@@ -1,0 +1,1141 @@
+<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>V-Training – QL Khóa ĐT (Full)</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--p:#1a56db;--pL:#dbeafe;--pD:#1e40af;--nv:#0c1929;--nM:#1e3356;--am:#d97706;--aL:#fef3c7;--g:#059669;--gL:#d1fae5;--r:#dc2626;--rL:#fee2e2;--pp:#7c3aed;--ppL:#ede9fe;--tl:#0d9488;--tlL:#ccfbf1;--pk:#db2777;--pkL:#fce7f3;--bg:#f1f5f9;--c:#fff;--tx:#1e293b;--t2:#64748b;--t3:#94a3b8;--bd:#e2e8f0;--bl:#f1f5f9;--f:'Be Vietnam Pro',sans-serif}
+body{font-family:var(--f);font-size:12px;color:var(--tx);background:var(--bg);line-height:1.5}
+.app{display:flex;min-height:100vh}
+.side{width:195px;background:var(--nv);color:#fff;flex-shrink:0;overflow-y:auto}
+.slogo{padding:11px 9px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--nM)}
+.slogo i{width:24px;height:24px;border-radius:5px;background:var(--am);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:var(--nv);font-style:normal}
+.slogo span{font-weight:700;font-size:12px}
+.st{padding:13px 7px 2px;font-size:8px;font-weight:700;color:rgba(255,255,255,.12);letter-spacing:1.6px}
+.ni{padding:5px 9px;border-radius:4px;cursor:pointer;font-size:11px;margin:1px 3px;color:rgba(255,255,255,.4);transition:.12s}
+.ni:hover{color:rgba(255,255,255,.7);background:rgba(255,255,255,.04)}
+.ni.a{background:var(--nM);color:#fff;font-weight:600}
+.mn{flex:1;min-width:0}.hdr{padding:0 14px;height:44px;display:flex;align-items:center;gap:8px;background:#fff;border-bottom:1px solid var(--bd)}
+.hdr h2{font-size:13px;font-weight:700;flex:1}
+.rb{display:flex;align-items:center;gap:4px;padding:3px 8px;border:1px solid var(--bd);border-radius:5px;font-size:10px;font-weight:600}
+.rb .av{width:18px;height:18px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700}
+.ct{padding:12px}
+.cd{background:var(--c);border:1px solid var(--bd);border-radius:9px;overflow:hidden;margin-bottom:10px}
+.ch{padding:9px 12px;display:flex;align-items:center;gap:5px;border-bottom:1px solid var(--bl);flex-wrap:wrap}
+.ch .tl{font-size:12px;font-weight:600;flex:1}
+.s{border-radius:7px;padding:9px 11px;flex:1;min-width:72px;cursor:pointer;transition:.12s}
+.s:hover{filter:brightness(.96)}.s .v{font-size:16px;font-weight:700}.s .l{font-size:9px;color:var(--t2);margin-top:1px}
+.bg{display:inline-flex;padding:2px 7px;border-radius:99px;font-size:10px;font-weight:600;white-space:nowrap}
+.bg-b{background:var(--pL);color:var(--pD)}.bg-g{background:var(--gL);color:#065f46}.bg-r{background:var(--rL);color:#991b1b}
+.bg-y{background:var(--aL);color:#92400e}.bg-p{background:var(--ppL);color:#5b21b6}.bg-x{background:#f1f5f9;color:#475569}
+.bg-t{background:var(--tlL);color:#0f766e}.bg-k{background:var(--pkL);color:#9d174d}
+.bt{padding:4px 9px;border-radius:5px;font-size:10px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:3px;border:none;font-family:var(--f);transition:.12s}
+.bt:hover{filter:brightness(.9)}
+.bp{background:var(--p);color:#fff}.bs{background:transparent;color:var(--t2);border:1px solid var(--bd)}.bo{background:var(--g);color:#fff}.bw{background:var(--am);color:#fff}.bd_{background:var(--r);color:#fff}
+.bf{width:100%;justify-content:center}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{text-align:left;padding:6px 8px;font-size:9px;font-weight:700;color:var(--t2);border-bottom:1px solid var(--bd);text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+td{padding:6px 8px;border-bottom:1px solid var(--bl)}
+tr:nth-child(even){background:#fafbfc}tbody tr{cursor:pointer;transition:.1s}tbody tr:hover{background:var(--pL)}
+.fg{margin-bottom:7px}.fg label{display:block;font-size:10px;font-weight:600;color:var(--t2);margin-bottom:2px}
+.fg input,.fg select,.fg textarea{width:100%;padding:5px 8px;border:1px solid var(--bd);border-radius:5px;font-size:11px;font-family:var(--f)}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 2px var(--pL)}
+.fg textarea{resize:vertical;min-height:40px}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:0 8px}
+.pg{background:var(--bl);border-radius:3px;height:5px;overflow:hidden}.pb{height:100%;border-radius:3px}
+.tabs{display:flex;gap:0;border-bottom:2px solid var(--bd);margin-bottom:10px;overflow-x:auto}
+.tab{padding:7px 12px;font-size:10px;font-weight:400;color:var(--t2);border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;white-space:nowrap;font-family:var(--f);margin-bottom:-2px;transition:.1s}
+.tab:hover{color:var(--p);background:var(--pL)}.tab.a{color:var(--p);font-weight:600;border-bottom-color:var(--p)}
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:100;justify-content:center;align-items:flex-start;padding-top:50px}
+.mo.show{display:flex}
+.ml{background:#fff;border-radius:10px;width:600px;max-height:82vh;overflow:auto;box-shadow:0 16px 48px rgba(0,0,0,.15)}
+.mh{padding:10px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;position:sticky;top:0;background:#fff;z-index:1}
+.mh .tl{font-size:13px;font-weight:700;flex:1}
+.mh .cl{background:none;border:none;font-size:16px;cursor:pointer;color:var(--t2)}
+.mb{padding:14px}
+.up{border:2px dashed var(--bd);border-radius:6px;padding:12px;text-align:center;margin-bottom:8px;font-size:10px;color:var(--t2);cursor:pointer;transition:.12s}
+.up:hover{border-color:var(--p);background:var(--pL)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hi{background:var(--pL);border-radius:5px;padding:7px 10px;margin-bottom:8px;font-size:10px;color:var(--pD)}
+.wa{background:var(--aL);border-radius:5px;padding:5px 9px;margin-bottom:8px;font-size:10px;color:#92400e}
+.mc{border:1px solid var(--bd);border-radius:7px;padding:8px 10px;margin-bottom:6px;cursor:pointer;transition:.12s}
+.mc:hover{border-color:var(--p);box-shadow:0 1px 6px rgba(26,86,219,.06)}
+.mc.sel{border-color:var(--p);background:var(--pL)}
+.tg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:8px}
+.tc_{padding:7px;border-radius:5px;border:1.5px solid var(--bd);text-align:center;cursor:pointer;font-size:10px;font-weight:600;transition:.15s}
+.tc_:hover{border-color:var(--p);color:var(--p)}.tc_.sel{border-color:var(--p);background:rgba(26,86,219,.06);color:var(--p)}
+.dt{padding:5px 10px;border-radius:5px 5px 0 0;font-size:10px;font-weight:500;cursor:pointer;border:1px solid var(--bd);border-bottom:none;background:var(--bl);color:var(--t2);font-family:var(--f)}
+.dt.a{background:#fff;color:var(--p);font-weight:600}
+b{font-weight:600}code{font-size:9px;color:var(--p);font-family:monospace}
+.clickable{cursor:pointer;color:var(--p);transition:.12s}.clickable:hover{text-decoration:underline;color:var(--pD)}
+.fx{display:flex}.g4{gap:4px}.g6{gap:6px}.g8{gap:8px}.g10{gap:10px}.wp{flex-wrap:wrap}.ac{align-items:center}.f1{flex:1}
+.m8{margin-bottom:8px}.m10{margin-bottom:10px}.m12{margin-bottom:12px}
+.ts{font-size:11px}.tx_{font-size:10px}.tc{color:var(--t2)}
+.stab{display:flex;gap:0;margin-bottom:8px;border-bottom:1px solid var(--bd)}
+.stab .si{padding:5px 10px;font-size:10px;cursor:pointer;border-bottom:2px solid transparent;color:var(--t2);font-family:var(--f);background:none;border-top:none;border-left:none;border-right:none}
+.stab .si:hover{color:var(--p)}.stab .si.a{color:var(--p);font-weight:600;border-bottom-color:var(--p)}
+</style></head><body>
+<div class="app">
+<aside class="side">
+<div class="slogo"><i>V</i><span>V-Training</span></div>
+<div class="st">KHÓA ĐÀO TẠO</div>
+<div class="ni a" onclick="go('dash')">Tổng quan</div>
+<div class="ni" onclick="go('tna')">TNA / Nhu cầu</div>
+<div class="ni" onclick="go('courses')">DS Khóa ĐT</div>
+<div class="ni" onclick="go('course')">Khóa đào tạo</div>
+<div class="st">NỘI DUNG</div>
+<div class="ni" onclick="go('mats')">Kho Học liệu</div>
+<div class="st">NHÂN SỰ ĐÀO TẠO</div>
+<div class="ni" onclick="go('gv')">Giảng viên</div>
+<div class="ni" onclick="go('ctv')">Cộng tác viên</div>
+<div class="ni" onclick="go('gvNeed')">Nhu cầu tuyển GV</div>
+<div class="ni" onclick="go('gvRecruit')">Tuyển dụng GV</div>
+<div class="ni" onclick="go('ttt')">TTT (Train Trainer)</div>
+<div class="st">VẬN HÀNH</div>
+<div class="ni" onclick="go('vhDash')">Dashboard VH</div>
+<div class="ni" onclick="go('vhClass')">Chi tiết lớp VH</div>
+<div class="ni" onclick="go('vhEkip')">Quản lý Ekip</div>
+<div class="ni" onclick="go('vhAssign')">Phân công Ekip</div>
+<div class="ni" onclick="go('vhQuality')">ĐG chất lượng VH</div>
+<div class="ni" onclick="go('vhEval')">Đánh giá NV VH</div>
+<div class="ni" onclick="go('vhTask')">Giao việc</div>
+<div class="ni" onclick="go('vhCL')">Checklist</div>
+<div class="st">PHÊ DUYỆT</div>
+<div class="ni" onclick="go('approval')">Trung tâm Phê duyệt</div>
+<div class="ni" onclick="go('apvHistory')">Lịch sử PD</div>
+<div class="st">HỆ THỐNG</div>
+<div class="ni" onclick="go('users')">Người dùng</div>
+<div class="ni" onclick="go('cats')">Danh mục</div>
+</aside>
+<div class="mn">
+<div class="hdr"><h2 id="tt">Tổng quan</h2><div class="rb"><div class="av">QL</div>Trần Thị Bình</div></div>
+<div class="ct" id="ct"></div>
+</div></div>
+<div class="mo" id="mo" onclick="if(event.target===this)cm()"><div class="ml"><div class="mh"><span class="tl" id="mt"></span><button class="cl" onclick="cm()">✕</button></div><div class="mb" id="mmb"></div></div></div>
+<script>
+// ===== DATA =====
+const HV=[
+{c:'NV001',n:'Nguyễn Văn An',u:'TT KD MB',t:'QL KD HN',cls:'A',a:'6/6',sc:'87',s:'ĐH',email:'an.nv@evnspc.vn',sdt:'0901-234-001'},
+{c:'NV002',n:'Phạm Thu Hà',u:'P. MKT',t:'TP MKT',cls:'A',a:'5/6',sc:'82',s:'ĐH',email:'ha.pt@evnspc.vn',sdt:'0901-234-002'},
+{c:'NV003',n:'Đỗ Quang Minh',u:'P. KT Điện',t:'PP KT',cls:'A',a:'6/6',sc:'92',s:'ĐH',email:'minh.dq@evnspc.vn',sdt:'0901-234-003'},
+{c:'NV004',n:'Trần Thị Lan',u:'P. TC',t:'QL TC',cls:'A',a:'5/6',sc:'78',s:'ĐH',email:'lan.tt@evnspc.vn',sdt:'0901-234-004'},
+{c:'NV005',n:'Hoàng Đức Mạnh',u:'P. CNTT',t:'TN Dev',cls:'A',a:'4/6',sc:'85',s:'ĐH',email:'manh.hd@evnspc.vn',sdt:'0901-234-005'},
+{c:'NV006',n:'Lê Thị Ngọc',u:'P. NS',t:'CV ĐT',cls:'A',a:'6/6',sc:'95',s:'ĐH',email:'ngoc.lt@evnspc.vn',sdt:'0901-234-006'},
+{c:'NV007',n:'Võ Thanh Tùng',u:'TT KD HP',t:'QL KD',cls:'A',a:'5/6',sc:'88',s:'ĐH',email:'tung.vt@evnspc.vn',sdt:'0901-234-007'},
+{c:'NV008',n:'Ngô T.M. Anh',u:'P. KH',t:'TP KH',cls:'A',a:'6/6',sc:'90',s:'ĐH',email:'anh.nm@evnspc.vn',sdt:'0901-234-008'},
+{c:'NV009',n:'Đặng Văn Hưng',u:'ĐL Hà Đông',t:'PGĐ ĐL',cls:'A',a:'5/6',sc:'76',s:'ĐH',email:'hung.dv@evnspc.vn',sdt:'0901-234-009'},
+{c:'NV010',n:'Bùi Minh Tuấn',u:'ĐL Bình Dương',t:'PGĐ ĐL',cls:'B',a:'-',sc:'-',s:'Chờ',email:'tuan.bm@evnspc.vn',sdt:'0901-234-010'},
+{c:'NV011',n:'Đinh Hoàng Nam',u:'ĐL Đồng Nai',t:'TP KD',cls:'B',a:'-',sc:'-',s:'Chờ',email:'nam.dh@evnspc.vn',sdt:'0901-234-011'},
+{c:'NV012',n:'Phan Thị Hồng',u:'ĐL Khánh Hòa',t:'TP NS',cls:'B',a:'-',sc:'-',s:'Chờ',email:'hong.pt@evnspc.vn',sdt:'0901-234-012'}
+];
+const GVL=[
+{c:'GV001',n:'TS. Phạm Minh Đức',spec:'QTNS, Coaching, VHDN',fee:'15tr/ngày',hd:'HĐ-2026-001',hdTT:'Đang HĐ',buoi:'B1-B4,B7-B8',rate:'4.8/5',sdt:'0912-345-001',bank:'VCB 001234567890',hdStart:'01/01/2026',hdEnd:'31/12/2026',hdValue:'180,000,000₫',hdPaid:'90,000,000₫',works:[{kh:'KH-001 QLNS EVNSPC',role:'GV chính',buoi:6,status:'Đang giảng'},{kh:'KH-005 VHDN Viettel',role:'GV chính',buoi:4,status:'Hoàn thành'}]},
+{c:'GV002',n:'ThS. Lê Hoàng An',spec:'Lãnh đạo, QL xung đột',fee:'12tr/ngày',hd:'HĐ-2026-002',hdTT:'Đang HĐ',buoi:'B5-B6,B9-B12',rate:'4.6/5',sdt:'0912-345-002',bank:'TCB 009876543210',hdStart:'01/02/2026',hdEnd:'30/06/2026',hdValue:'120,000,000₫',hdPaid:'48,000,000₫',works:[{kh:'KH-001 QLNS EVNSPC',role:'GV phụ',buoi:4,status:'Đang giảng'}]},
+{c:'GV003',n:'LS. Nguyễn Việt Hùng',spec:'Luật LĐ, Compliance',fee:'8tr/buổi',hd:'HĐ-2026-003',hdTT:'Đang HĐ',buoi:'B13-B14 (Thi)',rate:'4.5/5',sdt:'0912-345-003',bank:'BIDV 3456789012',hdStart:'01/03/2026',hdEnd:'30/09/2026',hdValue:'32,000,000₫',hdPaid:'0',works:[{kh:'KH-001 QLNS EVNSPC',role:'Chuyên gia',buoi:2,status:'Chờ'}]},
+{c:'GV004',n:'PGS.TS Trần Thanh Hải',spec:'CĐS, AI trong QL',fee:'20tr/ngày',hd:'HĐ-2026-004',hdTT:'Đang HĐ',buoi:'(Khóa VNPT)',rate:'4.9/5',sdt:'0912-345-004',bank:'ACB 567890123456',hdStart:'01/03/2026',hdEnd:'30/09/2026',hdValue:'200,000,000₫',hdPaid:'40,000,000₫',works:[{kh:'KH-002 LĐ số VNPT',role:'GV chính',buoi:8,status:'Đang giảng'}]}
+];
+const CTVL=[
+{c:'CTV01',n:'Nguyễn Huy',spec:'Hậu cần & VH lớp',type:'Full-time',fee:'8tr/tháng',hd:'CTV-2026-001',hdTT:'Đang HĐ',sdt:'0912-345-010',bank:'VPB 111222333444',hdStart:'01/01/2026',hdEnd:'31/12/2026',hdValue:'96,000,000₫',hdPaid:'24,000,000₫',rate:'4.2/5',works:[{kh:'KH-001 QLNS',cls:'Lớp A',role:'CV VH chính',status:'Đang làm'},{kh:'KH-005 VHDN',cls:'Lớp 1',role:'CV VH chính',status:'Xong'}],payments:[{month:'01/2026',amount:'8,000,000₫',s:'Đã TT',date:'05/02'},{month:'02/2026',amount:'8,000,000₫',s:'Đã TT',date:'05/03'},{month:'03/2026',amount:'8,000,000₫',s:'Chờ TT',date:'-'}]},
+{c:'CTV02',n:'Lê Văn An',spec:'Kỹ thuật AV, quay phim',type:'Part-time',fee:'500k/buổi',hd:'CTV-2026-002',hdTT:'Đang HĐ',sdt:'0912-345-011',bank:'MB 555666777888',hdStart:'01/02/2026',hdEnd:'31/07/2026',hdValue:'18,000,000₫',hdPaid:'6,000,000₫',rate:'-',works:[{kh:'KH-001 QLNS',cls:'Lớp A',role:'KT AV',status:'Đang làm'}],payments:[{month:'02/2026',amount:'3,000,000₫',s:'Đã TT',date:'05/03'},{month:'03/2026',amount:'3,000,000₫',s:'Chờ TT',date:'-'}]},
+{c:'CTV03',n:'Vũ Thị Mai',spec:'Hỗ trợ GV, ghi chép',type:'Part-time',fee:'400k/buổi',hd:'CTV-2026-003',hdTT:'Đang HĐ',sdt:'0912-345-012',bank:'TPB 999000111222',hdStart:'01/03/2026',hdEnd:'31/07/2026',hdValue:'12,000,000₫',hdPaid:'2,400,000₫',rate:'-',works:[{kh:'KH-001 QLNS',cls:'Lớp A',role:'Hỗ trợ',status:'Đang làm'}],payments:[{month:'03/2026',amount:'2,400,000₫',s:'Chờ TT',date:'-'}]}
+];
+const GAMI=[
+{id:'GM-001',n:'Case: Xung đột KD vs KT ĐL Bình Dương',type:'Case Study',url:'https://vtraining.vn/gami/001',status:'Active',buoi:'B11-12',nhom:5,results:[{nhom:'N1 Rồng lửa',pt:25,gp:35,tb:28,total:88},{nhom:'N2 Phượng hoàng',pt:22,gp:32,tb:26,total:80},{nhom:'N3 Kỳ lân',pt:20,gp:30,tb:24,total:74},{nhom:'N4 Đại bàng',pt:24,gp:34,tb:27,total:85},{nhom:'N5 Sư tử',pt:23,gp:33,tb:25,total:81}]},
+{id:'GM-002',n:'Case: NV xuất sắc xin nghỉ việc',type:'Role Play',url:'https://vtraining.vn/gami/002',status:'Draft',buoi:'B13',nhom:5,results:[]},
+{id:'GM-003',n:'Case: Thiết kế Onboarding 90 ngày',type:'Design Challenge',url:'https://vtraining.vn/gami/003',status:'Active',buoi:'B3-4',nhom:5,results:[{nhom:'N1',pt:26,gp:36,tb:27,total:89},{nhom:'N2',pt:24,gp:34,tb:25,total:83},{nhom:'N3',pt:22,gp:31,tb:24,total:77},{nhom:'N4',pt:25,gp:35,tb:26,total:86},{nhom:'N5',pt:23,gp:33,tb:25,total:81}]}
+];
+const BTTH=[
+{id:'BT-001',n:'Bài thu hoạch M1: KH tuyển dụng Q3/2026',type:'Thu hoạch',buoi:'Sau B4',deadline:'30/03',submitted:7,total:9,status:'Đang thu',results:[{hv:'Nguyễn V. An',file:'BTH_An.pdf',date:'28/03',score:85,nx:'Tốt'},{hv:'Phạm T. Hà',file:'ha_bth.docx',date:'28/03',score:78,nx:'Khá'},{hv:'Đỗ Q. Minh',file:'minh.pdf',date:'27/03',score:92,nx:'Xuất sắc'},{hv:'Trần T. Lan',file:'lan.pdf',date:'29/03',score:72,nx:'Đạt'},{hv:'Hoàng Đ. Mạnh',file:'manh.docx',date:'30/03(trễ)',score:0,nx:'Chờ chấm'},{hv:'Lê T. Ngọc',file:'ngoc.pdf',date:'27/03',score:95,nx:'Xuất sắc'},{hv:'Võ T. Tùng',file:'tung.pdf',date:'28/03',score:82,nx:'Khá'}]},
+{id:'BT-002',n:'Bài tập cá nhân: Phân tích xung đột tại ĐV',type:'Bài tập',buoi:'B12',deadline:'02/04',submitted:0,total:9,status:'Chờ nộp',results:[]},
+{id:'BT-003',n:'Bài thu hoạch M3: Kế hoạch PT đội nhóm 6 tháng',type:'Thu hoạch',buoi:'Sau B12',deadline:'20/04',submitted:0,total:9,status:'Chưa giao',results:[]},
+{id:'BT-004',n:'Bài KT online Module 2 (20 câu, 30 phút)',type:'Kiểm tra',buoi:'Sau B8',deadline:'05/04',submitted:0,total:9,status:'Chờ mở',results:[]}
+];
+const DAYS=[
+{day:'Ngày 1 (10/03)',buoi:[{b:1,t:'08:00–10:00',topic:'Tổng quan QTNS hiện đại',type:'BG',gv:'TS. Phạm Đức',tools:['Video','Poll'],sl:'QTNS_B1.pptx',doc:'TL_B1.pdf'},{b:2,t:'10:30–12:00',topic:'Vai trò HR Business Partner',type:'TL',gv:'TS. Phạm Đức',tools:['Thảo luận nhóm','Poll'],sl:null,doc:null}]},
+{day:'Ngày 2 (12/03)',buoi:[{b:3,t:'08:00–10:00',topic:'Tuyển dụng & Employer Branding',type:'WS',gv:'TS. Phạm Đức',tools:['Gamification','Video'],sl:'TD_B2.pptx',doc:'CL.xlsx'},{b:4,t:'10:30–12:00',topic:'Thiết kế Onboarding 90 ngày',type:'CS',gv:'TS. Phạm Đức',tools:['Thảo luận nhóm','Bài tập'],sl:null,doc:null}]},
+{day:'Ngày 3 (17/03)',buoi:[{b:5,t:'08:00–10:00',topic:'Thiết lập KPI & BSC',type:'BG+BT',gv:'ThS. Lê An',tools:['Bài tập','Poll'],sl:'KPI_B3.pptx',doc:'KPI.xlsx'},{b:6,t:'10:30–12:00',topic:'Đánh giá hiệu suất 360°',type:'WS',gv:'ThS. Lê An',tools:['Survey','Thảo luận nhóm'],sl:null,doc:null}]},
+{day:'Ngày 4 (19/03)',buoi:[{b:7,t:'08:00–10:00',topic:'Coaching & Mô hình GROW',type:'WS',gv:'TS. Phạm Đức',tools:['Video','Thảo luận nhóm'],sl:'Coach.pptx',doc:'GROW.pdf'},{b:8,t:'10:30–12:00',topic:'Mentoring & Phát triển NV',type:'TH',gv:'TS. Phạm Đức',tools:['Survey','Thu hoạch'],sl:null,doc:null}]},
+{day:'Ngày 5 (24/03)',buoi:[{b:9,t:'08:00–10:00',topic:'Phong cách lãnh đạo tình huống',type:'CS',gv:'ThS. Lê An',tools:['Gamification','Video'],sl:'Lead.pptx',doc:'Case.pdf'},{b:10,t:'10:30–12:00',topic:'Xây dựng đội ngũ hiệu suất cao',type:'WS',gv:'ThS. Lê An',tools:['Thảo luận nhóm','Thu hoạch'],sl:null,doc:null}]},
+{day:'Ngày 6 (26/03) – HÔM NAY',buoi:[{b:11,t:'08:00–10:00',topic:'Nguồn gốc xung đột – Thomas-Kilmann',type:'BG',gv:'ThS. Lê An',tools:['Video','Poll'],sl:null,doc:'Case_XD.pdf'},{b:12,t:'10:30–12:00',topic:'Kỹ thuật đàm phán Win-Win',type:'WS',gv:'ThS. Lê An',tools:['Thảo luận nhóm','Gamification','Survey'],sl:null,doc:null}]}
+];
+const MODS=[
+{id:'M1',name:'Nhập môn QTNS',hrs:8,sess:'B1–B4',sum:'Nền tảng QTNS, HRBP, tuyển dụng, onboarding.',purpose:'Hiểu bức tranh toàn cảnh QTNS trong CĐS.',obj:['Mô tả 5 chức năng QTNS hiện đại','Phân biệt HR truyền thống vs HRBP','Thiết kế Onboarding 90 ngày','Áp dụng 3 kỹ thuật Employer Branding'],
+cts:[{n:'Tổng quan QTNS',mt:'BG + Video (15p): chiếu cho toàn lớp + reaction',dur:'2h'},{n:'Vai trò HRBP',mt:'TL nhóm 5x15p: so sánh HR vs HRBP + Poll',dur:'1.5h'},{n:'Tuyển dụng & EB',mt:'WS: framework + Gamification thi đua thiết kế JD',dur:'2h'},{n:'Onboarding 90 ngày',mt:'CS: case thực tế + BT cá nhân thiết kế onboarding',dur:'2.5h'}]},
+{id:'M2',name:'Đánh giá & Phát triển',hrs:8,sess:'B5–B8',sum:'KPI, BSC, 360°, coaching, mentoring.',purpose:'Kỹ năng đánh giá hiệu suất và phát triển NV.',obj:['Thiết lập KPI SMART cho 3 vị trí','Triển khai đánh giá 360°','Thực hiện coaching theo GROW','Xây dựng IDP cho NV'],
+cts:[{n:'KPI & BSC',mt:'BG + BT cá nhân: lập KPI cho 3 vị trí + Poll kiểm tra',dur:'2h'},{n:'Đánh giá 360°',mt:'WS: quy trình + Survey mẫu + TL nhóm rút KN',dur:'2h'},{n:'Coaching GROW',mt:'WS: Video mẫu (10p) + thực hành cặp + GV nhận xét',dur:'2h'},{n:'Mentoring & IDP',mt:'TH: lập IDP mẫu + Survey + Bài thu hoạch',dur:'2h'}]},
+{id:'M3',name:'Lãnh đạo đội nhóm',hrs:8,sess:'B9–B12',sum:'Phong cách LĐ, xung đột, đàm phán.',purpose:'Phát triển năng lực LĐ tình huống và giải quyết xung đột.',obj:['Xác định phong cách LĐ phù hợp','Áp dụng Thomas-Kilmann','Sử dụng đàm phán Win-Win','Xây dựng kế hoạch PT đội nhóm 6 tháng'],
+cts:[{n:'LĐ tình huống',mt:'CS: 3 tình huống + Gamification + Video (20p)',dur:'2h'},{n:'Đội ngũ hiệu suất',mt:'WS: Tuckman + TL nhóm: team charter + Thu hoạch',dur:'2h'},{n:'Xung đột T-K',mt:'BG: 5 phong cách + Video (12p) + Poll',dur:'2h'},{n:'Đàm phán Win-Win',mt:'WS: Case XĐ KD-KT + TL 5x12p + Gami chấm chéo + Survey',dur:'2h'}]}
+];
+const OT=[
+{id:'T01',n:'Kiểm tra P.301: máy chiếu, micro, loa',gr:'KT',ph:'PRE',due:'26/03 07:00',nv:'Lê Văn An',p:'HIGH',s:'Đang'},
+{id:'T02',n:'In Case Study (25 bộ x 5tr, màu)',gr:'HC',ph:'PRE',due:'25/03 17:00',nv:'Nguyễn Huy',p:'MED',s:'Xong'},
+{id:'T03',n:'Layout 5 bàn tròn + bàn GV + flipchart',gr:'HC',ph:'PRE',due:'26/03 07:30',nv:'Lê Văn An',p:'HIGH',s:'Đang'},
+{id:'T04',n:'Nước, trà, cà phê, bánh (25 ng)',gr:'HC',ph:'PRE',due:'26/03 07:45',nv:'Nguyễn Huy',p:'MED',s:'Đang'},
+{id:'T05',n:'Test WiFi + backup 4G',gr:'KT',ph:'PRE',due:'26/03 07:15',nv:'Lê Văn An',p:'HIGH',s:'Chưa'},
+{id:'T06',n:'Chụp ảnh khai mạc (10+ ảnh)',gr:'TT',ph:'DUR',due:'26/03 08:05',nv:'Nguyễn Huy',p:'MED',s:'Chưa'},
+{id:'T07',n:'Hỗ trợ chia nhóm TL',gr:'ND',ph:'DUR',due:'26/03 09:30',nv:'Vũ Thị Mai',p:'MED',s:'Chưa'},
+{id:'T08',n:'Ghi Q&A gửi BQL',gr:'ND',ph:'POST',due:'26/03 13:00',nv:'Vũ Thị Mai',p:'MED',s:'Chưa'},
+{id:'T09',n:'Thu dọn, kiểm kê, khóa cửa',gr:'HC',ph:'POST',due:'26/03 12:30',nv:'Lê Văn An',p:'LOW',s:'Chưa'},
+{id:'T10',n:'Upload ảnh+DD → nghiệm thu',gr:'TT',ph:'POST',due:'26/03 14:00',nv:'Nguyễn Huy',p:'MED',s:'Chưa'}
+];
+const MAT=[
+{id:'HL001',n:'Video: QTNS hiện đại (15p)',tp:'Video',ch:'QTNS',b:'B1',sz:'245MB',s:'CB',by:'TS. Phạm Đức'},
+{id:'HL002',n:'Slide: Tuyển dụng (42 sl)',tp:'Slide',ch:'TD',b:'B3',sz:'12MB',s:'CB',by:'TS. Phạm Đức'},
+{id:'HL003',n:'Template: KPI Framework',tp:'Template',ch:'ĐG',b:'B5',sz:'1.2MB',s:'CB',by:'ThS. Lê An'},
+{id:'HL004',n:'PDF: Mô hình GROW',tp:'PDF',ch:'Coaching',b:'B7',sz:'3.5MB',s:'CB',by:'TS. Phạm Đức'},
+{id:'HL005',n:'Video: Leadership Styles (20p)',tp:'Video',ch:'LĐ',b:'B9',sz:'380MB',s:'CB',by:'ThS. Lê An'},
+{id:'HL006',n:'Case: Xung đột KD (5 tr)',tp:'CS',ch:'XĐ',b:'B11',sz:'850KB',s:'CB',by:'ThS. Lê An'},
+{id:'HL007',n:'Video: Kotter (12p)',tp:'Video',ch:'TĐ',b:'B13',sz:'195MB',s:'Nháp',by:'TS. Phạm Đức'},
+{id:'HL008',n:'Slide: Văn hóa (35 sl)',tp:'Slide',ch:'VH',b:'B14',sz:'8MB',s:'Nháp',by:'TS. Phạm Đức'}
+];
+const KHOA_DETAIL=[
+{code:'KH-001',n:'QLNS cho QL cấp 4',kh:'EVNSPC',lh:'Nguyễn Hoàng – TP NS',mt:'Blended',cd:'QL con người',lv:'QTNS',dt:'QL cấp 4',hrs:40,period:'10/03–15/07/2026',budget:'450,000,000₫',spent:'280,000,000₫',pm:'Trần Thị Bình',obj:'Lập KPI, coaching, QL xung đột, VH đội nhóm',dk:'QL cấp 4 hoặc quy hoạch bổ nhiệm',cls:3,hv:75,s:'Đang TK'},
+{code:'KH-002',n:'Lãnh đạo thời đại số',kh:'VNPT',lh:'Trần Minh – PGĐ NS',mt:'Offline',cd:'Lãnh đạo',lv:'CĐS',dt:'QL cấp 3-4',hrs:32,period:'01/04–30/05/2026',budget:'320,000,000₫',spent:'40,000,000₫',pm:'Nguyễn V. Hiền',obj:'Tư duy số, AI trong QL, Digital Leadership',dk:'QL cấp 3-4 khối CNTT',cls:2,hv:50,s:'Đang TK'},
+{code:'KH-003',n:'Chuyển đổi xanh',kh:'EVN HQ',lh:'Lê Hoàng – VP TĐ',mt:'Blended',cd:'CĐS',lv:'ESG',dt:'QL cấp 3',hrs:48,period:'15/04–30/08/2026',budget:'680,000,000₫',spent:'0',pm:'Lê T. Thảo',obj:'ESG, ISO 14001, Báo cáo phát thải carbon',dk:'QL cấp 3 trở lên',cls:4,hv:120,s:'Sắp mở'},
+{code:'KH-004',n:'An toàn điện NC lv3',kh:'EVNCPC',lh:'Võ Thanh – TP AT',mt:'E-learn',cd:'Kỹ thuật',lv:'AT điện',dt:'KS AT',hrs:24,period:'01/05–30/06/2026',budget:'180,000,000₫',spent:'0',pm:'Trần Thị Bình',obj:'Cập nhật quy chuẩn AT 2026, thực hành xử lý sự cố',dk:'Kỹ sư AT đã có chứng chỉ lv2',cls:5,hv:200,s:'Sắp mở'},
+{code:'KH-005',n:'Văn hóa DN Viettel',kh:'Viettel',lh:'Phạm Hùng – GĐ NS',mt:'Offline',cd:'Văn hóa',lv:'VHDN',dt:'NV-QL',hrs:8,period:'01/02–28/02/2026',budget:'150,000,000₫',spent:'150,000,000₫',pm:'Nguyễn V. Hiền',obj:'Lan tỏa giá trị cốt lõi Viettel',dk:'Toàn bộ NV',cls:1,hv:30,s:'Xong'},
+{code:'KH-006',n:'Digital Marketing',kh:'MobiFone',lh:'Ngô Lan – TP MKT',mt:'Webinar',cd:'KD',lv:'Digital MKT',dt:'NV KD',hrs:20,period:'01/06–30/07/2026',budget:'120,000,000₫',spent:'0',pm:'Lê T. Thảo',obj:'Performance MKT, Social Media, Google Ads',dk:'NV KD/MKT',cls:2,hv:80,s:'Sắp mở'}
+];
+const LOP_DETAIL=[
+{c:'L01',n:'Lớp A – Miền Bắc',course:'KH-001',p:'10/03–15/05/2026',l:'P.301 Trụ sở HN',ss:'25/30',gv:'TS. Phạm Minh Đức',gv2:'ThS. Lê Hoàng An',ops:'Nguyễn Huy',ops2:'Lê Văn An, Vũ Thị Mai',ekip:'Ekip Bắc',buoi:'6/12',pct:50,s:'Đang học',note:'3 HV điểm danh <80%'},
+{c:'L02',n:'Lớp B – Miền Trung',course:'KH-001',p:'20/04–30/06/2026',l:'Online Zoom',ss:'20/25',gv:'ThS. Lê Hoàng An',gv2:'TBD',ops:'Trần Bình',ops2:'Vũ Thị Mai',ekip:'Ekip Trung',buoi:'0/12',pct:0,s:'Sắp mở',note:'Chưa có GV chính'},
+{c:'L03',n:'Lớp C – Miền Nam',course:'KH-001',p:'01/06–30/07/2026',l:'P.201 VP HCM',ss:'30/30',gv:'TBD',gv2:'TBD',ops:'TBD',ops2:'TBD',ekip:'Ekip Nam',buoi:'0/12',pct:0,s:'Sắp mở',note:'TBD – chưa setup'}
+];
+const TTT_INVITES=[
+{id:'INV-001',gv:'ThS. Lê Hoàng An',course:'KH-001 QLNS',ttt:'TTT-001',sentDate:'10/02/2026',status:'Chấp nhận',reason:'',elearn:'2/3 bài',giaoan:'Đã xem',video:'3/4 video'},
+{id:'INV-002',gv:'LS. Nguyễn Việt Hùng',course:'KH-001 QLNS',ttt:'TTT-001',sentDate:'10/02/2026',status:'Chấp nhận',reason:'',elearn:'1/3 bài',giaoan:'Chưa xem',video:'1/4 video'},
+{id:'INV-003',gv:'Nguyễn Thanh Long',course:'KH-003 CĐ Xanh',ttt:'TTT-002',sentDate:'15/03/2026',status:'Chờ phản hồi',reason:'',elearn:'-',giaoan:'-',video:'-'},
+{id:'INV-004',gv:'Trần Minh Tuệ',course:'KH-003 CĐ Xanh',ttt:'TTT-002',sentDate:'15/03/2026',status:'Từ chối',reason:'Lịch trùng với dự án tư vấn tại Hà Nội từ 01/04–30/06',elearn:'-',giaoan:'-',video:'-'},
+{id:'INV-005',gv:'PGS.TS Trần Thanh Hải',course:'KH-002 LĐ số',ttt:'TTT-003',sentDate:'01/02/2026',status:'Chấp nhận',reason:'',elearn:'4/4 bài',giaoan:'Đã xem',video:'2/2 video'}
+];
+// ===== HELPERS =====
+function bg(c,t){return `<span class="bg bg-${c}">${t}</span>`}
+function S(l,v,c,k){return `<div class="s" style="background:${c}10" ${k?'data-nav="'+k+'"':''}><div class="v" style="color:${c}">${v}</div><div class="l">${l}</div></div>`}
+function T(co,da){let h='<table><thead><tr>'+co.map(c=>'<th>'+c.l+'</th>').join('')+'</tr></thead><tbody>';da.forEach((r,i)=>{h+='<tr>'+co.map(c=>'<td>'+(c.r?c.r(r,i):(r[c.k]||''))+'</td>').join('')+'</tr>'});return h+'</tbody></table>'}
+function I(l,p,v,t){return '<div class="fg"><label>'+l+'</label><input type="'+(t||'text')+'" placeholder="'+(p||'')+'" value="'+(v||'')+'"></div>'}
+function SL(l,o){return '<div class="fg"><label>'+l+'</label><select>'+o.map(x=>'<option>'+x+'</option>').join('')+'</select></div>'}
+function TA(l,p,v){return '<div class="fg"><label>'+l+'</label><textarea placeholder="'+(p||'')+'">'+(v||'')+'</textarea></div>'}
+function tb(t){const m={'Thảo':'p','nhóm':'p','Bài':'y','Gami':'k','Video':'b','Poll':'t','Survey':'g','Thu':'r','Kiểm':'b'};for(let k in m)if(t.includes(k))return m[k];return 'x'}
+let cp='dash',ct_=0,ad=0,sm=-1,st_='',gvt=0,cvt=0,gmt=0,btt=0;
+function go(p){cp=p;R()}function sT(t){ct_=t;R()}function sD(d){ad=d;R()}function sM(i){sm=sm===i?-1:i;R()}function sTl(t){st_=st_===t?'':t;R()}
+function om(t,h){document.getElementById('mt').innerHTML=t;document.getElementById('mmb').innerHTML=h;document.getElementById('mo').classList.add('show')}
+function cm(){document.getElementById('mo').classList.remove('show')}
+
+// ===== RENDER =====
+const TT={dash:'Tổng quan',tna:'TNA',courses:'DS Khóa',course:'Khóa đào tạo',mats:'Kho Học liệu',gv:'Giảng viên',ctv:'Cộng tác viên',gvNeed:'Nhu cầu tuyển GV',gvRecruit:'Tuyển dụng GV',ttt:'TTT (Train the Trainer)',vhDash:'Dashboard VH',vhClass:'Chi tiết lớp VH',vhEkip:'Quản lý Ekip',vhAssign:'Phân công Ekip',vhQuality:'ĐG Chất lượng VH',vhEval:'Đánh giá NV VH',vhTask:'Giao việc',vhCL:'Checklist',approval:'Trung tâm Phê duyệt',apvHistory:'Lịch sử Phê duyệt',users:'Người dùng',cats:'Danh mục'};
+function R(){
+  document.getElementById('tt').textContent=TT[cp]||'V-Training';
+  document.getElementById('ct').innerHTML=(PG[cp]||PG.dash)();
+  document.querySelectorAll('.ni').forEach(n=>{n.classList.remove('a');if(n.getAttribute('onclick')?.includes("'"+cp+"'"))n.classList.add('a')});
+}
+const PG={};
+
+// ===== DASHBOARD =====
+PG.dash=()=>`
+<div class="fx g8 wp m12">${S('Khóa','8','#1a56db',"go('courses')")}${S('Lớp','12','#059669',"go('course')")}${S('HV','1,247','#7c3aed')}${S('GV','4','#0d9488',"go('gv')")}${S('CTV','3','#d97706',"go('ctv')")}${S('On-time','87%','#059669')}</div>
+<div class="two">
+<div class="cd"><div class="ch"><span class="tl">Khóa đang triển khai</span></div>
+${[{n:'KH-001: QLNS QL cấp 4',kh:'EVNSPC',s:'Đang TK',p:50,cls:3},{n:'KH-002: LĐ số',kh:'VNPT',s:'Đang TK',p:30,cls:2},{n:'KH-003: CĐ Xanh',kh:'EVN HQ',s:'Sắp mở',p:0,cls:4},{n:'KH-005: VHDN',kh:'Viettel',s:'Xong',p:100,cls:1}].map(k=>'<div style="padding:6px 10px;border-bottom:1px solid var(--bl);cursor:pointer" onclick="go(\'course\')"><div class="fx ac g4"><b class="f1 ts">'+k.n+'</b>'+bg(k.s==='Xong'?'g':k.s==='Đang TK'?'b':'y',k.s)+'</div><div class="tx_ tc">'+k.kh+' · '+k.cls+' lớp</div><div class="fx ac g6" style="margin-top:3px"><div class="pg f1"><div class="pb" style="width:'+k.p+'%;background:var(--p)"></div></div><span class="tx_">'+k.p+'%</span></div></div>').join('')}
+</div>
+<div class="cd"><div class="ch"><span class="tl" style="color:var(--r)">⚠ Vấn đề (3)</span></div>
+${[{k:'KH-001',i:'Lớp B chưa có GV chính'},{k:'KH-001',i:'3 HV Lớp A điểm danh <80%'},{k:'KH-006',i:'Chưa ký HĐ GV – Digital MKT'}].map(x=>'<div style="padding:5px 10px;border-bottom:1px solid var(--bl);cursor:pointer" onclick="go(\'course\')"><div class="tx_" style="color:var(--r);font-weight:600">'+x.k+'</div><div class="ts">'+x.i+'</div></div>').join('')}
+</div></div>`;
+
+// ===== KHÓA ĐÀO TẠO (8 TABS) =====
+PG.course=()=>{
+const tabs=['DS Lớp','Thông tin','Nội dung ĐT','Agenda & Công cụ','Vận hành','Học viên','Học liệu','Gamification & BT'];
+let body='';
+if(ct_===0)body=tLop();else if(ct_===1)body=tInfo();else if(ct_===2)body=tND();else if(ct_===3)body=tAG();
+else if(ct_===4)body=tVH();else if(ct_===5)body=tHV();else if(ct_===6)body=tHL();else if(ct_===7)body=tGBT();
+return `<div class="cd"><div style="padding:9px 12px;display:flex;align-items:center;gap:8px"><div class="f1"><div style="font-size:14px;font-weight:700">KH-001: QLNS cho QL cấp 4 – EVNSPC</div><div class="tx_ tc">Blended | 40h (6 ngày) | 3 lớp / 75 HV | PM: Trần Thị Bình</div></div>${bg('b','ĐANG TK')}<button class="bt bs" onclick="om('Sửa khóa',fEC())">Sửa</button></div></div>
+<div class="tabs">${tabs.map((t,i)=>'<button class="tab'+(ct_===i?' a':'')+'" onclick="sT('+i+')">'+t+'</button>').join('')}</div>${body}`};
+
+function tLop(){return `<div class="fx g8 wp m10">${S('Lớp','3','#1a56db')}${S('Xong','0','#059669')}${S('Đang','1','#d97706')}${S('Sắp','2','#7c3aed')}</div>
+<div class="cd"><div class="ch"><span class="tl">DS Lớp</span><button class="bt bp" onclick="om('Tạo lớp mới',fNC())">+ Tạo lớp</button></div>
+${T([{l:'Mã',r:r=>'<code>'+r.c+'</code>'},{l:'Tên',r:(r,i)=>'<b class="clickable" data-act="clickClass" data-i="'+i+'">'+r.n+'</b>'},{l:'TG',k:'p'},{l:'Nơi',k:'l'},{l:'SS',k:'ss'},{l:'GV',k:'gv'},{l:'VH',k:'ops'},{l:'Buổi',k:'buoi'},{l:'TT',r:r=>bg(r.s==='Đang'?'b':'y',r.s)}],
+[{c:'L01',n:'Lớp A – MB',p:'10/03–15/05',l:'P.301 HN',ss:'25/30',gv:'TS. Phạm Đức',ops:'Nguyễn Huy',buoi:'6/12',s:'Đang'},{c:'L02',n:'Lớp B – MT',p:'20/04–30/06',l:'Zoom',ss:'20/25',gv:'ThS. Lê An',ops:'Trần Bình',buoi:'0/12',s:'Sắp'},{c:'L03',n:'Lớp C – MN',p:'01/06–30/07',l:'P.201 HCM',ss:'30/30',gv:'TBD',ops:'TBD',buoi:'0/12',s:'Sắp'}])}</div>`}
+
+function tInfo(){return `<div class="two">
+<div class="cd"><div class="ch"><span class="tl">Thông tin</span></div><div style="padding:6px 10px">${[['Mã','KH-001'],['Tên','QLNS cho QL cấp 4'],['CT','PG-2026-01'],['KH','EVNSPC'],['LH','Nguyễn Hoàng – TP NS'],['HT','Blended'],['CĐ','QL con người'],['ĐT','QL cấp 4'],['Giờ','40h (12 buổi / 6 ngày)'],['TG','10/03–15/07/2026'],['PM','Trần Thị Bình']].map(([k,v])=>'<div style="display:flex;padding:3px 0;border-bottom:1px solid var(--bl);font-size:11px"><span style="width:80px;color:var(--t2);flex-shrink:0">'+k+'</span><span>'+v+'</span></div>').join('')}</div></div>
+<div><div class="cd"><div class="ch"><span class="tl">Ngân sách</span></div><div style="padding:6px 10px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">${[['Tổng NS','450,000,000₫','--pL','--pD'],['Đã chi','280,000,000₫','--gL','--g'],['Còn lại','170,000,000₫','--aL','--am'],['% TH','62%','--ppL','--pp']].map(([l,v,b,c])=>'<div style="background:var('+b+');border-radius:5px;padding:6px"><div class="tx_" style="color:var('+c+')">'+l+'</div><div style="font-size:14px;font-weight:700;color:var('+c+')">'+v+'</div></div>').join('')}</div></div></div>
+<div class="cd"><div class="ch"><span class="tl">Mục tiêu</span></div><div style="padding:6px 10px;font-size:11px;color:var(--t2);line-height:1.6"><b style="color:var(--tx)">Mục tiêu:</b> Lập KPI, coaching, QL xung đột, VH đội nhóm.<br><b style="color:var(--tx)">Điều kiện:</b> QL cấp 4 hoặc quy hoạch.</div></div></div></div>`}
+
+// Tab Nội dung ĐT - WITH EDIT
+function tND(){
+const ml=MODS.map((m,i)=>'<div class="mc'+(sm===i?' sel':'')+'" onclick="sM('+i+')"><div class="fx ac g6">'+bg('b',m.id)+'<div class="f1"><b class="ts">'+m.name+'</b><div class="tx_ tc">'+m.sess+' · '+m.hrs+'h</div></div><span class="tx_ tc">'+(sm===i?'▼':'▶')+'</span></div></div>').join('');
+let det='';
+if(sm>=0){const m=MODS[sm];det=`
+<div class="cd"><div class="ch"><span class="tl">${m.id}: ${m.name}</span>${bg('b',m.hrs+'h')}<button class="bt bs" onclick="om('Sửa Module: ${m.name}',fEM(${sm}))">Sửa</button></div>
+<div style="padding:8px 12px">
+<div class="m8"><div class="tx_ tc" style="font-weight:700">TÓM TẮT</div><div class="ts">${m.sum}</div></div>
+<div class="m8"><div class="tx_ tc" style="font-weight:700">MỤC ĐÍCH</div><div class="ts">${m.purpose}</div></div>
+<div class="m8"><div class="tx_ tc" style="font-weight:700">MỤC TIÊU ĐÀO TẠO</div>${m.obj.map(o=>'<div class="ts" style="padding:2px 0 2px 10px">✅ '+o+'</div>').join('')}</div>
+<div><div class="tx_ tc" style="font-weight:700;margin-bottom:4px">NỘI DUNG & YÊU CẦU</div>
+${m.cts.map((c,ci)=>'<div style="border:1px solid var(--bl);border-radius:6px;padding:7px 9px;margin-bottom:5px"><div class="fx ac g4 m8">'+bg('t','ND'+(ci+1))+'<b class="ts f1">'+c.n+'</b><span class="tx_ tc">'+c.dur+'</span><button class="bt bs" onclick="om(\'Sửa nội dung: '+c.n+'\',fEND('+sm+','+ci+'))">Sửa</button></div><div class="ts tc"><b style="color:var(--tx)">Phương pháp:</b> '+c.mt+'</div></div>').join('')}
+</div></div></div>`}
+return `<div class="cd"><div class="ch"><span class="tl">Cấu trúc (${MODS.length} Module)</span><button class="bt bp" onclick="om('Thêm Module',fNM())">+ Module</button></div><div style="padding:6px 10px">${ml}</div></div>${det}`}
+
+// Tab Agenda WITH EDIT + Tool Forms
+function tAG(){
+const dtabs=DAYS.map((d,i)=>'<button class="dt'+(ad===i?' a':'')+'" onclick="sD('+i+')">'+d.day+'</button>').join('');
+const day=DAYS[ad];
+const tools=[{id:'tl',l:'Thảo luận nhóm'},{id:'bt',l:'Bài tập/Thu hoạch'},{id:'gm',l:'Gamification'},{id:'vd',l:'Chiếu Video'},{id:'pl',l:'Poll nhanh'},{id:'sv',l:'Survey'}];
+let tf='';
+if(st_==='tl')tf=`<div class="cd" style="border-color:var(--pp)"><div class="ch"><span class="tl" style="color:var(--pp)">Thảo luận nhóm</span></div><div style="padding:7px 10px">${I('Tiêu đề','','Case: Xung đột KD vs KT')}${TA('Nội dung','','KD phàn nàn KT chậm 48h. KT cho rằng KD đăng ký quá nhiều KH không đạt chuẩn.\\nYêu cầu: (1) Phân tích (2) Thomas-Kilmann (3) Win-Win')}<div class="fr">${I('Phút','','12','number')}${I('Nhóm','','5','number')}</div>${SL('Chia','Ngẫu nhiên,Theo ĐV,Thủ công,Giữ nhóm cũ'.split(','))}<button class="bt bw bf">Chia nhóm & Bắt đầu</button></div></div>`;
+if(st_==='pl')tf=`<div class="cd" style="border-color:var(--tl)"><div class="ch"><span class="tl" style="color:var(--tl)">Poll nhanh</span></div><div style="padding:7px 10px">${I('Câu hỏi','','Phong cách XL xung đột hiệu quả nhất?')}${I('A','','Competing – Quyết đoán')}${I('B','','Collaborating – Win-Win')}${I('C','','Compromising – Nhường')}${I('D','','Avoiding – Để nguội')}${I('Giây','','45','number')}<button class="bt bw bf">Mở poll</button></div></div>`;
+if(st_==='vd')tf=`<div class="cd" style="border-color:var(--p)"><div class="ch"><span class="tl" style="color:var(--p)">Chiếu Video</span></div><div style="padding:7px 10px">${SL('Chọn video','-- Chọn --,HL001: QTNS (15p),HL005: Leadership (20p),HL006: Case XĐ,Upload mới'.split(','))}<div style="background:#111;border-radius:5px;height:80px;display:flex;align-items:center;justify-content:center;margin-bottom:6px"><span style="color:#fff;opacity:.4;font-size:20px">▶</span></div>${SL('HV được phép','Chỉ xem,Reaction emoji,Reaction + Bình luận'.split(','))}<button class="bt bp bf">Chiếu</button></div></div>`;
+if(st_==='gm')tf=`<div class="cd" style="border-color:var(--pk)"><div class="ch"><span class="tl" style="color:var(--pk)">Gamification</span><button class="bt bs" onclick="om('Tạo Gamification mới',fNG())">+ Tạo mới</button></div><div style="padding:7px 10px">${SL('Chọn','-- Chọn --,GM-001: XĐ KD-KT (Active),GM-002: NV nghỉ (Draft),GM-003: Onboarding (Active)'.split(','))}${SL('Chấm','GV chấm,Peer review,Kết hợp GV+Peer'.split(','))}${SL('Thời gian/nhóm','5 phút,7 phút,10 phút'.split(','))}${I('URL kích hoạt','','https://vtraining.vn/gami/001')}<button class="bt bw bf">Kích hoạt & Gửi URL cho HV</button></div></div>
+<div class="cd"><div class="ch"><span class="tl">Dashboard Gamification – GM-001</span></div><div style="padding:6px 10px">
+<div class="fx g8 wp m8">${S('Nhóm','5','#7c3aed')}${S('Điểm TB','81.6','#059669')}${S('Cao nhất','88','#1a56db')}${S('Thấp nhất','74','#dc2626')}</div>
+${T([{l:'Nhóm',r:r=>'<b>'+r.nhom+'</b>'},{l:'PT/30',k:'pt'},{l:'GP/40',k:'gp'},{l:'TB/30',k:'tb'},{l:'Tổng',r:r=>'<b style="color:'+(r.total>=85?'var(--g)':r.total>=75?'var(--am)':'var(--r)')+'">'+r.total+'</b>'},{l:'Hạng',r:(r,i)=>bg(i===0?'g':i<3?'b':'y','#'+(i+1))}],GAMI[0].results.sort((a,b)=>b.total-a.total))}
+</div></div>`;
+if(st_==='bt')tf=`<div class="cd" style="border-color:var(--am)"><div class="ch"><span class="tl" style="color:var(--am)">Bài tập / Thu hoạch</span><button class="bt bs" onclick="om('Tạo BT/TH mới',fNBT())">+ Tạo mới</button></div><div style="padding:7px 10px">
+${T([{l:'Mã',r:r=>'<code>'+r.id+'</code>'},{l:'Tên',r:r=>'<b>'+r.n+'</b>'},{l:'Loại',r:r=>bg(r.type==='Thu hoạch'?'y':r.type==='Kiểm tra'?'b':'t',r.type)},{l:'Hạn',k:'deadline'},{l:'Nộp',r:r=>r.submitted+'/'+r.total},{l:'TT',r:r=>bg(r.status==='Đang thu'?'b':r.status==='Chờ nộp'?'y':r.status==='Chưa giao'?'x':'p',r.status)},{l:'',r:r=>r.results.length?'<button class="bt bs" data-act="clickBTResult" data-i="'+r.id+'">Xem KQ</button>':''}],BTTH)}
+</div></div>
+<div class="cd"><div class="ch"><span class="tl">Dashboard BT/TH</span></div><div style="padding:6px 10px">
+<div class="fx g8 wp m8">${S('Tổng BT/TH','4','#1a56db')}${S('Đang thu','1','#d97706')}${S('Đã chấm','0','#059669')}${S('Điểm TB','84','#7c3aed')}</div>
+</div></div>`;
+if(st_==='sv')tf=`<div class="cd" style="border-color:var(--g)"><div class="ch"><span class="tl" style="color:var(--g)">Survey</span></div><div style="padding:7px 10px">${SL('Mẫu','-- Tạo --,ĐG buổi (5 câu),ĐG GV (8 câu),Feedback khóa (12 câu)'.split(','))}<div class="hi">Preview: 5 câu Likert (1-5 sao) + 1 câu mở</div><button class="bt bo bf">Gửi cho 25 HV</button></div></div>`;
+return `<div class="fx g4 wp m10" style="border-bottom:1px solid var(--bd)">${dtabs}</div>
+<div class="cd"><div class="ch"><span class="tl">${day.day}</span><span class="tx_ tc">${day.buoi.length} buổi</span><button class="bt bs" onclick="om('Sửa Agenda: ${day.day}',fEAG(${ad}))">Sửa</button></div>
+<div style="padding:6px 10px">${day.buoi.map(b=>'<div style="padding:6px 0;border-bottom:1px solid var(--bl)"><div class="fx ac g8"><code style="width:65px;flex-shrink:0;font-size:10px">'+b.t+'</code><div class="f1"><div class="ts" style="font-weight:600">'+b.topic+'</div><div class="tx_ tc">'+b.type+' | '+b.gv+'</div><div class="fx g4 wp" style="margin-top:2px">'+b.tools.map(t=>bg(tb(t),t)).join('')+(b.sl?'<span class="tx_" style="color:var(--p)">📄'+b.sl+'</span>':'')+(b.doc?'<span class="tx_" style="color:var(--tl)">📎'+b.doc+'</span>':'')+'</div></div></div></div>').join('')}</div></div>
+<div class="tx_ tc m8" style="font-weight:700">CÔNG CỤ (click mở form):</div>
+<div class="tg">${tools.map(f=>'<div class="tc_'+(st_===f.id?' sel':'')+'" onclick="sTl(\''+f.id+'\')">'+f.l+'</div>').join('')}</div>${tf}`}
+
+// Tab Vận hành
+function tVH(){return `<div class="fx g8 wp m10">${S('Task',OT.length+'','#1a56db')}${S('Xong',OT.filter(t=>t.s==='Xong').length+'','#059669')}${S('Đang',OT.filter(t=>t.s==='Đang').length+'','#d97706')}${S('Chưa',OT.filter(t=>t.s==='Chưa').length+'','#dc2626')}</div>
+<div class="cd"><div class="ch"><span class="tl">Task VH – Ngày 6</span></div>
+${T([{l:'ID',r:r=>'<code>'+r.id+'</code>'},{l:'Việc',r:r=>'<b>'+r.n+'</b>'},{l:'Nhóm',k:'gr'},{l:'Ph',r:r=>bg(r.ph==='PRE'?'b':r.ph==='DUR'?'t':'p',r.ph)},{l:'Hạn',k:'due'},{l:'NV',k:'nv'},{l:'ƯT',r:r=>bg(r.p==='HIGH'?'y':'x',r.p)},{l:'TT',r:r=>bg(r.s==='Xong'?'g':r.s==='Đang'?'b':'r',r.s)}],OT)}</div>`}
+
+function tHV(){return `<div class="fx g6 m8 wp ac">${SL('','Tất cả lớp,Lớp A,Lớp B,Lớp C'.split(','))}${SL('','Tất cả ĐV,TT KD,P. MKT,P. KT,P. TC,P. CNTT'.split(','))}<button class="bt bp" onclick="om('Thêm HV',fNHV())">+ Thêm</button><button class="bt bs" onclick="om('Import Excel',fIMP())">Import</button></div>
+<div class="cd"><div class="ch"><span class="tl">HV (${HV.length})</span></div>
+${T([{l:'Mã',r:r=>'<code>'+r.c+'</code>'},{l:'Tên',r:r=>'<b>'+r.n+'</b>'},{l:'ĐV',k:'u'},{l:'Chức danh',k:'t'},{l:'Lớp',r:r=>bg('b',r.cls)},{l:'Mặt',k:'a'},{l:'Điểm',k:'sc'},{l:'Email',k:'email'},{l:'TT',r:r=>bg(r.s==='ĐH'?'g':'x',r.s)}],HV)}</div>`}
+
+function tHL(){return `<div class="cd"><div class="ch"><span class="tl">Học liệu (${MAT.length})</span><button class="bt bp">+ Thêm</button></div>
+${T([{l:'Mã',r:r=>'<code>'+r.id+'</code>'},{l:'Tên',r:r=>'<b>'+r.n+'</b>'},{l:'Loại',r:r=>bg('t',r.tp)},{l:'CĐ',k:'ch'},{l:'Buổi',k:'b'},{l:'Size',k:'sz'},{l:'Tác giả',k:'by'},{l:'TT',r:r=>bg(r.s==='CB'?'g':'y',r.s)}],MAT)}</div>`}
+
+// Tab 7: Gamification & BT
+function tGBT(){
+const stabs=['Gamification','Bài tập / Thu hoạch'];
+return `<div class="stab">${stabs.map((s,i)=>'<button class="si'+(gmt===i?' a':'')+'" onclick="gmt='+i+';R()">'+s+'</button>').join('')}</div>${gmt===0?tGami():tBTTH()}`}
+
+function tGami(){return `
+<div class="cd"><div class="ch"><span class="tl">DS Gamification (${GAMI.length})</span><button class="bt bp" onclick="om('Tạo Gamification mới',fNG())">+ Tạo mới</button></div>
+${T([{l:'Mã',r:r=>'<code>'+r.id+'</code>'},{l:'Tên',r:r=>'<b>'+r.n+'</b>'},{l:'Loại',r:r=>bg('k',r.type)},{l:'Buổi',k:'buoi'},{l:'Nhóm',k:'nhom'},{l:'URL',r:r=>r.url?'<span class="tx_" style="color:var(--p)">'+r.url+'</span>':'-'},{l:'TT',r:r=>bg(r.status==='Active'?'g':'y',r.status)},{l:'',r:r=>r.results.length?'<button class="bt bs" data-act="clickGMResult" data-i="'+r.id+'">KQ</button>':''}],GAMI)}</div>
+<div class="cd"><div class="ch"><span class="tl">Dashboard Tổng hợp Gamification</span></div><div style="padding:6px 10px">
+<div class="fx g8 wp m8">${S('Tổng','3','#db2777')}${S('Active','2','#059669')}${S('Điểm TB','82','#7c3aed')}${S('Tham gia','100%','#1a56db')}</div></div></div>`}
+
+function tBTTH(){return `
+<div class="cd"><div class="ch"><span class="tl">DS Bài tập / Thu hoạch (${BTTH.length})</span><button class="bt bp" onclick="om('Tạo BT/TH mới',fNBT())">+ Tạo mới</button></div>
+${T([{l:'Mã',r:r=>'<code>'+r.id+'</code>'},{l:'Tên',r:r=>'<b>'+r.n+'</b>'},{l:'Loại',r:r=>bg(r.type==='Thu hoạch'?'y':r.type==='Kiểm tra'?'b':'t',r.type)},{l:'Buổi',k:'buoi'},{l:'Hạn',k:'deadline'},{l:'Nộp',r:r=>r.submitted+'/'+r.total},{l:'TT',r:r=>bg(r.status==='Đang thu'?'b':r.status==='Chờ nộp'?'y':r.status==='Chưa giao'?'x':'p',r.status)},{l:'',r:r=>r.results.length?'<button class="bt bs" data-act="clickBTResult" data-i="'+r.id+'">KQ</button>':''}],BTTH)}</div>
+<div class="cd"><div class="ch"><span class="tl">Dashboard BT/TH</span></div><div style="padding:6px 10px">
+<div class="fx g8 wp m8">${S('Tổng','4','#1a56db')}${S('Đang thu','1','#d97706')}${S('Đã chấm xong','0','#059669')}${S('Chờ mở','1','#7c3aed')}</div>
+<div class="m8"><div class="tx_ tc" style="font-weight:600;margin-bottom:3px">Tỉ lệ nộp bài:</div>
+${[{l:'BT-001 Thu hoạch M1',v:78},{l:'BT-002 BT cá nhân',v:0},{l:'BT-003 Thu hoạch M3',v:0},{l:'BT-004 KT online M2',v:0}].map(r=>'<div class="fx ac g6" style="padding:2px 0"><span class="tx_" style="width:130px">'+r.l+'</span><div class="pg f1"><div class="pb" style="width:'+r.v+'%;background:var(--p)"></div></div><span class="tx_">'+r.v+'%</span></div>').join('')}
+</div></div></div>`}
+
+// ===== GV MODULE (5 sub-tabs) =====
+PG.gv=()=>{
+const tabs=['Danh sách','Hợp đồng','Công việc','Thù lao'];
+return `<div class="tabs">${tabs.map((t,i)=>'<button class="tab'+(gvt===i?' a':'')+'" onclick="gvt='+i+';R()">'+t+'</button>').join('')}</div>${gvt===0?gvList():gvt===1?gvHD():gvt===2?gvWork():gvPay()}`};
+
+function gvList(){return `<div class="cd"><div class="ch"><span class="tl">Giảng viên (${GVL.length})</span><button class="bt bp" onclick="om('Thêm Giảng viên',fNGV())">+ Thêm GV</button></div>
+${T([{l:'Mã',r:r=>'<code>'+r.c+'</code>'},{l:'Họ tên',r:r=>'<b>'+r.n+'</b>'},{l:'Chuyên môn',k:'spec'},{l:'Chi phí',k:'fee'},{l:'HĐ',k:'hd'},{l:'TT HĐ',r:r=>bg('g',r.hdTT)},{l:'Buổi',k:'buoi'},{l:'Rating',k:'rate'},{l:'SĐT',k:'sdt'}],GVL)}</div>`}
+
+function gvHD(){return `<div class="cd"><div class="ch"><span class="tl">DS Hợp đồng GV</span></div>
+${T([{l:'Mã HĐ',r:r=>'<code>'+r.hd+'</code>'},{l:'GV',r:r=>'<b>'+r.n+'</b>'},{l:'Từ',k:'hdStart'},{l:'Đến',k:'hdEnd'},{l:'Giá trị',k:'hdValue'},{l:'Đã TT',k:'hdPaid'},{l:'Còn lại',r:r=>{const v=parseInt(r.hdValue.replace(/\D/g,''))-parseInt(r.hdPaid.replace(/\D/g,''));return (v/1e6).toFixed(0)+'tr'}},{l:'TT',r:r=>bg('g',r.hdTT)},{l:'',r:r=>'<button class="bt bs" data-act="clickHD" data-i="'+r.c+'">Chi tiết</button>'}],GVL)}</div>`}
+
+function gvWork(){return `<div class="cd"><div class="ch"><span class="tl">Công việc hợp tác</span></div>
+${T([{l:'GV',r:r=>'<b>'+r.n+'</b>'},{l:'Khóa',k:'kh'},{l:'Vai trò',k:'role'},{l:'Buổi',k:'buoi'},{l:'TT',r:r=>bg(r.status==='Đang giảng'?'b':r.status==='Hoàn thành'?'g':'y',r.status)}],GVL.flatMap(g=>g.works.map(w=>({n:g.n,...w}))))}</div>`}
+
+function gvPay(){return `<div class="cd"><div class="ch"><span class="tl">Theo dõi thù lao GV</span></div>
+${T([{l:'GV',r:r=>'<b>'+r.n+'</b>'},{l:'HĐ',k:'hd'},{l:'Giá trị HĐ',k:'hdValue'},{l:'Đã TT',r:r=>'<span style="color:var(--g)">'+r.hdPaid+'</span>'},{l:'Còn lại',r:r=>{const v=parseInt(r.hdValue.replace(/\D/g,''))-parseInt(r.hdPaid.replace(/\D/g,''));return '<span style="color:var(--r)">'+(v/1e6).toFixed(0)+'tr</span>'}},{l:'% TT',r:r=>{const p=Math.round(parseInt(r.hdPaid.replace(/\D/g,''))/parseInt(r.hdValue.replace(/\D/g,''))*100);return '<div class="fx ac g4"><div class="pg" style="width:50px"><div class="pb" style="width:'+p+'%;background:var(--g)"></div></div>'+p+'%</div>'}}],GVL)}</div>`}
+
+// ===== CTV MODULE (5 sub-tabs) =====
+PG.ctv=()=>{
+const tabs=['Danh sách','Hợp đồng','Công việc','Thù lao'];
+return `<div class="tabs">${tabs.map((t,i)=>'<button class="tab'+(cvt===i?' a':'')+'" onclick="cvt='+i+';R()">'+t+'</button>').join('')}</div>${cvt===0?cvList():cvt===1?cvHD():cvt===2?cvWork():cvPay()}`};
+
+function cvList(){return `<div class="cd"><div class="ch"><span class="tl">CTV (${CTVL.length})</span><button class="bt bp" onclick="om('Thêm CTV',fNCTV())">+ Thêm CTV</button></div>
+${T([{l:'Mã',r:r=>'<code>'+r.c+'</code>'},{l:'Họ tên',r:r=>'<b>'+r.n+'</b>'},{l:'Chuyên môn',k:'spec'},{l:'Loại',r:r=>bg('y',r.type)},{l:'Chi phí',k:'fee'},{l:'HĐ',k:'hd'},{l:'TT',r:r=>bg('g',r.hdTT)},{l:'SĐT',k:'sdt'},{l:'ĐG',k:'rate'}],CTVL)}</div>`}
+
+function cvHD(){return `<div class="cd"><div class="ch"><span class="tl">DS Hợp đồng CTV</span></div>
+${T([{l:'Mã HĐ',r:r=>'<code>'+r.hd+'</code>'},{l:'CTV',r:r=>'<b>'+r.n+'</b>'},{l:'Loại',r:r=>bg('y',r.type)},{l:'Từ',k:'hdStart'},{l:'Đến',k:'hdEnd'},{l:'Giá trị',k:'hdValue'},{l:'Đã TT',k:'hdPaid'},{l:'TT',r:r=>bg('g',r.hdTT)},{l:'',r:r=>'<button class="bt bs" data-act="clickHDC" data-i="'+r.c+'">Chi tiết</button>'}],CTVL)}</div>`}
+
+function cvWork(){return `<div class="cd"><div class="ch"><span class="tl">Công việc CTV</span></div>
+${T([{l:'CTV',r:r=>'<b>'+r.n+'</b>'},{l:'Khóa',k:'kh'},{l:'Lớp',k:'cls'},{l:'Vai trò',k:'role'},{l:'TT',r:r=>bg(r.status==='Đang làm'?'b':r.status==='Xong'?'g':'y',r.status)}],CTVL.flatMap(c=>c.works.map(w=>({n:c.n,...w}))))}</div>`}
+
+function cvPay(){return `<div class="cd"><div class="ch"><span class="tl">Theo dõi thanh toán thù lao CTV</span></div>
+${T([{l:'CTV',r:r=>'<b>'+r.n+'</b>'},{l:'Tháng',k:'month'},{l:'Số tiền',k:'amount'},{l:'TT',r:r=>bg(r.s==='Đã TT'?'g':'y',r.s)},{l:'Ngày TT',k:'date'}],CTVL.flatMap(c=>c.payments.map(p=>({n:c.n,...p}))))}</div>
+<div class="cd"><div class="ch"><span class="tl">Tổng hợp thù lao CTV</span></div><div style="padding:6px 10px">
+<div class="fx g8 wp m8">${S('Tổng HĐ',CTVL.length+'','#1a56db')}${S('Tổng giá trị','126tr','#7c3aed')}${S('Đã TT','32.4tr','#059669')}${S('Chờ TT','13.4tr','#d97706')}</div>
+</div></div>`}
+
+// ===== VẬN HÀNH MODULES =====
+PG.vhDash=()=>`
+<div class="fx g8 wp m12">${S('Khóa','8','#1a56db')}${S('Lớp đang mở','12','#059669')}${S('Task hôm nay','10','#d97706')}${S('Chưa làm','4','#dc2626')}${S('NV VH','11','#7c3aed')}</div>
+<div class="two">
+<div class="cd"><div class="ch"><span class="tl">Lớp đang vận hành</span></div>
+${T([{l:'Lớp',r:r=>'<b>'+r.cls+'</b>'},{l:'Khóa',k:'kh'},{l:'CV chính',k:'cv'},{l:'Buổi',k:'buoi'},{l:'CL%',r:r=>'<div class="fx ac g4"><div class="pg" style="width:40px"><div class="pb" style="width:'+r.cl+'%;background:var(--g)"></div></div>'+r.cl+'%</div>'},{l:'TT',r:r=>bg(r.s==='Đang'?'b':'y',r.s)}],
+[{cls:'Lớp A – MB',kh:'KH-001 QLNS',cv:'Nguyễn Huy',buoi:'6/12',cl:85,s:'Đang'},{cls:'Lớp B – MT',kh:'KH-001 QLNS',cv:'Trần Bình',buoi:'0/12',cl:0,s:'Sắp'},{cls:'Lớp C – MN',kh:'KH-001 QLNS',cv:'TBD',buoi:'0/12',cl:0,s:'Sắp'},{cls:'Lớp 1 – VNPT',kh:'KH-002 LĐ số',cv:'Nguyễn Huy',buoi:'3/8',cl:70,s:'Đang'}])}</div>
+<div class="cd"><div class="ch"><span class="tl">Vấn đề VH cần xử lý</span></div>
+${[{cls:'Lớp A',i:'T05: Test WiFi chưa làm – ưu tiên CAO',p:'HIGH'},{cls:'Lớp B',i:'Chưa phân công CV VH chính',p:'HIGH'},{cls:'Lớp C',i:'TBD – chưa có nhân sự',p:'MED'}].map(x=>'<div style="padding:5px 10px;border-bottom:1px solid var(--bl)"><div class="fx ac g4"><b class="tx_">'+x.cls+'</b>'+bg(x.p==='HIGH'?'r':'y',x.p)+'</div><div class="ts">'+x.i+'</div></div>').join('')}</div></div>`;
+
+PG.vhClass=()=>`
+<div class="cd"><div class="ch"><span class="tl">Chi tiết VH – Lớp A (KH-001)</span></div><div style="padding:6px 10px" class="tx_ tc">25 HV | P.301 HN | CV: Nguyễn Huy + Lê Văn An + Vũ Thị Mai</div></div>
+<div class="cd"><div class="ch"><span class="tl">CL tổng hợp theo ngày</span></div>
+${T([{l:'Ngày',k:'day'},{l:'PRE',r:r=>bg(r.pre==='OK'?'g':'y',r.pre)},{l:'DUR',r:r=>bg(r.dur==='OK'?'g':r.dur==='-'?'x':'y',r.dur)},{l:'POST',r:r=>bg(r.post==='OK'?'g':r.post==='-'?'x':'y',r.post)},{l:'Issue',k:'issue'}],
+[{day:'N1 (10/03)',pre:'OK',dur:'OK',post:'OK',issue:'-'},{day:'N2 (12/03)',pre:'OK',dur:'OK',post:'OK',issue:'-'},{day:'N3 (17/03)',pre:'OK',dur:'OK',post:'OK',issue:'Micro hú 5p'},{day:'N4 (19/03)',pre:'OK',dur:'OK',post:'OK',issue:'-'},{day:'N5 (24/03)',pre:'OK',dur:'OK',post:'OK',issue:'-'},{day:'N6 (26/03) HN',pre:'2/5',dur:'-',post:'-',issue:'Đang làm'}])}</div>
+<div class="cd"><div class="ch"><span class="tl">HSNT Upload</span></div>
+${T([{l:'Loại',k:'tp'},{l:'Ngày',k:'b'},{l:'File',r:r=>r.f?'<span style="color:var(--p)">'+r.f+'</span>':'<button class="bt bs">Upload</button>'},{l:'TT',r:r=>bg(r.s==='OK'?'g':'y',r.s)}],
+[{tp:'Điểm danh ký',b:'N1-N5',f:'diemdanh.pdf',s:'OK'},{tp:'Ảnh buổi',b:'N1-N5',f:'photos.zip',s:'OK'},{tp:'Điểm danh',b:'N6',f:'',s:'Chờ'},{tp:'Ảnh',b:'N6',f:'',s:'Chờ'},{tp:'Feedback',b:'N1-N5',f:'feedback.xlsx',s:'OK'},{tp:'BC GV',b:'N1-N5',f:'bc_gv.pdf',s:'OK'}])}</div>`;
+
+PG.vhAssign=()=>`
+<div class="cd"><div class="ch"><span class="tl">Phân công VH toàn khóa</span><button class="bt bp" onclick="om('Phân công mới',fAsgn())">+ Phân công</button></div>
+${T([{l:'Lớp',r:r=>'<b>'+r.cls+'</b>'},{l:'CV chính',k:'m'},{l:'CV hỗ trợ',k:'sub'},{l:'Ekip',k:'ek'},{l:'SĐT',k:'sdt'},{l:'TT',r:r=>bg(r.s==='OK'?'g':'y',r.s)}],
+[{cls:'Lớp A – MB',m:'Nguyễn Huy (FT)',sub:'Lê Văn An, Vũ Thị Mai',ek:'Ekip Bắc',sdt:'0912-345-010',s:'OK'},{cls:'Lớp B – MT',m:'Trần Bình (FT)',sub:'Vũ Thị Mai',ek:'Ekip Trung',sdt:'0912-345-012',s:'OK'},{cls:'Lớp C – MN',m:'TBD',sub:'TBD',ek:'Ekip Nam',sdt:'-',s:'Chưa'}])}</div>`;
+
+PG.vhEval=()=>`
+<div class="cd"><div class="ch"><span class="tl">Đánh giá NV Vận hành</span><button class="bt bp" onclick="om('Tạo đánh giá',fEvalVH())">+ Đánh giá</button></div>
+${T([{l:'NV',r:r=>'<b>'+r.n+'</b>'},{l:'Vai trò',k:'role'},{l:'Lớp',k:'cls'},{l:'Task xong',k:'done'},{l:'Đúng hạn',k:'ontime'},{l:'Điểm ĐG',r:r=>'<b style="color:'+(r.sc>=4?'var(--g)':'var(--am)')+'">'+r.sc+'/5</b>'},{l:'Nhận xét',k:'nx'}],
+[{n:'Nguyễn Huy',role:'CV chính',cls:'Lớp A',done:'38/42',ontime:'95%',sc:4.5,nx:'Chủ động, cẩn thận'},{n:'Lê Văn An',role:'KT AV',cls:'Lớp A',done:'20/24',ontime:'85%',sc:4.0,nx:'Cần cải thiện time'},{n:'Vũ Thị Mai',role:'Hỗ trợ',cls:'Lớp A',done:'12/14',ontime:'90%',sc:4.2,nx:'Ghi chép tốt'},{n:'Trần Bình',role:'CV chính',cls:'Lớp B',done:'-',ontime:'-',sc:0,nx:'Chưa bắt đầu'}])}</div>`;
+
+PG.vhTask=()=>`
+<div class="cd"><div class="ch"><span class="tl">Giao việc</span><button class="bt bp" onclick="om('Giao việc mới',fNewTask())">+ Giao việc</button></div>
+${T([{l:'ID',r:r=>'<code>'+r.id+'</code>'},{l:'Việc',r:r=>'<b>'+r.n+'</b>'},{l:'Nhóm',k:'gr'},{l:'Phase',r:r=>bg(r.ph==='PRE'?'b':r.ph==='DUR'?'t':'p',r.ph)},{l:'Giao cho',k:'nv'},{l:'Hạn',k:'due'},{l:'ƯT',r:r=>bg(r.p==='HIGH'?'y':'x',r.p)},{l:'TT',r:r=>bg(r.s==='Xong'?'g':r.s==='Đang'?'b':'r',r.s)}],OT)}</div>`;
+
+PG.vhCL=()=>`
+<div class="cd"><div class="ch"><span class="tl">Checklist mẫu – PRE (trước buổi)</span></div><div style="padding:6px 10px">
+${['Kiểm tra phòng: máy chiếu, micro, loa, WiFi','In tài liệu phát tay (theo DS buổi)','Setup bàn ghế theo layout yêu cầu','Chuẩn bị nước uống, trà, cà phê','Check micro pin, remote, laser','Chụp ảnh setup phòng trước buổi'].map((t,i)=>'<div style="display:flex;align-items:center;gap:5px;padding:4px 0;border-bottom:1px solid var(--bl)"><div style="width:13px;height:13px;border-radius:3px;border:2px solid '+(i<2?'var(--g)':'var(--bd)')+';background:'+(i<2?'var(--g)':'transparent')+';display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="color:#fff;font-size:8px;font-weight:700">'+(i<2?'✓':'')+'</span></div><span class="ts" style="'+(i<2?'color:var(--t2);text-decoration:line-through':'')+'">'+t+'</span></div>').join('')}
+</div></div>
+<div class="cd"><div class="ch"><span class="tl">Checklist – DURING (trong buổi)</span></div><div style="padding:6px 10px">
+${['Điểm danh HV (bắt đầu buổi)','Chụp ảnh toàn cảnh lớp + GV','Hỗ trợ chia nhóm thảo luận','Ghi chép Q&A chính','Phát/thu bài tập/phiếu đánh giá'].map(t=>'<div style="display:flex;align-items:center;gap:5px;padding:4px 0;border-bottom:1px solid var(--bl)"><div style="width:13px;height:13px;border-radius:3px;border:2px solid var(--bd);flex-shrink:0"></div><span class="ts">'+t+'</span></div>').join('')}
+</div></div>
+<div class="cd"><div class="ch"><span class="tl">Checklist – POST (sau buổi)</span></div><div style="padding:6px 10px">
+${['Thu dọn phòng, kiểm kê thiết bị','Upload ảnh + điểm danh lên hệ thống','Gửi Q&A + feedback cho BQL','Email cảm ơn GV + share TL cho HV','Khóa cửa phòng, bàn giao chìa khóa'].map(t=>'<div style="display:flex;align-items:center;gap:5px;padding:4px 0;border-bottom:1px solid var(--bl)"><div style="width:13px;height:13px;border-radius:3px;border:2px solid var(--bd);flex-shrink:0"></div><span class="ts">'+t+'</span></div>').join('')}
+</div></div>`;
+
+// ===== OTHER PAGES =====
+PG.tna=()=>`<div class="cd"><div class="ch"><span class="tl">TNA (6)</span><button class="bt bp">+ Tạo TNA</button></div>
+${T([{l:'Mã',r:r=>'<code>'+r.c+'</code>'},{l:'KH',r:r=>'<b>'+r.kh+'</b>'},{l:'Nhu cầu',k:'nd'},{l:'ĐT',k:'dt'},{l:'SL',k:'sl'},{l:'TT',r:r=>bg(r.s==='Xong'?'g':r.s==='PT'?'b':'y',r.s)}],
+[{c:'TNA-001',kh:'EVNSPC',nd:'QLNS cho QL cấp 4',dt:'QL cấp 4',sl:75,s:'Xong'},{c:'TNA-002',kh:'VNPT',nd:'LĐ số',dt:'QL 3-4',sl:50,s:'Xong'},{c:'TNA-003',kh:'EVN HQ',nd:'CĐ xanh',dt:'QL cấp 3',sl:120,s:'PT'},{c:'TNA-004',kh:'EVNCPC',nd:'AT điện NC',dt:'KS AT',sl:200,s:'PT'},{c:'TNA-005',kh:'MobiFone',nd:'Digital MKT',dt:'NV KD',sl:80,s:'Chờ'},{c:'TNA-006',kh:'EVNSPC',nd:'Giao tiếp NV mới',dt:'NV mới',sl:90,s:'Chờ'}])}</div>`;
+
+PG.courses=()=>`<div class="fx g6 m8 wp ac">${SL('','-- KH --,EVNSPC,VNPT,EVN HQ,EVNCPC,Viettel,MobiFone'.split(','))}${SL('','-- TT --,Đang TK,Sắp mở,Xong'.split(','))}<button class="bt bp" onclick="om('Tạo khóa mới',fEC())">+ Tạo khóa</button></div>
+<div class="cd"><div class="ch"><span class="tl">DS Khóa (6)</span></div>
+${T([{l:'Mã',r:r=>'<code>'+r.code+'</code>'},{l:'Tên',r:(r,i)=>'<b class="clickable" data-act="clickCourse" data-i="'+i+'">'+r.n+'</b>'},{l:'KH',k:'kh'},{l:'HT',r:r=>bg('t',r.mt)},{l:'Lớp',k:'cls'},{l:'HV',k:'hv'},{l:'NS',k:'ns'},{l:'TT',r:r=>bg(r.s==='Đang'?'b':r.s==='Sắp'?'y':'g',r.s)}],
+[{code:'KH-001',n:'QLNS QL cấp 4',kh:'EVNSPC',mt:'Blended',cls:3,hv:75,ns:'450tr',s:'Đang'},{code:'KH-002',n:'LĐ số',kh:'VNPT',mt:'Offline',cls:2,hv:50,ns:'320tr',s:'Đang'},{code:'KH-003',n:'CĐ Xanh',kh:'EVN HQ',mt:'Blended',cls:4,hv:120,ns:'680tr',s:'Sắp'},{code:'KH-004',n:'AT điện NC',kh:'EVNCPC',mt:'E-learn',cls:5,hv:200,ns:'180tr',s:'Sắp'},{code:'KH-005',n:'VHDN',kh:'Viettel',mt:'Offline',cls:1,hv:30,ns:'150tr',s:'Xong'},{code:'KH-006',n:'Digital MKT',kh:'MobiFone',mt:'Webinar',cls:2,hv:80,ns:'120tr',s:'Sắp'}])}</div>`;
+
+PG.mats=()=>`<div class="cd"><div class="ch"><span class="tl">Kho Học liệu (${MAT.length})</span><button class="bt bs">Lọc</button><button class="bt bp">+ Upload</button></div>
+${T([{l:'Mã',r:r=>'<code>'+r.id+'</code>'},{l:'Tên',r:r=>'<b>'+r.n+'</b>'},{l:'Loại',r:r=>bg('t',r.tp)},{l:'CĐ',k:'ch'},{l:'Buổi',k:'b'},{l:'Size',k:'sz'},{l:'TG',k:'by'},{l:'TT',r:r=>bg(r.s==='CB'?'g':'y',r.s)}],MAT)}</div>`;
+
+PG.users=()=>`<div style="display:grid;grid-template-columns:200px 1fr;gap:10px">
+<div class="cd"><div class="ch"><span class="tl">Nhóm</span></div>${T([{l:'Nhóm',r:r=>'<b>'+r.n+'</b>'},{l:'SL',k:'sl'}],[{n:'Admin',sl:2},{n:'QL Khóa',sl:5},{n:'CV VH',sl:8},{n:'GV',sl:15},{n:'HV',sl:1247},{n:'Quan sát',sl:3}])}</div>
+<div class="cd"><div class="ch"><span class="tl">Users</span><button class="bt bp">+ User</button></div>
+${T([{l:'User',r:r=>'<code>'+r.u+'</code>'},{l:'Tên',r:r=>'<b>'+r.n+'</b>'},{l:'Email',k:'e'},{l:'Nhóm',r:r=>bg('b',r.g)},{l:'TT',r:()=>bg('g','Active')}],
+[{u:'binh.tt',n:'Trần Thị Bình',e:'binh@vt.vn',g:'QL Khóa'},{u:'hien.nv',n:'Nguyễn V. Hiền',e:'hien@vt.vn',g:'QL Khóa'},{u:'admin1',n:'System Admin',e:'admin@vt.vn',g:'Admin'},{u:'duc.pm',n:'TS. Phạm M. Đức',e:'duc@train.vn',g:'GV'}])}</div></div>`;
+
+PG.cats=()=>{
+const cats={'Khách hàng':[['KH01','EVNSPC','HCM'],['KH02','VNPT','HN'],['KH03','EVN HQ','HN'],['KH04','EVNCPC','ĐN'],['KH05','Viettel','HN'],['KH06','MobiFone','HN']],'Đối tượng':[['DT01','NV mới'],['DT02','NV'],['DT03','QL cấp 4'],['DT04','QL cấp 3'],['DT05','QL cấp 2']],'Hình thức':[['HT01','E-learn'],['HT02','Offline'],['HT03','Blended'],['HT04','Webinar'],['HT05','Workshop']],'Chủ đề':[['CD01','QL con người'],['CD02','QL công việc'],['CD03','Lãnh đạo'],['CD04','Kỹ thuật'],['CD05','CĐS']],'Chuyên đề':[['CĐ01','QTNS'],['CĐ02','Coaching'],['CĐ03','QLDA'],['CĐ04','DM'],['CĐ05','AT điện']],'Lĩnh vực':[['LV01','QTNS'],['LV02','KD'],['LV03','CN'],['LV04','KT Điện']],'Loại HL':[['LH01','Video'],['LH02','Slide'],['LH03','PDF'],['LH04','Template'],['LH05','Case']],'Nhóm CL':[['CL01','PRE'],['CL02','DURING'],['CL03','POST'],['CL04','NT']],'Loại HSNT':[['HS01','Điểm danh'],['HS02','Ảnh'],['HS03','BĐ'],['HS04','BB NT'],['HS05','FB']],'Cấp bậc':[['CB01','NV'],['CB02','CV'],['CB03','TN'],['CB04','TP'],['CB05','PGĐ'],['CB06','GĐ']],'Loại GV':[['LG01','GV nội bộ'],['LG02','Thỉnh giảng'],['LG03','CG'],['LG04','CTV FT'],['LG05','CTV PT']],'PT TT':[['TT01','CK NH'],['TT02','Tiền mặt'],['TT03','Đối trừ']]};
+return `<div style="display:flex;gap:10px"><div class="cd" style="width:170px;flex-shrink:0"><div class="ch"><span class="tl">Loại DM</span></div><div style="padding:3px 5px">${Object.keys(cats).map((k,i)=>'<div style="padding:4px 6px;font-size:11px;border-radius:3px;cursor:pointer;'+(i===0?'background:var(--pL);color:var(--pD);font-weight:600':'')+'">'+k+'</div>').join('')}</div></div>
+<div class="f1">${Object.entries(cats).map(([k,v])=>'<div class="cd"><div class="ch"><span class="tl">'+k+' ('+v.length+')</span><button class="bt bp">+ Thêm</button></div>'+T([{l:'Mã',r:r=>'<code>'+r[0]+'</code>'},{l:'Tên',r:r=>'<b>'+r[1]+'</b>'},...(v[0]&&v[0][2]?[{l:'Info',r:r=>r[2]||''}]:[]),{l:'TT',r:()=>bg('g','Active')},{l:'',r:()=>'<button class="bt bs">Sửa</button>'}],v)+'</div>').join('')}</div></div>`};
+
+PG.stats=()=>`<div class="fx g8 wp m12">${S('Khóa','8','#1a56db')}${S('Lớp','21','#0d9488')}${S('HV','1,247','#7c3aed')}${S('Xong','1','#059669')}${S('DT','10.3 tỷ','#d97706')}</div>
+<div class="two">
+<div class="cd"><div class="ch"><span class="tl">DT theo KH</span></div>${T([{l:'KH',r:r=>'<b>'+r.n+'</b>'},{l:'Khóa',k:'k'},{l:'DT',k:'dt'}],[{n:'EVN HQ',k:5,dt:'3.8 tỷ'},{n:'EVNSPC',k:3,dt:'2.1 tỷ'},{n:'EVNCPC',k:4,dt:'1.8 tỷ'},{n:'VNPT',k:2,dt:'1.5 tỷ'},{n:'Viettel',k:1,dt:'680tr'},{n:'MobiFone',k:1,dt:'420tr'}])}</div>
+<div class="cd"><div class="ch"><span class="tl">Top GV</span></div>${T([{l:'GV',r:r=>'<b>'+r.n+'</b>'},{l:'Buổi',k:'b'},{l:'Rate',k:'r'}],[{n:'PGS.TS Trần T. Hải',b:12,r:'4.9'},{n:'TS. Phạm Đức',b:28,r:'4.8'},{n:'ThS. Lê An',b:20,r:'4.6'},{n:'LS. Nguyễn Hùng',b:5,r:'4.5'}])}</div>
+<div class="cd"><div class="ch"><span class="tl">Tỉ lệ HV</span></div><div style="padding:6px 10px">${[{l:'Điểm danh',v:92,c:'var(--g)'},{l:'Nộp bài',v:78,c:'var(--am)'},{l:'Hoàn thành',v:95,c:'var(--p)'},{l:'Hài lòng',v:88,c:'var(--pp)'}].map(r=>'<div class="fx ac g6" style="padding:3px 0"><span class="ts" style="width:80px">'+r.l+'</span><div class="pg f1"><div class="pb" style="width:'+r.v+'%;background:'+r.c+'"></div></div><b class="tx_" style="color:'+r.c+'">'+r.v+'%</b></div>').join('')}</div></div>
+<div class="cd"><div class="ch"><span class="tl">Tổng hợp HĐ GV/CTV</span></div><div style="padding:6px 10px">
+<div class="fx g8 wp">${S('HĐ GV','4','#1a56db')}${S('Đã TT GV','178tr','#059669')}${S('HĐ CTV','3','#d97706')}${S('Đã TT CTV','32.4tr','#059669')}</div>
+</div></div></div>`;
+
+// ===== MODAL FORMS =====
+function fEC(){return `<div class="fr">${I('Mã khóa *','KH-007')}${SL('KH *','--,EVNSPC,VNPT,EVN HQ,EVNCPC,Viettel,MobiFone'.split(','))}</div>
+${I('Tên khóa *','VD: Kỹ năng giao tiếp cho NV bán hàng')}
+<div class="fr">${SL('CT','-- Độc lập --,PG-2026-01: QL,PG-2026-02: CĐS'.split(','))}${SL('HT *','E-learn,Offline,Blended,Webinar,Workshop'.split(','))}</div>
+<div class="fr">${SL('CĐ','--,QTNS,Coaching,QLDA,DM,AT điện'.split(','))}${SL('LV','--,QTNS,KD,CN,KT Điện'.split(','))}</div>
+<div class="fr">${I('Giờ','40','','number')}${SL('ĐT','NV mới,NV,QL cấp 4,QL cấp 3'.split(','))}</div>
+<div class="fr">${I('NS (VNĐ)','450,000,000')}${I('PM','Trần Thị Bình')}</div>
+${TA('Mục tiêu','Sau khóa, HV có thể...')}${TA('Điều kiện','VD: QL cấp 4 hoặc quy hoạch')}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bs">Nháp</button><button class="bt bp">Tạo</button></div>`}
+
+function fNC(){return `<div class="fr">${I('Mã *','L04')}${I('Tên *','Lớp D – Tây Nam Bộ')}</div>
+<div class="fr">${I('Bắt đầu','','','date')}${I('Kết thúc','','','date')}</div>
+<div class="fr">${I('Nơi','Phòng / Zoom')}${I('SS max','25','','number')}</div>
+<div class="fr">${SL('GV *','--,TS. Phạm Đức,ThS. Lê An,LS. Nguyễn Hùng'.split(','))}${SL('CV VH','--,Nguyễn Huy,Trần Bình,Lê Văn An'.split(','))}</div>
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Tạo lớp</button></div>`}
+
+function fNM(){return `${I('Mã Module','M4')}${I('Tên *','VD: Quản trị sự thay đổi')}
+<div class="fr">${I('Giờ','8','','number')}${I('Buổi','B13–B16')}</div>
+${TA('Tóm tắt','Mô tả ngắn...')}${TA('Mục đích','Module giúp HV...')}
+${TA('Mục tiêu ĐT','Sau khi hoàn thành, HV có thể:\\n- ...\\n- ...')}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Thêm Module</button></div>`}
+
+function fEM(i){const m=MODS[i];return `${I('Mã',m.id)}${I('Tên *','',m.name)}
+<div class="fr">${I('Giờ','',m.hrs+'','number')}${I('Buổi','',m.sess)}</div>
+${TA('Tóm tắt','',m.sum)}${TA('Mục đích','',m.purpose)}
+${TA('Mục tiêu ĐT','',m.obj.join('\\n'))}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Cập nhật</button></div>`}
+
+function fEND(mi,ci){const c=MODS[mi].cts[ci];return `${I('Tên nội dung *','',c.n)}
+${I('Thời lượng','',c.dur)}
+${TA('Phương pháp & Yêu cầu giảng dạy','',c.mt)}
+${SL('Công cụ chính','Video minh họa,Thảo luận nhóm,Bài tập cá nhân,Gamification,Poll,Survey,Case Study'.split(','))}
+${TA('Ghi chú cho GV','VD: Chuẩn bị 5 bảng flipchart...')}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Cập nhật</button></div>`}
+
+function fEAG(di){const d=DAYS[di];return `<div class="hi">Sửa Agenda: ${d.day}</div>
+${d.buoi.map((b,i)=>'<div style="border:1px solid var(--bl);border-radius:6px;padding:8px;margin-bottom:6px"><div class="tx_ tc" style="font-weight:600;margin-bottom:4px">Buổi '+b.b+'</div><div class="fr">'+I('Giờ','',b.t)+I('Chủ đề *','',b.topic)+'</div><div class="fr">'+I('Loại','',b.type)+I('GV','',b.gv)+'</div>'+I('Slide (file/URL)','',b.sl||'')+I('Tài liệu (file/URL)','',b.doc||'')+'</div>').join('')}
+<button class="bt bp" style="margin-top:4px">+ Thêm buổi</button>
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Cập nhật</button></div>`}
+
+function fNG(){return `${I('Mã','GM-004')}${I('Tên *','VD: Case: Quản lý xung đột đa phòng ban')}
+${SL('Loại','Case Study,Role Play,Design Challenge,Quiz Battle,Debate'.split(','))}
+${TA('Nội dung tình huống *','Mô tả chi tiết tình huống, bối cảnh, yêu cầu...')}
+<div class="fr">${I('Số nhóm','5','','number')}${I('Thời gian/nhóm (phút)','7','','number')}</div>
+${SL('Buổi áp dụng','B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,B12'.split(','))}
+${I('URL kích hoạt','https://vtraining.vn/gami/004')}
+${SL('Hình thức chấm','GV chấm,Peer review,Kết hợp GV+Peer'.split(','))}
+<div class="fr">${I('PT/Rubric (điểm)','30','','number')}${I('GP/Rubric','40','','number')}${I('TB/Rubric','30','','number')}</div>
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bs">Lưu nháp</button><button class="bt bp">Tạo & Kích hoạt</button></div>`}
+
+function fRGM(id){const g=GAMI.find(x=>x.id===id);if(!g||!g.results.length)return '<div class="hi">Chưa có kết quả</div>';
+const sorted=g.results.sort((a,b)=>b.total-a.total);
+return `<div class="hi"><b>${g.n}</b> | ${g.nhom} nhóm | ${g.type}</div>
+<div class="fx g8 wp m8">${S('Điểm TB',(sorted.reduce((s,r)=>s+r.total,0)/sorted.length).toFixed(1),'#059669')}${S('Cao nhất',sorted[0].total+'','#1a56db')}${S('Thấp nhất',sorted[sorted.length-1].total+'','#dc2626')}</div>
+${T([{l:'Hạng',r:(r,i)=>bg(i===0?'g':i<3?'b':'y','#'+(i+1))},{l:'Nhóm',r:r=>'<b>'+r.nhom+'</b>'},{l:'PT/30',k:'pt'},{l:'GP/40',k:'gp'},{l:'TB/30',k:'tb'},{l:'Tổng',r:r=>'<b style="color:'+(r.total>=85?'var(--g)':'var(--am)')+'">'+r.total+'</b>'}],sorted)}`}
+
+function fNBT(){return `${SL('Loại *','Bài tập cá nhân,Bài tập nhóm,Bài thu hoạch,Bài kiểm tra online'.split(','))}
+${I('Tên *','VD: Phân tích xung đột tại đơn vị bạn')}
+${TA('Yêu cầu chi tiết *','1. Mô tả tình huống\\n2. Phân tích theo mô hình...\\n3. Đề xuất giải pháp\\n\\nYêu cầu: 500-800 từ, nộp file doc/pdf')}
+${SL('Buổi giao','Sau B1,Sau B2,...,Sau B12'.split(','))}
+${I('Hạn nộp','','','date')}
+${SL('Đối tượng','Toàn lớp (25 HV),Theo nhóm (5 nhóm)'.split(','))}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bs">Lưu nháp</button><button class="bt bp">Giao bài</button></div>`}
+
+function fRBT(id){const b=BTTH.find(x=>x.id===id);if(!b||!b.results.length)return '<div class="hi">Chưa có bài nộp</div>';
+return `<div class="hi"><b>${b.n}</b> | Hạn: ${b.deadline} | Nộp: ${b.submitted}/${b.total}</div>
+${T([{l:'HV',r:r=>'<b>'+r.hv+'</b>'},{l:'File',r:r=>'<span style="color:var(--p)">'+r.file+'</span>'},{l:'Nộp',k:'date'},{l:'Điểm',r:r=>r.score?'<b style="color:'+(r.score>=85?'var(--g)':r.score>=70?'var(--am)':'var(--r)')+'">'+r.score+'</b>':'<input type="number" placeholder="0" style="width:35px;border:1px solid var(--bd);border-radius:3px;padding:1px 3px;font-size:10px">'},{l:'NX',r:r=>r.nx||'<input placeholder="..." style="width:60px;border:1px solid var(--bd);border-radius:3px;padding:1px 3px;font-size:10px">'}],b.results)}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Lưu</button><button class="bt bo">Công bố</button></div>`}
+
+function fNGV(){return `<div class="fr">${I('Họ tên *','TS. Nguyễn Văn X')}${SL('Loại','Thỉnh giảng (HĐ dài hạn),Chuyên gia (theo buổi)'.split(','))}</div>
+${I('Chuyên môn','QTNS, Coaching...')}
+<div class="fr">${I('Chi phí','15tr/ngày')}${I('SĐT','0912-xxx')}</div>
+<div class="fr">${I('Email','email@x.vn')}${I('TK NH','VCB 00123456789')}</div>
+<div class="fr">${I('HĐ từ','','','date')}${I('HĐ đến','','','date')}</div>
+${I('Giá trị HĐ (VNĐ)','180,000,000')}
+${TA('Ghi chú','Thông tin bổ sung...')}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Thêm GV</button></div>`}
+
+function fNCTV(){return `<div class="fr">${I('Họ tên *','Nguyễn Văn X')}${SL('Loại','CTV Full-time,CTV Part-time'.split(','))}</div>
+${I('Chuyên môn','Hậu cần & VH lớp')}
+<div class="fr">${I('Chi phí','500k/buổi')}${I('SĐT','0912-xxx')}</div>
+<div class="fr">${I('Email','email@x.vn')}${I('TK NH','MB 555666777')}</div>
+<div class="fr">${I('HĐ từ','','','date')}${I('HĐ đến','','','date')}</div>
+${I('Giá trị HĐ (VNĐ)','18,000,000')}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Thêm CTV</button></div>`}
+
+function fDHD(c){const g=GVL.find(x=>x.c===c);if(!g)return '';return `<div class="hi"><b>${g.hd}</b> – ${g.n}</div>
+${[['GV',g.n],['Chuyên môn',g.spec],['Chi phí',g.fee],['HĐ từ',g.hdStart],['HĐ đến',g.hdEnd],['Giá trị HĐ',g.hdValue],['Đã thanh toán',g.hdPaid],['Trạng thái',g.hdTT],['TK Ngân hàng',g.bank],['SĐT',g.sdt]].map(([k,v])=>'<div style="display:flex;padding:3px 0;border-bottom:1px solid var(--bl);font-size:11px"><span style="width:90px;color:var(--t2)">'+k+'</span><span>'+v+'</span></div>').join('')}
+<div class="m8" style="margin-top:8px"><b class="tx_">Công việc trong HĐ:</b></div>
+${T([{l:'Khóa',k:'kh'},{l:'Vai trò',k:'role'},{l:'Buổi',k:'buoi'},{l:'TT',r:r=>bg(r.status==='Đang giảng'?'b':r.status==='Hoàn thành'?'g':'y',r.status)}],g.works)}
+<div class="m8" style="margin-top:8px"><b class="tx_">Lịch sử thanh toán:</b></div>
+${T([{l:'Đợt',r:(_,i)=>'Đợt '+(i+1)},{l:'Số tiền',k:'amount'},{l:'Ngày TT',k:'date'},{l:'TT',r:r=>bg(r.s==='Đã TT'?'g':'y',r.s)}],
+[{amount:(parseInt(g.hdPaid.replace(/\\D/g,''))/2/1e6).toFixed(0)+'tr',date:'05/02/2026',s:'Đã TT'},{amount:(parseInt(g.hdPaid.replace(/\\D/g,''))/2/1e6).toFixed(0)+'tr',date:'05/03/2026',s:'Đã TT'},{amount:'Theo KL thực tế',date:'-',s:'Chờ TT'}])}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Đóng</button><button class="bt bp" onclick="cm();om('Sửa HĐ: '+g.hd,fEditHD('${c}'))">Sửa HĐ</button></div>`}
+
+function fEditHD(c){const g=GVL.find(x=>x.c===c);if(!g)return '';return `
+<div class="fr">${I('Số HĐ *','',g.hd)}${I('GV *','',g.n)}</div>
+<div class="fr">${I('Từ ngày *','',g.hdStart)}${I('Đến ngày *','',g.hdEnd)}</div>
+<div class="fr">${I('Giá trị HĐ (VNĐ) *','',g.hdValue)}${I('Chi phí/ngày','',g.fee)}</div>
+${SL('Hình thức TT','Theo buổi giảng,Theo tháng,Theo đợt (đầu-giữa-cuối),Một lần cuối HĐ'.split(','))}
+${I('TK Ngân hàng','',g.bank)}
+${TA('Phạm vi công việc','VD: Giảng dạy Module 1-2 khóa KH-001, tổng 8 buổi. Bao gồm chuẩn bị slide, giáo án, chấm bài.')}
+${TA('Điều khoản đặc biệt','VD: Thanh toán 50% trước, 50% sau khi hoàn thành. Hủy trước 7 ngày không phạt.')}
+<div class="up">Đính kèm file HĐ scan (PDF) <button class="bt bs">Chọn file</button></div>
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Cập nhật HĐ</button></div>`}
+
+function fDHDC(c){const g=CTVL.find(x=>x.c===c);if(!g)return '';return `<div class="hi"><b>${g.hd}</b> – ${g.n}</div>
+${[['CTV',g.n],['Loại',g.type],['Chi phí',g.fee],['Từ',g.hdStart],['Đến',g.hdEnd],['Giá trị',g.hdValue],['Đã TT',g.hdPaid],['TK NH',g.bank]].map(([k,v])=>'<div style="display:flex;padding:3px 0;border-bottom:1px solid var(--bl);font-size:11px"><span style="width:80px;color:var(--t2)">'+k+'</span><span>'+v+'</span></div>').join('')}
+<div class="m8" style="margin-top:8px"><b class="tx_">Lịch sử thanh toán:</b></div>
+${T([{l:'Tháng',k:'month'},{l:'Số tiền',k:'amount'},{l:'TT',r:r=>bg(r.s==='Đã TT'?'g':'y',r.s)},{l:'Ngày TT',k:'date'}],g.payments)}`}
+
+function fNHV(){return `<div class="fr">${I('Mã NV *','NV016')}${I('Họ tên *','Nguyễn Văn X')}</div>
+<div class="fr">${I('Đơn vị','TT KD MB')}${I('Chức danh','TP')}</div>
+<div class="fr">${I('Email *','x@evnspc.vn')}${I('SĐT','0901-xxx')}</div>
+${SL('Lớp *','--,Lớp A,Lớp B,Lớp C'.split(','))}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Thêm</button></div>`}
+
+function fIMP(){return `<div class="up">📂 Kéo thả .xlsx hoặc <button class="bt bs">Chọn file</button></div>
+<button class="bt bs m8">⬇ Tải mẫu</button>
+<div style="background:var(--gL);border-radius:5px;padding:6px;font-size:10px;color:#065f46;margin-bottom:8px"><b>Preview:</b> 18 hợp lệ · 2 trùng · 1 thiếu email</div>
+${SL('Lớp','--,Lớp A,Lớp B,Lớp C'.split(','))}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Import 18 HV</button></div>`}
+
+function fAsgn(){return `${SL('Lớp *','--,Lớp A – MB,Lớp B – MT,Lớp C – MN'.split(','))}
+${SL('CV VH chính *','--,Nguyễn Huy (FT),Trần Bình (FT)'.split(','))}
+${I('CV hỗ trợ','Tìm CTV...')}
+${SL('Ekip','--,Ekip Bắc,Ekip Trung,Ekip Nam'.split(','))}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Phân công</button></div>`}
+
+function fEvalVH(){return `${SL('NV VH *','--,Nguyễn Huy,Lê Văn An,Vũ Thị Mai,Trần Bình'.split(','))}
+${SL('Lớp','Lớp A – MB,Lớp B – MT'.split(','))}
+${SL('Điểm tổng hợp (1-5)','1 – Yếu,2 – TB,3 – Khá,4 – Tốt,5 – Xuất sắc'.split(','))}
+${TA('Nhận xét','Chủ động, cẩn thận, cần cải thiện...')}
+${TA('Điểm mạnh','VD: Ghi chép tốt, chủ động xử lý sự cố')}
+${TA('Cần cải thiện','VD: Quản lý thời gian, báo cáo chậm')}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Lưu đánh giá</button></div>`}
+
+function fNewTask(){return `${I('Tên công việc *','VD: Kiểm tra thiết bị phòng 301')}
+${SL('Nhóm','Kỹ thuật,Hậu cần,Nội dung,Truyền thông'.split(','))}
+${SL('Phase','PRE (trước buổi),DURING (trong buổi),POST (sau buổi)'.split(','))}
+${SL('Giao cho *','--,Nguyễn Huy,Lê Văn An,Vũ Thị Mai'.split(','))}
+${I('Hạn hoàn thành *','','','datetime-local')}
+${SL('Ưu tiên','HIGH,MEDIUM,LOW'.split(','))}
+${TA('Mô tả chi tiết','Yêu cầu cụ thể, checklist...')}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Giao việc</button></div>`}
+
+// ===== GV: NHU CẦU TUYỂN =====
+PG.gvNeed=()=>`
+<div class="cd"><div class="ch"><span class="tl">Nhu cầu Giảng viên theo khóa</span><button class="bt bp" onclick="om('Tạo nhu cầu GV',fNGVNeed())">+ Tạo nhu cầu</button></div>
+${T([{l:'Mã',r:r=>'<code>'+r.id+'</code>'},{l:'Khóa',r:r=>'<b>'+r.kh+'</b>'},{l:'Vị trí cần',k:'pos'},{l:'Chuyên môn YC',k:'spec'},{l:'KN (năm)',k:'exp'},{l:'Chi phí dự kiến',k:'fee'},{l:'Hạn tuyển',k:'due'},{l:'TT',r:r=>bg(r.s==='Đã tuyển'?'g':r.s==='Đang tuyển'?'b':'y',r.s)},{l:'UV',k:'uv'},{l:'',r:r=>'<button class="bt bs" data-act="clickGVNeed" data-i="'+r.id+'">Chi tiết</button>'}],
+[{id:'NC-001',kh:'KH-001 QLNS EVNSPC',pos:'GV chính – Module 3',spec:'Lãnh đạo, QL xung đột, 5+ năm giảng VHDN',exp:'5+',fee:'12-15tr/ngày',due:'01/03/2026',s:'Đã tuyển',uv:'4/4'},
+{id:'NC-002',kh:'KH-003 CĐ Xanh EVN',pos:'GV chính – ESG',spec:'ESG, Phát triển bền vững, ISO 14001',exp:'3+',fee:'15-20tr/ngày',due:'01/04/2026',s:'Đang tuyển',uv:'2/5'},
+{id:'NC-003',kh:'KH-006 Digital MKT',pos:'GV – Social Media',spec:'Digital Marketing, Performance MKT',exp:'3+',fee:'10-12tr/ngày',due:'15/05/2026',s:'Chưa tuyển',uv:'0/3'},
+{id:'NC-004',kh:'KH-001 QLNS EVNSPC',pos:'GV phụ – Luật LĐ',spec:'Luật LĐ, BHXH, Compliance',exp:'5+',fee:'8tr/buổi',due:'01/03/2026',s:'Đã tuyển',uv:'2/2'}])}</div>`;
+
+// ===== GV: TUYỂN DỤNG + BÀI ĐÁNH GIÁ =====
+PG.gvRecruit=()=>{
+const rtabs=['DS Ứng viên','Bài đánh giá','Kết quả'];
+return `<div class="stab">${rtabs.map((t,i)=>'<button class="si'+(btt===i?' a':'')+'" onclick="btt='+i+';R()">'+t+'</button>').join('')}</div>${btt===0?gvUV():btt===1?gvExam():gvResult()}`};
+
+function gvUV(){return `
+<div class="cd"><div class="ch"><span class="tl">DS Ứng viên GV</span><button class="bt bp" onclick="om('Thêm ứng viên',fNUV())">+ Thêm UV</button></div>
+${T([{l:'Mã',r:r=>'<code>'+r.id+'</code>'},{l:'Họ tên',r:r=>'<b>'+r.n+'</b>'},{l:'Chuyên môn',k:'spec'},{l:'KN',k:'exp'},{l:'Ứng tuyển cho',k:'ncau'},{l:'Bài ĐG',r:r=>bg(r.dg==='Đã nộp'?'g':r.dg==='Đã gửi'?'b':'y',r.dg)},{l:'Điểm',k:'score'},{l:'TT',r:r=>bg(r.s==='Pass'?'g':r.s==='Đang ĐG'?'b':r.s==='Fail'?'r':'y',r.s)},{l:'',r:r=>r.dg==='Chưa gửi'?'<button class="bt bw" data-act="clickSendExam" data-i="'+r.id+'">Gửi bài ĐG</button>':''}],
+[{id:'UV-001',n:'Nguyễn Thanh Long',spec:'VHDN, Change Mgmt',exp:'7 năm',ncau:'NC-002 CĐ Xanh',dg:'Đã nộp',score:'82/100',s:'Pass'},
+{id:'UV-002',n:'Trần Minh Tuệ',spec:'ESG, ISO 14001',exp:'5 năm',ncau:'NC-002 CĐ Xanh',dg:'Đã gửi',score:'-',s:'Đang ĐG'},
+{id:'UV-003',n:'Lê Hồng Phúc',spec:'Lãnh đạo, Coaching',exp:'10 năm',ncau:'NC-001 QLNS',dg:'Đã nộp',score:'91/100',s:'Pass'},
+{id:'UV-004',n:'Phạm Thị Hạnh',spec:'Digital MKT, SEO',exp:'4 năm',ncau:'NC-003 DM',dg:'Chưa gửi',score:'-',s:'Chờ'},
+{id:'UV-005',n:'Vũ Đức Anh',spec:'Social Media, Ads',exp:'3 năm',ncau:'NC-003 DM',dg:'Chưa gửi',score:'-',s:'Chờ'}])}</div>`}
+
+function gvExam(){return `
+<div class="cd"><div class="ch"><span class="tl">"Để chúng tôi hiểu bạn" – Quản lý bài đánh giá sơ tuyển GV</span><button class="bt bp" onclick="om('Tạo bài đánh giá mới',fNewExam())">+ Tạo bài ĐG</button></div>
+${T([{l:'Mã',r:r=>'<code>'+r.id+'</code>'},{l:'Tên bài',r:r=>'<b>'+r.n+'</b>'},{l:'Lĩnh vực',k:'lv'},{l:'Cấu trúc',k:'ct'},{l:'Thời gian',k:'time'},{l:'Đã gửi',k:'sent'},{l:'Đã nộp',k:'done'},{l:'TT',r:r=>bg(r.s==='Active'?'g':'y',r.s)},{l:'',r:r=>'<button class="bt bs" data-act="clickExam" data-i="'+r.id+'">Xem</button>'}],
+[{id:'EX-001',n:'ĐG sơ tuyển GV Văn hóa DN',lv:'VHDN',ct:'14 TN tình huống + 6 câu tự luận',time:'45 phút',sent:4,done:2,s:'Active'},
+{id:'EX-002',n:'ĐG sơ tuyển GV Lãnh đạo',lv:'Lãnh đạo',ct:'10 TN + 4 tự luận',time:'30 phút',sent:2,done:1,s:'Active'},
+{id:'EX-003',n:'ĐG sơ tuyển GV Digital MKT',lv:'Digital MKT',ct:'12 TN + 3 tự luận',time:'35 phút',sent:0,done:0,s:'Draft'}])}</div>
+
+<div class="cd"><div class="ch"><span class="tl">Preview: EX-001 – ĐG GV Văn hóa DN</span></div><div style="padding:8px 12px">
+<div class="hi"><b>BỘ CÂU HỎI ĐÁNH GIÁ ONLINE GIẢNG VIÊN VỀ VĂN HÓA DOANH NGHIỆP</b><br>Phần A – 14 câu trắc nghiệm tình huống | Phần B – 6 câu trả lời ngắn | Thời gian: 45 phút</div>
+<div class="mc"><b class="ts">Case 1: "Thiếu chủ động" hay "thiếu điều kiện để chủ động"?</b>
+<div class="tx_ tc" style="margin-top:3px">Một tổ chức phản ánh: "Nhân sự thiếu chủ động, ngại phối hợp, việc gì cũng chờ cấp trên."<br>Gồm 3 bộ dữ kiện + 4 câu hỏi (C1-C4)</div></div>
+<div class="mc"><b class="ts">Case 2: Giá trị cốt lõi "sống" hay chỉ "được nhớ"?</b>
+<div class="tx_ tc" style="margin-top:3px">3 giá trị cốt lõi sau 18 tháng triển khai + 4 câu hỏi (C5-C8)</div></div>
+<div class="mc"><b class="ts">Case 3: Yêu cầu đào tạo mơ hồ từ khách hàng</b>
+<div class="tx_ tc" style="margin-top:3px">Brief ngắn về VHDN sau tái cơ cấu + 3 câu hỏi (C9-C11)</div></div>
+<div class="mc"><b class="ts">Case 4: Thiết kế lớp học nhiều cấp bậc, nhạy cảm</b>
+<div class="tx_ tc" style="margin-top:3px">60 HV đa cấp bậc, chủ đề nhạy cảm + 3 câu hỏi (C12-C14)</div></div>
+<div class="mc"><b class="ts">Phần B – 6 câu tự luận (C15-C20)</b>
+<div class="tx_ tc" style="margin-top:3px">Phản biện KH, câu hỏi khai thác, thiết kế phiên 90p, phân tích thất bại, xử lý không biết đáp án, phản ứng với nội dung mới</div></div>
+</div></div>`}
+
+function gvResult(){return `
+<div class="cd"><div class="ch"><span class="tl">Kết quả đánh giá UV</span></div>
+${T([{l:'UV',r:r=>'<b>'+r.n+'</b>'},{l:'Bài ĐG',k:'exam'},{l:'Phần A (70đ)',r:r=>'<b>'+r.a+'</b>'},{l:'Phần B (30đ)',r:r=>'<b>'+r.b+'</b>'},{l:'Tổng',r:r=>'<b style="color:'+(r.total>=80?'var(--g)':r.total>=60?'var(--am)':'var(--r)')+'">'+r.total+'/100</b>'},{l:'Đánh giá',r:r=>bg(r.eval==='Đạt'?'g':r.eval==='Khá'?'b':'r',r.eval)},{l:'Ghi chú',k:'note'}],
+[{n:'Nguyễn Thanh Long',exam:'EX-001 VHDN',a:'56/70',b:'26/30',total:82,eval:'Đạt',note:'Tư duy tư vấn tốt'},
+{n:'Lê Hồng Phúc',exam:'EX-002 LĐ',a:'65/70',b:'26/30',total:91,eval:'Đạt',note:'Xuất sắc – mời HĐ ngay'},
+{n:'Trần Minh Tuệ',exam:'EX-001 VHDN',a:'-',b:'-',total:0,eval:'Chờ',note:'Đang làm bài'}])}</div>`}
+
+// ===== TTT (Train the Trainer) =====
+PG.ttt=()=>{
+const ttabs=['DS Chương trình','Chi tiết TTT','Lời mời & Tiến trình'];
+return `<div class="stab">${ttabs.map((t,i)=>'<button class="si'+((typeof tttTab!=="undefined"?tttTab:0)===i?' a':'')+'" onclick="tttTab='+i+';R()">'+t+'</button>').join('')}</div>${(typeof tttTab!=="undefined"?tttTab:0)===0?tttList():(typeof tttTab!=="undefined"?tttTab:0)===1?tttDetail():tttInvite()}`};
+var tttTab=0;
+
+function tttList(){return `
+<div class="cd"><div class="ch"><span class="tl">Chương trình TTT theo khóa</span><button class="bt bp" onclick="om('Tạo TTT mới',fNTTT())">+ Tạo TTT</button></div>
+${T([{l:'Mã',r:r=>'<code>'+r.id+'</code>'},{l:'Khóa',r:r=>'<b>'+r.kh+'</b>'},{l:'Tên TTT',k:'n'},{l:'GV tham gia',k:'gv'},{l:'Buổi',k:'buoi'},{l:'E-learning',k:'el'},{l:'TT',r:r=>bg(r.s==='Đang'?'b':r.s==='Xong'?'g':'y',r.s)}],
+[{id:'TTT-001',kh:'KH-001 QLNS',n:'TTT QLNS cho GV mới',gv:'ThS. Lê An, LS. Nguyễn Hùng',buoi:'4 buổi',el:'3 bài',s:'Đang'},
+{id:'TTT-002',kh:'KH-003 CĐ Xanh',n:'TTT ESG Framework',gv:'UV đang tuyển',buoi:'3 buổi',el:'2 bài',s:'Chưa'},
+{id:'TTT-003',kh:'KH-002 LĐ số',n:'TTT Leadership Digital',gv:'PGS.TS Trần Hải',buoi:'2 buổi',el:'4 bài',s:'Xong'}])}</div>`}
+
+function tttDetail(){return `
+<div class="cd"><div style="padding:9px 12px"><div style="font-size:14px;font-weight:700">TTT-001: TTT QLNS cho GV mới</div><div class="tx_ tc">Khóa: KH-001 | GV: ThS. Lê An, LS. Nguyễn Hùng | 4 buổi + 3 E-learning</div></div></div>
+<div class="cd"><div class="ch"><span class="tl">Agenda TTT</span><button class="bt bs" onclick="om('Sửa Agenda TTT',fEAGTTT())">Sửa</button></div><div style="padding:6px 10px">
+${[{b:1,d:'20/02',t:'09:00-12:00',topic:'Tổng quan giáo án & Phương pháp giảng QTNS',gv:'TS. Phạm Đức',tools:['Thuyết trình','Q&A']},
+{b:2,d:'22/02',t:'09:00-12:00',topic:'Thực hành giảng Module 3: Lãnh đạo & Xung đột',gv:'ThS. Lê An',tools:['Micro-teaching','Feedback']},
+{b:3,d:'25/02',t:'09:00-12:00',topic:'Kỹ thuật sử dụng công cụ tương tác',gv:'ThS. Lê An',tools:['Demo','Thực hành']},
+{b:4,d:'27/02',t:'09:00-12:00',topic:'Giảng thử (Mock class) + Đánh giá Readiness',gv:'LS. Nguyễn Hùng',tools:['Mock teaching','Rubric ĐG']}
+].map(function(a){return '<div style="padding:6px 0;border-bottom:1px solid var(--bl);display:flex;gap:6px"><div style="width:28px;text-align:center;font-size:14px;font-weight:700;color:var(--p)">B'+a.b+'</div><div class="f1"><div class="ts" style="font-weight:600">'+a.topic+'</div><div class="tx_ tc">'+a.d+' | '+a.t+' | '+a.gv+'</div><div class="fx g4 wp" style="margin-top:2px">'+a.tools.map(function(t){return bg('t',t)}).join('')+'</div></div></div>'}).join('')}
+</div></div>
+<div class="cd"><div class="ch"><span class="tl">E-learning bắt buộc</span><button class="bt bp">+ Thêm bài</button></div>
+${T([{l:'#',r:function(_,i){return i+1}},{l:'Tên bài',r:r=>'<b>'+r.n+'</b>'},{l:'TL',k:'dur'},{l:'Hạn',k:'due'},{l:'TT GV',r:r=>bg(r.done?'g':'y',r.done?'Đã học':'Chưa')}],
+[{n:'Video: Giới thiệu giáo án QTNS & PP giảng',dur:'25p',due:'18/02',done:true},
+{n:'Video: Hướng dẫn V-Training (công cụ)',dur:'15p',due:'19/02',done:true},
+{n:'Bài test: KT Module 3 (20 câu, ≥80%)',dur:'20p',due:'24/02',done:false}])}</div>`}
+
+function tttInvite(){return `
+<div class="cd"><div class="ch"><span class="tl">Lời mời tham gia giảng dạy</span><button class="bt bp" onclick="om('Gửi lời mời GV',fSendTTTInvite())">+ Gửi lời mời</button></div>
+${T([{l:'Mã',r:r=>'<code>'+r.id+'</code>'},{l:'GV',r:r=>'<b>'+r.gv+'</b>'},{l:'Khóa',k:'course'},{l:'TTT',k:'ttt'},{l:'Ngày gửi',k:'sentDate'},{l:'Trạng thái',r:r=>bg(r.status==='Chấp nhận'?'g':r.status==='Từ chối'?'r':r.status==='Chờ phản hồi'?'y':'x',r.status)},{l:'Lý do từ chối',r:r=>r.reason?'<span class="tx_ tc">'+r.reason+'</span>':'-'},{l:'',r:r=>r.status==='Chấp nhận'?'<button class="bt bo" data-act="clickTTTAccepted" data-i="'+r.id+'">Gửi TL</button>':r.status==='Chờ phản hồi'?'<button class="bt bw">Nhắc lại</button>':''}],TTT_INVITES)}</div>
+
+<div class="cd"><div class="ch"><span class="tl">Tiến trình sau chấp nhận</span></div>
+${T([{l:'GV',r:r=>'<b>'+r.gv+'</b>'},{l:'Khóa',k:'course'},{l:'E-learning',r:r=>r.elearn==='-'?bg('x','—'):bg(r.elearn.startsWith(r.elearn.split('/')[1])?'g':'y',r.elearn)},{l:'Giáo án',r:r=>r.giaoan==='-'?bg('x','—'):bg(r.giaoan==='Đã xem'?'g':'y',r.giaoan)},{l:'Video HL',r:r=>r.video==='-'?bg('x','—'):bg(r.video.startsWith(r.video.split('/')[1])?'g':'y',r.video)}],TTT_INVITES.filter(function(x){return x.status==='Chấp nhận'}))}</div>`}
+
+// ===== VH: QUẢN LÝ EKIP =====
+PG.vhEkip=()=>`
+<div class="cd"><div class="ch"><span class="tl">Quản lý Ekip Vận hành</span><button class="bt bp" onclick="om('Tạo Ekip mới',fNEkip())">+ Tạo Ekip</button></div>
+${T([{l:'Mã',r:r=>'<code>'+r.id+'</code>'},{l:'Tên Ekip',r:r=>'<b>'+r.n+'</b>'},{l:'Trưởng ekip',k:'lead'},{l:'Thành viên',k:'members'},{l:'Khu vực',k:'area'},{l:'Lớp phụ trách',k:'cls'},{l:'TT',r:r=>bg(r.s==='Active'?'g':'y',r.s)},{l:'',r:r=>'<button class="bt bs" data-act="clickEditEkip" data-i="'+r.id+'">Sửa</button>'}],
+[{id:'EK-001',n:'Ekip Bắc',lead:'Nguyễn Huy (FT)',members:'Lê Văn An (CTV), Vũ Thị Mai (CTV)',area:'Miền Bắc',cls:'Lớp A – KH-001, Lớp 1 – KH-002',s:'Active'},
+{id:'EK-002',n:'Ekip Trung',lead:'Trần Bình (FT)',members:'Vũ Thị Mai (CTV)',area:'Miền Trung',cls:'Lớp B – KH-001',s:'Active'},
+{id:'EK-003',n:'Ekip Nam',lead:'TBD',members:'TBD',area:'Miền Nam',cls:'Lớp C – KH-001 (chờ)',s:'Chưa setup'}])}</div>
+<div class="cd"><div class="ch"><span class="tl">Chi tiết Ekip Bắc (EK-001)</span></div><div style="padding:6px 10px">
+${T([{l:'NV',r:r=>'<b>'+r.n+'</b>'},{l:'Vai trò',k:'role'},{l:'Loại',r:r=>bg(r.type==='FT'?'b':'y',r.type)},{l:'SĐT',k:'sdt'},{l:'Task hoàn thành',k:'done'},{l:'Đúng hạn',k:'ontime'},{l:'ĐG',r:r=>'<b style="color:'+(r.sc>=4?'var(--g)':'var(--am)')+'">'+r.sc+'/5</b>'}],
+[{n:'Nguyễn Huy',role:'Trưởng ekip / CV VH chính',type:'FT',sdt:'0912-345-010',done:'38/42',ontime:'95%',sc:4.5},
+{n:'Lê Văn An',role:'KT Âm thanh, Ánh sáng',type:'CTV',sdt:'0912-345-011',done:'20/24',ontime:'85%',sc:4.0},
+{n:'Vũ Thị Mai',role:'Hỗ trợ GV, Ghi chép',type:'CTV',sdt:'0912-345-012',done:'12/14',ontime:'90%',sc:4.2}])}
+</div></div>`;
+
+// ===== VH: PHÂN CÔNG EKIP =====
+PG.vhAssign=()=>`
+<div class="cd"><div class="ch"><span class="tl">Phân công Ekip cho các lớp</span><button class="bt bp" onclick="om('Phân công Ekip',fPCEkip())">+ Phân công</button></div>
+${T([{l:'Lớp',r:r=>'<b>'+r.cls+'</b>'},{l:'Khóa',k:'kh'},{l:'Ekip',r:r=>bg('b',r.ekip)},{l:'CV chính',k:'lead'},{l:'CV hỗ trợ',k:'members'},{l:'Hình thức',r:r=>bg(r.ht==='1 lần'?'t':'p',r.ht)},{l:'TT',r:r=>bg(r.s==='OK'?'g':'y',r.s)},{l:'',r:r=>'<button class="bt bs">Sửa</button>'}],
+[{cls:'Lớp A – MB',kh:'KH-001 QLNS',ekip:'Ekip Bắc',lead:'Nguyễn Huy',members:'Lê Văn An, Vũ Thị Mai',ht:'Toàn khóa',s:'OK'},
+{cls:'Lớp B – MT',kh:'KH-001 QLNS',ekip:'Ekip Trung',lead:'Trần Bình',members:'Vũ Thị Mai',ht:'Toàn khóa',s:'OK'},
+{cls:'Lớp C – MN',kh:'KH-001 QLNS',ekip:'Ekip Nam',lead:'TBD',members:'TBD',ht:'-',s:'Chưa'},
+{cls:'Lớp 1 – VNPT',kh:'KH-002 LĐ số',ekip:'Ekip Bắc',lead:'Nguyễn Huy',members:'Lê Văn An',ht:'Từng ngày',s:'OK'}])}</div>
+<div class="hi">💡 <b>Hình thức phân công:</b> "Toàn khóa" = phân 1 lần cho toàn bộ các buổi. "Từng ngày" = phân công linh hoạt mỗi ngày (khi ekip cần rotate).</div>`;
+
+// ===== VH: ĐÁNH GIÁ CHẤT LƯỢNG VH =====
+PG.vhQuality=()=>`
+<div class="cd"><div class="ch"><span class="tl">Đánh giá Chất lượng Vận hành theo lớp</span><button class="bt bp" onclick="om('Tạo đánh giá CLVH',fNQuality())">+ Đánh giá</button></div>
+${T([{l:'Lớp',r:r=>'<b>'+r.cls+'</b>'},{l:'Khóa',k:'kh'},{l:'Ngày ĐG',k:'date'},{l:'PRE',r:r=>'<b style="color:'+(r.pre>=4?'var(--g)':'var(--am)')+'">'+r.pre+'/5</b>'},{l:'DURING',r:r=>'<b style="color:'+(r.dur>=4?'var(--g)':'var(--am)')+'">'+r.dur+'/5</b>'},{l:'POST',r:r=>'<b style="color:'+(r.post>=4?'var(--g)':'var(--am)')+'">'+r.post+'/5</b>'},{l:'Tổng',r:r=>{const avg=((r.pre+r.dur+r.post)/3).toFixed(1);return '<b style="color:'+(avg>=4?'var(--g)':'var(--am)')+'">'+avg+'/5</b>'}},{l:'TT',r:r=>bg(r.s==='Hoàn thành'?'g':'b',r.s)}],
+[{cls:'Lớp A – MB (N1)',kh:'KH-001',date:'10/03',pre:5,dur:4.5,post:4,s:'Hoàn thành'},
+{cls:'Lớp A – MB (N2)',kh:'KH-001',date:'12/03',pre:4.5,dur:4,post:4.5,s:'Hoàn thành'},
+{cls:'Lớp A – MB (N3)',kh:'KH-001',date:'17/03',pre:4,dur:3.5,post:4,s:'Hoàn thành'},
+{cls:'Lớp A – MB (N4)',kh:'KH-001',date:'19/03',pre:5,dur:4.5,post:4.5,s:'Hoàn thành'},
+{cls:'Lớp A – MB (N5)',kh:'KH-001',date:'24/03',pre:4.5,dur:4.5,post:4,s:'Hoàn thành'},
+{cls:'Lớp A – MB (N6)',kh:'KH-001',date:'26/03',pre:3,dur:0,post:0,s:'Đang VH'}])}</div>
+
+<div class="cd"><div class="ch"><span class="tl">Chi tiết ĐG – Lớp A Ngày 3 (17/03)</span></div><div style="padding:8px 12px">
+<div class="tx_ tc" style="font-weight:700;margin-bottom:6px">PHASE PRE – Trước buổi học (Điểm: 4/5)</div>
+${T([{l:'Tiêu chí',r:r=>'<b>'+r.tc+'</b>'},{l:'Điểm',r:r=>'<b>'+r.sc+'/5</b>'},{l:'Ghi chú',k:'note'}],
+[{tc:'Phòng học & thiết bị sẵn sàng đúng giờ',sc:4,note:'Máy chiếu chậm 5p khởi động'},
+{tc:'Tài liệu in đủ, đúng, đẹp',sc:5,note:'25 bộ đầy đủ'},
+{tc:'Layout phòng đúng yêu cầu',sc:4,note:'OK'},
+{tc:'Nước uống, tea break đầy đủ',sc:4,note:'Thiếu đường'},
+{tc:'Bảng tên, thẻ HV sẵn sàng',sc:3,note:'2 thẻ in sai tên'}])}
+<div class="tx_ tc" style="font-weight:700;margin:8px 0 6px">PHASE DURING – Trong buổi (Điểm: 3.5/5)</div>
+${T([{l:'Tiêu chí',r:r=>'<b>'+r.tc+'</b>'},{l:'Điểm',r:r=>'<b>'+r.sc+'/5</b>'},{l:'Ghi chú',k:'note'}],
+[{tc:'Điểm danh đúng giờ, đầy đủ',sc:4,note:'OK'},
+{tc:'Hỗ trợ GV kịp thời (chia nhóm, phát TL)',sc:3,note:'Chậm chia bảng tên nhóm'},
+{tc:'Xử lý sự cố kỹ thuật nhanh',sc:3,note:'Micro hú 5 phút mới sửa xong'},
+{tc:'Chụp ảnh đủ góc, đủ số lượng',sc:4,note:'12 ảnh OK'},
+{tc:'Ghi chép Q&A chính xác',sc:3.5,note:'Thiếu 2 câu hỏi cuối'}])}
+<div class="tx_ tc" style="font-weight:700;margin:8px 0 6px">PHASE POST – Sau buổi (Điểm: 4/5)</div>
+${T([{l:'Tiêu chí',r:r=>'<b>'+r.tc+'</b>'},{l:'Điểm',r:r=>'<b>'+r.sc+'/5</b>'},{l:'Ghi chú',k:'note'}],
+[{tc:'Thu dọn phòng đúng quy cách',sc:4,note:'OK'},
+{tc:'Upload minh chứng đúng hạn',sc:4,note:'Upload trong 2h'},
+{tc:'Gửi Q&A + feedback cho BQL',sc:4,note:'Gửi đúng hạn'},
+{tc:'Email cảm ơn GV + TL cho HV',sc:4,note:'OK'},
+{tc:'Báo cáo vấn đề (nếu có)',sc:4,note:'Báo micro hú'}])}
+</div></div>`;
+
+// ===== MODAL FORMS MỚI =====
+function fNGVNeed(){return `${SL('Khóa *','-- Chọn --,KH-001 QLNS EVNSPC,KH-002 LĐ số VNPT,KH-003 CĐ Xanh EVN,KH-006 DM MobiFone'.split(','))}
+${I('Vị trí cần tuyển *','VD: GV chính – Module 3 Lãnh đạo')}
+${TA('Chuyên môn yêu cầu *','VD: Lãnh đạo, QL xung đột, 5+ năm kinh nghiệm giảng dạy VHDN/Quản lý')}
+<div class="fr">${I('Kinh nghiệm tối thiểu','5+ năm')}${I('Chi phí dự kiến','12-15tr/ngày')}</div>
+${I('Hạn tuyển','','','date')}
+${TA('Tiêu chí đánh giá ưu tiên','VD: Có kinh nghiệm giảng tập đoàn lớn, tư duy tư vấn, kỹ năng facilitator')}
+${SL('Bài đánh giá áp dụng','-- Chọn --,EX-001: ĐG GV VHDN,EX-002: ĐG GV Lãnh đạo,EX-003: ĐG GV DM,Tạo bài mới'.split(','))}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Tạo nhu cầu</button></div>`}
+
+function fDGVNeed(id){return `<div class="hi"><b>${id}</b></div>
+${[['Khóa','KH-001 QLNS EVNSPC'],['Vị trí','GV chính – Module 3'],['Chuyên môn YC','Lãnh đạo, QL xung đột, 5+ năm'],['Chi phí','12-15tr/ngày'],['Hạn','01/03/2026'],['Bài ĐG','EX-001: ĐG GV VHDN'],['TT','Đã tuyển (ThS. Lê Hoàng An)']].map(([k,v])=>'<div style="display:flex;padding:3px 0;border-bottom:1px solid var(--bl);font-size:11px"><span style="width:90px;color:var(--t2)">'+k+'</span><span>'+v+'</span></div>').join('')}
+<div class="m8" style="margin-top:8px"><b class="tx_">DS Ứng viên:</b></div>
+${T([{l:'UV',r:r=>'<b>'+r.n+'</b>'},{l:'Bài ĐG',r:r=>bg(r.dg?'g':'y',r.dg?'Đã nộp':'Chờ')},{l:'Điểm',k:'sc'},{l:'KQ',r:r=>bg(r.kq==='Pass'?'g':'r',r.kq)}],
+[{n:'ThS. Lê Hoàng An',dg:true,sc:'91/100',kq:'Pass'},{n:'Trần Văn Hiệp',dg:true,sc:'68/100',kq:'Fail'},{n:'Nguyễn Thanh Long',dg:true,sc:'82/100',kq:'Pass'},{n:'Phạm Quốc Bảo',dg:true,sc:'75/100',kq:'Pass'}])}`}
+
+function fNUV(){return `<div class="fr">${I('Họ tên *','Nguyễn Văn X')}${I('Email *','email@domain.vn')}</div>
+<div class="fr">${I('SĐT','0912-xxx')}${I('Kinh nghiệm','5 năm')}</div>
+${I('Chuyên môn','VD: VHDN, Change Management, Coaching')}
+${SL('Ứng tuyển cho','-- Chọn --,NC-001: GV Module 3 KH-001,NC-002: GV ESG KH-003,NC-003: GV DM KH-006'.split(','))}
+<div class="up">Upload CV (PDF) <button class="bt bs">Chọn file</button></div>
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Thêm UV</button></div>`}
+
+function fSendExam(id){return `<div class="hi">Gửi bài đánh giá "Để chúng tôi hiểu bạn" cho ứng viên</div>
+${SL('Bài đánh giá *','EX-001: ĐG GV VHDN (14 TN + 6 TL, 45p),EX-002: ĐG GV Lãnh đạo (10 TN + 4 TL, 30p),EX-003: ĐG GV DM (12 TN + 3 TL, 35p)'.split(','))}
+${I('Email ứng viên *','','phamhanh@email.vn')}
+${I('Hạn hoàn thành','','','date')}
+${TA('Lời nhắn kèm theo','Kính chào Anh/Chị, PeopleOne trân trọng mời Anh/Chị tham gia bài đánh giá sơ tuyển...')}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Gửi email + Link bài ĐG</button></div>`}
+
+function fNewExam(){return `${I('Tên bài đánh giá *','VD: ĐG sơ tuyển GV Quản lý dự án')}
+${SL('Lĩnh vực','VHDN,Lãnh đạo,Digital MKT,QTNS,QLDA,An toàn điện'.split(','))}
+<div class="fr">${I('Số câu TN','14','','number')}${I('Số câu tự luận','6','','number')}</div>
+${I('Thời gian (phút)','45','','number')}
+${TA('Mô tả cấu trúc','VD: Phần A – 14 câu trắc nghiệm tình huống (4 Case x 3-4 câu)\\nPhần B – 6 câu tự luận bắt buộc')}
+<div class="hi">Sau khi tạo, bạn có thể soạn chi tiết từng câu hỏi, case study, đáp án trong giao diện soạn bài.</div>
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bs">Lưu nháp</button><button class="bt bp">Tạo & Soạn bài</button></div>`}
+
+function fDExam(id){return `<div class="hi"><b>EX-001: ĐG sơ tuyển GV Văn hóa DN</b><br>14 câu TN tình huống + 6 câu tự luận | 45 phút</div>
+<b class="tx_">Case 1: "Thiếu chủ động" hay "thiếu điều kiện để chủ động"?</b>
+<div class="tx_ tc m8">Một tổ chức phản ánh: "NS thiếu chủ động, ngại phối hợp, việc gì cũng chờ cấp trên." 3 bộ dữ kiện → 4 câu hỏi</div>
+<div style="border:1px solid var(--bl);border-radius:5px;padding:6px 8px;margin-bottom:6px"><b class="tx_">C1: Nhận định nào được dữ kiện hỗ trợ mạnh nhất?</b>
+<div class="tx_ tc">A. Động lực thấp | B. Thiếu hiểu CL | <b style="color:var(--g)">C. Thiết kế quyền hạn, an toàn ✓</b> | D. Năng lực yếu</div></div>
+<div style="border:1px solid var(--bl);border-radius:5px;padding:6px 8px;margin-bottom:6px"><b class="tx_">C2: Dữ kiện bổ sung nào tốt nhất?</b>
+<div class="tx_ tc">A. Tỷ lệ tham gia NB | <b style="color:var(--g)">B. So sánh nhóm cùng QT, khác TP ✓</b> | C. Tỷ lệ thôi việc</div></div>
+<div class="tx_ tc m8">... (12 câu TN + 6 tự luận tiếp theo)</div>
+<div class="fx g4" style="justify-content:flex-end"><button class="bt bs" onclick="cm()">Đóng</button><button class="bt bp">Sửa bài ĐG</button></div>`}
+
+function fNTTT(){return `${SL('Khóa *','-- Chọn --,KH-001 QLNS,KH-002 LĐ số,KH-003 CĐ Xanh,KH-006 DM'.split(','))}
+${I('Tên chương trình TTT *','VD: TTT ESG Framework cho GV mới')}
+${I('GV tham gia','VD: ThS. Lê An, LS. Nguyễn Hùng')}
+<div class="fr">${I('Số buổi','4','','number')}${I('Số bài E-learning','3','','number')}</div>
+${TA('Mô tả','Mục tiêu TTT, nội dung chính, lịch dự kiến...')}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Tạo TTT</button></div>`}
+
+function fEAGTTT(){return `<div class="hi">Sửa Agenda TTT-001</div>
+${[{b:1,t:'09:00-12:00',topic:'Tổng quan giáo án & PP giảng',gv:'TS. Phạm Đức'},{b:2,t:'09:00-12:00',topic:'Thực hành giảng M3',gv:'ThS. Lê An'}].map(a=>'<div style="border:1px solid var(--bl);border-radius:5px;padding:6px 8px;margin-bottom:5px"><div class="tx_ tc" style="font-weight:600;margin-bottom:3px">Buổi '+a.b+'</div><div class="fr">'+I('Giờ','',a.t)+I('Chủ đề *','',a.topic)+'</div>'+I('GV hướng dẫn','',a.gv)+'</div>').join('')}
+<button class="bt bp m8">+ Thêm buổi</button>
+<div class="fx g4" style="justify-content:flex-end"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Cập nhật</button></div>`}
+
+function fNEkip(){return `${I('Mã Ekip','EK-004')}${I('Tên Ekip *','VD: Ekip Tây Nam')}
+${I('Khu vực','VD: Tây Nam Bộ')}
+${SL('Trưởng Ekip *','-- Chọn --,Nguyễn Huy (FT),Trần Bình (FT),Tuyển mới'.split(','))}
+${TA('Thành viên','Chọn CTV: Lê Văn An, Vũ Thị Mai...')}
+${TA('Ghi chú','Thông tin bổ sung...')}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Tạo Ekip</button></div>`}
+
+function fEEkip(id){return `${I('Mã','',id)}${I('Tên Ekip *','','Ekip Bắc')}
+${I('Khu vực','','Miền Bắc')}
+${SL('Trưởng Ekip *','Nguyễn Huy (FT),Trần Bình (FT)'.split(','))}
+${TA('Thành viên','','Lê Văn An (CTV), Vũ Thị Mai (CTV)')}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Cập nhật</button></div>`}
+
+function fPCEkip(){return `${SL('Lớp *','-- Chọn --,Lớp A – MB (KH-001),Lớp B – MT (KH-001),Lớp C – MN (KH-001),Lớp 1 – VNPT (KH-002)'.split(','))}
+${SL('Ekip *','-- Chọn --,EK-001 Ekip Bắc,EK-002 Ekip Trung,EK-003 Ekip Nam'.split(','))}
+${SL('Hình thức phân công','Toàn khóa (1 lần cho tất cả buổi),Từng ngày (rotate linh hoạt)'.split(','))}
+<div class="hi">Khi chọn Ekip, hệ thống tự gán Trưởng ekip làm CV VH chính và các thành viên làm CV hỗ trợ.</div>
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Phân công</button></div>`}
+
+function fNQuality(){return `${SL('Lớp *','-- Chọn --,Lớp A – MB (KH-001),Lớp B – MT (KH-001)'.split(','))}
+${SL('Ngày *','Ngày 1 (10/03),Ngày 2 (12/03),Ngày 3 (17/03),Ngày 4 (19/03),Ngày 5 (24/03),Ngày 6 (26/03)'.split(','))}
+<div class="tx_ tc" style="font-weight:700;margin:6px 0 4px">PHASE PRE – Trước buổi</div>
+${[['Phòng & thiết bị sẵn sàng đúng giờ','5'],['Tài liệu in đủ, đúng, đẹp','5'],['Layout phòng đúng yêu cầu','5'],['Nước uống, tea break đầy đủ','5'],['Bảng tên, thẻ HV sẵn sàng','5']].map(([tc,sc])=>'<div class="fx ac g6 m8"><span class="tx_ f1">'+tc+'</span><select style="width:50px;padding:2px;border:1px solid var(--bd);border-radius:3px;font-size:10px"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></div>').join('')}
+<div class="tx_ tc" style="font-weight:700;margin:6px 0 4px">PHASE DURING – Trong buổi</div>
+${[['Điểm danh đúng giờ','5'],['Hỗ trợ GV kịp thời','5'],['Xử lý sự cố KT nhanh','5'],['Chụp ảnh đủ góc','5'],['Ghi chép Q&A','5']].map(([tc,sc])=>'<div class="fx ac g6 m8"><span class="tx_ f1">'+tc+'</span><select style="width:50px;padding:2px;border:1px solid var(--bd);border-radius:3px;font-size:10px"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></div>').join('')}
+<div class="tx_ tc" style="font-weight:700;margin:6px 0 4px">PHASE POST – Sau buổi</div>
+${[['Thu dọn đúng quy cách','5'],['Upload minh chứng đúng hạn','5'],['Gửi Q&A + FB cho BQL','5'],['Email cảm ơn GV + TL HV','5'],['Báo cáo vấn đề','5']].map(([tc,sc])=>'<div class="fx ac g6 m8"><span class="tx_ f1">'+tc+'</span><select style="width:50px;padding:2px;border:1px solid var(--bd);border-radius:3px;font-size:10px"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></div>').join('')}
+${TA('Ghi chú chung','VD: Micro hú 5 phút buổi sáng, đã xử lý...')}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Lưu đánh giá</button></div>`}
+
+// ===== CLICK-TO-DETAIL MODALS =====
+
+function dMat(i){const m=MAT[i];return `<div class="hi"><b>${m.id}: ${m.n}</b></div>
+${[['Mã',m.id],['Tên',m.n],['Loại',m.tp],['Chủ đề',m.ch],['Buổi sử dụng',m.b],['Dung lượng',m.sz],['Tác giả',m.by],['Trạng thái',m.s]].map(([k,v])=>'<div style="display:flex;padding:3px 0;border-bottom:1px solid var(--bl);font-size:11px"><span style="width:90px;color:var(--t2)">'+k+'</span><span>'+v+'</span></div>').join('')}
+<div style="margin-top:8px;background:#111;border-radius:6px;height:120px;display:flex;align-items:center;justify-content:center"><span style="color:#fff;opacity:.4;font-size:20px">${m.tp==='Video'?'▶':'📄'}</span></div>
+<div class="fx g4" style="justify-content:flex-end;margin-top:10px"><button class="bt bs" onclick="cm()">Đóng</button><button class="bt bp" onclick="cm();om('Sửa học liệu: ${m.id}',fEditMat(${i}))">Sửa</button>${m.s==='Nháp'?'<button class="bt bo">Công bố</button>':''}</div>`}
+
+function fEditMat(i){const m=MAT[i];return `
+${I('Mã','',m.id)}${I('Tên *','',m.n)}
+<div class="fr">${SL('Loại','Video,Slide,PDF,Template,Case Study,Infographic,Audio'.split(','))}${I('Chủ đề','',m.ch)}</div>
+${I('URL / File','',m.tp==='Video'?'https://stream.vtraining.vn/v/001':'drive/docs/...')}
+<div class="fr">${I('Tác giả','',m.by)}${I('Dung lượng','',m.sz)}</div>
+${TA('Mô tả','Mô tả ngắn về nội dung học liệu...')}
+<div class="up">Thay đổi file <button class="bt bs">Chọn file</button></div>
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Cập nhật</button></div>`}
+
+function dGV(i){const g=GVL[i];return `<div class="hi"><b>${g.c}: ${g.n}</b></div>
+${[['Mã',g.c],['Họ tên',g.n],['Chuyên môn',g.spec],['Chi phí',g.fee],['Số HĐ',g.hd],['TT HĐ',g.hdTT],['Buổi phụ trách',g.buoi],['Rating',g.rate],['SĐT',g.sdt],['TK Ngân hàng',g.bank],['HĐ từ',g.hdStart],['HĐ đến',g.hdEnd],['Giá trị HĐ',g.hdValue],['Đã thanh toán',g.hdPaid]].map(([k,v])=>'<div style="display:flex;padding:3px 0;border-bottom:1px solid var(--bl);font-size:11px"><span style="width:100px;color:var(--t2)">'+k+'</span><span>'+v+'</span></div>').join('')}
+<div style="margin-top:8px"><b class="tx_">Công việc hiện tại:</b></div>
+${T([{l:'Khóa',k:'kh'},{l:'Vai trò',k:'role'},{l:'Buổi',k:'buoi'},{l:'TT',r:r=>bg(r.status==='Đang giảng'?'b':r.status==='Hoàn thành'?'g':'y',r.status)}],g.works)}
+<div class="fx g4" style="justify-content:flex-end;margin-top:10px"><button class="bt bs" onclick="cm()">Đóng</button><button class="bt bp" onclick="cm();om('Sửa GV: ${g.n}',fEditGV(${i}))">Sửa</button><button class="bt bw" onclick="cm();om('HĐ: ${g.hd}',fDHD('${g.c}'))">Xem HĐ</button></div>`}
+
+function fEditGV(i){const g=GVL[i];return `
+<div class="fr">${I('Mã','',g.c)}${I('Họ tên *','',g.n)}</div>
+${I('Chuyên môn','',g.spec)}
+<div class="fr">${I('Chi phí','',g.fee)}${I('SĐT','',g.sdt)}</div>
+<div class="fr">${I('Email','',g.n.toLowerCase().replace(/\s/g,'')+'@email.vn')}${I('TK NH','',g.bank)}</div>
+${I('Rating','',g.rate)}
+${TA('Ghi chú','Thông tin bổ sung về GV...')}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Cập nhật</button></div>`}
+
+function dCTV(i){const c=CTVL[i];return `<div class="hi"><b>${c.c}: ${c.n}</b></div>
+${[['Mã',c.c],['Họ tên',c.n],['Chuyên môn',c.spec],['Loại',c.type],['Chi phí',c.fee],['Số HĐ',c.hd],['TT HĐ',c.hdTT],['SĐT',c.sdt],['TK NH',c.bank],['HĐ từ',c.hdStart],['HĐ đến',c.hdEnd],['Giá trị HĐ',c.hdValue],['Đã TT',c.hdPaid],['Đánh giá',c.rate]].map(([k,v])=>'<div style="display:flex;padding:3px 0;border-bottom:1px solid var(--bl);font-size:11px"><span style="width:90px;color:var(--t2)">'+k+'</span><span>'+v+'</span></div>').join('')}
+<div style="margin-top:8px"><b class="tx_">Công việc:</b></div>
+${T([{l:'Khóa',k:'kh'},{l:'Lớp',k:'cls'},{l:'Vai trò',k:'role'},{l:'TT',r:r=>bg(r.status==='Đang làm'?'b':r.status==='Xong'?'g':'y',r.status)}],c.works)}
+<div style="margin-top:6px"><b class="tx_">Thanh toán:</b></div>
+${T([{l:'Tháng',k:'month'},{l:'Số tiền',k:'amount'},{l:'TT',r:r=>bg(r.s==='Đã TT'?'g':'y',r.s)},{l:'Ngày TT',k:'date'}],c.payments)}
+<div class="fx g4" style="justify-content:flex-end;margin-top:10px"><button class="bt bs" onclick="cm()">Đóng</button><button class="bt bp" onclick="cm();om('Sửa CTV: ${c.n}',fEditCTV(${i}))">Sửa</button></div>`}
+
+function fEditCTV(i){const c=CTVL[i];return `
+<div class="fr">${I('Mã','',c.c)}${I('Họ tên *','',c.n)}</div>
+${I('Chuyên môn','',c.spec)}
+<div class="fr">${SL('Loại','Full-time,Part-time'.split(','))}${I('Chi phí','',c.fee)}</div>
+<div class="fr">${I('SĐT','',c.sdt)}${I('TK NH','',c.bank)}</div>
+${TA('Ghi chú','...')}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Cập nhật</button></div>`}
+
+function dTask(i){const t=OT[i];return `<div class="hi"><b>${t.id}: ${t.n}</b></div>
+${[['Mã Task',t.id],['Công việc',t.n],['Nhóm',t.gr],['Phase',t.ph],['Hạn',t.due],['Phụ trách',t.nv],['Ưu tiên',t.p],['Trạng thái',t.s]].map(([k,v])=>'<div style="display:flex;padding:3px 0;border-bottom:1px solid var(--bl);font-size:11px"><span style="width:80px;color:var(--t2)">'+k+'</span><span>'+v+'</span></div>').join('')}
+<div style="margin-top:8px">${TA('Ghi chú tiến độ','Cập nhật tình hình thực hiện...')}</div>
+<div class="up">Upload minh chứng <button class="bt bs">Chọn file</button></div>
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Đóng</button>
+${t.s!=='Xong'?'<button class="bt bp" onclick="cm();om(\'Sửa task: '+t.id+'\',fEditTask('+i+'))">Sửa</button><button class="bt bo">Hoàn thành</button>':''}
+</div>`}
+
+function fEditTask(i){const t=OT[i];return `
+${I('Tên công việc *','',t.n)}
+<div class="fr">${SL('Nhóm','Kỹ thuật,Hậu cần,Nội dung,Truyền thông'.split(','))}${SL('Phase','PRE,DURING,POST'.split(','))}</div>
+<div class="fr">${SL('Giao cho','Nguyễn Huy,Lê Văn An,Vũ Thị Mai'.split(','))}${SL('Ưu tiên','HIGH,MEDIUM,LOW'.split(','))}</div>
+${I('Hạn','',t.due)}
+${TA('Mô tả chi tiết','Yêu cầu cụ thể...')}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Cập nhật</button></div>`}
+
+function dHV(i){const h=HV[i];return `<div class="hi"><b>${h.c}: ${h.n}</b></div>
+${[['Mã NV',h.c],['Họ tên',h.n],['Đơn vị',h.u],['Chức danh',h.t],['Lớp',h.cls],['Email',h.email],['SĐT',h.sdt],['Có mặt',h.a],['Điểm TB',h.sc],['Trạng thái',h.s]].map(([k,v])=>'<div style="display:flex;padding:3px 0;border-bottom:1px solid var(--bl);font-size:11px"><span style="width:80px;color:var(--t2)">'+k+'</span><span>'+v+'</span></div>').join('')}
+<div class="fx g4" style="justify-content:flex-end;margin-top:10px"><button class="bt bs" onclick="cm()">Đóng</button><button class="bt bp" onclick="cm();om('Sửa HV: ${h.n}',fEditHVD(${i}))">Sửa</button></div>`}
+
+function fEditHVD(i){const h=HV[i];return `
+<div class="fr">${I('Mã NV','',h.c)}${I('Họ tên *','',h.n)}</div>
+<div class="fr">${I('Đơn vị','',h.u)}${I('Chức danh','',h.t)}</div>
+<div class="fr">${I('Email','',h.email)}${I('SĐT','',h.sdt)}</div>
+${SL('Lớp','Lớp A,Lớp B,Lớp C'.split(','))}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Cập nhật</button></div>`}
+
+// ===== APPROVAL DATA =====
+const APV=[
+{id:'APV-001',type:'Giáo án',desc:'Thay đổi nội dung Module 2 – Bổ sung Case Study "Coaching thất bại"',course:'KH-001',by:'TS. Phạm M. Đức',date:'25/03/2026',s:'Chờ PD',urgency:'Bình thường',
+detail:{before:'Module 2 gồm 4 ND: KPI, 360°, Coaching GROW, Mentoring IDP',after:'Module 2 gồm 5 ND: KPI, 360°, Coaching GROW, Case "Coaching thất bại" (MỚI), Mentoring IDP',reason:'GV nhận thấy HV cần thêm case thực tế về coaching không hiệu quả để phân tích nguyên nhân',impact:'Tăng 30 phút → cần giảm phần Mentoring từ 2h xuống 1.5h'}},
+{id:'APV-002',type:'Học viên',desc:'Thêm 3 HV mới vào Lớp A (vượt sĩ số 30 → 28 hiện tại → 31)',course:'KH-001',by:'Nguyễn Hoàng (KH EVNSPC)',date:'24/03/2026',s:'Chờ PD',urgency:'Khẩn',
+detail:{before:'Lớp A: 25/30 HV (còn 5 slot)',after:'Lớp A: 28/30 HV (còn 2 slot) → Thêm 3 NV mới: NV016 Lê Văn K, NV017 Trần T. Mai, NV018 Phạm Q. Dũng',reason:'EVNSPC bổ sung 3 QL cấp 4 mới bổ nhiệm Q1/2026',impact:'Vượt sĩ số 1 người (31/30). Cần thêm 3 bộ tài liệu. Phòng 301 đủ chỗ.'}},
+{id:'APV-003',type:'Đề thi',desc:'Thay đổi đề bài thu hoạch Module 1 – Đổi chủ đề từ "KH tuyển dụng" sang "KH onboarding"',course:'KH-001',by:'ThS. Lê H. An',date:'23/03/2026',s:'Đã PD',urgency:'Bình thường',
+detail:{before:'Đề: Xây dựng KH tuyển dụng Q3/2026 cho ĐV (2000-3000 từ)',after:'Đề: Thiết kế chương trình Onboarding 90 ngày cho NV mới tại ĐV (2000-3000 từ)',reason:'Chủ đề Onboarding phù hợp hơn với Module 1, tuyển dụng đã cover trong buổi 3-4',impact:'Không ảnh hưởng hạn nộp. Cần thông báo lại cho 25 HV.'}},
+{id:'APV-004',type:'Lịch giảng',desc:'Dời Ngày 7 (31/03) sang 02/04 do GV bận hội thảo',course:'KH-001',by:'TS. Phạm M. Đức',date:'22/03/2026',s:'Đã PD',urgency:'Khẩn',
+detail:{before:'Ngày 7: 31/03/2026 – Văn hóa đội nhóm – TS. Phạm Đức',after:'Ngày 7: 02/04/2026 – Văn hóa đội nhóm – TS. Phạm Đức',reason:'GV được mời tham dự Hội thảo Quốc gia về QTNS ngày 31/03',impact:'Dời 2 ngày. Cần thông báo 25 HV + book lại phòng 301. Ngày 8 giữ nguyên 04/04.'}},
+{id:'APV-005',type:'Ngân sách',desc:'Tăng ngân sách KH-001 thêm 30tr do phát sinh chi phí GV thay thế',course:'KH-001',by:'Trần Thị Bình (PM)',date:'21/03/2026',s:'Từ chối',urgency:'Bình thường',
+detail:{before:'NS: 450,000,000₫',after:'NS: 480,000,000₫ (+30,000,000₫)',reason:'Cần mời thêm LS. Nguyễn V. Hùng cho buổi Luật LĐ (8tr/buổi x 2 buổi = 16tr) + phát sinh in ấn',impact:'Tăng 6.7%. KH EVNSPC cần phê duyệt bổ sung.'}},
+{id:'APV-006',type:'Phân công GV',desc:'Đổi GV chính Lớp B từ ThS. Lê An sang PGS.TS Trần Hải',course:'KH-001',by:'Trần Thị Bình (PM)',date:'20/03/2026',s:'Chờ PD',urgency:'Bình thường',
+detail:{before:'Lớp B – GV chính: ThS. Lê Hoàng An',after:'Lớp B – GV chính: PGS.TS Trần Thanh Hải',reason:'ThS. Lê An bận khóa KH-002 VNPT trùng lịch. PGS Hải có chuyên môn phù hợp.',impact:'Chi phí tăng (20tr vs 12tr/ngày). Cần ký phụ lục HĐ với PGS Hải.'}},
+{id:'APV-007',type:'Vận hành',desc:'Đổi phòng học Lớp A từ P.301 sang P.205 cho 3 ngày cuối',course:'KH-001',by:'Nguyễn Huy (CV VH)',date:'25/03/2026',s:'Chờ PD',urgency:'Khẩn',
+detail:{before:'Lớp A: P.301 Trụ sở HN (toàn khóa)',after:'Lớp A: P.301 (Ngày 1-6) → P.205 (Ngày 7-9-10)',reason:'P.301 bị bảo trì hệ thống điều hòa từ 31/03. P.205 tầng 2 cùng tòa nhà, 35 chỗ.',impact:'Cần thông báo HV + GV. P.205 không có flipchart cố định → mang theo.'}}
+];
+
+// ===== APPROVAL PAGES =====
+PG.approval=()=>{
+const pending=APV.filter(a=>a.s==='Chờ PD');
+const all=APV;
+return `
+<div class="fx g8 wp m12">${S('Chờ PD',pending.length+'','#dc2626')}${S('Tổng yêu cầu',all.length+'','#1a56db')}${S('Đã PD','2','#059669')}${S('Từ chối','1','#d97706')}</div>
+${pending.length?'<div class="wa">⚠ Có <b>'+pending.length+' yêu cầu</b> đang chờ phê duyệt'+(pending.some(a=>a.urgency==='Khẩn')?' – <b style="color:var(--r)">'+pending.filter(a=>a.urgency==='Khẩn').length+' KHẨN CẤP</b>':'')+'</div>':''}
+<div class="cd"><div class="ch"><span class="tl">Yêu cầu chờ Phê duyệt (${pending.length})</span></div>
+${T([{l:'Mã',r:r=>'<code>'+r.id+'</code>'},{l:'Loại',r:r=>bg(apvColor(r.type),r.type)},{l:'Mô tả',r:r=>'<b>'+r.desc+'</b>'},{l:'Khóa',k:'course'},{l:'Người YC',k:'by'},{l:'Ngày',k:'date'},{l:'Mức độ',r:r=>r.urgency==='Khẩn'?bg('r','🔴 Khẩn'):bg('x','Bình thường')},{l:'',r:r=>'<button class="bt bp" data-act="clickAPV" data-i="'+r.id+'">Xem & PD</button>'}],pending)}</div>
+
+<div class="cd"><div class="ch"><span class="tl">Tất cả yêu cầu (${all.length})</span></div>
+${T([{l:'Mã',r:r=>'<code>'+r.id+'</code>'},{l:'Loại',r:r=>bg(apvColor(r.type),r.type)},{l:'Mô tả',r:r=>'<b style="font-size:10px">'+r.desc+'</b>'},{l:'KH',k:'course'},{l:'Người YC',k:'by'},{l:'Ngày',k:'date'},{l:'TT',r:r=>bg(r.s==='Chờ PD'?'y':r.s==='Đã PD'?'g':'r',r.s)},{l:'',r:r=>'<button class="bt bs" data-act="clickAPV" data-i="'+r.id+'">Xem</button>'}],all)}</div>`};
+
+PG.apvHistory=()=>`
+<div class="cd"><div class="ch"><span class="tl">Lịch sử Phê duyệt</span></div>
+${T([{l:'Mã',r:r=>'<code>'+r.id+'</code>'},{l:'Loại',r:r=>bg(apvColor(r.type),r.type)},{l:'Mô tả',r:r=>'<b style="font-size:10px">'+r.desc+'</b>'},{l:'KH',k:'course'},{l:'Người YC',k:'by'},{l:'Ngày YC',k:'date'},{l:'TT',r:r=>bg(r.s==='Chờ PD'?'y':r.s==='Đã PD'?'g':'r',r.s)},{l:'Người PD',r:r=>r.s!=='Chờ PD'?'Trần Thị Bình':'-'},{l:'Ngày PD',r:r=>r.s==='Đã PD'?r.date:r.s==='Từ chối'?r.date:'-'}],APV)}</div>`;
+
+function apvColor(t){const m={'Giáo án':'p','Học viên':'b','Đề thi':'t','Lịch giảng':'k','Ngân sách':'y','Phân công GV':'g','Vận hành':'x'};return m[t]||'x'}
+
+function fAPV(id){const a=APV.find(x=>x.id===id);if(!a)return '';
+return `<div class="hi"><b>${a.id}: ${a.type}</b> – ${a.course}</div>
+<div style="margin-bottom:8px">${[['Loại thay đổi',a.type],['Mô tả',a.desc],['Người yêu cầu',a.by],['Ngày yêu cầu',a.date],['Mức độ',a.urgency],['Trạng thái',a.s]].map(([k,v])=>'<div style="display:flex;padding:3px 0;border-bottom:1px solid var(--bl);font-size:11px"><span style="width:100px;color:var(--t2)">'+k+'</span><span>'+v+'</span></div>').join('')}</div>
+
+<div class="cd" style="margin-bottom:8px"><div class="ch"><span class="tl" style="color:var(--r)">TRƯỚC thay đổi</span></div>
+<div style="padding:6px 10px;font-size:11px;background:var(--rL);border-radius:0 0 8px 8px">${a.detail.before}</div></div>
+
+<div class="cd" style="margin-bottom:8px"><div class="ch"><span class="tl" style="color:var(--g)">SAU thay đổi</span></div>
+<div style="padding:6px 10px;font-size:11px;background:var(--gL);border-radius:0 0 8px 8px">${a.detail.after}</div></div>
+
+<div class="cd" style="margin-bottom:8px"><div class="ch"><span class="tl">Lý do & Tác động</span></div>
+<div style="padding:6px 10px;font-size:11px"><b>Lý do:</b> ${a.detail.reason}<br><br><b>Tác động:</b> ${a.detail.impact}</div></div>
+
+${a.s==='Chờ PD'?`
+${TA('Ghi chú phê duyệt','Nhận xét của người phê duyệt...')}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px">
+<button class="bt bs" onclick="cm()">Đóng</button>
+<button class="bt bd_" onclick="cm()">❌ Từ chối</button>
+<button class="bt bw" onclick="cm()">⏸ Yêu cầu bổ sung</button>
+<button class="bt bo" onclick="cm()">✅ Phê duyệt</button>
+</div>`:'<div class="fx g4" style="justify-content:flex-end"><button class="bt bs" onclick="cm()">Đóng</button></div>'}`}
+
+// ===== CLEAN CLICK HANDLERS (no quote escaping needed) =====
+function clickMat(i){om(MAT[i].id+': '+MAT[i].n,dMat(i))}
+function clickGV(i){om(GVL[i].c+': '+GVL[i].n,dGV(i))}
+function clickCTV(i){om(CTVL[i].c+': '+CTVL[i].n,dCTV(i))}
+function clickTask(i){om(OT[i].id+': '+OT[i].n,dTask(i))}
+function clickHV(i){om(HV[i].c+': '+HV[i].n,dHV(i))}
+function clickAPV(id){om('Phê duyệt: '+id,fAPV(id))}
+
+function clickBTResult(id){var b=BTTH.find(function(x){return x.id===id});om('KQ: '+b.n,fRBT(id))}
+function clickGMResult(id){var g=GAMI.find(function(x){return x.id===id});om('KQ: '+g.n,fRGM(id))}
+function clickHD(c){var g=GVL.find(function(x){return x.c===c});om('HĐ: '+g.hd,fDHD(c))}
+function clickHDC(c){var g=CTVL.find(function(x){return x.c===c});om('HĐ: '+g.hd,fDHDC(c))}
+function clickGVNeed(id){om('Chi tiết: '+id,fDGVNeed(id))}
+function clickSendExam(id){var u=['UV-001','UV-002','UV-003','UV-004','UV-005'];om('Gửi bài ĐG',fSendExam(id))}
+function clickExam(id){om('Chi tiết bài ĐG',fDExam(id))}
+function clickEditEkip(id){om('Sửa Ekip',fEEkip(id))}
+
+// ===== UPDATE EXISTING TABLES TO BE CLICKABLE =====
+
+// Override tHL to make materials clickable
+function tHL(){return `<div class="cd"><div class="ch"><span class="tl">Học liệu (${MAT.length})</span><button class="bt bp">+ Thêm</button></div>
+${T([{l:'Mã',r:r=>'<code>'+r.id+'</code>'},{l:'Tên',r:(r,i)=>'<b class="clickable" data-act="clickMat" data-i="'+i+'">'+r.n+'</b>'},{l:'Loại',r:r=>bg('t',r.tp)},{l:'CĐ',k:'ch'},{l:'Buổi',k:'b'},{l:'Size',k:'sz'},{l:'TG',k:'by'},{l:'TT',r:r=>bg(r.s==='CB'?'g':'y',r.s)}],MAT)}</div>`}
+
+// Override tHV to make students clickable
+function tHV(){return `<div class="fx g6 m8 wp ac">${SL('','Tất cả lớp,Lớp A,Lớp B,Lớp C'.split(','))}${SL('','Tất cả ĐV,TT KD,P. MKT,P. KT,P. TC,P. CNTT'.split(','))}<button class="bt bp" onclick="om('Thêm HV',fNHV())">+ Thêm</button><button class="bt bs" onclick="om('Import Excel',fIMP())">Import</button></div>
+<div class="cd"><div class="ch"><span class="tl">HV (${HV.length})</span></div>
+${T([{l:'Mã',r:r=>'<code>'+r.c+'</code>'},{l:'Tên',r:(r,i)=>'<b class="clickable" data-act="clickHV" data-i="'+i+'">'+r.n+'</b>'},{l:'ĐV',k:'u'},{l:'CD',k:'t'},{l:'Lớp',r:r=>bg('b',r.cls)},{l:'Mặt',k:'a'},{l:'Điểm',k:'sc'},{l:'Email',k:'email'},{l:'TT',r:r=>bg(r.s==='ĐH'?'g':'x',r.s)}],HV)}</div>`}
+
+// Override tVH to make tasks clickable
+function tVH(){return `<div class="fx g8 wp m10">${S('Task',OT.length+'','#1a56db')}${S('Xong',OT.filter(t=>t.s==='Xong').length+'','#059669')}${S('Đang',OT.filter(t=>t.s==='Đang').length+'','#d97706')}${S('Chưa',OT.filter(t=>t.s==='Chưa').length+'','#dc2626')}</div>
+<div class="cd"><div class="ch"><span class="tl">Task VH – Ngày 6</span></div>
+${T([{l:'ID',r:r=>'<code>'+r.id+'</code>'},{l:'Việc',r:(r,i)=>'<b class="clickable" data-act="clickTask" data-i="'+i+'">'+r.n+'</b>'},{l:'Nhóm',k:'gr'},{l:'Ph',r:r=>bg(r.ph==='PRE'?'b':r.ph==='DUR'?'t':'p',r.ph)},{l:'Hạn',k:'due'},{l:'NV',k:'nv'},{l:'ƯT',r:r=>bg(r.p==='HIGH'?'y':'x',r.p)},{l:'TT',r:r=>bg(r.s==='Xong'?'g':r.s==='Đang'?'b':'r',r.s)}],OT)}</div>`}
+
+// Override gvList to make GV clickable
+function gvList(){return `<div class="cd"><div class="ch"><span class="tl">Giảng viên (${GVL.length})</span><button class="bt bp" onclick="om('Thêm GV',fNGV())">+ Thêm GV</button></div>
+${T([{l:'Mã',r:r=>'<code>'+r.c+'</code>'},{l:'Họ tên',r:(r,i)=>'<b class="clickable" data-act="clickGV" data-i="'+i+'">'+r.n+'</b>'},{l:'Chuyên môn',k:'spec'},{l:'Chi phí',k:'fee'},{l:'HĐ',k:'hd'},{l:'TT',r:r=>bg('g',r.hdTT)},{l:'Buổi',k:'buoi'},{l:'Rating',k:'rate'},{l:'SĐT',k:'sdt'}],GVL)}</div>`}
+
+// Override cvList to make CTV clickable
+function cvList(){return `<div class="cd"><div class="ch"><span class="tl">CTV (${CTVL.length})</span><button class="bt bp" onclick="om('Thêm CTV',fNCTV())">+ Thêm CTV</button></div>
+${T([{l:'Mã',r:r=>'<code>'+r.c+'</code>'},{l:'Họ tên',r:(r,i)=>'<b class="clickable" data-act="clickCTV" data-i="'+i+'">'+r.n+'</b>'},{l:'Chuyên môn',k:'spec'},{l:'Loại',r:r=>bg('y',r.type)},{l:'Chi phí',k:'fee'},{l:'HĐ',k:'hd'},{l:'TT',r:r=>bg('g',r.hdTT)},{l:'SĐT',k:'sdt'},{l:'ĐG',k:'rate'}],CTVL)}</div>`}
+
+// Override pgMats to make materials clickable
+PG.mats=()=>`<div class="cd"><div class="ch"><span class="tl">Kho Học liệu (${MAT.length})</span><button class="bt bs">Lọc</button><button class="bt bp">+ Upload</button></div>
+${T([{l:'Mã',r:r=>'<code>'+r.id+'</code>'},{l:'Tên',r:(r,i)=>'<b class="clickable" data-act="clickMat" data-i="'+i+'">'+r.n+'</b>'},{l:'Loại',r:r=>bg('t',r.tp)},{l:'CĐ',k:'ch'},{l:'Buổi',k:'b'},{l:'Size',k:'sz'},{l:'TG',k:'by'},{l:'TT',r:r=>bg(r.s==='CB'?'g':'y',r.s)}],MAT)}</div>`;
+
+// Override pgOps (vhTask) to make tasks clickable
+PG.vhTask=()=>`
+<div class="cd"><div class="ch"><span class="tl">Giao việc</span><button class="bt bp" onclick="om('Giao việc mới',fNewTask())">+ Giao việc</button></div>
+${T([{l:'ID',r:r=>'<code>'+r.id+'</code>'},{l:'Việc',r:(r,i)=>'<b class="clickable" data-act="clickTask" data-i="'+i+'">'+r.n+'</b>'},{l:'Nhóm',k:'gr'},{l:'Phase',r:r=>bg(r.ph==='PRE'?'b':r.ph==='DUR'?'t':'p',r.ph)},{l:'Giao cho',k:'nv'},{l:'Hạn',k:'due'},{l:'ƯT',r:r=>bg(r.p==='HIGH'?'y':'x',r.p)},{l:'TT',r:r=>bg(r.s==='Xong'?'g':r.s==='Đang'?'b':'r',r.s)}],OT)}</div>`;
+
+// ===== CLICKABLE STYLE =====
+// (already in CSS as .clickable)
+
+
+// ===== COURSE & CLASS DETAIL MODALS =====
+function dCourse(i){var k=KHOA_DETAIL[i];return `<div class="hi"><b>${k.code}: ${k.n}</b></div>
+${[['Mã khóa',k.code],['Tên',k.n],['Khách hàng',k.kh],['Liên hệ KH',k.lh],['Hình thức',k.mt],['Chuyên đề',k.cd],['Lĩnh vực',k.lv],['Đối tượng',k.dt],['Tổng giờ',k.hrs+'h'],['Thời gian',k.period],['Ngân sách',k.budget],['Đã chi',k.spent],['PM',k.pm],['Trạng thái',k.s],['Số lớp',k.cls+''],['Số HV',k.hv+'']].map(function(x){return '<div style="display:flex;padding:3px 0;border-bottom:1px solid var(--bl);font-size:11px"><span style="width:90px;color:var(--t2)">'+x[0]+'</span><span>'+x[1]+'</span></div>'}).join('')}
+<div style="margin-top:6px"><b class="tx_">Mục tiêu:</b> <span class="ts tc">${k.obj}</span></div>
+<div><b class="tx_">Điều kiện:</b> <span class="ts tc">${k.dk}</span></div>
+<div class="fx g4" style="justify-content:flex-end;margin-top:10px">
+<button class="bt bs" onclick="cm()">Đóng</button>
+<button class="bt bp" onclick="cm();om('Sửa khóa: ${k.code}',fEditCourseD(${i}))">Sửa</button>
+<button class="bt bw" onclick="cm();go('course')">Mở chi tiết (8 tab)</button>
+</div>`}
+
+function fEditCourseD(i){var k=KHOA_DETAIL[i];return `
+<div class="fr">${I('Mã','',k.code)}${I('Tên *','',k.n)}</div>
+<div class="fr">${SL('KH','EVNSPC,VNPT,EVN HQ,EVNCPC,Viettel,MobiFone'.split(','))}${SL('HT','E-learn,Offline,Blended,Webinar,Workshop'.split(','))}</div>
+<div class="fr">${I('CĐ','',k.cd)}${I('LV','',k.lv)}</div>
+<div class="fr">${I('Giờ','',k.hrs+'','number')}${I('ĐT','',k.dt)}</div>
+<div class="fr">${I('NS','',k.budget)}${I('PM','',k.pm)}</div>
+${TA('Mục tiêu','',k.obj)}
+${TA('Điều kiện','',k.dk)}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Cập nhật</button></div>`}
+
+function dClass(i){var c=LOP_DETAIL[i];return `<div class="hi"><b>${c.c}: ${c.n}</b></div>
+${[['Mã lớp',c.c],['Tên',c.n],['Khóa',c.course],['Thời gian',c.p],['Địa điểm',c.l],['Sĩ số',c.ss],['GV chính',c.gv],['GV phụ',c.gv2],['CV VH chính',c.ops],['CV hỗ trợ',c.ops2],['Ekip',c.ekip],['Buổi',c.buoi],['Tiến độ',c.pct+'%'],['Trạng thái',c.s],['Ghi chú',c.note]].map(function(x){return '<div style="display:flex;padding:3px 0;border-bottom:1px solid var(--bl);font-size:11px"><span style="width:90px;color:var(--t2)">'+x[0]+'</span><span>'+x[1]+'</span></div>'}).join('')}
+<div class="fx g4" style="justify-content:flex-end;margin-top:10px">
+<button class="bt bs" onclick="cm()">Đóng</button>
+<button class="bt bp" onclick="cm();om('Sửa lớp: ${c.c}',fEditClassD(${i}))">Sửa</button>
+</div>`}
+
+function fEditClassD(i){var c=LOP_DETAIL[i];return `
+<div class="fr">${I('Mã','',c.c)}${I('Tên *','',c.n)}</div>
+<div class="fr">${I('Bắt đầu','',c.p.split('–')[0]||'')}${I('Kết thúc','',c.p.split('–')[1]||'')}</div>
+${I('Địa điểm','',c.l)}
+${I('Sĩ số max','',c.ss.split('/')[1]||'30','number')}
+<div class="fr">${I('GV chính','',c.gv)}${I('GV phụ','',c.gv2)}</div>
+<div class="fr">${I('CV VH chính','',c.ops)}${I('CV hỗ trợ','',c.ops2)}</div>
+${I('Ekip','',c.ekip)}
+${TA('Ghi chú','',c.note)}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Cập nhật</button></div>`}
+
+function fSendTTTInvite(){return `<div class="hi"><b>Gửi lời mời tham gia giảng dạy cho GV</b></div>
+${SL('Chương trình TTT *','-- Chọn --,TTT-001: QLNS (KH-001),TTT-002: CĐ Xanh (KH-003),TTT-003: LĐ số (KH-002)'.split(','))}
+${SL('GV được mời *','-- Chọn --,TS. Phạm M. Đức,ThS. Lê H. An,LS. Nguyễn V. Hùng,PGS.TS Trần T. Hải,Nguyễn Thanh Long (UV),Trần Minh Tuệ (UV)'.split(','))}
+${I('Email GV *','email@domain.vn')}
+<div class="cd" style="margin:8px 0"><div class="ch"><span class="tl">Nội dung lời mời (Preview)</span></div><div style="padding:8px 12px;font-size:11px;color:var(--t2);line-height:1.7">
+<b style="color:var(--tx)">Kính gửi [Tên GV],</b><br><br>
+V-Training trân trọng kính mời Anh/Chị tham gia giảng dạy:<br><br>
+<b style="color:var(--p)">Khóa: KH-001 – QLNS cho QL cấp 4 – EVNSPC</b><br>
+• Hình thức: Blended Learning (Offline 80% + E-learning 20%)<br>
+• Thời gian: 10/03–15/07/2026 | 40h (12 buổi / 6 ngày)<br>
+• Đối tượng: QL cấp 4 EVNSPC – 75 HV / 3 lớp<br>
+• Mục tiêu: Lập KPI, coaching, QL xung đột, xây dựng VH đội nhóm<br><br>
+<b style="color:var(--tx)">Quyền lợi:</b> Thù lao theo HĐ + Hỗ trợ đi lại + Chương trình TTT hỗ trợ<br><br>
+Vui lòng xác nhận tham gia trước ngày [hạn]. Xin cảm ơn!
+</div></div>
+${I('Hạn phản hồi','','','date')}
+${TA('Ghi chú thêm','VD: Lưu ý về lịch trình, nội dung đặc biệt...')}
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Hủy</button><button class="bt bp">Gửi lời mời</button></div>`}
+
+function clickTTTAccepted(id){var inv=TTT_INVITES.find(function(x){return x.id===id});if(!inv)return;om('Gửi tài liệu cho '+inv.gv,fTTTPostAccept(id))}
+
+function fTTTPostAccept(id){var inv=TTT_INVITES.find(function(x){return x.id===id});if(!inv)return '';return `
+<div class="hi"><b>${inv.gv}</b> đã chấp nhận lời mời – Khóa: ${inv.course}</div>
+<div class="tx_ tc m8" style="font-weight:700">Gửi tài liệu & lời mời học tập cho GV:</div>
+
+<div class="cd m8"><div class="ch"><span class="tl">1. Lời mời học E-learning</span></div><div style="padding:6px 10px">
+${T([{l:'Bài',r:r=>'<b>'+r.n+'</b>'},{l:'TL',k:'dur'},{l:'Hạn',k:'due'},{l:'TT',r:r=>bg(r.s==='Đã học'?'g':'y',r.s)}],
+[{n:'Video: Giới thiệu giáo án QTNS & PP giảng',dur:'25p',due:'18/02',s:inv.elearn.includes('2/')||inv.elearn.includes('3/')?'Đã học':'Chưa'},
+{n:'Video: Hướng dẫn V-Training (công cụ)',dur:'15p',due:'19/02',s:inv.elearn.includes('2/')||inv.elearn.includes('3/')?'Đã học':'Chưa'},
+{n:'Bài test: KT Module 3 (20 câu, ≥80%)',dur:'20p',due:'24/02',s:inv.elearn.includes('3/')?'Đã học':'Chưa'}])}
+<button class="bt bp bf">Gửi email nhắc học E-learning</button>
+</div></div>
+
+<div class="cd m8"><div class="ch"><span class="tl">2. Chia sẻ Giáo án</span></div><div style="padding:6px 10px;font-size:11px">
+<div class="fx ac g4 m8">TT: ${bg(inv.giaoan==='Đã xem'?'g':'y',inv.giaoan)}</div>
+${T([{l:'Module',r:r=>'<b>'+r.m+'</b>'},{l:'Buổi',k:'b'},{l:'Giờ',k:'h'},{l:'Nội dung chính',k:'nd'}],
+[{m:'M1: Nhập môn QTNS',b:'B1-B4',h:'8h',nd:'QTNS, HRBP, Tuyển dụng, Onboarding'},
+{m:'M2: Đánh giá & PT',b:'B5-B8',h:'8h',nd:'KPI, 360°, Coaching, Mentoring'},
+{m:'M3: Lãnh đạo',b:'B9-B12',h:'8h',nd:'LĐ tình huống, Xung đột, Đàm phán'}])}
+<button class="bt bp bf">Gửi link xem Giáo án chi tiết</button>
+</div></div>
+
+<div class="cd m8"><div class="ch"><span class="tl">3. Video học liệu liên quan</span></div><div style="padding:6px 10px">
+${T([{l:'Video',r:r=>'<b>'+r.n+'</b>'},{l:'TL',k:'dur'},{l:'Module',k:'mod'},{l:'TT',r:r=>bg(r.s==='Đã xem'?'g':'y',r.s)}],
+[{n:'Video: Giới thiệu QTNS hiện đại',dur:'15p',mod:'M1',s:'Đã xem'},
+{n:'Video: Leadership Styles',dur:'20p',mod:'M3',s:'Đã xem'},
+{n:'Video: Thomas-Kilmann Conflict',dur:'12p',mod:'M3',s:'Đã xem'},
+{n:'Video: Mô hình GROW Coaching',dur:'10p',mod:'M2',s:'Chưa xem'}])}
+<button class="bt bp bf">Gửi link xem Video học liệu</button>
+</div></div>
+<div class="fx g4" style="justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cm()">Đóng</button></div>`}
+
+function clickCourse(i){var k=KHOA_DETAIL[i];if(!k){go('course');return}om(k.code+': '+k.n,dCourse(i))}
+function clickClass(i){var c=LOP_DETAIL[i];if(!c)return;om(c.c+': '+c.n,dClass(i))}
+
+// ===== EVENT DELEGATION =====
+document.addEventListener('click',function(e){
+  var el=e.target.closest('[data-act]');
+  if(el){
+    e.stopPropagation();
+    var fn=el.dataset.act;
+    var arg=el.dataset.i;
+    if(window[fn])window[fn](arg!==undefined&&arg!==''&&!isNaN(arg)?Number(arg):arg);
+    return;
+  }
+  var nav=e.target.closest('[data-nav]');
+  if(nav){
+    e.stopPropagation();
+    try{(new Function(nav.dataset.nav))()}catch(ex){}
+    return;
+  }
+  var tr=e.target.closest('tbody tr');
+  if(tr&&!e.target.closest('button')&&!e.target.closest('input')&&!e.target.closest('select')){
+    var link=tr.querySelector('[data-act]');
+    if(link){
+      var fn2=link.dataset.act;
+      var arg2=link.dataset.i;
+      if(window[fn2])window[fn2](arg2!==undefined&&arg2!==''&&!isNaN(arg2)?Number(arg2):arg2);
+    }
+  }
+});
+
+// ===== INIT =====
+R();
+</script></body></html>

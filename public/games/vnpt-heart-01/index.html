@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VNPT HEART — Trái tim trong từng quyết định</title>
+<style>
+  :root{
+    --navy:#0a2540;
+    --navy-2:#0e3a66;
+    --blue:#1559b3;
+    --blue-bright:#2f80ed;
+    --sky:#e8f1fc;
+    --gold:#f2a900;
+    --green:#2bb673;
+    --red:#e8503a;
+    --ink:#0b1c30;
+    --paper:#f6f9fd;
+    --line:#d6e2f0;
+    /* HEART value colors */
+    --h:#2f80ed; --e:#2bb673; --a:#f2860c; --r:#e8503a; --t:#d6266f;
+    --shadow:0 18px 50px -18px rgba(10,37,64,.45);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Be Vietnam Pro','Segoe UI',system-ui,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 600px at 15% -10%, #14457a 0%, transparent 55%),
+      radial-gradient(1000px 700px at 100% 0%, #0e3a66 0%, transparent 50%),
+      linear-gradient(160deg,#071a30 0%,#0a2540 45%,#0c2e54 100%);
+    min-height:100vh;
+    display:flex;align-items:flex-start;justify-content:center;
+    padding:24px 16px 60px;
+    overflow-x:hidden;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:radial-gradient(rgba(255,255,255,.06) 1px,transparent 1px);
+    background-size:22px 22px;mask-image:linear-gradient(180deg,#000 0%,transparent 70%);
+  }
+  .stage{width:100%;max-width:880px;position:relative;z-index:1}
+
+  /* ---------- Brand header ---------- */
+  .brand{display:flex;align-items:center;gap:14px;margin-bottom:18px;color:#fff}
+  .heartmark{
+    width:46px;height:46px;flex:0 0 auto;position:relative;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,var(--blue-bright),var(--t));
+    border-radius:14px;box-shadow:0 10px 30px -8px rgba(47,128,237,.7);
+  }
+  .heartmark svg{width:26px;height:26px}
+  .brand h1{font-size:1.05rem;font-weight:800;letter-spacing:.3px;line-height:1.15}
+  .brand small{display:block;font-weight:500;opacity:.7;font-size:.74rem;letter-spacing:.4px;text-transform:uppercase}
+
+  /* ---------- Card ---------- */
+  .card{
+    background:var(--paper);
+    border-radius:24px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.6);
+  }
+  .screen{display:none;animation:fade .5s ease both}
+  .screen.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  /* ---------- INTRO ---------- */
+  .intro{padding:46px 40px 40px;text-align:center;position:relative}
+  .intro .bighearts{position:absolute;inset:0;overflow:hidden;pointer-events:none;opacity:.06}
+  .intro h2{font-size:2.05rem;font-weight:800;color:var(--navy);line-height:1.12;letter-spacing:-.5px}
+  .intro .tag{display:inline-block;margin-bottom:16px;padding:6px 16px;border-radius:999px;background:var(--sky);color:var(--blue);font-weight:700;font-size:.78rem;letter-spacing:.6px;text-transform:uppercase}
+  .intro p.lead{max-width:560px;margin:14px auto 0;color:#3c5572;font-size:1.02rem;line-height:1.6}
+  .heart-row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:26px 0 8px}
+  .vchip{display:flex;flex-direction:column;align-items:center;gap:6px;width:96px}
+  .vchip .dot{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1.2rem;box-shadow:0 8px 20px -8px rgba(0,0,0,.35)}
+  .vchip span{font-size:.72rem;color:#516a85;font-weight:600;line-height:1.25;text-align:center}
+  .meta-row{display:flex;justify-content:center;gap:26px;margin:24px 0 6px;flex-wrap:wrap}
+  .meta-row .m{font-size:.82rem;color:#516a85}
+  .meta-row .m b{display:block;font-size:1.3rem;color:var(--navy);font-weight:800}
+  .namebox{margin:26px auto 0;max-width:360px}
+  .namebox input{
+    width:100%;padding:15px 18px;border-radius:14px;border:2px solid var(--line);
+    font-size:1rem;font-family:inherit;outline:none;transition:.2s;background:#fff;
+  }
+  .namebox input:focus{border-color:var(--blue-bright);box-shadow:0 0 0 4px rgba(47,128,237,.15)}
+  .btn{
+    cursor:pointer;border:none;font-family:inherit;font-weight:800;letter-spacing:.3px;
+    background:linear-gradient(135deg,var(--blue-bright),var(--blue));
+    color:#fff;padding:16px 40px;border-radius:14px;font-size:1.05rem;
+    box-shadow:0 14px 30px -10px rgba(21,89,179,.8);transition:transform .15s, box-shadow .2s;
+    margin-top:22px;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 18px 38px -10px rgba(21,89,179,.9)}
+  .btn:active{transform:translateY(0)}
+  .btn.ghost{background:#fff;color:var(--blue);border:2px solid var(--line);box-shadow:none}
+  .btn.ghost:hover{border-color:var(--blue-bright)}
+  .rules{margin-top:24px;font-size:.82rem;color:#6a8099}
+  .scoringkey{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:20px}
+  .scoringkey .k{display:flex;align-items:center;gap:8px;font-size:.8rem;color:#516a85;background:#fff;border:1px solid var(--line);padding:8px 14px;border-radius:10px}
+  .scoringkey .k i{width:12px;height:12px;border-radius:4px;display:inline-block}
+
+  /* ---------- PLAY HEADER ---------- */
+  .play-top{background:linear-gradient(120deg,var(--navy),var(--navy-2));color:#fff;padding:18px 26px;display:flex;align-items:center;gap:18px}
+  .progress-wrap{flex:1}
+  .progress-meta{display:flex;justify-content:space-between;font-size:.78rem;opacity:.85;margin-bottom:7px}
+  .progress-meta b{opacity:1;font-weight:700}
+  .bar{height:8px;background:rgba(255,255,255,.18);border-radius:99px;overflow:hidden}
+  .bar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue-bright),var(--gold));border-radius:99px;transition:width .5s ease}
+  .timer{
+    width:62px;height:62px;flex:0 0 auto;border-radius:50%;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;font-weight:800;position:relative;
+    background:conic-gradient(var(--gold) 0deg, rgba(255,255,255,.15) 0deg);
+  }
+  .timer::before{content:"";position:absolute;inset:5px;border-radius:50%;background:var(--navy)}
+  .timer span{position:relative;z-index:1;font-size:1.25rem;line-height:1}
+  .timer small{position:relative;z-index:1;font-size:.55rem;opacity:.7;letter-spacing:1px}
+  .score-pill{background:rgba(255,255,255,.12);padding:8px 16px;border-radius:12px;text-align:center}
+  .score-pill b{display:block;font-size:1.25rem;font-weight:800}
+  .score-pill small{font-size:.6rem;opacity:.7;letter-spacing:1px;text-transform:uppercase}
+
+  /* ---------- QUESTION BODY ---------- */
+  .qbody{padding:30px 34px 34px}
+  .vtag{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;font-weight:700;font-size:.76rem;color:#fff;margin-bottom:16px}
+  .qtitle{font-size:1.35rem;font-weight:800;color:var(--navy);margin-bottom:14px;line-height:1.25}
+  .scenario{
+    background:#fff;border:1px solid var(--line);border-left:5px solid var(--blue-bright);
+    border-radius:14px;padding:18px 20px;font-size:1rem;line-height:1.6;color:#28415c;
+  }
+  .scenario .quote{display:block;margin-top:10px;padding-left:14px;border-left:3px solid var(--line);font-style:italic;color:#54708d}
+  .opts{display:flex;flex-direction:column;gap:12px;margin-top:20px}
+  .opt{
+    text-align:left;cursor:pointer;background:#fff;border:2px solid var(--line);
+    border-radius:14px;padding:16px 18px;font-size:.98rem;line-height:1.45;color:var(--ink);
+    font-family:inherit;display:flex;gap:14px;align-items:flex-start;transition:.18s;position:relative;
+  }
+  .opt .letter{flex:0 0 auto;width:30px;height:30px;border-radius:9px;background:var(--sky);color:var(--blue);font-weight:800;display:flex;align-items:center;justify-content:center;font-size:.95rem;transition:.18s}
+  .opt:hover{border-color:var(--blue-bright);transform:translateY(-1px);box-shadow:0 10px 24px -14px rgba(21,89,179,.6)}
+  .opt:hover .letter{background:var(--blue-bright);color:#fff}
+  .opt:disabled{cursor:default;transform:none;box-shadow:none}
+  .opt.correct{border-color:var(--green);background:#eafaf2}
+  .opt.correct .letter{background:var(--green);color:#fff}
+  .opt.neutral{border-color:var(--gold);background:#fff7e8}
+  .opt.neutral .letter{background:var(--gold);color:#fff}
+  .opt.wrong{border-color:var(--red);background:#fdeeeb}
+  .opt.wrong .letter{background:var(--red);color:#fff}
+  .opt .ptag{margin-left:auto;flex:0 0 auto;font-weight:800;font-size:.82rem;opacity:0;transition:.2s}
+  .opt.revealed .ptag{opacity:1}
+
+  /* ---------- FEEDBACK ---------- */
+  .feedback{margin-top:18px;display:none;animation:fade .4s ease both}
+  .feedback.show{display:block}
+  .fb-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .fb-badge{padding:7px 16px;border-radius:10px;font-weight:800;font-size:.9rem;color:#fff}
+  .fb-points{font-weight:800;color:var(--navy);font-size:1.05rem}
+  .fb-explain{background:var(--navy);color:#eaf2fb;border-radius:14px;padding:18px 20px;font-size:.96rem;line-height:1.6}
+  .fb-explain .lbl{display:block;font-size:.72rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:7px}
+  .reflect{margin-top:12px;background:var(--sky);border:1px dashed var(--blue-bright);border-radius:14px;padding:15px 18px;font-size:.94rem;color:var(--navy);line-height:1.55}
+  .reflect b{display:block;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .next-row{display:flex;justify-content:flex-end;margin-top:18px}
+
+  /* ---------- RESULT ---------- */
+  .result{padding:0}
+  .res-hero{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:40px 36px 30px;text-align:center;position:relative;overflow:hidden}
+  .res-hero::after{content:"";position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(242,169,0,.4),transparent 70%);top:-120px;right:-80px}
+  .rank-name{font-size:.85rem;letter-spacing:1px;text-transform:uppercase;opacity:.8}
+  .badge-name{font-size:1.9rem;font-weight:800;margin:6px 0 4px;position:relative}
+  .res-score{font-size:3.2rem;font-weight:800;line-height:1;margin-top:14px;position:relative}
+  .res-score small{font-size:1rem;opacity:.7;font-weight:600}
+  .res-body{padding:30px 36px 38px}
+  .res-body h3{font-size:1.05rem;color:var(--navy);margin-bottom:6px;font-weight:800}
+  .res-body p.sub{color:#54708d;font-size:.9rem;margin-bottom:16px}
+  .radar-wrap{display:flex;justify-content:center;margin:8px 0 26px}
+  .lb{border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:26px}
+  .lb-row{display:flex;align-items:center;gap:14px;padding:13px 18px;border-bottom:1px solid var(--line);font-size:.95rem}
+  .lb-row:last-child{border-bottom:none}
+  .lb-row .pos{width:26px;height:26px;border-radius:8px;background:var(--sky);color:var(--blue);font-weight:800;display:flex;align-items:center;justify-content:center;font-size:.85rem}
+  .lb-row.me{background:var(--sky)}
+  .lb-row.me .pos{background:var(--gold);color:#fff}
+  .lb-row .nm{font-weight:600;color:var(--ink)}
+  .lb-row .sc{margin-left:auto;font-weight:800;color:var(--navy)}
+  .reflections{background:var(--paper)}
+  .reflections .r-item{padding:13px 0;border-bottom:1px dashed var(--line);font-size:.92rem;color:#33506e;line-height:1.5;display:flex;gap:10px}
+  .reflections .r-item:last-child{border-bottom:none}
+  .reflections .r-item .n{flex:0 0 auto;color:var(--blue);font-weight:800}
+  .closing{margin-top:24px;text-align:center;font-size:1.05rem;font-weight:700;color:var(--navy);font-style:italic;line-height:1.5;padding:0 10px}
+  .res-actions{display:flex;gap:12px;justify-content:center;margin-top:26px;flex-wrap:wrap}
+
+  .footer-note{text-align:center;color:rgba(255,255,255,.5);font-size:.74rem;margin-top:20px}
+
+  @media(max-width:560px){
+    .intro{padding:34px 22px}
+    .intro h2{font-size:1.6rem}
+    .qbody{padding:24px 20px 26px}
+    .play-top{padding:14px 18px;gap:12px}
+    .timer{width:54px;height:54px}
+    .score-pill{padding:6px 12px}
+    .res-hero{padding:32px 22px 26px}
+    .res-body{padding:24px 20px 30px}
+    .vchip{width:30%}
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <div class="brand">
+    <div class="heartmark">
+      <svg viewBox="0 0 24 24" fill="#fff"><path d="M12 21s-7.5-4.6-10-9.2C.3 8.4 2 5 5.4 5c2 0 3.5 1.2 4.6 2.6C11.1 6.2 12.6 5 14.6 5 18 5 19.7 8.4 22 11.8 19.5 16.4 12 21 12 21z"/></svg>
+    </div>
+    <div>
+      <h1>VNPT HEART</h1>
+      <small>Trái tim trong từng quyết định</small>
+    </div>
+  </div>
+
+  <div class="card">
+
+    <!-- ============ INTRO ============ -->
+    <section class="screen active" id="introScreen">
+      <div class="intro">
+        <span class="tag">Gamification · NSQL cấp 3</span>
+        <h2>Trái tim trong<br>từng quyết định</h2>
+        <p class="lead">10 tình huống quản trị có thật. Mỗi lựa chọn để lại một hệ quả. Hãy đưa văn hóa <b>VNPT HEART</b> vào từng quyết định của bạn — và khám phá bạn là kiểu nhà quản lý nào.</p>
+
+        <div class="heart-row" id="heartRow"></div>
+
+        <div class="meta-row">
+          <div class="m"><b>10</b> tình huống</div>
+          <div class="m"><b>~10</b> phút</div>
+          <div class="m"><b>60s</b> mỗi màn</div>
+        </div>
+
+        <div class="scoringkey">
+          <div class="k"><i style="background:var(--green)"></i> Kiến tạo · 100đ</div>
+          <div class="k"><i style="background:var(--gold)"></i> Trung tính · 40đ</div>
+          <div class="k"><i style="background:var(--red)"></i> Phản văn hóa · 0đ</div>
+        </div>
+
+        <div class="namebox">
+          <input id="playerName" type="text" placeholder="Nhập tên của bạn để vào bảng xếp hạng" maxlength="28" />
+        </div>
+        <button class="btn" id="startBtn">Bắt đầu hành trình →</button>
+        <p style="margin-top:18px;font-size:.8rem;color:#7d93a8">Trả lời nhanh và đúng để được điểm thưởng tốc độ.</p>
+      </div>
+    </section>
+
+    <!-- ============ PLAY ============ -->
+    <section class="screen" id="playScreen">
+      <div class="play-top">
+        <div class="progress-wrap">
+          <div class="progress-meta"><span>Tình huống <b id="qNum">1</b>/10</span><span id="qTitleMini"></span></div>
+          <div class="bar"><i id="progBar"></i></div>
+        </div>
+        <div class="timer" id="timer"><span id="timeVal">60</span><small>GIÂY</small></div>
+        <div class="score-pill"><b id="scoreVal">0</b><small>Điểm</small></div>
+      </div>
+      <div class="qbody">
+        <span class="vtag" id="vTag"></span>
+        <div class="qtitle" id="qTitle"></div>
+        <div class="scenario" id="scenario"></div>
+        <div class="opts" id="opts"></div>
+
+        <div class="feedback" id="feedback">
+          <div class="fb-head">
+            <span class="fb-badge" id="fbBadge"></span>
+            <span class="fb-points" id="fbPoints"></span>
+          </div>
+          <div class="fb-explain"><span class="lbl">Vì sao?</span><span id="fbText"></span></div>
+          <div class="reflect"><b>Câu hỏi suy ngẫm</b><span id="fbReflect"></span></div>
+          <div class="next-row"><button class="btn" id="nextBtn">Tiếp theo →</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ RESULT ============ -->
+    <section class="screen result" id="resultScreen">
+      <div class="res-hero">
+        <div class="rank-name">Danh hiệu của bạn</div>
+        <div class="badge-name" id="badgeName">—</div>
+        <div class="res-score" id="finalScore">0<small> điểm</small></div>
+      </div>
+      <div class="res-body">
+        <h3>Bản đồ HEART cá nhân</h3>
+        <p class="sub">Bạn mạnh ở giá trị nào, và đâu là điều cần soi chiếu thêm?</p>
+        <div class="radar-wrap"><canvas id="radar" width="320" height="300"></canvas></div>
+
+        <h3>Bảng xếp hạng</h3>
+        <p class="sub">So với những học viên đã chơi trong phiên này.</p>
+        <div class="lb" id="leaderboard"></div>
+
+        <h3>Mang về: 10 câu hỏi suy ngẫm</h3>
+        <p class="sub">Hãy chọn 1–2 câu chuyển thành cam kết hành động 60 ngày của bạn.</p>
+        <div class="reflections" id="reflections"></div>
+
+        <p class="closing">"Văn hóa VNPT không nằm trong tài liệu.<br>Văn hóa nằm trong từng quyết định bạn vừa đưa ra."</p>
+
+        <div class="res-actions">
+          <button class="btn ghost" id="reviewBtn">Xem lại lựa chọn</button>
+          <button class="btn" id="againBtn">Chơi lại</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+  <p class="footer-note">Chương trình VNPT HEART · WS2 · Dành cho Người quản lý cấp 3</p>
+</div>
+
+<script>
+/* ====================== DATA ====================== */
+const VALUES = {
+  H:{name:"Hợp tác cùng vươn cao", en:"Higher Together", color:"var(--h)", hex:"#2f80ed"},
+  E:{name:"Thấu hiểu và Chia sẻ", en:"Empathy & Sharing", color:"var(--e)", hex:"#2bb673"},
+  A:{name:"Sáng tạo không giới hạn", en:"Audacious Innovation", color:"var(--a)", hex:"#f2860c"},
+  R:{name:"Phụng sự để kiến tạo", en:"Responsible Future Creation", color:"var(--r)", hex:"#e8503a"},
+  T:{name:"Khách hàng là trái tim", en:"True Customer Centricity", color:"var(--t)", hex:"#d6266f"}
+};
+
+/* Each option: t=text, lvl='good'|'neutral'|'bad' */
+const QUESTIONS = [
+  {
+    val:"H", ref:"CM5 · Kết nối chủ động, Phối hợp nhịp nhàng",
+    title:"Tin nhắn lúc 17h05",
+    scenario:`17h05 thứ Sáu, bạn vừa tắt máy tính chuẩn bị về thì nhận tin nhắn từ Trưởng phòng Kỹ thuật:<span class="quote">"Anh ơi, khách hàng VIP đang cần xác nhận một thông số để chốt hợp đồng trước thứ Hai, nhưng dữ liệu này nằm ở phòng anh. Anh hỗ trợ em với."</span>Bạn không nắm ngay thông số đó, phải tra cứu khoảng 20 phút.`,
+    opts:[
+      {t:"Để máy, mai thứ Bảy hoặc đầu tuần xử lý — đằng nào hạn cũng là thứ Hai.", lvl:"neutral"},
+      {t:"Nhắn ngay: \"Mình đã nhận. Để mình tra cứu, trễ nhất 18h mình gửi em thông số kèm nguồn.\" rồi ở lại xử lý.", lvl:"good"},
+      {t:"Chuyển tiếp tin nhắn cho một nhân viên dưới quyền và tắt máy về, không báo lại gì.", lvl:"bad"}
+    ],
+    explain:"Phối hợp nhịp nhàng đôi khi chỉ bắt đầu bằng một tin nhắn \"Tôi đã nhận\". Khách hàng và đồng đội không sợ chờ — họ sợ chờ trong im lặng. OneVNPT là khi việc của khách hàng được xem là việc của mình, dù dữ liệu nằm ở phòng nào.",
+    reflect:"Lần gần nhất bạn nhận một yêu cầu phối hợp \"ngoài giờ\", bạn đã phản hồi thế nào?"
+  },
+  {
+    val:"T", ref:"CM4 · Dám chịu trách nhiệm · NT8 Giải pháp tận gốc",
+    title:"Lỗi lặp lại lần thứ ba",
+    scenario:`Một khách hàng doanh nghiệp phản ánh lần thứ ba về cùng một lỗi gián đoạn dịch vụ vào giờ cao điểm. Hai lần trước đội của bạn đã khắc phục nhanh và sự cố tạm hết.<span class="quote">"Lần nào gọi các anh cũng sửa được, nhưng sao cứ lặp lại? Tôi mệt rồi."</span>`,
+    opts:[
+      {t:"Khắc phục nhanh như hai lần trước để dịch vụ chạy lại ngay, vì khách đang sốt ruột.", lvl:"neutral"},
+      {t:"Khắc phục tạm để dịch vụ chạy lại, đồng thời lập nhóm phân tích nguyên nhân gốc, cam kết mốc thời gian xử lý triệt để và chủ động báo tiến độ.", lvl:"good"},
+      {t:"Giải thích với khách rằng đây là lỗi kỹ thuật khách quan, ngoài tầm kiểm soát của đơn vị.", lvl:"bad"}
+    ],
+    explain:"\"Khách hàng là trái tim\" không dừng ở việc xử lý nhanh, mà ở việc giải quyết để vấn đề không tái diễn. Mỗi lần khắc phục tạm mà không truy gốc là một lần bào mòn niềm tin. Dám chịu trách nhiệm nghĩa là theo đuổi đến cùng.",
+    reflect:"Ở đơn vị bạn, có \"lỗi lặp lại\" nào đang được xử lý theo kiểu chữa cháy không?"
+  },
+  {
+    val:"A", ref:"CM6 · Tôn trọng khác biệt · NT4 Cởi mở với cái mới",
+    title:"Sáng kiến của nhân viên trẻ",
+    scenario:`Một nhân viên trẻ đề xuất dùng công cụ số mới để rút ngắn quy trình xử lý hồ sơ từ 3 ngày xuống 1 ngày. Ý tưởng chưa được kiểm chứng, có rủi ro nhỏ về tương thích hệ thống. Vài thành viên kỳ cựu nói:<span class="quote">"Cách cũ vẫn chạy tốt, thử nghiệm chi cho rủi ro."</span>`,
+    opts:[
+      {t:"Giữ quy trình cũ cho an toàn, vì cách cũ vẫn đang vận hành ổn định.", lvl:"bad"},
+      {t:"Cho thử nghiệm có kiểm soát trên một nhóm hồ sơ nhỏ, đặt tiêu chí đánh giá rõ ràng, nếu hiệu quả thì nhân rộng.", lvl:"good"},
+      {t:"Triển khai ngay toàn bộ vì ý tưởng nghe rất hay, cần tạo động lực cho nhân viên trẻ.", lvl:"neutral"}
+    ],
+    explain:"Sáng tạo không giới hạn không phải là liều lĩnh. Đó là \"thách thức giả định, thử nhanh, nhân rộng giá trị\" — bứt phá có kỷ luật. NSQL cấp 3 là người tạo không gian an toàn để đội ngũ dám thử.",
+    reflect:"Khi nào lần cuối bạn nói \"được, thử đi\" với một ý tưởng chưa chắc chắn của nhân viên?"
+  },
+  {
+    val:"H", ref:"CM4 · QT07 Giao tiếp rõ ràng, đúng trọng tâm",
+    title:"Email cả nhà cùng nhận",
+    scenario:`Một nhiệm vụ liên quan 3 phòng được giao qua một email chung gửi tất cả mọi người, không chỉ định ai chủ trì. Sau một tuần, công việc trễ hạn. Khi bạn hỏi, mỗi phòng đều nói:<span class="quote">"Tôi tưởng phòng kia làm đầu mối."</span>`,
+    opts:[
+      {t:"Gửi email nhắc nhở chung, yêu cầu \"các phòng phối hợp chặt chẽ hơn\".", lvl:"neutral"},
+      {t:"Xác định ngay một đầu mối chịu trách nhiệm chính, làm rõ phần việc — thời hạn — người phụ trách của từng phòng, xác nhận lại bằng văn bản.", lvl:"good"},
+      {t:"Báo cáo cấp trên rằng việc trễ là do các phòng thiếu tinh thần phối hợp.", lvl:"bad"}
+    ],
+    explain:"Phần lớn việc trễ liên phòng không phải do người lười, mà do không ai được chỉ định chịu trách nhiệm cuối. Vai trò của NSQL cấp 3 là thiết kế lại cơ chế giao việc: luôn có một đầu mối, một thời hạn, một kết luận.",
+    reflect:"Trong các việc liên phòng gần đây, có việc nào \"ai cũng tưởng người khác làm\" không?"
+  },
+  {
+    val:"T", ref:"H · NT9 Trải nghiệm liền mạch · OneVNPT",
+    title:"Khách hàng không thấy OneVNPT",
+    scenario:`Một khách hàng doanh nghiệp muốn triển khai giải pháp tổng thể, nhưng phải làm việc với 4 đầu mối khác nhau của VNPT, mỗi đầu mối chỉ trả lời phần của mình.<span class="quote">"VNPT mạnh, nhưng chưa thật sự liền mạch. Tôi phải tự ghép các mảnh lại."</span>`,
+    opts:[
+      {t:"Mỗi đầu mối cứ làm tốt phần của mình, việc ghép nối là trách nhiệm chung của cả tập đoàn.", lvl:"neutral"},
+      {t:"Chủ động đứng ra làm đầu mối điều phối tổng thể cho khách, kết nối các bộ phận để khách chỉ làm việc với một điểm chạm duy nhất.", lvl:"good"},
+      {t:"Hướng dẫn khách hàng tự liên hệ đúng từng phòng ban để được hỗ trợ nhanh hơn.", lvl:"bad"}
+    ],
+    explain:"Khách hàng chỉ nhìn thấy một VNPT, không nhìn thấy ranh giới đơn vị. Cát cứ văn hóa xảy ra khi mỗi bộ phận làm tốt phần mình nhưng không ai chịu trách nhiệm cho trải nghiệm tổng thể. NSQL cấp 3 là người phá vỡ ranh giới đó.",
+    reflect:"Khách hàng của bạn có đang phải \"tự ghép các mảnh\" của VNPT không?"
+  },
+  {
+    val:"E", ref:"CM2 · Thẳng thắn chân thành, Giao tiếp thiện chí",
+    title:"Lời góp ý khó nói",
+    scenario:`Một nhân viên giỏi chuyên môn nhưng gần đây hay trả lời khách hàng cộc lốc, khiến 2 khách phàn nàn. Bạn cần góp ý nhưng lo nhân viên tự ái, vì đây là người có năng lực và đang gặp áp lực gia đình.`,
+    opts:[
+      {t:"Gửi email nhắc nhở chung cho cả nhóm về thái độ với khách, để nhân viên đó tự hiểu mà không bị nêu tên.", lvl:"neutral"},
+      {t:"Gặp riêng, lắng nghe trước xem nhân viên đang gặp khó khăn gì, rồi góp ý thẳng thắn vào hành vi cụ thể với thái độ xây dựng và đề xuất hỗ trợ.", lvl:"good"},
+      {t:"Bỏ qua vì nhân viên giỏi chuyên môn, hơn nữa đang có chuyện gia đình, nhắc nhở lúc này dễ làm mất người.", lvl:"bad"}
+    ],
+    explain:"Thẳng thắn chân thành không phải là gay gắt. Đó là góp ý vào hành vi, đúng lúc, đúng cách, với thiện chí. Thấu hiểu hoàn cảnh không có nghĩa là làm ngơ hành vi — mà là chọn cách nói để người nghe đón nhận được.",
+    reflect:"Có lời góp ý nào bạn đang trì hoãn vì sợ làm mất lòng không?"
+  },
+  {
+    val:"R", ref:"QT02 · Trung thực, minh bạch trong báo cáo",
+    title:"Con số đẹp trong báo cáo",
+    scenario:`Sắp đến hạn báo cáo kết quả quý. Một chỉ số của đơn vị bạn chưa đạt mục tiêu, chênh khá ít. Một đồng nghiệp gợi ý:<span class="quote">"Làm tròn lên một chút cho đẹp, quý sau bù lại, ai cũng làm thế mà."</span>`,
+    opts:[
+      {t:"Làm tròn lên cho đạt chỉ tiêu, vì chênh lệch không đáng kể và quý sau sẽ bù.", lvl:"bad"},
+      {t:"Báo cáo đúng số thực tế, kèm phân tích nguyên nhân chưa đạt và kế hoạch khắc phục cụ thể cho quý sau.", lvl:"good"},
+      {t:"Báo cáo số thực nhưng không giải thích gì thêm, để cấp trên tự đánh giá.", lvl:"neutral"}
+    ],
+    explain:"Một con số trung thực kèm kế hoạch khắc phục có giá trị hơn một con số đẹp nhưng giả. Phụng sự để kiến tạo bắt đầu từ sự liêm chính với chính số liệu của mình. Niềm tin của tổ chức được xây từ những lần dám báo đúng.",
+    reflect:"Bạn nghĩ điều gì sẽ xảy ra nếu cả tổ chức đều \"làm tròn cho đẹp\"?"
+  },
+  {
+    val:"A", ref:"CM8 · Trân trọng bước nhỏ, Tạo giá trị lớn",
+    title:"Cải tiến nhỏ bị xem nhẹ",
+    scenario:`Một nhân viên đề xuất một cải tiến rất nhỏ: thay đổi thứ tự các bước trong một biểu mẫu để khách điền nhanh hơn 2 phút. Có người trong nhóm cho rằng:<span class="quote">"Việc cỏn con, không đáng để bàn trong cuộc họp."</span>`,
+    opts:[
+      {t:"Gạt sang một bên, ưu tiên bàn các vấn đề lớn hơn trong cuộc họp.", lvl:"bad"},
+      {t:"Ghi nhận công khai sáng kiến, áp dụng thử ngay, và khuyến khích cả nhóm tiếp tục đề xuất cải tiến nhỏ.", lvl:"good"},
+      {t:"Tiếp nhận nhưng để vào danh sách \"xem xét sau\", không phản hồi rõ thời điểm.", lvl:"neutral"}
+    ],
+    explain:"Mọi giá trị lớn đều bắt đầu từ những cải tiến nhỏ, bền bỉ. Tiết kiệm 2 phút mỗi khách, nhân với hàng nghìn lượt giao dịch, là một con số lớn. Quan trọng hơn, việc ghi nhận bước nhỏ nuôi dưỡng một văn hóa dám đề xuất.",
+    reflect:"Lần gần nhất bạn ghi nhận một cải tiến nhỏ của ai đó là khi nào?"
+  },
+  {
+    val:"E", ref:"CM1 Lắng nghe chủ động · CM6 Tôn trọng khác biệt",
+    title:"Im lặng trong cuộc họp",
+    scenario:`Trong cuộc họp nhóm, một nhân viên mới rụt rè định nói nhưng bị một thành viên kỳ cựu nói át đi. Bạn nhận thấy nhân viên mới có vẻ có ý kiến nhưng không dám lên tiếng nữa.`,
+    opts:[
+      {t:"Tiếp tục cuộc họp theo mạch hiện tại để kịp thời gian, ai có ý kiến thì tự chủ động nói.", lvl:"bad"},
+      {t:"Chủ động mời nhân viên mới: \"Mình thấy bạn có vẻ có ý gì đó, bạn nói tiếp giúp mình nhé\", tạo không gian an toàn để mọi người được lắng nghe.", lvl:"good"},
+      {t:"Sau họp gặp riêng nhân viên mới hỏi ý kiến, để tránh làm gián đoạn cuộc họp.", lvl:"neutral"}
+    ],
+    explain:"Sự khác biệt về góc nhìn là nguồn năng lượng cho đổi mới — nếu được lắng nghe đúng cách. Một tập thể mạnh là tập thể nơi cả người mới và người ít nói đều dám lên tiếng. NSQL cấp 3 là người giữ cho không gian ấy an toàn.",
+    reflect:"Trong nhóm bạn, ai là người thường xuyên im lặng trong các cuộc họp?"
+  },
+  {
+    val:"T", ref:"CM3 Giữ trọn lời hứa · CM7 Phản hồi nhanh gọn",
+    title:"Lời hứa giữa cơn quá tải",
+    scenario:`Bạn đã hứa với một khách hàng sẽ phản hồi kết quả vào chiều nay. Nhưng đầu giờ chiều, đơn vị phát sinh sự cố lớn, cả đội căng mình xử lý. Bạn nhận ra khả năng cao sẽ không kịp trả lời khách đúng hẹn.`,
+    opts:[
+      {t:"Tập trung toàn lực cho sự cố, việc trả lời khách để khi nào xong sự cố tính sau.", lvl:"neutral"},
+      {t:"Dành 1 phút chủ động nhắn khách: \"Em xin lỗi, đơn vị đang xử lý một sự cố. Em sẽ phản hồi chậm nhất trước 10h sáng mai, mong anh/chị thông cảm.\"", lvl:"good"},
+      {t:"Giao một nhân viên trả lời khách bằng một câu chung chung để \"giữ lời hứa\" hình thức, dù chưa có kết quả thực.", lvl:"bad"}
+    ],
+    explain:"Giữ trọn lời hứa không phải lúc nào cũng là hoàn thành đúng hạn — đôi khi là chủ động báo sớm khi không kịp. Một lời xin lỗi đúng lúc kèm mốc hẹn mới giữ được niềm tin tốt hơn cả sự im lặng lẫn câu trả lời rỗng.",
+    reflect:"Khi không kịp một lời hứa, phản xạ đầu tiên của bạn là báo sớm hay im lặng?"
+  }
+];
+
+const POINTS = {good:100, neutral:40, bad:0};
+const LEVEL_LABEL = {good:"KIẾN TẠO", neutral:"TRUNG TÍNH", bad:"PHẢN VĂN HÓA"};
+const LEVEL_COLOR = {good:"var(--green)", neutral:"var(--gold)", bad:"var(--red)"};
+
+/* ====================== STATE ====================== */
+let state = {idx:0, score:0, time:60, timer:null, answered:false, player:"", chosen:[], valScore:{H:0,E:0,A:0,R:0,T:0}, valMax:{H:0,E:0,A:0,R:0,T:0}};
+
+let realtimeLeaderboard = [];
+
+function escapeHtml(value){
+  return String(value || '').replace(/[&<>"']/g,(char)=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[char]));
+}
+
+function normalizeLeaderboardRows(rows){
+  return (Array.isArray(rows) ? rows : [])
+    .map((row)=>({
+      name: String(row.playerName || row.name || '').trim(),
+      groupName: String(row.groupName || '').trim(),
+      score: Math.max(0, Math.round(Number(row.totalScore ?? row.score ?? 0) || 0)),
+      bestScore: Math.max(0, Math.round(Number(row.bestScore ?? row.totalScore ?? row.score ?? 0) || 0)),
+      runCount: Math.max(1, Math.round(Number(row.runCount || 1) || 1)),
+      rankLabel: String(row.latestRankLabel || row.rankLabel || '').trim()
+    }))
+    .filter((row)=>row.name && row.score >= 0)
+    .sort((a,b)=>b.score-a.score || b.bestScore-a.bestScore || b.runCount-a.runCount || a.name.localeCompare(b.name,'vi'));
+}
+
+function buildLeaderboardRows(currentName, currentScore){
+  const rows = realtimeLeaderboard.slice();
+  const name = String(currentName || '').trim();
+  if(name){
+    const idx = rows.findIndex((row)=>row.name === name);
+    const localRow = {
+      name,
+      groupName: 'Public',
+      score: Math.max(0, Math.round(Number(currentScore) || 0)),
+      bestScore: Math.max(0, Math.round(Number(currentScore) || 0)),
+      runCount: 1,
+      me: true
+    };
+    if(idx >= 0){
+      rows[idx] = {...rows[idx], ...localRow, bestScore: Math.max(rows[idx].bestScore || 0, localRow.bestScore)};
+    } else {
+      rows.push(localRow);
+    }
+  }
+  return rows.sort((a,b)=>b.score-a.score || b.bestScore-a.bestScore || b.runCount-a.runCount || a.name.localeCompare(b.name,'vi')).slice(0,8);
+}
+
+function renderLeaderboard(rows){
+  const lb=document.getElementById('leaderboard');
+  if(!lb)return;
+  lb.innerHTML='';
+  const finalRows = Array.isArray(rows) ? rows : buildLeaderboardRows(state.player, state.score);
+  if(!finalRows.length){
+    const row=document.createElement('div');
+    row.className='lb-row';
+    row.innerHTML='<span class="pos">-</span><span class="nm">Chưa có kết quả realtime</span><span class="sc">0đ</span>';
+    lb.appendChild(row);
+    return;
+  }
+  finalRows.forEach((r,i)=>{
+    const row=document.createElement('div');
+    row.className='lb-row'+(r.me?' me':'');
+    row.innerHTML=`<span class="pos">${i+1}</span><span class="nm">${escapeHtml(r.name)}</span><span class="sc">${r.score}đ</span>`;
+    lb.appendChild(row);
+  });
+}
+
+function setRealtimeLeaderboard(rows){
+  realtimeLeaderboard = normalizeLeaderboardRows(rows);
+  if(document.getElementById('resultScreen')?.classList.contains('active')){
+    renderLeaderboard(buildLeaderboardRows(state.player, state.score));
+  }
+}
+
+window.VContentGame = Object.assign(window.VContentGame || {}, {setLeaderboard:setRealtimeLeaderboard});
+window.addEventListener('message',(event)=>{
+  const data=event.data || {};
+  if(data.type === 'vcontent-leaderboard' && data.gameId === 'vnpt-heart-01'){
+    setRealtimeLeaderboard(data.rows);
+  }
+});
+if(Array.isArray(window.VContentGameLeaderboard)){
+  setRealtimeLeaderboard(window.VContentGameLeaderboard);
+}
+
+/* ====================== INTRO BUILD ====================== */
+const heartRow = document.getElementById('heartRow');
+Object.entries(VALUES).forEach(([k,v])=>{
+  const c=document.createElement('div');c.className='vchip';
+  c.innerHTML=`<div class="dot" style="background:${v.color}">${k}</div><span>${v.name}</span>`;
+  heartRow.appendChild(c);
+});
+
+/* count value max for radar */
+QUESTIONS.forEach(q=>{state.valMax[q.val]+=1});
+
+/* ====================== NAV ====================== */
+const screens={intro:document.getElementById('introScreen'),play:document.getElementById('playScreen'),result:document.getElementById('resultScreen')};
+function show(s){Object.values(screens).forEach(x=>x.classList.remove('active'));screens[s].classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+
+document.getElementById('startBtn').addEventListener('click',()=>{
+  const n=document.getElementById('playerName').value.trim();
+  state.player = n || "Học viên ẩn danh";
+  state.idx=0;state.score=0;state.chosen=[];state.valScore={H:0,E:0,A:0,R:0,T:0};
+  show('play');renderQuestion();
+});
+
+/* ====================== RENDER QUESTION ====================== */
+function renderQuestion(){
+  const q=QUESTIONS[state.idx];
+  state.answered=false;state.time=60;
+  document.getElementById('qNum').textContent=state.idx+1;
+  document.getElementById('progBar').style.width=((state.idx)/QUESTIONS.length*100)+'%';
+  document.getElementById('scoreVal').textContent=state.score;
+  document.getElementById('qTitleMini').textContent=q.title;
+  document.getElementById('qTitle').textContent=q.title;
+  document.getElementById('scenario').innerHTML=q.scenario;
+
+  const v=VALUES[q.val];
+  const vt=document.getElementById('vTag');
+  vt.style.background=v.color;
+  vt.innerHTML=`<b style="font-weight:900">${q.val}</b> ${v.name} · ${q.ref}`;
+
+  // build options (shuffle)
+  const opts=document.getElementById('opts');opts.innerHTML='';
+  const order=[0,1,2].sort(()=>Math.random()-0.5);
+  const letters=['A','B','C'];
+  order.forEach((oi,pos)=>{
+    const o=q.opts[oi];
+    const b=document.createElement('button');
+    b.className='opt';b.dataset.lvl=o.lvl;
+    b.innerHTML=`<span class="letter">${letters[pos]}</span><span>${o.t}</span><span class="ptag"></span>`;
+    b.addEventListener('click',()=>choose(b,o.lvl));
+    opts.appendChild(b);
+  });
+
+  document.getElementById('feedback').classList.remove('show');
+  startTimer();
+}
+
+/* ====================== TIMER ====================== */
+function startTimer(){
+  clearInterval(state.timer);
+  updateTimer();
+  state.timer=setInterval(()=>{
+    state.time--;updateTimer();
+    if(state.time<=0){clearInterval(state.timer);if(!state.answered)autoTimeout();}
+  },1000);
+}
+function updateTimer(){
+  const t=document.getElementById('timer');
+  const pct=(state.time/60)*360;
+  const col = state.time>20 ? 'var(--gold)' : (state.time>8?'#f2860c':'var(--red)');
+  t.style.background=`conic-gradient(${col} ${pct}deg, rgba(255,255,255,.15) ${pct}deg)`;
+  document.getElementById('timeVal').textContent=state.time;
+}
+function autoTimeout(){
+  // no answer -> reveal as bad, 0 pts
+  const q=QUESTIONS[state.idx];
+  state.chosen.push({q:state.idx,lvl:'timeout',pts:0});
+  revealAll(null,'timeout');
+}
+
+/* ====================== CHOOSE ====================== */
+function choose(btn,lvl){
+  if(state.answered)return;
+  state.answered=true;clearInterval(state.timer);
+  let pts=POINTS[lvl];
+  let speedBonus=0;
+  if(lvl==='good'){speedBonus=Math.min(30,state.time);pts+=speedBonus;}
+  state.score+=pts;
+  document.getElementById('scoreVal').textContent=state.score;
+  // value scoring for radar (good=1, neutral=0.4)
+  const q=QUESTIONS[state.idx];
+  state.valScore[q.val]+= lvl==='good'?1:(lvl==='neutral'?0.4:0);
+  state.chosen.push({q:state.idx,lvl,pts});
+  revealAll(btn,lvl,speedBonus);
+}
+
+function revealAll(chosenBtn,lvl,speedBonus=0){
+  const opts=[...document.querySelectorAll('.opt')];
+  opts.forEach(b=>{
+    b.disabled=true;b.classList.add('revealed');
+    const l=b.dataset.lvl;
+    const cls = l==='good'?'correct':(l==='neutral'?'neutral':'wrong');
+    b.classList.add(cls);
+    b.querySelector('.ptag').textContent = '+'+POINTS[l]+'đ';
+  });
+  if(chosenBtn){chosenBtn.style.boxShadow='0 0 0 3px '+(lvl==='good'?'var(--green)':lvl==='neutral'?'var(--gold)':'var(--red)')}
+
+  const q=QUESTIONS[state.idx];
+  const fb=document.getElementById('feedback');
+  const badge=document.getElementById('fbBadge');
+  const isTimeout = lvl==='timeout';
+  const useLvl = isTimeout?'bad':lvl;
+  badge.textContent = isTimeout? 'HẾT GIỜ' : LEVEL_LABEL[useLvl];
+  badge.style.background = LEVEL_COLOR[useLvl];
+  let ptsTxt = isTimeout ? '+0đ (không trả lời kịp)' : '+'+(POINTS[useLvl]+(speedBonus||0))+'đ';
+  if(speedBonus>0) ptsTxt += ` (gồm ${speedBonus}đ thưởng tốc độ)`;
+  document.getElementById('fbPoints').textContent=ptsTxt;
+  document.getElementById('fbText').textContent=q.explain;
+  document.getElementById('fbReflect').textContent=q.reflect;
+  document.getElementById('progBar').style.width=((state.idx+1)/QUESTIONS.length*100)+'%';
+  fb.classList.add('show');
+  document.getElementById('nextBtn').textContent = state.idx===QUESTIONS.length-1 ? 'Xem kết quả →' : 'Tiếp theo →';
+  fb.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+document.getElementById('nextBtn').addEventListener('click',()=>{
+  if(state.idx<QUESTIONS.length-1){state.idx++;renderQuestion();}
+  else finish();
+});
+
+/* ====================== RESULT ====================== */
+function emitGameResult(badge){
+  const maxScore = QUESTIONS.length * 130;
+  const payload = {
+    playerName: state.player,
+    groupName: 'Public',
+    score: state.score,
+    maxScore,
+    rankLabel: badge,
+    values: state.valScore,
+    answers: state.chosen.map(item => ({
+      questionIndex: item.q,
+      title: QUESTIONS[item.q] ? QUESTIONS[item.q].title : '',
+      value: QUESTIONS[item.q] ? QUESTIONS[item.q].val : '',
+      quality: item.lvl,
+      score: item.pts
+    })),
+    meta: { gameKey: 'vnpt-heart-01', chosenCount: state.chosen.length }
+  };
+  try {
+    window.parent && window.parent.postMessage({type:'game-result-ready', gameId:'vnpt-heart-01', payload}, window.location.origin);
+  } catch(e) {}
+  try {
+    const bc = new BroadcastChannel('vnpt-heart-01-results');
+    bc.postMessage({type:'game-result-ready', gameId:'vnpt-heart-01', payload});
+    bc.close();
+  } catch(e) {}
+}
+
+function finish(){
+  clearInterval(state.timer);
+  // badge
+  let badge,score=state.score;
+  if(score>=900)badge="Người Kiến tạo Văn hóa";
+  else if(score>=600)badge="Người Dẫn dắt đang trưởng thành";
+  else badge="Người Khởi đầu Hành trình";
+  document.getElementById('badgeName').textContent=badge;
+  document.getElementById('finalScore').innerHTML=score+'<small> điểm</small>';
+
+  renderLeaderboard(buildLeaderboardRows(state.player, score));
+
+  // reflections list
+  const rf=document.getElementById('reflections');rf.innerHTML='';
+  QUESTIONS.forEach((q,i)=>{
+    const it=document.createElement('div');it.className='r-item';
+    it.innerHTML=`<span class="n">${i+1}.</span><span>${q.reflect}</span>`;
+    rf.appendChild(it);
+  });
+
+  drawRadar();
+  emitGameResult(badge);
+  show('result');
+}
+
+/* ====================== RADAR ====================== */
+function drawRadar(){
+  const cv=document.getElementById('radar');const ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height,cx=W/2,cy=H/2+6,R=110;
+  ctx.clearRect(0,0,W,H);
+  const keys=['H','E','A','R','T'];
+  const n=keys.length;
+  // grid rings
+  for(let ring=1;ring<=4;ring++){
+    ctx.beginPath();
+    for(let i=0;i<=n;i++){
+      const ang=(-Math.PI/2)+(i%n)*(2*Math.PI/n);
+      const r=R*ring/4;
+      const x=cx+r*Math.cos(ang),y=cy+r*Math.sin(ang);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle='rgba(21,89,179,.15)';ctx.lineWidth=1;ctx.stroke();
+  }
+  // axes + labels
+  keys.forEach((k,i)=>{
+    const ang=(-Math.PI/2)+i*(2*Math.PI/n);
+    const x=cx+R*Math.cos(ang),y=cy+R*Math.sin(ang);
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(x,y);
+    ctx.strokeStyle='rgba(21,89,179,.18)';ctx.stroke();
+    const lx=cx+(R+20)*Math.cos(ang),ly=cy+(R+20)*Math.sin(ang);
+    ctx.fillStyle=VALUES[k].hex;ctx.font='bold 16px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(k,lx,ly);
+  });
+  // data polygon
+  ctx.beginPath();
+  keys.forEach((k,i)=>{
+    const ratio = state.valMax[k] ? state.valScore[k]/state.valMax[k] : 0;
+    const ang=(-Math.PI/2)+i*(2*Math.PI/n);
+    const r=R*Math.max(0.05,ratio);
+    const x=cx+r*Math.cos(ang),y=cy+r*Math.sin(ang);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.closePath();
+  ctx.fillStyle='rgba(47,128,237,.22)';ctx.fill();
+  ctx.strokeStyle='#2f80ed';ctx.lineWidth=2.5;ctx.stroke();
+  // points
+  keys.forEach((k,i)=>{
+    const ratio = state.valMax[k] ? state.valScore[k]/state.valMax[k] : 0;
+    const ang=(-Math.PI/2)+i*(2*Math.PI/n);
+    const r=R*Math.max(0.05,ratio);
+    const x=cx+r*Math.cos(ang),y=cy+r*Math.sin(ang);
+    ctx.beginPath();ctx.arc(x,y,4.5,0,2*Math.PI);ctx.fillStyle=VALUES[k].hex;ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+  });
+}
+
+/* ====================== REVIEW / AGAIN ====================== */
+document.getElementById('againBtn').addEventListener('click',()=>{
+  document.getElementById('playerName').value=state.player;
+  show('intro');
+});
+document.getElementById('reviewBtn').addEventListener('click',()=>{
+  let msg="TÓM TẮT LỰA CHỌN CỦA BẠN\n\n";
+  state.chosen.forEach((c,i)=>{
+    const lbl = c.lvl==='timeout'?'Hết giờ':LEVEL_LABEL[c.lvl];
+    msg+=`${i+1}. ${QUESTIONS[c.q].title} — ${lbl} (${c.pts}đ)\n`;
+  });
+  alert(msg);
+});
+window.render_game_to_text = function(){
+  const active = Object.entries(screens).find(([,node])=>node.classList.contains('active'));
+  const q = QUESTIONS[state.idx] || null;
+  const options = Array.from(document.querySelectorAll('.opt')).map((node, index)=>({
+    index,
+    level: node.dataset.lvl || '',
+    disabled: Boolean(node.disabled),
+    text: (node.textContent || '').replace(/\s+/g,' ').trim()
+  }));
+  return JSON.stringify({
+    gameId: 'vnpt-heart-01',
+    coordinateSystem: 'DOM quiz flow; no canvas coordinates',
+    screen: active ? active[0] : 'unknown',
+    player: state.player,
+    questionIndex: state.idx,
+    questionCount: QUESTIONS.length,
+    title: q ? q.title : '',
+    answered: state.answered,
+    timeRemaining: state.time,
+    score: state.score,
+    chosenCount: state.chosen.length,
+    options
+  });
+};
+
+window.advanceTime = function(ms){
+  const active = screens.play.classList.contains('active');
+  if(!active || state.answered || !state.timer) return;
+  const seconds = Math.max(1, Math.round((Number(ms) || 0) / 1000));
+  state.time = Math.max(0, state.time - seconds);
+  updateTimer();
+  if(state.time<=0){
+    clearInterval(state.timer);
+    if(!state.answered) autoTimeout();
+  }
+};
+</script>
+</body>
+</html>

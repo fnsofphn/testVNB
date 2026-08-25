@@ -1,0 +1,79 @@
+import fs from 'node:fs';
+
+const read = (path) => fs.readFileSync(path, 'utf8');
+const assert = (condition, message) => {
+  if (!condition) throw new Error(message);
+};
+
+const app = read('src/App.tsx');
+const shell = read('src/modules/vplanning/VPlanningNativePage.tsx');
+const page = read('src/modules/vplanning/trainingOperations/TrainingOperationsPage.tsx');
+const css = read('src/modules/vplanning/trainingOperations/TrainingOperationsPage.css');
+const domain = read('src/modules/vplanning/trainingOperations/domain.js');
+const api = read('api/vwork-training-operations.js');
+const userApi = read('api/vwork-training-operations-user.js');
+const fileApi = read('api/vwork-training-operations-file.js');
+const service = read('src/modules/vplanning/trainingOperations/service.ts');
+const migration = read('supabase/migrations/20260824155749_vwork_training_operations.sql');
+const privilegeHardening = read('supabase/migrations/20260825170000_vwork_training_operations_privilege_hardening.sql');
+const databaseGuards = read('supabase/tests/vwork_training_operations_guards.sql');
+
+assert(app.includes("import('@/modules/vplanning/trainingOperations/TrainingOperationsPage')"), 'Training Operations must stay lazy-loaded behind the V-Work boundary.');
+assert(app.includes('path="/vwork/training-operations"'), 'Training Operations must have its own V-Work route.');
+assert(app.includes("VITE_ENABLE_VWORK_TRAINING_OPERATIONS !== 'true'"), 'Production route must remain feature-flagged until explicitly enabled.');
+assert(app.indexOf("identity.includes('training_manager')") < app.indexOf("identity.includes('manager') ||"), 'Client role mapping must resolve training managers as operations before the generic manager rule.');
+assert(shell.includes("href:'/vwork/training-operations'"), 'The V-Work shell must link to the isolated Training Operations route.');
+assert(shell.includes('hidden:!ENABLE_TRAINING_OPERATIONS'), 'The V-Work navigation entry must follow the same feature flag.');
+
+assert(page.includes("const [layer, setLayer] = useState('projects')"), 'Project/course/class navigation must start from the project list.');
+assert(page.includes('Lịch tháng thu nhỏ') && page.includes('calendar-view-switch'), 'Overview must include the mini calendar and switchable calendar views.');
+assert(page.includes("{ id: 'VSurvey', mature: false }") && page.includes("{ id: 'VEvent', mature: false }"), 'Future VSurvey and VEvent scope must remain visible without deep configuration.');
+assert(page.includes('Clone cấu hình từ') && page.includes('LỚP MẪU'), 'New classes must choose a class-template clone source.');
+assert(page.includes('+ Thêm lớp') && page.includes('Lưu lớp'), 'The add-class interaction must expose an editable form and save action.');
+assert(page.includes('removeDraftClass') && page.includes('Xóa lớp'), 'The create flow must support removing draft classes while preserving at least one class.');
+assert(page.includes('Ekip & tài khoản') && page.includes('Tạo tài khoản thật'), 'Operations must be able to provision real team login accounts from the module.');
+assert(page.includes('không sinh công việc ngang hàng ở cấp dự án hoặc khóa học'), 'Tasks must be generated inside classes only.');
+assert(!page.includes('LegacyCreateWizard'), 'The obsolete project/course-level task wizard must not remain in production source.');
+assert(!page.includes('MOCKUP DUYỆT') && !page.includes('Mock state'), 'Production source must not expose mockup-only labels.');
+assert(page.includes("runCommand('ASSIGN_GROUP_MANAGER'"), 'Group manager assignment must not be implemented as CTV assignment.');
+assert(page.includes("content: ['vlearning', 'game', 'discussion', 'assignment', 'test']"), 'Content workspace must expose D04-D08 exactly.');
+assert(page.includes('const baseTasks = tasks;') && page.includes('const baseVisible = tasks;'), 'Member task lists must trust the server-scoped result instead of filtering a hard-coded mock identity.');
+assert(!page.includes("task.assignee === 'Nam Nguyễn'") && !page.includes('<option>Nam Nguyễn</option>'), 'Production assignment UI must not depend on mock people names.');
+for (const field of ['content_name', 'eln_structure', 'game_content', 'play_limit', 'topic_content', 'group_reference', 'assignment_brief', 'rubric_pass_score', 'question_bank', 'test_rule', 'material_name_type', 'class_ids', 'visible_from', 'visible_to']) {
+  assert(page.includes(`key: '${field}'`), `Canonical input field ${field} must be represented in the production form.`);
+}
+assert(page.includes("uploadTrainingOperationsFile(file, task.id, 'evidence')"), 'Members must be able to upload private task evidence.');
+assert(page.includes('getTrainingOperationsFileUrl(record.path, record.name)'), 'Reviewers must open private evidence through a short-lived signed URL.');
+assert(page.includes('deadlineOverrideReason') && page.includes('Lý do deadline sau khai giảng'), 'Task assignment must capture a reason for post-class-start deadline exceptions.');
+assert(page.includes('Vướng mắc / blocker') && page.includes("runCommand('UPDATE_TASK_PROGRESS'"), 'Members must persist checklist blockers as part of D12 progress tracking.');
+assert(domain.includes("ASSIGN_GROUP_MANAGER: ['operations', 'admin']"), 'Group manager assignment must be authorized at the domain boundary.');
+assert(api.includes('/rpc/persist_vwork_training_operations_state'), 'All mutations must use the isolated atomic persistence RPC.');
+assert(api.includes("VWORK_TRAINING_OPERATIONS_ENABLED !== 'true'") && fileApi.includes("VWORK_TRAINING_OPERATIONS_ENABLED !== 'true'") && userApi.includes("VWORK_TRAINING_OPERATIONS_ENABLED !== 'true'"), 'Every server endpoint must remain disabled in production until the module server flag is explicitly enabled.');
+assert(userApi.includes('/auth/v1/admin/users') && userApi.includes('/vcontent_profiles') && userApi.includes('/vplanning_users?on_conflict=email'), 'Account provisioning must atomically reconcile Auth, PeopleOne profile and the VWork directory.');
+assert(userApi.includes('TRAINING_OPERATIONS_ACCOUNT_PERMISSION_DENIED') && userApi.includes('rollbackAttempted'), 'Account provisioning must enforce server authorization and attempt compensation after partial failure.');
+assert(api.includes('loadTeamDirectory(auth)') && api.includes("role === 'manager' || role === 'member'"), 'Assignment options must use the existing VWork user directory with stable identities.');
+assert(api.includes('/vwork_training_operations_tasks?') && api.includes('/vwork_training_operations_audit_events?'), 'Reads must reconstruct state from independent task and audit rows.');
+assert(!api.includes("method: 'PATCH'") && !api.includes("/vwork_training_operations_state?on_conflict"), 'The API must not bypass the atomic RPC with direct aggregate writes.');
+assert(!api.includes('/vplanning_state') && !api.includes('/vplanning_records'), 'The module must not write to existing VPlanning state storage.');
+assert(migration.includes('public.vwork_training_operations_tasks') && migration.includes('public.vwork_training_operations_task_history'), 'Every task must have an independent current row and append-only history.');
+assert(migration.includes('public.vwork_training_operations_command_requests') && migration.includes('pg_advisory_xact_lock'), 'Mutations must be idempotent and serialized per workspace.');
+assert(migration.includes('VWORK_EMPTY_TASK_PAYLOAD_REJECTED') && migration.includes('VWORK_MISSING_EXISTING_TASK_REJECTED'), 'The database must reject empty and reduced task payloads.');
+assert(migration.includes('security invoker') && migration.includes('revoke all on function public.persist_vwork_training_operations_state'), 'The mutation RPC must be security-invoker and unavailable to browser roles.');
+assert(privilegeHardening.includes('revoke all on table public.vwork_training_operations_task_history from service_role') && privilegeHardening.includes('grant select, insert on table public.vwork_training_operations_task_history to service_role'), 'Task history must be append-only for the API service role.');
+assert(!/grant\s+(?:all|delete|truncate|update).*vwork_training_operations_(?:task_history|audit_events|command_requests)/i.test(privilegeHardening), 'Immutable module logs must never grant update, delete, or truncate to the API service role.');
+assert(migration.includes('enable row level security') && migration.includes('revoke all on table public.vwork_training_operations_state from anon, authenticated'), 'Training Operations tables must have RLS and no direct browser grants.');
+assert(!/\b(?:insert into|update|delete from|alter table|create trigger on)\s+public\.(?!vwork_training_operations_)/i.test(migration), 'Migration writes must remain inside the VWork Training Operations namespace.');
+assert(service.includes("'/api/vwork-training-operations-file'") && !service.includes("'/api/vwork-file'"), 'Training Operations uploads must use the isolated private upload boundary.');
+assert(service.includes('requestId: crypto.randomUUID()'), 'Every browser mutation must carry a unique idempotency key.');
+assert(fileApi.includes("public: false") && fileApi.includes("vwork-training-operations-private"), 'Roster and evidence files must not be stored in a public bucket.');
+assert(fileApi.includes("evidence: { upload: ['member'], download: ['member', 'manager'] }"), 'Private evidence access must be limited to the assigned workflow roles and operations administrators.');
+assert(fileApi.includes("assertEvidenceTaskAccess(admin, profile, role") && fileApi.includes(".eq('task_id', taskId)"), 'Evidence upload and download must verify the current task assignment server-side.');
+assert(databaseGuards.includes('GUARD_EMPTY_TASKS_ACCEPTED') && databaseGuards.includes('GUARD_MISSING_TASK_ACCEPTED'), 'Database guard smoke must cover empty and reduced payloads.');
+assert(databaseGuards.includes('GUARD_STALE_CLIENT_ACCEPTED') && databaseGuards.includes('GUARD_IDEMPOTENCY_FAILED'), 'Database guard smoke must cover stale clients and retries.');
+assert(databaseGuards.includes('GUARD_LATE_FAILURE_CHANGED_TASK') && databaseGuards.trimEnd().endsWith('rollback;'), 'Database guard smoke must prove transaction rollback without leaving test rows.');
+
+assert(css.includes('.vwork-training-operations.app-shell'), 'Training Operations CSS must be rooted at its isolated module class.');
+assert(!/^\s*(?:body|html|:root|\.sidebar|\.topbar|button|input|select|textarea)\s*\{/m.test(css), 'Training Operations CSS must not leak generic selectors into VLearning or VTraining.');
+
+console.log('V-Work Training Operations architecture checks passed.');
+

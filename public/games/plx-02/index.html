@@ -1,0 +1,2718 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Một ca làm việc – Sáu tình huống – Khung tư duy “5 Rõ” · PLX GAMIFICATION</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --plx-red:#E30613;
+    --plx-red-deep:#B30510;
+    --plx-navy:#002D74;
+    --plx-navy-ink:#001A4A;
+    --plx-gold:#F0A500;
+    --plx-gold-deep:#C08500;
+    --plx-green:#2D9B4E;
+    --plx-green-deep:#1E7738;
+    --cream:#FBF7F0;
+    --cream-deep:#F3ECDD;
+    --paper:#FFFFFF;
+    --ink:#161413;
+    --muted:#6B655D;
+    --faint:#D9D3C7;
+    --line:rgba(22,20,19,0.10);
+    --line-strong:rgba(22,20,19,0.18);
+    --sans:'Be Vietnam Pro',-apple-system,sans-serif;
+    --serif:'Fraunces',Georgia,serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  html,body{height:100%}
+  body{
+    font-family:var(--sans);
+    background:var(--cream);
+    color:var(--ink);
+    font-feature-settings:"ss01","ss02","cv11";
+    letter-spacing:-0.005em;
+    overflow-x:hidden;
+  }
+
+  /* ═══════════════ TOPBAR (đen & vàng — phân biệt với App 1) ═══════════════ */
+  .topbar{
+    height:56px;
+    background:linear-gradient(135deg,#0B0A09 0%,#1C1A17 100%);
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 20px;
+    border-bottom:3px solid var(--plx-gold);
+    position:sticky;top:0;z-index:50;
+  }
+  .topbar .brand{display:flex;align-items:center;gap:12px}
+  .plx-mark{
+    width:34px;height:34px;border-radius:50%;
+    background:var(--plx-gold);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 0 3px rgba(240,165,0,0.25);
+    position:relative;
+  }
+  .plx-mark::before{
+    content:"";position:absolute;inset:8px;
+    border-radius:2px;background:var(--plx-navy);
+    clip-path:polygon(50% 0%,100% 100%,0% 100%);
+  }
+  .brand-stack{color:#fff;line-height:1.1}
+  .brand-stack .b1{font-size:11px;letter-spacing:0.18em;font-weight:600;opacity:0.7;text-transform:uppercase}
+  .brand-stack .b2{font-family:var(--serif);font-size:17px;font-weight:600;letter-spacing:-0.01em}
+
+  .top-right{display:flex;align-items:center;gap:10px}
+  .chip{
+    background:rgba(255,255,255,0.1);
+    color:#fff;
+    font-size:11px;font-weight:600;
+    padding:5px 11px;border-radius:20px;
+    display:flex;align-items:center;gap:6px;
+    border:1px solid rgba(255,255,255,0.12);
+  }
+  .chip .dot{width:6px;height:6px;border-radius:50%;background:var(--plx-gold);box-shadow:0 0 8px var(--plx-gold)}
+  .chip.mono{font-family:var(--mono);font-weight:700;letter-spacing:0.05em}
+
+  /* ═══════════════ BUTTONS ═══════════════ */
+  .btn{
+    font-family:var(--sans);font-weight:600;font-size:14px;
+    border:none;cursor:pointer;padding:12px 22px;
+    border-radius:10px;display:inline-flex;align-items:center;gap:8px;justify-content:center;
+    transition:all 0.18s ease;letter-spacing:-0.005em;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{
+    background:var(--plx-navy);color:#fff;
+    box-shadow:0 4px 0 var(--plx-navy-ink),0 8px 20px rgba(0,45,116,0.3);
+  }
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 0 var(--plx-navy-ink),0 10px 24px rgba(0,45,116,0.35)}
+  .btn-gold{
+    background:var(--plx-gold);color:var(--plx-navy-ink);
+    box-shadow:0 4px 0 var(--plx-gold-deep),0 8px 20px rgba(240,165,0,0.3);
+  }
+  .btn-gold:hover{transform:translateY(-1px)}
+  .btn-ghost{
+    background:transparent;color:var(--ink);
+    border:1.5px solid var(--line-strong);
+  }
+  .btn-ghost:hover{border-color:var(--ink);background:rgba(0,0,0,0.03)}
+  .btn-lg{padding:16px 30px;font-size:15px;border-radius:12px}
+  .btn:disabled{opacity:0.4;cursor:not-allowed;transform:none !important}
+
+  /* ═══════════════ SCREEN CONTAINER ═══════════════ */
+  .screen{display:none;animation:fadeIn 0.4s ease}
+  .screen.active{display:block}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .wrap{width:100%;max-width:none;margin:0;padding:24px 22px 60px}
+
+  /* ═══════════════ LOBBY SCREEN ═══════════════ */
+  .lobby-hero{
+    background:var(--paper);
+    border-radius:20px;
+    padding:40px 44px 36px;
+    position:relative;overflow:hidden;
+    border:1px solid var(--line);
+    box-shadow:0 2px 0 rgba(0,0,0,0.03),0 30px 60px -20px rgba(0,45,116,0.08);
+  }
+  .lobby-hero::before{
+    content:"";position:absolute;top:-60px;left:-80px;
+    width:360px;height:360px;border-radius:50%;
+    background:radial-gradient(circle,rgba(240,165,0,0.12) 0%,transparent 60%);
+    pointer-events:none;
+  }
+  .hero-content{position:relative;z-index:1}
+  .kicker{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--plx-gold-deep);
+    background:rgba(240,165,0,0.12);
+    padding:6px 12px;border-radius:30px;
+    margin-bottom:20px;
+  }
+  .kicker .k-dot{width:6px;height:6px;border-radius:50%;background:var(--plx-gold-deep)}
+
+  .hero-title{
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:clamp(28px,3.2vw,42px);
+    line-height:1.04;letter-spacing:-0.025em;
+    color:var(--plx-navy);
+    max-width:none;
+    white-space:nowrap;
+  }
+  @media(max-width:1180px){.hero-title{white-space:normal}}
+  .hero-title em{color:var(--plx-gold-deep);font-style:normal;position:relative;display:inline-block}
+  .hero-title em::after{
+    content:"";position:absolute;left:-2px;right:-2px;bottom:4px;height:10px;
+    background:var(--plx-gold);opacity:0.35;z-index:-1;border-radius:2px;
+  }
+  .hero-sub{
+    font-size:17px;line-height:1.55;color:var(--muted);
+    margin-top:18px;max-width:none;
+  }
+  .hero-sub strong{color:var(--ink);font-weight:600}
+
+  /* 5 Rõ boxes showcase */
+  .ro-showcase{
+    margin-top:32px;
+    display:grid;grid-template-columns:repeat(5,1fr);gap:10px;
+  }
+  @media(max-width:820px){.ro-showcase{grid-template-columns:repeat(2,1fr)}}
+  .ro-box{
+    background:var(--cream-deep);
+    border-radius:12px;padding:16px 14px;
+    border:1px solid var(--line);
+    position:relative;overflow:hidden;
+    transition:all 0.25s ease;
+  }
+  .ro-box::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+    background:var(--plx-gold);
+  }
+  .ro-box:nth-child(1)::before{background:var(--plx-red)}
+  .ro-box:nth-child(2)::before{background:var(--plx-gold)}
+  .ro-box:nth-child(3)::before{background:var(--plx-navy)}
+  .ro-box:nth-child(4)::before{background:var(--plx-green)}
+  .ro-box:nth-child(5)::before{background:var(--plx-red-deep)}
+  .ro-box:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,0.05)}
+  .ro-num{
+    font-family:var(--serif);font-size:11px;letter-spacing:0.12em;font-weight:600;
+    color:var(--muted);text-transform:uppercase;margin-bottom:4px;
+  }
+  .ro-label{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--plx-navy);letter-spacing:-0.01em;line-height:1}
+  .ro-desc{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.35}
+
+  /* Team preview */
+  .team-preview{
+    margin-top:32px;
+    background:var(--cream);border-radius:14px;padding:22px 24px;
+    border:1px solid var(--line);
+  }
+  .team-preview h4{
+    font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--muted);font-weight:700;margin-bottom:14px;
+  }
+  .team-row{display:flex;gap:14px;flex-wrap:wrap}
+  .team-chip{
+    display:flex;align-items:center;gap:10px;
+    background:var(--paper);padding:8px 14px 8px 8px;border-radius:40px;
+    border:1px solid var(--line);
+  }
+  .team-avatar{
+    width:32px;height:32px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-weight:700;font-size:13px;color:#fff;flex-shrink:0;
+  }
+  .team-meta{line-height:1.2}
+  .team-name{font-size:12px;font-weight:700;color:var(--ink)}
+  .team-role{font-size:10px;color:var(--muted)}
+
+  /* Shift setup */
+  .setup-grid{
+    margin-top:30px;
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;
+  }
+  @media(max-width:820px){.setup-grid{grid-template-columns:1fr}}
+  .setup-card{
+    background:var(--paper);border:1px solid var(--line);
+    border-radius:12px;padding:16px 18px;position:relative;
+  }
+  .setup-icon{
+    width:32px;height:32px;border-radius:8px;margin-bottom:10px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-weight:700;font-size:16px;
+  }
+  .setup-icon.c1{background:rgba(227,6,19,0.12);color:var(--plx-red)}
+  .setup-icon.c2{background:rgba(240,165,0,0.14);color:var(--plx-gold-deep)}
+  .setup-icon.c3{background:rgba(45,155,78,0.14);color:var(--plx-green-deep)}
+  .setup-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px}
+  .setup-desc{font-size:12px;line-height:1.45;color:var(--muted)}
+
+  .cta-row{
+    margin-top:32px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;
+  }
+  .cta-row .meta{font-size:12px;color:var(--muted)}
+
+  /* ═══════════════ SHIFT CLOCK & TIMELINE ═══════════════ */
+  .shift-bar{
+    background:var(--plx-navy);
+    background-image:linear-gradient(135deg,var(--plx-navy) 0%,#001A4A 100%);
+    border-radius:16px;padding:18px 22px;margin-bottom:18px;
+    color:#fff;position:relative;overflow:hidden;
+    border:1px solid rgba(255,255,255,0.05);
+  }
+  .shift-bar::before{
+    content:"";position:absolute;top:-50%;right:-20%;
+    width:400px;height:400px;border-radius:50%;
+    background:radial-gradient(circle,rgba(240,165,0,0.08) 0%,transparent 60%);
+  }
+  .sb-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;position:relative;z-index:1}
+  .sb-title{font-size:11px;letter-spacing:0.14em;text-transform:uppercase;font-weight:700;opacity:0.7}
+  .sb-clock{
+    font-family:var(--mono);font-size:22px;font-weight:700;
+    letter-spacing:0.02em;color:var(--plx-gold);
+    display:flex;align-items:center;gap:10px;
+  }
+  .sb-clock .progress{
+    font-family:var(--sans);font-size:12px;color:#fff;opacity:0.7;font-weight:500;
+  }
+  .sb-clock .timer-chip{
+    font-family:var(--mono);font-size:13px;font-weight:700;color:#fff;
+    background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.18);
+    padding:5px 9px;border-radius:999px;
+  }
+  .sb-clock .timer-chip.warn{color:var(--plx-gold);border-color:rgba(240,165,0,0.6)}
+  .sb-clock .timer-chip.danger{color:#fff;background:var(--plx-red);border-color:var(--plx-red)}
+
+  .timeline{
+    position:relative;padding:28px 14px 12px;
+  }
+  .tl-track{
+    position:relative;height:4px;background:rgba(255,255,255,0.15);border-radius:2px;
+  }
+  .tl-fill{
+    position:absolute;top:0;left:0;bottom:0;
+    background:linear-gradient(90deg,var(--plx-gold) 0%,#FFD15C 100%);
+    border-radius:2px;transition:width 0.6s ease;
+    box-shadow:0 0 12px rgba(240,165,0,0.6);
+  }
+  .tl-events{position:absolute;top:0;left:14px;right:14px;height:0}
+  .tl-event-marker{
+    position:absolute;top:-10px;transform:translateX(-50%);
+    width:18px;height:18px;border-radius:50%;
+    background:var(--paper);border:3px solid rgba(255,255,255,0.4);
+    cursor:default;transition:all 0.3s;
+  }
+  .tl-event-marker::after{
+    content:attr(data-time);position:absolute;top:-22px;left:50%;transform:translateX(-50%);
+    font-family:var(--mono);font-size:9px;color:#fff;opacity:0.6;font-weight:600;white-space:nowrap;
+  }
+  .tl-event-marker.done{background:var(--plx-green);border-color:var(--plx-green-deep)}
+  .tl-event-marker.current{
+    background:var(--plx-red);border-color:var(--plx-red);
+    box-shadow:0 0 0 4px rgba(227,6,19,0.4);
+    animation:pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 4px rgba(227,6,19,0.4)}50%{box-shadow:0 0 0 10px rgba(227,6,19,0.15)}}
+  .tl-event-marker.danger{background:var(--plx-gold);border-color:var(--plx-gold-deep)}
+
+  .tl-scale{
+    display:flex;justify-content:space-between;margin-top:10px;
+    font-family:var(--mono);font-size:10px;color:#fff;opacity:0.5;font-weight:600;
+  }
+
+  /* ═══════════════ MAIN GAME GRID ═══════════════ */
+  .game-grid{
+    display:grid;grid-template-columns:230px 1fr 290px;gap:16px;
+  }
+  @media(max-width:1100px){
+    .game-grid{grid-template-columns:1fr}
+    .team-board{order:1}
+    .stage{order:2}
+    .side-r{order:3}
+  }
+
+  /* ═══════════════ TEAM BOARD (LEFT) ═══════════════ */
+  .team-board{
+    background:var(--paper);
+    border-radius:14px;
+    border:1px solid var(--line);
+    padding:16px;
+    height:fit-content;
+  }
+  .tb-head{
+    font-size:11px;letter-spacing:0.12em;text-transform:uppercase;
+    font-weight:700;color:var(--muted);margin-bottom:12px;
+  }
+  .staff-list{display:flex;flex-direction:column;gap:8px}
+  .staff{
+    display:flex;align-items:center;gap:10px;
+    padding:10px;border-radius:10px;
+    background:var(--cream);border:1.5px solid transparent;
+    transition:all 0.2s;position:relative;
+  }
+  .staff.selected{
+    background:#FFF7E2;border-color:var(--plx-gold);
+    box-shadow:0 4px 12px rgba(240,165,0,0.2);
+  }
+  .staff.assigned{
+    background:#E8F5EC;border-color:var(--plx-green);
+  }
+  .staff-avatar{
+    width:36px;height:36px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-weight:700;font-size:14px;color:#fff;flex-shrink:0;
+    position:relative;
+  }
+  .staff-avatar::after{
+    content:"";position:absolute;bottom:-2px;right:-2px;
+    width:10px;height:10px;border-radius:50%;
+    background:var(--plx-green);border:2px solid var(--paper);
+  }
+  .staff.busy .staff-avatar::after{background:var(--plx-gold)}
+  .staff.alert .staff-avatar::after{background:var(--plx-red);animation:blink 1.2s infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
+
+  .staff-body{flex:1;min-width:0}
+  .staff-name{font-size:12px;font-weight:700;color:var(--ink);line-height:1.2}
+  .staff-role{font-size:10px;color:var(--muted);margin-top:2px}
+  .staff-energy{
+    margin-top:4px;height:3px;background:var(--faint);border-radius:2px;overflow:hidden;
+  }
+  .staff-energy .fill{height:100%;transition:width 0.5s;border-radius:2px}
+
+  /* ═══════════════ EVENT STAGE (CENTER) ═══════════════ */
+  .stage{
+    background:var(--paper);
+    border-radius:16px;border:1px solid var(--line);
+    overflow:hidden;
+  }
+
+  .stage-header{
+    padding:20px 24px;background:var(--cream-deep);
+    border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:16px;
+  }
+  @media(max-width:760px){.stage-header{align-items:flex-start;flex-wrap:wrap}}
+  .event-time{
+    font-family:var(--mono);font-size:22px;font-weight:700;
+    color:var(--plx-navy);letter-spacing:0.02em;
+    background:var(--paper);padding:8px 14px;border-radius:10px;
+    border:1.5px solid var(--plx-navy);
+    flex-shrink:0;
+  }
+  .event-time-stack{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0}
+  .event-index{
+    font-size:10px;letter-spacing:0.12em;text-transform:uppercase;
+    font-weight:700;color:var(--muted);white-space:nowrap;
+  }
+  .event-head-body{flex:1;min-width:0}
+  .event-countdown{
+    flex-shrink:0;min-width:118px;
+    background:var(--paper);border:1.5px solid var(--line-strong);
+    border-radius:12px;padding:8px 12px;text-align:center;
+  }
+  .event-countdown .label{
+    display:block;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--muted);font-weight:700;margin-bottom:2px;
+  }
+  .event-countdown .value{
+    font-family:var(--mono);font-size:22px;font-weight:700;
+    color:var(--plx-navy);letter-spacing:0.02em;
+  }
+  .event-countdown.warn{border-color:var(--plx-gold)}
+  .event-countdown.warn .value{color:var(--plx-gold-deep)}
+  .event-countdown.danger{border-color:var(--plx-red);background:#FDEEEC}
+  .event-countdown.danger .value{color:var(--plx-red)}
+  .event-countdown .hint{
+    display:block;font-size:9px;color:var(--muted);font-weight:600;margin-top:2px;
+  }
+  .event-badge{
+    font-size:10px;letter-spacing:0.12em;text-transform:uppercase;font-weight:700;
+    padding:3px 9px;border-radius:30px;display:inline-block;margin-bottom:6px;
+  }
+  .event-badge.normal{background:rgba(0,45,116,0.1);color:var(--plx-navy)}
+  .event-badge.urgent{background:rgba(240,165,0,0.18);color:var(--plx-gold-deep)}
+  .event-badge.critical{background:rgba(227,6,19,0.12);color:var(--plx-red)}
+  .event-title{
+    font-family:var(--serif);font-size:22px;font-weight:700;
+    color:var(--plx-navy);line-height:1.15;letter-spacing:-0.01em;
+  }
+
+  .event-scenario{
+    padding:18px 24px;
+    font-size:15px;line-height:1.55;color:var(--ink);
+    background:var(--paper);
+    border-bottom:1px solid var(--line);
+  }
+  .event-scenario::before{
+    content:"📋 Tình huống";
+    display:block;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;
+    font-weight:700;color:var(--muted);margin-bottom:6px;
+  }
+
+  /* 5 Rõ form */
+  .form-5ro{padding:22px 24px}
+  .ro-field{
+    margin-bottom:18px;
+    padding-bottom:18px;border-bottom:1px dashed var(--line);
+  }
+  .ro-field:last-of-type{border-bottom:none;padding-bottom:0}
+  .ro-field-head{
+    display:flex;align-items:center;gap:12px;margin-bottom:10px;
+  }
+  .ro-badge{
+    width:34px;height:34px;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-weight:700;font-size:14px;color:#fff;flex-shrink:0;
+  }
+  .ro-badge.r1{background:var(--plx-red)}
+  .ro-badge.r2{background:var(--plx-gold-deep)}
+  .ro-badge.r3{background:var(--plx-navy)}
+  .ro-badge.r4{background:var(--plx-green-deep)}
+  .ro-badge.r5{background:var(--plx-red-deep)}
+
+  .ro-label-main{
+    font-family:var(--serif);font-size:17px;font-weight:700;color:var(--plx-navy);letter-spacing:-0.01em;
+  }
+  .ro-q{font-size:13px;color:var(--muted);margin-top:1px}
+
+  .ro-options{display:grid;gap:6px;margin-top:10px}
+  .ro-opt{
+    display:flex;align-items:flex-start;gap:10px;
+    padding:11px 14px;border-radius:9px;
+    background:var(--cream);border:1.5px solid var(--line-strong);
+    cursor:pointer;transition:all 0.15s;text-align:left;
+    font-family:var(--sans);width:100%;
+  }
+  .ro-opt:hover:not(:disabled){border-color:var(--plx-navy);background:#fff}
+  .ro-opt.picked{
+    background:#E9F0FB;border-color:var(--plx-navy);
+    box-shadow:0 0 0 3px rgba(0,45,116,0.1);
+  }
+  .ro-opt:disabled{cursor:default}
+  .ro-opt.picked.correct{background:#EAF6EE;border-color:var(--plx-green)}
+  .ro-opt.picked.mid{background:#FEF5E4;border-color:var(--plx-gold)}
+  .ro-opt.picked.wrong{background:#FDEEEC;border-color:var(--plx-red)}
+  .ro-opt.shown-correct{background:#EAF6EE;border-color:var(--plx-green);opacity:0.9}
+
+  .ro-opt-radio{
+    width:18px;height:18px;border-radius:50%;
+    border:1.5px solid var(--line-strong);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    transition:all 0.15s;margin-top:2px;
+  }
+  .ro-opt.picked .ro-opt-radio{border-color:var(--plx-navy)}
+  .ro-opt.picked .ro-opt-radio::after{
+    content:"";width:8px;height:8px;border-radius:50%;background:var(--plx-navy);
+  }
+  .ro-opt.picked.correct .ro-opt-radio{border-color:var(--plx-green)}
+  .ro-opt.picked.correct .ro-opt-radio::after{background:var(--plx-green)}
+  .ro-opt.picked.mid .ro-opt-radio{border-color:var(--plx-gold)}
+  .ro-opt.picked.mid .ro-opt-radio::after{background:var(--plx-gold)}
+  .ro-opt.picked.wrong .ro-opt-radio{border-color:var(--plx-red)}
+  .ro-opt.picked.wrong .ro-opt-radio::after{background:var(--plx-red)}
+  .ro-opt.shown-correct .ro-opt-radio{border-color:var(--plx-green)}
+  .ro-opt.shown-correct .ro-opt-radio::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--plx-green)}
+
+  .ro-opt-text{font-size:13.5px;line-height:1.5;color:var(--ink);flex:1}
+  .ro-opt-text .tag{
+    display:inline-block;font-size:10px;font-weight:700;letter-spacing:0.04em;
+    padding:1px 7px;border-radius:10px;margin-left:6px;vertical-align:1px;
+  }
+  .ro-opt.shown-correct .ro-opt-text .tag.good{background:var(--plx-green);color:#fff}
+
+  /* submit bar */
+  .submit-bar{
+    margin-top:22px;padding-top:18px;border-top:1px solid var(--line);
+    display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
+  }
+  .progress-text{font-size:13px;color:var(--muted)}
+  .progress-text strong{font-family:var(--serif);color:var(--plx-navy);font-size:15px}
+  .speed-note{
+    flex-basis:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:var(--cream);border:1px solid var(--line);border-radius:10px;
+    padding:9px 12px;font-size:12px;color:var(--muted);
+  }
+  .speed-note strong{color:var(--plx-navy);font-family:var(--mono);font-size:13px}
+
+  /* Verdict panel after submit */
+  .verdict{
+    margin:20px 24px 24px;
+    border-radius:14px;padding:20px 22px;
+    border:1.5px solid;
+    animation:slideUp 0.35s ease;
+  }
+  @keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .verdict.good{background:linear-gradient(135deg,#EAF6EE 0%,#F7FBF8 100%);border-color:var(--plx-green)}
+  .verdict.mid{background:linear-gradient(135deg,#FEF5E4 0%,#FDFBF4 100%);border-color:var(--plx-gold)}
+  .verdict.bad{background:linear-gradient(135deg,#FDEEEC 0%,#FEF7F6 100%);border-color:var(--plx-red)}
+
+  .v-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .v-icon{
+    width:40px;height:40px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    color:#fff;font-weight:900;font-size:20px;
+  }
+  .verdict.good .v-icon{background:var(--plx-green)}
+  .verdict.mid .v-icon{background:var(--plx-gold)}
+  .verdict.bad .v-icon{background:var(--plx-red)}
+  .v-head-text{flex:1}
+  .v-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--ink)}
+  .v-score{font-size:12px;color:var(--muted);margin-top:2px}
+  .v-score strong{font-family:var(--serif);font-size:16px;color:var(--plx-navy);margin-right:4px}
+  .v-bonus{
+    display:inline-flex;align-items:center;gap:4px;margin-left:6px;
+    color:var(--plx-green-deep);font-weight:700;
+  }
+
+  .v-breakdown{
+    display:grid;grid-template-columns:repeat(5,1fr);gap:6px;
+    margin:14px 0;
+  }
+  @media(max-width:600px){.v-breakdown{grid-template-columns:repeat(5,1fr)}}
+  .vb-cell{
+    background:var(--paper);border-radius:8px;padding:8px 6px;
+    text-align:center;border:1px solid var(--line);
+  }
+  .vb-cell-num{font-family:var(--serif);font-size:10px;font-weight:700;color:var(--muted);letter-spacing:0.06em;margin-bottom:3px}
+  .vb-cell-score{font-family:var(--serif);font-size:18px;font-weight:700;line-height:1}
+  .vb-cell.good .vb-cell-score{color:var(--plx-green)}
+  .vb-cell.mid .vb-cell-score{color:var(--plx-gold-deep)}
+  .vb-cell.bad .vb-cell-score{color:var(--plx-red)}
+
+  .v-lesson{
+    background:var(--paper);border-radius:10px;padding:14px 16px;
+    border-left:3px solid var(--plx-gold);margin-top:12px;
+    font-size:13.5px;line-height:1.55;
+  }
+  .v-lesson-lbl{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;font-weight:700;color:var(--plx-gold-deep);margin-bottom:4px}
+
+  .v-cta{margin-top:16px;display:flex;justify-content:flex-end}
+
+  /* ═══════════════ RIGHT SIDEBAR — Resources + Log ═══════════════ */
+  .side-r{display:flex;flex-direction:column;gap:14px}
+
+  .leaderboard{
+    background:var(--paper);
+    border:1px solid var(--line);border-radius:14px;
+    padding:16px 18px;
+  }
+  .lb-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}
+  .lb-title{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+  .lb-rank{
+    font-family:var(--serif);font-size:28px;font-weight:700;color:var(--plx-navy);line-height:1;
+    text-align:right;
+  }
+  .lb-rank span{display:block;font-family:var(--sans);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-top:3px}
+  .lb-list{display:flex;flex-direction:column;gap:7px}
+  .lb-row{
+    display:grid;grid-template-columns:26px 1fr auto;gap:8px;align-items:center;
+    font-size:12px;color:var(--ink);padding:7px 8px;border-radius:8px;background:var(--cream);
+    border:1px solid transparent;
+  }
+  .lb-row.you{background:#E9F0FB;border-color:rgba(0,45,116,0.22);font-weight:700}
+  .lb-pos{font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:700}
+  .lb-score{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--plx-navy)}
+  .lb-note{font-size:10.5px;color:var(--muted);line-height:1.4;margin-top:10px}
+  .leaderboard.rank-card{
+    padding:14px;
+  }
+  .rank-mini-row{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:8px;
+    margin-top:12px;
+  }
+  .rank-mini{
+    background:var(--cream);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px 8px;
+    text-align:center;
+    min-width:0;
+  }
+  .rank-mini .mc-val{
+    font-family:var(--serif);
+    font-size:24px;
+    font-weight:700;
+    color:var(--ink);
+    line-height:1;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .rank-mini.rank-card .mc-val{color:var(--plx-navy)}
+  .rank-mini .mc-lbl{
+    margin-top:6px;
+    font-size:9px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    font-weight:700;
+    color:var(--muted);
+  }
+  .honor-banner{
+    display:none;position:relative;overflow:hidden;margin-top:18px;padding:18px 20px 18px 96px;border-radius:14px;
+    background:linear-gradient(135deg,rgba(240,165,0,0.24),rgba(255,255,255,0.94));
+    border:1.5px solid rgba(240,165,0,0.55);
+    box-shadow:0 16px 36px rgba(240,165,0,0.18);
+    color:var(--plx-navy);
+  }
+  .honor-banner.active{display:block;animation:honorPop 0.55s ease both}
+  .honor-banner.rank-1{background:linear-gradient(135deg,#FFF2BF 0%,#FFFFFF 72%);border-color:#F0A500}
+  .honor-banner.rank-2{background:linear-gradient(135deg,#EEF2F8 0%,#FFFFFF 72%);border-color:#AAB4C4}
+  .honor-banner.rank-3{background:linear-gradient(135deg,#F8E2C8 0%,#FFFFFF 72%);border-color:#C9863A}
+  .honor-cup{
+    position:absolute;left:18px;top:50%;transform:translateY(-50%);
+    width:58px;height:58px;border-radius:16px;display:grid;place-items:center;
+    background:var(--plx-gold);color:var(--plx-navy);font-family:var(--serif);
+    font-size:26px;font-weight:900;box-shadow:0 10px 22px rgba(240,165,0,0.28);
+  }
+  .honor-banner.rank-2 .honor-cup{background:#DDE4EE;color:#22324A}
+  .honor-banner.rank-3 .honor-cup{background:#D59A54;color:#2E1908}
+  .honor-podium{display:flex;align-items:flex-end;gap:6px;margin-top:12px;height:36px}
+  .podium-step{width:42px;border-radius:7px 7px 3px 3px;background:rgba(0,45,116,0.15);display:grid;place-items:center;font-family:var(--mono);font-size:11px;font-weight:800;color:var(--plx-navy)}
+  .podium-step.s1{height:36px;background:rgba(240,165,0,0.72)}
+  .podium-step.s2{height:29px;background:rgba(170,180,196,0.78)}
+  .podium-step.s3{height:23px;background:rgba(201,134,58,0.72)}
+  .podium-step.active{outline:3px solid rgba(227,6,19,0.22);transform:translateY(-3px)}
+  .honor-title{font-family:var(--serif);font-size:24px;font-weight:800;line-height:1.15}
+  .honor-sub{font-size:13px;line-height:1.5;color:var(--ink);margin-top:6px}
+  .honor-confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .honor-confetti span{
+    position:absolute;top:-12px;width:7px;height:12px;border-radius:2px;
+    background:var(--plx-gold);animation:confettiFall 1.4s ease-in-out infinite;
+  }
+  .honor-confetti span:nth-child(2){left:18%;background:var(--plx-red);animation-delay:.12s}
+  .honor-confetti span:nth-child(3){left:38%;background:var(--plx-green);animation-delay:.24s}
+  .honor-confetti span:nth-child(4){left:61%;background:var(--plx-navy);animation-delay:.36s}
+  .honor-confetti span:nth-child(5){left:82%;background:var(--plx-gold-deep);animation-delay:.48s}
+  .honor-confetti span:nth-child(6){left:50%;background:#fff;animation-delay:.6s}
+  .honor-confetti span:nth-child(7){left:70%;background:var(--plx-red);animation-delay:.72s}
+  @keyframes honorPop{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+  @keyframes confettiFall{0%{transform:translateY(-16px) rotate(0deg);opacity:0}20%{opacity:1}100%{transform:translateY(132px) rotate(220deg);opacity:0}}
+
+  .gauges{
+    background:var(--paper);
+    border:1px solid var(--line);border-radius:14px;
+    padding:18px 20px;
+  }
+  .gauges h4{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;font-weight:700;color:var(--muted);margin-bottom:16px}
+  .gauge{margin-bottom:18px}
+  .gauge:last-child{margin-bottom:0}
+  .gauge-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+  .gauge-name{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--ink)}
+  .gauge-dot{width:8px;height:8px;border-radius:50%}
+  .gauge-val{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:-0.02em;color:var(--plx-navy)}
+  .gauge-val .lim{font-size:11px;color:var(--muted);font-weight:500}
+  .gauge-bar{height:8px;border-radius:4px;background:var(--cream-deep);overflow:hidden;position:relative}
+  .gauge-bar .fill{
+    height:100%;width:0%;border-radius:4px;
+    transition:width 0.6s cubic-bezier(0.4,0,0.2,1);
+  }
+  .gauge-bar .fill.prestige{background:linear-gradient(90deg,var(--plx-green) 0%,#4CBF73 100%)}
+  .gauge-bar .fill.energy{background:linear-gradient(90deg,var(--plx-navy) 0%,#3D7CD2 100%)}
+  .gauge-bar .fill.risk{background:linear-gradient(90deg,var(--plx-gold) 0%,var(--plx-red) 100%)}
+  .gauge-ticks{display:flex;justify-content:space-between;margin-top:4px;font-family:var(--mono);font-size:9px;color:var(--muted);font-weight:600}
+  .gauge-help{
+    margin-top:16px;padding-top:14px;border-top:1px solid var(--line);
+    display:flex;flex-direction:column;gap:9px;
+  }
+  .gauge-help-title{
+    font-size:10px;letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--muted);font-weight:700;
+  }
+  .gauge-help-item{
+    font-size:11px;line-height:1.45;color:var(--muted);
+    display:grid;grid-template-columns:10px 1fr;gap:7px;
+  }
+  .gauge-help-item .mini-dot{
+    width:7px;height:7px;border-radius:50%;margin-top:5px;
+  }
+  .gauge-help-item strong{color:var(--ink);font-weight:700}
+  .gauge-help-note{
+    font-size:10.5px;line-height:1.45;color:var(--muted);
+    background:var(--cream);border:1px solid var(--line);
+    border-radius:8px;padding:9px 10px;
+  }
+
+  /* PCCC checklist */
+  .checklist{
+    background:var(--paper);
+    border:1px solid var(--line);border-radius:14px;
+    padding:16px 18px;
+  }
+  .cl-head{
+    font-size:11px;letter-spacing:0.12em;text-transform:uppercase;font-weight:700;color:var(--muted);
+    margin-bottom:12px;display:flex;align-items:center;gap:6px;
+  }
+  .cl-head::before{content:"🛡️";font-size:12px;filter:grayscale(0.3)}
+  .cl-list{display:flex;flex-direction:column;gap:8px}
+  .cl-item{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--ink);line-height:1.3}
+  .cl-box{
+    width:16px;height:16px;border-radius:4px;
+    border:1.5px solid var(--line-strong);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:10px;font-weight:800;color:#fff;
+  }
+  .cl-box.done{background:var(--plx-green);border-color:var(--plx-green)}
+  .cl-box.alert{background:var(--plx-red);border-color:var(--plx-red)}
+  .cl-item.done{color:var(--ink);text-decoration:none}
+
+  /* Event log */
+  .event-log{
+    background:var(--paper);
+    border:1px solid var(--line);border-radius:14px;
+    padding:16px 18px;
+  }
+  .el-head{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;font-weight:700;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+  .el-head::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--plx-red);box-shadow:0 0 6px var(--plx-red);animation:blink 1.5s infinite}
+  .el-list{display:flex;flex-direction:column;gap:10px;max-height:200px;overflow-y:auto}
+  .el-item{
+    padding-left:18px;position:relative;font-size:12px;line-height:1.4;color:var(--ink);
+  }
+  .el-item::before{
+    content:"";position:absolute;left:4px;top:5px;
+    width:8px;height:8px;border-radius:50%;background:var(--plx-gold);
+  }
+  .el-item.good::before{background:var(--plx-green)}
+  .el-item.bad::before{background:var(--plx-red)}
+  .el-time{font-family:var(--mono);font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:1px}
+  .el-empty{font-size:12px;color:var(--muted);font-style:italic}
+
+  /* ═══════════════ RESULTS SCREEN ═══════════════ */
+  .results-hero{
+    background:var(--paper);
+    border-radius:18px;border:1px solid var(--line);
+    padding:40px 44px 34px;
+    position:relative;overflow:hidden;text-align:center;
+  }
+  .results-hero::before{
+    content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse at top,rgba(0,45,116,0.1) 0%,transparent 60%);
+    pointer-events:none;
+  }
+  .rh-inner{position:relative;z-index:1;max-width:740px;margin:0 auto}
+
+  .rh-medal{
+    width:100px;height:100px;border-radius:22px;margin:0 auto 20px;
+    background:linear-gradient(135deg,var(--plx-navy) 0%,#3D7CD2 60%,var(--plx-navy-ink) 100%);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-size:38px;font-weight:700;color:#fff;
+    box-shadow:0 10px 30px rgba(0,45,116,0.35),inset 0 -4px 10px rgba(0,0,0,0.2);
+    position:relative;
+    transform:rotate(-4deg);
+  }
+  .rh-medal::after{
+    content:"";position:absolute;inset:-6px;border-radius:26px;
+    border:2px dashed var(--plx-gold);opacity:0.4;
+  }
+  .rh-title{
+    font-family:var(--serif);font-size:38px;font-weight:700;
+    color:var(--plx-navy);letter-spacing:-0.02em;line-height:1.12;
+  }
+  .rh-sub{font-size:16px;color:var(--muted);margin-top:10px;line-height:1.5}
+
+  .rh-stats{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:30px;
+  }
+  @media(max-width:720px){.rh-stats{grid-template-columns:repeat(2,1fr)}}
+  .rh-stat{background:var(--cream);border-radius:12px;padding:18px 14px;border:1px solid var(--line)}
+  .rh-stat .v{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--plx-navy);line-height:1}
+  .rh-stat .l{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-top:6px}
+  .rh-explain{
+    margin:14px auto 0;max-width:620px;
+    font-size:12px;line-height:1.55;color:var(--muted);
+    background:var(--cream);border:1px solid var(--line);
+    border-radius:10px;padding:11px 14px;text-align:left;
+  }
+  .rh-explain strong{color:var(--ink);font-weight:700}
+
+  .results-grid{margin-top:24px;display:grid;grid-template-columns:1.3fr 1fr;gap:20px}
+  @media(max-width:820px){.results-grid{grid-template-columns:1fr}}
+
+  .panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:24px 26px}
+  .panel h3{font-family:var(--serif);font-size:22px;font-weight:600;color:var(--plx-navy);margin-bottom:4px;letter-spacing:-0.01em}
+  .panel .sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+
+  .event-review{display:flex;flex-direction:column;gap:10px}
+  .er-row{
+    display:grid;grid-template-columns:56px 1fr 80px;gap:12px;align-items:center;
+    padding:12px 14px;background:var(--cream);border-radius:10px;
+    border-left:3px solid var(--plx-navy);
+  }
+  .er-row.good{border-left-color:var(--plx-green)}
+  .er-row.mid{border-left-color:var(--plx-gold)}
+  .er-row.bad{border-left-color:var(--plx-red)}
+  .er-time{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--plx-navy);text-align:center;background:var(--paper);padding:5px 6px;border-radius:6px;border:1px solid var(--line)}
+  .er-text{font-size:13px;line-height:1.4}
+  .er-text strong{display:block;font-weight:700;color:var(--ink);margin-bottom:2px}
+  .er-text span{color:var(--muted);font-size:12px}
+  .er-score{font-family:var(--serif);font-weight:700;font-size:20px;text-align:right}
+  .er-row.good .er-score{color:var(--plx-green)}
+  .er-row.mid .er-score{color:var(--plx-gold-deep)}
+  .er-row.bad .er-score{color:var(--plx-red)}
+  .er-score .max{font-size:12px;color:var(--muted);font-weight:500}
+
+  .ro-mastery{display:flex;flex-direction:column;gap:12px;margin-top:8px}
+  .rm-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;font-size:13px}
+  .rm-row .rm-label{font-family:var(--serif);font-weight:600;color:var(--ink);display:flex;align-items:center;gap:8px}
+  .rm-dot{width:8px;height:8px;border-radius:50%}
+  .rm-score{font-family:var(--serif);font-weight:700;color:var(--plx-navy);font-size:16px}
+  .rm-bar{grid-column:1 / -1;height:6px;background:var(--cream-deep);border-radius:3px;overflow:hidden}
+  .rm-bar .fill{height:100%;transition:width 0.8s ease;border-radius:3px}
+
+  .commit-box{
+    background:linear-gradient(135deg,#F3ECDD 0%,#FBF7F0 100%);
+    border:1.5px solid var(--plx-gold);border-radius:14px;padding:20px 22px;margin-top:20px;
+  }
+  .commit-lbl{font-family:var(--serif);font-size:13px;font-weight:600;color:var(--plx-gold-deep);margin-bottom:8px}
+  .commit-box blockquote{
+    font-family:var(--serif);font-size:17px;font-style:italic;font-weight:500;line-height:1.45;color:var(--plx-navy);
+  }
+  .commit-box blockquote::before{content:"\201C";font-size:36px;color:var(--plx-gold);opacity:0.5;line-height:0;vertical-align:-12px;margin-right:4px}
+  .commit-box blockquote::after{content:"\201D";font-size:36px;color:var(--plx-gold);opacity:0.5;line-height:0;vertical-align:-20px;margin-left:4px}
+
+  .end-cta{margin-top:26px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+  .hidden{display:none !important}
+  /* Mobile polish patch: layout only, no game logic changes */
+  @media(max-width:640px){
+    .topbar{
+      height:auto;
+      min-height:0;
+      align-items:stretch;
+      flex-direction:column;
+      gap:10px;
+      padding:10px 14px;
+      border-radius:0 0 18px 18px;
+    }
+    .topbar .brand{
+      width:100%;
+      min-width:0;
+      gap:10px;
+      align-items:center;
+    }
+    .plx-mark{
+      width:30px;
+      height:30px;
+      flex:0 0 auto;
+    }
+    .brand-stack{
+      min-width:0;
+      flex:1 1 auto;
+    }
+    .brand-stack .b1{
+      font-size:10px;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .brand-stack .b2{
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+      font-size:15px;
+      line-height:1.15;
+      letter-spacing:0;
+    }
+    .top-right{
+      width:100%;
+      justify-content:flex-start;
+      gap:8px;
+      overflow-x:auto;
+      padding-bottom:2px;
+      scrollbar-width:none;
+    }
+    .top-right::-webkit-scrollbar{display:none}
+    .chip{
+      flex:0 0 auto;
+      white-space:nowrap;
+      font-size:12px;
+      padding:7px 10px;
+    }
+    .wrap{
+      padding:16px 14px 84px;
+    }
+    .lobby-hero{
+      padding:24px 18px 26px;
+      border-radius:18px;
+    }
+    .kicker{
+      max-width:100%;
+      white-space:normal;
+      line-height:1.25;
+      letter-spacing:0.1em;
+    }
+    .hero-title{
+      white-space:normal;
+      font-size:clamp(34px,10vw,44px);
+      line-height:1.05;
+      letter-spacing:0;
+      max-width:100%;
+    }
+    .hero-title em{display:inline}
+    .hero-sub{
+      font-size:16px;
+      line-height:1.58;
+      max-width:100%;
+    }
+    .ro-showcase{
+      grid-template-columns:1fr;
+      gap:10px;
+    }
+    .ro-box{
+      padding:14px 14px 14px 16px;
+    }
+    .setup-grid{
+      grid-template-columns:1fr;
+      gap:10px;
+    }
+    .cta-row .btn,
+    .cta-row .btn-lg{
+      width:100%;
+    }
+    .game-grid{
+      grid-template-columns:1fr;
+      gap:14px;
+    }
+    .shift-bar{
+      padding:16px 16px 18px;
+      border-radius:18px;
+    }
+    .sb-head{
+      align-items:flex-start;
+      gap:10px;
+      margin-bottom:16px;
+    }
+    .sb-title{
+      line-height:1.25;
+      max-width:68%;
+      letter-spacing:0.1em;
+    }
+    .timeline{
+      padding:26px 10px 10px;
+    }
+    .tl-events{
+      left:10px;
+      right:10px;
+    }
+    .tl-event-marker::after{
+      display:none;
+    }
+    .tl-scale{
+      font-size:8px;
+      letter-spacing:-0.02em;
+      opacity:0.45;
+    }
+    .team-board,
+    .status-board,
+    .stage,
+    .leaderboard{
+      border-radius:18px;
+    }
+    .stage-header{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:14px;
+      padding:18px 18px;
+    }
+    .event-time-stack{
+      align-items:flex-start;
+    }
+    .event-time{
+      font-size:26px;
+      padding:9px 14px;
+    }
+    .event-head-body{
+      width:100%;
+    }
+    .event-title{
+      font-size:clamp(28px,8.5vw,38px);
+      line-height:1.08;
+      max-width:100%;
+    }
+    .event-countdown{
+      width:100%;
+      min-width:0;
+      display:grid;
+      grid-template-columns:1fr auto;
+      align-items:center;
+      gap:8px;
+      text-align:left;
+    }
+    .event-countdown .value{
+      font-size:28px;
+    }
+    .event-countdown .hint{
+      grid-column:1 / -1;
+    }
+    .event-scenario{
+      padding:18px 18px;
+      font-size:16px;
+      line-height:1.62;
+    }
+    .form-5ro{
+      padding:20px 18px;
+    }
+    .ro-field-head{
+      align-items:flex-start;
+    }
+    .ro-label-main{
+      font-size:19px;
+      line-height:1.15;
+    }
+    .ro-opt{
+      padding:14px 13px;
+      gap:11px;
+    }
+    .ro-opt-text{
+      font-size:15px;
+      line-height:1.55;
+      min-width:0;
+    }
+    .submit-bar{
+      flex-direction:column;
+      align-items:stretch;
+      gap:12px;
+    }
+    .submit-bar .btn{
+      width:100%;
+    }
+    .leaderboard{
+      padding:18px 16px;
+    }
+    .results-hero{
+      padding:20px 16px;
+      border-radius:18px;
+    }
+    .rh-medal{
+      width:58px;
+      height:58px;
+      border-radius:14px;
+      margin-bottom:10px;
+      font-size:26px;
+    }
+    .rh-medal::after{
+      inset:-4px;
+      border-radius:20px;
+    }
+    .rh-title{
+      font-size:clamp(21px,6.4vw,26px);
+      line-height:1.02;
+      max-width:300px;
+      margin:0 auto;
+    }
+    .rh-sub{
+      display:none;
+    }
+    .rh-stats{
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      margin-top:14px;
+    }
+    .rh-stat{
+      padding:12px 10px;
+    }
+    .rh-stat .v{
+      font-size:24px;
+      overflow-wrap:anywhere;
+    }
+    .rh-stat .l{
+      font-size:9px;
+      line-height:1.25;
+      letter-spacing:0.08em;
+    }
+    .honor-banner{
+      padding:18px 16px;
+      text-align:center;
+    }
+    .honor-cup{
+      position:static;
+      transform:none;
+      margin:0 auto 12px;
+    }
+  }
+
+  @media(max-width:430px){
+    .wrap{padding-left:12px;padding-right:12px}
+    .brand-stack .b2{font-size:14px}
+    .chip{font-size:11px}
+    .hero-title{font-size:clamp(32px,11vw,40px)}
+    .event-title{font-size:clamp(28px,9vw,36px)}
+    .event-scenario,
+    .ro-opt-text{font-size:15px}
+    .rh-title{font-size:clamp(21px,6.2vw,25px)}
+    .rh-stats{grid-template-columns:1fr 1fr}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="plx-mark"></div>
+      <div class="brand-stack">
+        <div class="b1">Petrolimex · GAMIFICATION</div>
+        <div class="b2">Một ca làm việc – Sáu tình huống – Khung tư duy “5 Rõ”</div>
+      </div>
+    </div>
+    <div class="top-right">
+      <div class="chip mono" id="clock-chip">06:00</div>
+      <div class="chip">Game 02/03</div>
+    </div>
+  </header>
+
+  <!-- ══════════════════ LOBBY ══════════════════ -->
+  <section class="screen active" id="screen-lobby">
+    <div class="wrap">
+      <div class="lobby-hero">
+        <div class="hero-content">
+          <h1 class="hero-title">
+            Một ca làm việc – <em>Sáu tình huống</em> – Khung tư duy “5 Rõ”
+          </h1>
+          <p class="hero-sub">
+            Bạn là một <strong>Cửa hàng trưởng</strong>, phụ trách ca làm việc sáng từ <strong>06:00 đến 14:00</strong>. Ca làm việc của bạn có 5 nhân viên dưới quyền. Bạn và ca làm việc của mình cần đảm bảo 3 chỉ số <strong>Uy tín cửa hàng – Năng lượng đội ngũ – Mức độ rủi ro</strong>. Game này mô tả ca làm việc tại CHXD có 6 tình huống xảy ra. Là Cửa hàng trưởng, bạn phải giao việc chuẩn <strong>5 Rõ</strong> cho đội ngũ của mình – một kỹ thuật quản trị mà Chủ tịch HĐQT PLX đã yêu cầu áp dụng trên toàn hệ thống.
+          </p>
+
+          <div class="team-preview">
+            <h4>Mô phỏng Đội ngũ của bạn – Ca làm việc 06:00-14:00</h4>
+            <div class="team-row" id="lobby-team"></div>
+          </div>
+
+          <div class="ro-showcase">
+            <div class="ro-box">
+              <div class="ro-num">Rõ 01</div>
+              <div class="ro-label">Rõ người</div>
+              <div class="ro-desc">Giao cho đúng vai trò, đúng năng lực</div>
+            </div>
+            <div class="ro-box">
+              <div class="ro-num">Rõ 02</div>
+              <div class="ro-label">Rõ việc</div>
+              <div class="ro-desc">Định nghĩa nhiệm vụ đủ chi tiết để thực thi</div>
+            </div>
+            <div class="ro-box">
+              <div class="ro-num">Rõ 03</div>
+              <div class="ro-label">Rõ mục tiêu</div>
+              <div class="ro-desc">Kết quả đầu ra đo lường được</div>
+            </div>
+            <div class="ro-box">
+              <div class="ro-num">Rõ 04</div>
+              <div class="ro-label">Rõ thời hạn</div>
+              <div class="ro-desc">Mốc kiểm tra và thời điểm hoàn thành</div>
+            </div>
+            <div class="ro-box">
+              <div class="ro-num">Rõ 05</div>
+              <div class="ro-label">Rõ trách nhiệm</div>
+              <div class="ro-desc">Ai chịu trách nhiệm cuối cùng về kết quả</div>
+            </div>
+          </div>
+
+          <div class="setup-grid">
+            <div class="setup-card">
+              <div class="setup-icon c1">!</div>
+              <div class="setup-title">6 tình huống trong ca làm việc</div>
+              <div class="setup-desc">Từ khai ca đến bàn giao. Mỗi tình huống = 5 quyết định 5 Rõ.</div>
+            </div>
+            <div class="setup-card">
+              <div class="setup-icon c2">⧗</div>
+              <div class="setup-title">Thang điểm cho mỗi tình huống</div>
+              <div class="setup-desc">Mỗi tình huống làm tốt 5 Rõ sẽ được tối đa 100 điểm.</div>
+            </div>
+            <div class="setup-card">
+              <div class="setup-icon c3">✓</div>
+              <div class="setup-title">3 chỉ số phản ánh kết quả</div>
+              <div class="setup-desc">Uy tín / Năng lượng / Rủi ro cập nhật theo từng lựa chọn.</div>
+            </div>
+          </div>
+
+          <div class="cta-row">
+            <button class="btn btn-gold btn-lg" id="btn-start">
+              Mở ca sáng · 06:00
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="meta">Thời lượng: 20 phút</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ GAME ══════════════════ -->
+  <section class="screen" id="screen-game">
+    <div class="wrap">
+
+      <!-- Shift clock + timeline -->
+      <div class="shift-bar">
+        <div class="sb-head">
+          <div class="sb-title">Ca sáng — CHXD Petrolimex · Nội thành Hà Nội</div>
+          <div class="sb-clock"><span class="timer-chip" id="event-timer-chip">02:00</span></div>
+        </div>
+        <div class="timeline">
+          <div class="tl-track"><div class="tl-fill" id="tl-fill" style="width:0%"></div></div>
+          <div class="tl-events" id="tl-events"></div>
+          <div class="tl-scale">
+            <span>06:00</span><span>07:00</span><span>08:00</span><span>09:00</span><span>10:00</span><span>11:00</span><span>12:00</span><span>13:00</span><span>14:00</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="game-grid">
+
+        <!-- LEFT: Team board -->
+        <aside class="team-board">
+          <div class="tb-head">Đội ngũ ca sáng</div>
+          <div class="staff-list" id="staff-list"></div>
+        </aside>
+
+        <!-- CENTER: Event stage -->
+        <div class="stage">
+          <div class="stage-header">
+            <div class="event-time-stack">
+              <div class="event-time" id="event-time">06:15</div>
+              <div class="event-index" id="event-index">Tình huống 1/6</div>
+            </div>
+            <div class="event-head-body">
+              <div class="event-badge" id="event-badge">Thường</div>
+              <div class="event-title" id="event-title">—</div>
+            </div>
+            <div class="event-countdown" id="event-countdown">
+              <span class="label">Bộ đếm 120 giây</span>
+              <span class="value" id="event-timer">02:00</span>
+              <span class="hint">Nhanh và đúng được thưởng</span>
+            </div>
+          </div>
+          <div class="event-scenario" id="event-scenario">—</div>
+          <form class="form-5ro" id="form-5ro" onsubmit="return false;"></form>
+          <div id="verdict-slot"></div>
+        </div>
+
+        <!-- RIGHT: Resources + log -->
+        <aside class="side-r">
+          <div class="leaderboard rank-card">
+            <div class="lb-head">
+              <div>
+                <div class="lb-title">Thứ hạng realtime</div>
+                <div class="lb-note" id="lb-progress">Sau 0/6 tình huống</div>
+              </div>
+              <div class="lb-rank" id="lb-rank">—<span>Hạng của bạn</span></div>
+            </div>
+            <div class="rank-mini-row">
+              <div class="rank-mini">
+                <div class="mc-val" id="lb-score">0</div>
+                <div class="mc-lbl">Điểm</div>
+              </div>
+              <div class="rank-mini rank-card">
+                <div class="mc-val" id="lb-rank-card">—</div>
+                <div class="mc-lbl">Thứ hạng</div>
+              </div>
+              <div class="rank-mini">
+                <div class="mc-val" id="lb-done-count">0/6</div>
+                <div class="mc-lbl">Tiến độ</div>
+              </div>
+            </div>
+            <div class="lb-note">Xếp hạng lấy từ bảng realtime của lớp, không dùng danh sách học viên mô phỏng.</div>
+          </div>
+
+          <div class="gauges">
+            <h4>Chỉ số ca làm việc</h4>
+            <div class="gauge">
+              <div class="gauge-head">
+                <div class="gauge-name"><span class="gauge-dot" style="background:var(--plx-green)"></span>Uy tín cửa hàng</div>
+                <div class="gauge-val"><span id="g-prestige">70</span><span class="lim"> / 100</span></div>
+              </div>
+              <div class="gauge-bar"><div class="fill prestige" id="g-prestige-bar" style="width:70%"></div></div>
+              <div class="gauge-ticks"><span>Thấp</span><span>Vững</span><span>Dẫn đầu</span></div>
+            </div>
+            <div class="gauge">
+              <div class="gauge-head">
+                <div class="gauge-name"><span class="gauge-dot" style="background:var(--plx-navy)"></span>Năng lượng đội</div>
+                <div class="gauge-val"><span id="g-energy">85</span><span class="lim"> / 100</span></div>
+              </div>
+              <div class="gauge-bar"><div class="fill energy" id="g-energy-bar" style="width:85%"></div></div>
+              <div class="gauge-ticks"><span>Kiệt</span><span>Bền</span><span>Sung</span></div>
+            </div>
+            <div class="gauge">
+              <div class="gauge-head">
+                <div class="gauge-name"><span class="gauge-dot" style="background:var(--plx-red)"></span>Rủi ro vận hành</div>
+                <div class="gauge-val"><span id="g-risk">15</span><span class="lim"> / 100</span></div>
+              </div>
+              <div class="gauge-bar"><div class="fill risk" id="g-risk-bar" style="width:15%"></div></div>
+              <div class="gauge-ticks"><span>An toàn</span><span>Cảnh báo</span><span>Nguy hiểm</span></div>
+            </div>
+            <div class="gauge-help">
+              <div class="gauge-help-title">Ý nghĩa và cách tính</div>
+              <div class="gauge-help-item">
+                <span class="mini-dot" style="background:var(--plx-green)"></span>
+                <span><strong>Uy tín cửa hàng</strong> phản ánh niềm tin của khách, cấp trên và cơ quan liên quan. Tăng khi xử lý rõ người, rõ việc, đúng chuẩn phục vụ; giảm khi làm khách bức xúc hoặc bàn giao mơ hồ.</span>
+              </div>
+              <div class="gauge-help-item">
+                <span class="mini-dot" style="background:var(--plx-navy)"></span>
+                <span><strong>Năng lượng đội</strong> phản ánh sức bền và tinh thần phối hợp của nhân viên trong ca. Giữ tốt khi phân công hợp lý; giảm khi dồn việc, thiếu rõ ràng hoặc để đội phải chữa cháy kéo dài.</span>
+              </div>
+              <div class="gauge-help-item">
+                <span class="mini-dot" style="background:var(--plx-red)"></span>
+                <span><strong>Rủi ro vận hành</strong> đo nguy cơ sai quy trình, mất an toàn, khiếu nại hoặc trách nhiệm pháp lý. Chỉ số này càng thấp càng tốt.</span>
+              </div>
+              <div class="gauge-help-note">Sau mỗi tình huống, hệ thống lấy chất lượng 5 lựa chọn 5 Rõ và mức ảnh hưởng của tình huống để cộng/trừ điểm. Mỗi chỉ số luôn nằm trong thang 0-100.</div>
+            </div>
+          </div>
+
+          <div class="checklist">
+            <div class="cl-head">Checklist PCCC ca sáng</div>
+            <div class="cl-list" id="cl-list">
+              <div class="cl-item"><span class="cl-box">1</span>Kiểm bình chữa cháy (×4)</div>
+              <div class="cl-item"><span class="cl-box">2</span>Kiểm hệ thống chống sét</div>
+              <div class="cl-item"><span class="cl-box">3</span>Cửa thoát hiểm thông thoáng</div>
+              <div class="cl-item"><span class="cl-box">4</span>Nội quy PCCC niêm yết</div>
+              <div class="cl-item"><span class="cl-box">5</span>Thiết bị đo xăng chuẩn</div>
+            </div>
+          </div>
+
+          <div class="event-log">
+            <div class="el-head">Nhật ký ca</div>
+            <div class="el-list" id="el-list"><div class="el-empty">Chưa có sự kiện nào được xử lý</div></div>
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ RESULTS ══════════════════ -->
+  <section class="screen" id="screen-results">
+    <div class="wrap">
+      <div class="results-hero">
+        <div class="rh-inner">
+          <div class="rh-medal" id="rh-medal">—</div>
+          <h1 class="rh-title" id="rh-title">Bế ca</h1>
+          <p class="rh-sub" id="rh-sub">Ca sáng đã khép lại. Dưới đây là tổng kết kỷ luật thực thi của nhóm.</p>
+          <div class="rh-stats">
+            <div class="rh-stat"><div class="v" id="r-score">0</div><div class="l">Tổng điểm</div></div>
+            <div class="rh-stat"><div class="v" id="r-rank">—</div><div class="l">Xếp hạng lớp</div></div>
+            <div class="rh-stat"><div class="v" id="r-time">00:00</div><div class="l">Tổng thời gian trả lời</div></div>
+            <div class="rh-stat"><div class="v" id="r-grade">—</div><div class="l">Xếp loại</div></div>
+          </div>
+          <div class="honor-banner" id="honor-banner">
+            <div class="honor-confetti"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="honor-cup" id="honor-cup">1</div>
+            <div class="honor-title" id="honor-title">Vinh danh Top 3</div>
+            <div class="honor-sub" id="honor-sub">Bạn đang nằm trong nhóm dẫn đầu lớp.</div>
+            <div class="honor-podium" aria-hidden="true">
+              <div class="podium-step s2" id="podium-2">2</div>
+              <div class="podium-step s1" id="podium-1">1</div>
+              <div class="podium-step s3" id="podium-3">3</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="results-grid">
+        <div class="panel">
+          <h3>Rà soát 6 sự kiện trong ca</h3>
+          <div class="sub">Điểm số từng sự kiện theo chất lượng 5 Rõ.</div>
+          <div class="event-review" id="event-review"></div>
+        </div>
+
+        <div class="panel">
+          <h3>Bản đồ năng lực 5 Rõ</h3>
+          <div class="sub">Chất lượng thực hành của bạn ở từng yếu tố. Yếu tố thấp nhất là ưu tiên luyện tập.</div>
+          <div class="ro-mastery" id="ro-mastery"></div>
+
+          <div class="commit-box">
+            <div class="commit-lbl">Cam kết sau đào tạo</div>
+            <blockquote id="commit-text">Mỗi đầu ca, tôi sẽ nói ra thành tiếng đủ 5 câu cho từng nhiệm vụ quan trọng — rồi mới bắt đầu giao việc.</blockquote>
+          </div>
+        </div>
+      </div>
+
+      <div class="end-cta">
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ═══════════════ STAFF DATA ═══════════════
+  var STAFF = [
+    { id:"lan",  name:"Nguyễn Thị Lan",   role:"Thu ngân",            color:"#E30613", skills:["tiền mặt","hoá đơn","giao tiếp"],     energy:100 },
+    { id:"hung", name:"Trần Văn Hùng",    role:"Nhân viên bơm xăng (trưởng)",color:"#002D74", skills:["bơm","an toàn","đào tạo"],             energy:100 },
+    { id:"tuan", name:"Lê Minh Tuấn",     role:"Nhân viên bơm xăng",         color:"#2D9B4E", skills:["bơm","phục vụ"],                       energy:100 },
+    { id:"dung", name:"Phạm Quốc Dũng",   role:"Bảo vệ · PCCC",       color:"#C08500", skills:["an ninh","PCCC","sửa chữa"],           energy:100 },
+    { id:"mai",  name:"Hoàng Thị Mai",    role:"Vệ sinh · hỗ trợ",    color:"#9A4A9F", skills:["vệ sinh","hỗ trợ KH"],                 energy:100 }
+  ];
+
+  var LEADERBOARD_PEERS = [
+    { name:"Học viên A", scores:[112,104,92,108,96,106] },
+    { name:"Học viên B", scores:[96,101,110,88,104,99] },
+    { name:"Học viên C", scores:[84,96,92,100,88,94] },
+    { name:"Học viên D", scores:[74,82,86,78,90,84] }
+  ];
+
+  function initials(name){
+    var parts = name.trim().split(/\s+/);
+    return (parts[0][0] + (parts[parts.length-1][0]||"")).toUpperCase();
+  }
+
+  // ═══════════════ EVENT DATA (6 sự kiện) ═══════════════
+  // Mỗi sự kiện có 5 câu hỏi (1 cho mỗi Rõ), mỗi câu 3 lựa chọn.
+  // quality: "good" (+20), "mid" (+10), "bad" (0)
+  // impact: {prestige, energy, risk} — tác động lên 3 gauges
+  var EVENTS = [
+    {
+      id:1,
+      time:"06:15",
+      timePct:3,
+      badge:"Thường",
+      badgeClass:"normal",
+      title:"Bắt đầu ca sáng — phổ biến KPI và chuẩn phục vụ",
+      scenario:"06:00 bạn vừa mở cửa hàng. Cả 5 nhân viên có mặt nhưng Lan vừa báo con ốm, xin về 2 tiếng giữa ca (10:00-12:00). Hùng và Tuấn tuần trước có căng thẳng về phân ca. Bạn cần phổ biến KPI tuần, 3 chuẩn phục vụ PLX mới, và checklist PCCC đầu ca.",
+      questions:[
+        {
+          ro:1, label:"Rõ người",
+          q:"Bạn triệu tập ai để phổ biến đầu ca?",
+          options:[
+            { id:"A", text:"Họp cả 5 nhân viên trong 10 phút trước khi triển khai vị trí, dù Lan đang lo con ốm — thông điệp phải đồng nhất cho toàn đội.", quality:"good", reasoning:"Cả đội cần nghe cùng một thông điệp trong cùng một thời điểm. Lan dù lo con vẫn cần có mặt để tránh phải phổ biến lại sau — khi đó thông tin đã bị loãng qua người khác." },
+            { id:"B", text:"Miễn Lan tham dự vì cô đang bận lo sắp xếp chuyện gia đình, tôi sẽ phổ biến, trao đổi nhanh riêng với cô ấy khi cô ấy nói chuyện điện thoại với người nhà xong", quality:"bad", reasoning:"Dù có vẻ nhân văn, đây là vi phạm Rõ người. Phổ biến 2 lần ở 2 thời điểm → nội dung không đồng nhất, Lan cảm thấy bị \"loại\" dù bạn có ý tốt." },
+            { id:"C", text:"Chỉ họp Hùng và Dũng trước, sau đó nhờ 2 người truyền đạt lại cho các nhân sự còn lại", quality:"mid", reasoning:"Mô hình \"chuyền tin\" làm thông điệp bị diễn giải lại — mỗi lần truyền mất khoảng 20% chính xác. Đúng Rõ người ở cấp quản lý nhưng sai ở cấp thực thi." }
+          ]
+        },
+        {
+          ro:2, label:"Rõ việc",
+          q:"Nội dung cụ thể bạn phổ biến gồm những gì?",
+          options:[
+            { id:"A", text:"KPI tuần, 3 chuẩn phục vụ mới, checklist PCCC đầu ca, và 2 điểm vướng từ ca hôm qua cần khắc phục hôm nay.", quality:"good", reasoning:"Đủ 4 thành tố: mục tiêu (KPI) + chuẩn mực (3 chuẩn) + an toàn (PCCC) + cải tiến liên tục (rút kinh nghiệm ca trước). Đây là \"vòng lặp chuẩn hoá\" Chủ tịch đã chỉ đạo." },
+            { id:"B", text:"Chỉ nhắc các điểm cần sửa từ ca hôm qua — đội đã nắm KPI và 3 chuẩn phục vụ từ đầu tuần, lặp lại sẽ gây ức chế.", quality:"mid", reasoning:"Lập luận có logic nhưng sai. \"Nhắc lại\" không phải \"lặp lại\" — nó củng cố nhịp ca và phát hiện ai đã quên. Lược bỏ là tiết kiệm ngắn hạn, mất chuẩn dài hạn." },
+            { id:"C", text:"Để đội khởi động nhẹ đầu ca, tôi chỉ nhắc PCCC — KPI đã treo biểu đồ trên tường, ai cần thì nhìn được.", quality:"bad", reasoning:"Vi phạm nặng Rõ việc. \"Treo biểu đồ\" không thay thế được phổ biến trực tiếp. \"Khởi động nhẹ\" là cái bẫy cảm tính — ca sáng chính là lúc đội tỉnh táo nhất để nghe chuẩn." }
+          ]
+        },
+        {
+          ro:3, label:"Rõ mục tiêu",
+          q:"Kết quả đo lường được bạn muốn đội đạt sau cuộc họp ngắn?",
+          options:[
+            { id:"A", text:"100% nhân viên đọc lại được 3 chuẩn phục vụ, ký xác nhận checklist PCCC trước 06:30, không ai còn phải hỏi lại quy trình.", quality:"good", reasoning:"3 thước đo rõ: đọc lại (đo hiểu), ký checklist (đo hành động), không hỏi lại (đo độ rõ). Có mốc thời gian 06:30 cụ thể." },
+            { id:"B", text:"Đội làm việc với tinh thần đoàn kết, ủng hộ lẫn nhau qua các giờ cao điểm, không có sự cố an toàn nào trong ca.", quality:"bad", reasoning:"Bẫy cảm tính điển hình. \"Đoàn kết\" và \"không sự cố\" không phải mục tiêu đo được — đó là kỳ vọng. Nghe hay nhưng không định hướng được hành vi cụ thể cho nhân viên." },
+            { id:"C", text:"Đội hiểu nhiệm vụ chính của mình và hoàn thành công việc đúng quy trình chuẩn đã được đào tạo từ trước.", quality:"mid", reasoning:"Có hướng nhưng \"hiểu\" và \"hoàn thành đúng\" là trạng thái mơ hồ — lấy gì đo? Kết quả của \"Rõ mục tiêu\" phải trả lời được câu \"làm sao biết đã đạt?\"." }
+          ]
+        },
+        {
+          ro:4, label:"Rõ thời hạn",
+          q:"Bạn đặt những mốc kiểm tra nào trong ca?",
+          options:[
+            { id:"A", text:"Checklist PCCC ký xong 06:30, check-in nhanh lúc 10:00 khi Lan về, chốt bàn giao 14:00 có biên bản đầy đủ.", quality:"good", reasoning:"3 mốc phủ đầu-giữa-cuối ca. 10:00 chọn trùng thời điểm Lan về = nhân đôi mục đích (cập nhật + điều chỉnh phân công nếu cô chưa về kịp)." },
+            { id:"B", text:"Một mốc duy nhất cuối ca 14:00 khi bàn giao — giữa ca đội đang tập trung phục vụ, cắt ngang sẽ làm rối nhịp.", quality:"mid", reasoning:"Nghe bảo vệ đội nhưng thực tế là trễ. Phát hiện lệch chuẩn lúc 14:00 là đã quá muộn — cả ca đã làm sai. Check-in giữa ca chỉ mất 3 phút, không \"rối nhịp\"." },
+            { id:"C", text:"Kiểm khi thấy cần — đội đã làm việc với nhau nhiều tháng, áp lực quá sẽ giảm tinh thần ngay từ đầu ca.", quality:"bad", reasoning:"\"Khi thấy cần\" = không bao giờ. Quản trị bằng cảm tính là công thức cho lệch chuẩn dần dần. \"Quen nhau nhiều tháng\" không thay thế được kỷ luật thực thi." }
+          ]
+        },
+        {
+          ro:5, label:"Rõ trách nhiệm",
+          q:"Trách nhiệm ca được phân bổ thế nào?",
+          options:[
+            { id:"A", text:"Cửa hàng trưởng chịu trách nhiệm kết quả ca cuối cùng, Hùng thay Cửa hàng trưởng khi vắng, từng nhân viên chịu trách nhiệm vị trí của mình.", quality:"good", reasoning:"Ba lớp trách nhiệm thẳng hàng: tổng thể (Cửa hàng trưởng) → dự phòng (Hùng) → cá nhân (từng nhân viên). Không có khoảng trống, không chồng chéo." },
+            { id:"B", text:"Hùng là nhân viên lâu năm nhất, tôi giao Hùng làm phó ca — đồng thời giúp gắn kết lại Hùng với Tuấn qua công việc chung.", quality:"bad", reasoning:"Bẫy cảm tính rất tinh vi. Giao việc để \"gắn kết\" là đảo ngược logic — việc tốt là kết quả của đội tốt, không ngược lại. Lẫn lộn HR và vận hành." },
+            { id:"C", text:"Cửa hàng trưởng chịu trách nhiệm toàn bộ, nhân viên chỉ cần làm đúng quy trình được giao — mỗi người một vị trí cố định.", quality:"mid", reasoning:"Cửa hàng trưởng \"ôm\" hết → đội không trưởng thành, không có lớp trách nhiệm giữa. Khi Cửa hàng trưởng vắng, ai đại diện? Đây là mô hình \"người quản công\" kiểu cũ." }
+          ]
+        }
+      ],
+      lesson:"Mở đầu ca làm việc là điểm khó: cảm xúc đội chưa ổn (Lan lo con, Hùng-Tuấn căng thẳng), nhưng KPI và PCCC vẫn phải rõ. 5 Rõ dạy Cửa hàng trưởng: đừng dùng lý do cảm tính để bỏ qua kỷ luật — hãy giữ chuẩn CHUNG bằng lời, rồi giải quyết cảm xúc RIÊNG cho từng người sau cuộc họp.",
+      impactBase:{prestige:2, energy:-2, risk:-3}
+    },
+
+    {
+      id:2,
+      time:"07:00",
+      timePct:12.5,
+      badge:"An toàn · Khẩn",
+      badgeClass:"urgent",
+      title:"Xe bồn đến giao 15.000L RON 95",
+      scenario:"Xe bồn kéo đến cổng. Theo quy định phải: kiểm niêm phong → đo chiều cao xăng trước/sau → tắt cột bơm gần khu nhập ≥15m → lập biên bản 4 bên. Nhưng: Dũng đang xử lý sự cố điện ở phòng điều khiển, Hùng và Tuấn đang phục vụ 3 khách cột 1&3, Mai chưa từng giám sát xe bồn.",
+      questions:[
+        {
+          ro:1, label:"Rõ người",
+          q:"Ai trực tiếp tiếp nhận và giám sát xe bồn?",
+          options:[
+            { id:"A", text:"Cửa hàng trưởng rời điều phối để giám sát xe bồn, gọi Dũng quay lại ngay sau khi xử xong sự cố điện — song song 2 chuyên môn.", quality:"good", reasoning:"Đúng nguyên tắc: hoạt động an toàn bậc 1 phải có người giám sát cấp Cửa hàng trưởng. Dũng quay lại bổ sung chuyên môn PCCC ngay khi rảnh — không bỏ lỡ." },
+            { id:"B", text:"Mai đang rảnh vị trí nhất nên giao Mai tiếp xe bồn — đây cũng là cơ hội tốt để cô học quy trình nhập nhiên liệu.", quality:"bad", reasoning:"Bẫy \"cơ hội đào tạo\" — nghe có vẻ phát triển nhân viên. Nhưng xe bồn là hoạt động an toàn bậc 1, không phải việc để \"học on-job\". Mai mới 3 tháng, chưa đủ chuyên môn." },
+            { id:"C", text:"Yêu cầu lái xe bồn chờ 15-20 phút đến khi Dũng xong việc điện — ưu tiên đúng người đúng chuyên môn quan trọng hơn.", quality:"mid", reasoning:"Tư duy \"chờ người đúng\" là hợp lý nhưng thực tế lãng phí: xe bồn có lịch trình, chờ lâu gây tắc chuỗi cung ứng. Cửa hàng trưởng có thẩm quyền giám sát, không nhất thiết phải Dũng." }
+          ]
+        },
+        {
+          ro:2, label:"Rõ việc",
+          q:"Các bước việc cụ thể phải làm theo thứ tự?",
+          options:[
+            { id:"A", text:"Tắt cột 1 gần nhất, kiểm niêm phong, đo chiều cao xăng trước nhập, theo dõi nhập, đo lại sau, lập biên bản 4 chữ ký.", quality:"good", reasoning:"Đủ 6 bước theo đúng quy trình. Mỗi bước là một lớp bảo vệ. Quan trọng: tắt cột TRƯỚC khi đo = không có nguy cơ cháy nổ trong lúc thực hiện các bước còn lại." },
+            { id:"B", text:"Kiểm niêm phong và ký biên bản nhận hàng đúng mẫu — chiều cao xăng để Dũng đo kiểm chéo sau khi anh quay lại.", quality:"mid", reasoning:"Thiếu bước đo \"trước nhập\" = không có căn cứ đối chiếu sau này. Nếu phát hiện thiếu, không chứng minh được là trước hay trong khi nhập. Bỏ bước này = mất 50% giá trị quy trình." },
+            { id:"C", text:"Làm theo hướng dẫn của lái xe bồn — họ là nhân viên Tập đoàn, quy trình đã được chuẩn hoá, mình ký xác nhận theo.", quality:"bad", reasoning:"Sai nghiêm trọng về nguyên tắc bên-nhận-bên-giao. Bên mua (CHXD) PHẢI chủ động quy trình kiểm — không thể \"làm theo bên giao\". Đây là lỗ hổng gian lận thường gặp nhất." }
+          ]
+        },
+        {
+          ro:3, label:"Rõ mục tiêu",
+          q:"Kết quả đầu ra kỳ vọng sau quá trình nhập?",
+          options:[
+            { id:"A", text:"Biên bản đủ 4 chữ ký, chênh lệch chiều cao xăng dưới 0.5cm so với chứng từ, 0 sự cố PCCC trong thời gian nhập.", quality:"good", reasoning:"3 thước đo cho 3 khía cạnh: thủ tục (chữ ký) + kỹ thuật (chênh lệch cm) + an toàn (sự cố). Đủ để biên bản có giá trị pháp lý khi có tranh chấp sau này." },
+            { id:"B", text:"Nhập đủ 15.000L đúng số đã đặt hàng, không làm ảnh hưởng đến việc phục vụ khách tại các cột bơm còn lại.", quality:"mid", reasoning:"\"Đủ 15.000L\" mới chỉ là đầu vào, chưa kiểm chất lượng. \"Không ảnh hưởng khách\" là phụ — an toàn phải ưu tiên trên tốc độ phục vụ trong mọi tình huống xe bồn." },
+            { id:"C", text:"Hoàn tất trước 7:30 để tránh giờ cao điểm 8:30, giữ hình ảnh cửa hàng chuyên nghiệp với khách đang đến trạm.", quality:"bad", reasoning:"Mục tiêu \"nhanh\" đặt trên mục tiêu \"đúng\". Đây là tư duy sai khi xử lý hoạt động an toàn — áp lực thời gian chính là nguyên nhân gây ra hầu hết sự cố xe bồn trong ngành." }
+          ]
+        },
+        {
+          ro:4, label:"Rõ thời hạn",
+          q:"Các mốc thời gian cần đặt cho hoạt động nhập?",
+          options:[
+            { id:"A", text:"Nhập xong trong 45 phút, báo cáo nội bộ ngay khi hoàn tất, cập nhật log kho lên hệ thống trong vòng 60 phút.", quality:"good", reasoning:"Ba mốc khớp với quy trình: thực thi (45') → báo cáo (ngay) → hệ thống (60'). Không có việc nào \"lơ lửng\" — mỗi việc có deadline kèm đầu ra." },
+            { id:"B", text:"Làm đến khi thật sự đảm bảo đúng quy trình — thời gian không quan trọng bằng độ chính xác của biên bản.", quality:"mid", reasoning:"Nghe cẩn trọng nhưng không có deadline = việc có thể kéo dài vô hạn, ảnh hưởng các việc khác trong ca. Kỷ luật thực thi yêu cầu deadline CỘNG VỚI độ chính xác." },
+            { id:"C", text:"Xong trước 11:30 để Dũng và toàn đội cùng nghỉ trưa không ai phải ăn trưa lệch giờ vì công việc kéo dài.", quality:"bad", reasoning:"Bẫy cảm tính \"đồng hồ sinh học đội\". Deadline vận hành không được xây quanh giờ ăn — xây quanh quy trình. Đây là sai lầm rất phổ biến ở Cửa hàng trưởng mới." }
+          ]
+        },
+        {
+          ro:5, label:"Rõ trách nhiệm",
+          q:"Ai chịu trách nhiệm cuối cùng nếu phát sinh sự cố?",
+          options:[
+            { id:"A", text:"Dũng thực hiện, Cửa hàng trưởng giám sát, lái xe bồn xác nhận bên giao — ba chữ ký độc lập, không ai đổ trách nhiệm cho ai.", quality:"good", reasoning:"Ba lớp trách nhiệm độc lập và chồng lên nhau — khi có sự cố, biên bản truy ngay được mỗi bên đã làm gì. Đây là nguyên tắc \"rõ trách nhiệm\" của Chủ tịch." },
+            { id:"B", text:"Dũng là nhân viên chuyên trách PCCC nên chịu trách nhiệm toàn bộ quy trình nhập — Cửa hàng trưởng chỉ cần ký xác nhận phần hành chính cuối.", quality:"mid", reasoning:"Sai phân cấp. Sự cố xe bồn = sự cố CHXD, Cửa hàng trưởng chịu trách nhiệm cao nhất với cơ quan quản lý. Không thể giao trách nhiệm \"cuối cùng\" cho nhân viên chuyên môn." },
+            { id:"C", text:"Tập đoàn đã đảm bảo chất lượng ở khâu vận chuyển, CHXD là bên nhận nên trách nhiệm giới hạn ở khâu kiểm tra cuối.", quality:"bad", reasoning:"Đẩy trách nhiệm lên trên = né trách nhiệm. Quy trình nhập là của CHXD, sự cố xảy ra tại CHXD thì CHXD chịu trách nhiệm — dù lỗi có thể ở nguồn." }
+          ]
+        }
+      ],
+      lesson:"Hoạt động an toàn bậc 1 không có chỗ cho \"gần đúng\". 5 Rõ ở đây = 5 lớp bảo vệ — bỏ qua 1 lớp = tạo 1 lỗ hổng. Lý do cảm tính (\"để Mai học\", \"để đội nghỉ trưa\") hay lý do thiếu hụt (\"Dũng bận\") đều không được chấp nhận để giảm chuẩn an toàn.",
+      impactBase:{prestige:3, energy:-3, risk:-5}
+    },
+
+    {
+      id:3,
+      time:"08:30",
+      timePct:31,
+      badge:"Cao điểm · Khẩn",
+      badgeClass:"urgent",
+      title:"Giờ cao điểm + POS cột 2 không nhận thẻ",
+      scenario:"Sân trạm có 8 xe chờ. POS cột 2 lỗi không nhận thẻ ATM/Visa. 2 khách đã phàn nàn lớn tiếng. Cột 1&3 quá tải. Mai đang vệ sinh WC (lịch cố định), Dũng đang đi tuần PCCC định kỳ, Lan vẫn đang thu ngân cột chính nhưng sắp đến giờ về lo con (10:00).",
+      questions:[
+        {
+          ro:1, label:"Rõ người",
+          q:"Bạn phân công ai xử lý tình huống đa tầng này?",
+          options:[
+            { id:"A", text:"Dũng dừng việc kiểm tra PCCC, hỗ trợ liên hệ kỹ thuật POS. Mai tạm dừng vệ sinh hỗ trợ Lan thu tay cột 2, Cửa hàng trưởng điều phối hàng chờ và xin lỗi khách.", quality:"good", reasoning:"Cắt đúng: tuần PCCC có thể hoãn 30', vệ sinh WC có thể chậm 30'. Giờ cao điểm là \"code đỏ\" — mọi người tạm gác lịch cá nhân ưu tiên khẩn. Không ai \"ôm\" nhiều việc." },
+            { id:"B", text:"Giao Dũng toàn quyền xử POS, các nhân viên khác tiếp tục lịch bình thường — không nên để nhiều người bị cuốn vào một sự cố kỹ thuật.", quality:"mid", reasoning:"Nghe gọn gàng nhưng bỏ qua thực tế: khách đã bực, cột 2 đang tê liệt, cần giải pháp vận hành tạm SONG SONG với sửa POS. Một mình Dũng không đỡ được trải nghiệm khách." },
+            { id:"C", text:"Đóng cột 2, dồn khách sang cột 1 và 3 để giảm áp lực cho Lan — cô ấy đang lo con ốm đủ mệt không nên thêm việc.", quality:"bad", reasoning:"Bẫy \"bảo vệ Lan\" rất cảm tính. Đóng 1/3 công suất giờ cao điểm = mất doanh thu lớn + hàng chờ dài hơn + khách phẫn nộ hơn. Quyết định thương vụ bằng cảm xúc cá nhân." }
+          ]
+        },
+        {
+          ro:2, label:"Rõ việc",
+          q:"Các việc cụ thể triển khai song song?",
+          options:[
+            { id:"A", text:"Liên hệ bộ phận trung tâm hỗ trợ kỹ thuật, dùng POS dự phòng nếu có, hoá đơn tay + QR thủ công tại cột 2, xin lỗi khách chờ và ưu tiên khách mua ít.", quality:"good", reasoning:"Bốn việc đồng thời: kỹ thuật (liên hệ hỗ trợ) + vận hành tạm (hoá đơn tay) + trải nghiệm (xin lỗi) + điều phối (ưu tiên). Không có việc nào bị bỏ sót — đúng tư duy đa luồng giờ cao điểm." },
+            { id:"B", text:"Chỉ liên hệ bộ phận trung tâm hỗ trợ kỹ thuật và hướng dẫn khách chuyển cột — khách hiểu và chấp nhận chờ khi có sự cố kỹ thuật thật sự.", quality:"mid", reasoning:"Giả định \"khách hiểu\" là sai lầm điển hình. Giờ cao điểm khách không có thời gian \"hiểu\" — họ có thời gian biểu riêng. Cần giải pháp, không cần họ thông cảm." },
+            { id:"C", text:"Ưu tiên xử lý nội bộ trước khi liên hệ bộ phận trung tâm hỗ trợ kỹ thuật — tránh để sự cố nhỏ leo thang thành báo cáo cấp trên không cần thiết.", quality:"bad", reasoning:"\"Tránh leo thang\" = che giấu vấn đề. Kỹ thuật POS có SLA với bộ phận trung tâm hỗ trợ kỹ thuật, liên hệ là đúng quy trình. Che giấu chỉ làm thời gian sửa dài ra và bộ phận trung tâm không biết để xử lý hệ thống." }
+          ]
+        },
+        {
+          ro:3, label:"Rõ mục tiêu",
+          q:"Mục tiêu đo lường được trong tình huống này?",
+          options:[
+            { id:"A", text:"Thời gian chờ của khách dưới 5 phút, POS hoạt động lại dưới 30 phút, 0 khiếu nại đăng lên mạng xã hội trong sự cố.", quality:"good", reasoning:"Ba thước đo cho ba khía cạnh: trải nghiệm (5 phút) + kỹ thuật (30 phút) + danh tiếng (0 post). Đủ cụ thể để đội biết cần tập trung vào đâu, đủ rõ để cuối sự cố đánh giá được." },
+            { id:"B", text:"Tránh để khách bỏ sang trạm đối thủ và duy trì doanh thu cột 2 ở mức chấp nhận được trong giờ cao điểm.", quality:"mid", reasoning:"Mục tiêu thụ động \"tránh mất\" — không tạo ra hành vi rõ cho đội. \"Mức chấp nhận được\" là bao nhiêu? Không có số = không có mục tiêu thực sự, chỉ là mong muốn." },
+            { id:"C", text:"Sửa POS nhanh nhất có thể và giữ bầu không khí đội ngũ ổn định, không nhân viên nào bị áp lực quá mức trong sự cố này.", quality:"bad", reasoning:"Bẫy \"bảo vệ đội\" thêm vào mục tiêu vận hành. Đội có thể áp lực — đó là giờ cao điểm, áp lực là thực tế. Mục tiêu \"không áp lực\" dẫn đến né tránh quyết định khó." }
+          ]
+        },
+        {
+          ro:4, label:"Rõ thời hạn",
+          q:"Deadline cụ thể cho từng bước?",
+          options:[
+            { id:"A", text:"Giải pháp thủ công triển khai trong 2 phút, POS khôi phục dưới 30 phút, leo thang lên GĐ khu vực nếu quá 30 phút.", quality:"good", reasoning:"Deadline ngắn cho giải pháp tạm (2') + deadline kỹ thuật (30') + cơ chế báo cáo cấp trên tự động. \"Báo cáo cấp trên tự động\" là điểm khác biệt — không để Cửa hàng trưởng phải \"quyết có báo cấp trên không\" khi đang rối." },
+            { id:"B", text:"Trong giờ cao điểm 8:30-9:30 phải xong — nếu không kịp thì chấp nhận chậm và giải thích với khách lý do khách quan.", quality:"mid", reasoning:"Deadline \"cận giờ cao điểm\" thiếu cơ chế báo cáo cấp trên. Nếu bộ phận trung tâm hỗ trợ kỹ thuật không đến kịp thì sao? Phương án B không có plan B — đó là lỗ hổng lớn của Rõ thời hạn." },
+            { id:"C", text:"Xong trong ca trước 14:00 — Dũng đã có kinh nghiệm, áp deadline chặt sẽ khiến anh thêm căng thẳng khi đang xử.", quality:"bad", reasoning:"Cực kỳ cảm tính. \"Trong ca\" = 5 tiếng rưỡi, cột 2 chết 5 tiếng rưỡi = thảm hoạ doanh thu và trải nghiệm. \"Tránh căng thẳng cho Dũng\" không phải tiêu chí thời hạn." }
+          ]
+        },
+        {
+          ro:5, label:"Rõ trách nhiệm",
+          q:"Trách nhiệm phân bổ thế nào khi song song nhiều việc?",
+          options:[
+            { id:"A", text:"Dũng chủ trì POS, Mai chủ trì vận hành tạm cột 2, Cửa hàng trưởng chủ trì điều phối và báo cấp trên nếu có khiếu nại đi lên.", quality:"good", reasoning:"Ma trận \"một người một chủ trì\" — mỗi mảng có một người \"chủ\" (không phải \"làm\"). Chủ trì ≠ làm một mình, nhưng chịu trách nhiệm cuối cho mảng đó. Rất khớp với tinh thần Chủ tịch." },
+            { id:"B", text:"Dũng chịu trách nhiệm toàn bộ vì đây là sự cố kỹ thuật — đội còn lại không nên bị ảnh hưởng khi Dũng đã có kinh nghiệm.", quality:"mid", reasoning:"Lỗi \"gán trách nhiệm = gán công việc\". Dũng không thể chịu trách nhiệm về trải nghiệm khách đang bực — đó là việc tuyến đầu. Rõ trách nhiệm phải phân theo mảng không theo nguồn sự cố." },
+            { id:"C", text:"Nhà cung cấp POS chịu trách nhiệm vì máy của họ lỗi — cửa hàng là nạn nhân và cần đòi bồi thường sau sự cố.", quality:"bad", reasoning:"Đẩy trách nhiệm cho bên thứ 3. Khách không quan tâm ai lỗi — họ thấy CHXD không phục vụ được mình. Truy bồi thường là việc PHỤ, xử trải nghiệm khách là việc CHÍNH." }
+          ]
+        }
+      ],
+      lesson:"Sự cố giờ cao điểm = phép thử quản trị đa luồng. 5 Rõ dạy: mỗi mảng việc có một người chủ trì + deadline riêng + cơ chế báo cáo cấp trên tự động. Đừng rơi vào bẫy \"dồn một người giải quyết để đội nghỉ\" — vì khách không đợi đội nghỉ.",
+      impactBase:{prestige:1, energy:-4, risk:-2}
+    },
+
+    {
+      id:4,
+      time:"10:00",
+      timePct:50,
+      badge:"Khách hàng · Nhạy cảm",
+      badgeClass:"critical",
+      title:"Khách phàn nàn WC bẩn, quay clip",
+      scenario:"Khách nữ lớn tiếng: \"WC bẩn, giấy hết, sàn ướt — tôi quay đăng Facebook!\" — đã rút điện thoại bật camera. 3 khách khác nhìn thấy. Đội chỉ còn 4 người: Lan vừa xin về (10:00-12:00 lo con ốm). Mai mới 3 tháng, rất dễ cảm xúc khi bị khách la.",
+      questions:[
+        {
+          ro:1, label:"Rõ người",
+          q:"Ai tiếp cận khách đang quay clip ngay lập tức?",
+          options:[
+            { id:"A", text:"Cửa hàng trưởng trực tiếp tiếp khách xin lỗi, Mai lập tức vào dọn WC — không để Mai đối diện khách đang quay clip.", quality:"good", reasoning:"Đúng cấp tiếp: khách đang giận cần gặp cấp quyết định (Cửa hàng trưởng), không phải nhân viên. Bảo vệ Mai là hệ quả PHỤ, chính là để khách cảm thấy được tôn trọng bởi cấp đúng." },
+            { id:"B", text:"Mai xử lý cả hai: vừa xin lỗi khách vừa dọn WC — vệ sinh là chuyên trách của Mai, cô ấy biết cách giải thích cho khách.", quality:"mid", reasoning:"Sai cấp và sai năng lực. Mai 3 tháng không đủ kỹ năng xử khủng hoảng trước camera. Giao cô việc này = nguy cơ clip còn tệ hơn \"nhân viên khóc trước khách\"." },
+            { id:"C", text:"Để Mai tránh mặt vì cô mới, Cửa hàng trưởng và Hùng thay phiên xử lý cả khách lẫn WC — tránh cô khóc trước camera của khách.", quality:"bad", reasoning:"Bẫy \"bảo vệ Mai\" dẫn đến sai cơ cấu. Hùng là nhân viên bơm, không phải nhân sự phù hợp tiếp khách khiếu nại. Cửa hàng trưởng + Hùng \"thay phiên\" = không ai chủ trì = khách bực thêm." }
+          ]
+        },
+        {
+          ro:2, label:"Rõ việc",
+          q:"Các việc cụ thể phải làm với khách và quy trình?",
+          options:[
+            { id:"A", text:"Xin lỗi thực lòng, mời khách vào phòng tiếp khách uống nước, cam kết khắc phục, triển khai checklist WC 30'/lần từ ngay lúc này.", quality:"good", reasoning:"Ba lớp: xoa dịu (mời vào phòng = cắt khỏi camera) + khắc phục (dọn) + ngăn tái diễn (quy trình mới). Triển khai NGAY trong sự cố để khách thấy cam kết thật." },
+            { id:"B", text:"Xin lỗi và cam kết dọn ngay — checklist WC 30'/lần khoan triển khai vì Lan vừa về, đội 4 người không đủ luân phiên.", quality:"bad", reasoning:"Bẫy \"thiếu người\" rất hấp dẫn. Nhưng khách không quan tâm nội bộ đủ người hay không — cô quan tâm đến cam kết. Hơn nữa, 30'/lần = 16 lần/ca = mỗi nhân viên làm vài lần, 4 người ĐỦ." },
+            { id:"C", text:"Giải thích với khách rằng WC dùng chung, giờ cao điểm khó giữ sạch 100% — cửa hàng luôn cố gắng trong khả năng.", quality:"mid", reasoning:"Phản biện khách giữa chỗ đông = thảm hoạ truyền thông. Dù giải thích có lý, clip \"nhân viên PLX giải thích khi khách bức xúc\" sẽ bị cắt ra khỏi ngữ cảnh và lan viral rất nhanh." }
+          ]
+        },
+        {
+          ro:3, label:"Rõ mục tiêu",
+          q:"Kết quả cần đạt sau sự cố này?",
+          options:[
+            { id:"A", text:"Khách đổi cảm xúc không đăng bài tiêu cực, WC sạch trong 10 phút, checklist 30'/lần thực thi từ ca sau có ký xác nhận.", quality:"good", reasoning:"Ba mục tiêu ở ba chiều: cảm xúc khách (đo bằng hành vi đăng bài) + vận hành (thời gian dọn) + hệ thống (quy trình mới có ký). Mục tiêu ngắn hạn + dài hạn đồng thời." },
+            { id:"B", text:"Khách bình tĩnh lại và cảm thấy được lắng nghe, đội ngũ không ai bị căng thẳng thêm trong ca đã nhiều áp lực.", quality:"bad", reasoning:"Bẫy cảm tính \"bảo vệ đội\" lồng vào mục tiêu sự cố. \"Không căng thẳng\" không đo được và không đúng ưu tiên — khách hàng và thương hiệu phải được đặt trước cảm xúc đội trong sự cố." },
+            { id:"C", text:"Không để khiếu nại leo lên fanpage Tập đoàn và giữ hình ảnh cửa hàng trong cộng đồng khách quen của trạm.", quality:"mid", reasoning:"Mục tiêu đúng nhưng PHÒNG THỦ. Thiếu mục tiêu CẢI TIẾN (quy trình mới). Sự cố này là cơ hội xây quy trình vận hành chuẩn — nếu chỉ dập dịch, 2 tuần nữa lặp lại." }
+          ]
+        },
+        {
+          ro:4, label:"Rõ thời hạn",
+          q:"Thời gian triển khai các việc?",
+          options:[
+            { id:"A", text:"Xin lỗi ngay lập tức, dọn WC xong trong 10 phút, triển khai quy trình 30'/lần ngay từ sự cố này không chờ ca sau.", quality:"good", reasoning:"Ba deadline khác nhau cho ba hành động — không gộp chung. \"Không chờ ca sau\" là điểm quan trọng: quy trình phải bắt đầu NGAY để khách cảm nhận cam kết thật." },
+            { id:"B", text:"Dọn WC xong trước 12:00 khi Lan quay về, đội đông lại thành 5 người sẽ dễ luân phiên triển khai quy trình mới.", quality:"bad", reasoning:"Bẫy \"chờ đủ người\" rất tinh vi. 2 giờ chờ = có thể 30+ khách dùng WC bẩn trong thời gian đó. Quy trình phải bắt đầu NGAY với 4 người — không phải đợi đủ 5." },
+            { id:"C", text:"Dọn khi Mai rảnh tay sau khi tất cả khách hiện tại được phục vụ xong — không để Mai bị chia nhiều việc một lúc.", quality:"mid", reasoning:"\"Khi rảnh\" không phải thời hạn. Đội có thể bận suốt giờ cao điểm → WC bẩn kéo dài. Thiếu hụt nhân sự không giảm được tiêu chuẩn vệ sinh." }
+          ]
+        },
+        {
+          ro:5, label:"Rõ trách nhiệm",
+          q:"Ai chịu trách nhiệm dài hạn về tình trạng WC tại cửa hàng?",
+          options:[
+            { id:"A", text:"Cửa hàng trưởng chịu trách nhiệm quy trình, Mai chịu trách nhiệm thực hiện, cả đội chịu trách nhiệm phát hiện sớm và báo Cửa hàng trưởng.", quality:"good", reasoning:"Ba lớp: thiết kế (Cửa hàng trưởng) + thực hiện (Mai) + giám sát chéo (cả đội). Không có lỗ hổng — ngay cả khi Mai quên, người khác phải phát hiện và báo." },
+            { id:"B", text:"Mai chịu toàn bộ vì vệ sinh là vị trí của cô — đội còn lại có nhiệm vụ riêng, không nên bị cuốn vào việc không phải của mình.", quality:"mid", reasoning:"Mai 1 người không thể kiểm soát WC 8 tiếng liên tục. \"Vệ sinh là của Mai\" đúng ở mức thực hiện, sai ở mức phát hiện — WC bẩn là tín hiệu cả đội phải phát hiện." },
+            { id:"C", text:"Khách hàng có phần trách nhiệm dùng WC văn minh — cửa hàng không thể một mình giữ sạch nếu khách không hợp tác.", quality:"bad", reasoning:"Đẩy trách nhiệm cho khách = đối đầu với khách. Thương hiệu chỉ có thể xây từ phía mình. Đây là tư duy \"dịch vụ thụ động\" ngược với định hướng \"Tận tâm\" của thương hiệu mới." }
+          ]
+        }
+      ],
+      lesson:"Sự cố trải nghiệm = cơ hội xây quy trình. Cửa hàng trưởng giỏi biến mỗi khiếu nại thành một quy trình vận hành chuẩn mới ngay lập tức, không chờ \"khi đủ người\". Đừng để \"bảo vệ nhân viên mới\" hay \"thiếu người\" làm chậm cải tiến — vì hai sự cố lặp lại sẽ hại thương hiệu nhiều hơn việc đội hơi bận.",
+      impactBase:{prestige:4, energy:-3, risk:-4}
+    },
+
+    {
+      id:5,
+      time:"11:30",
+      timePct:68.75,
+      badge:"Cơ quan quản lý · Nghiêm trọng",
+      badgeClass:"critical",
+      title:"Đoàn thanh tra thị trường kiểm tra đột xuất",
+      scenario:"3 cán bộ thanh tra thị trường đến, xuất trình thẻ công vụ và quyết định kiểm đột xuất. Nội dung: chất lượng xăng dầu, Hóa đơn điện tử, hồ sơ kiểm định cột đo, hồ sơ PCCC. Dự kiến 2 giờ. Đội còn 4 người (Lan về), Mai vừa xong ca vệ sinh đầu tiên, Dũng đang ở khu kho.",
+      questions:[
+        {
+          ro:1, label:"Rõ người",
+          q:"Ai trực tiếp tiếp đoàn thanh tra?",
+          options:[
+            { id:"A", text:"Cửa hàng trưởng trực tiếp tiếp đoàn, Mai chuẩn bị hồ sơ giấy tờ, Dũng chuẩn bị khu vực kiểm PCCC, báo cấp trên qua điện thoại ngay.", quality:"good", reasoning:"Cửa hàng trưởng đúng cấp tiếp đoàn, 3 nhân viên mỗi người 1 mảng hỗ trợ song song, kênh báo cáo mở ngay. Cấu trúc \"một chủ trì, đội hỗ trợ\" chuẩn quản trị hiện trường." },
+            { id:"B", text:"Dũng tiếp đoàn vì anh thông thạo PCCC nhất — Cửa hàng trưởng ở lại điều phối vận hành để không gián đoạn phục vụ khách trong giờ này.", quality:"mid", reasoning:"Sai cấp tiếp: thanh tra cần gặp người quyết định, không phải chuyên viên. Dũng giỏi PCCC không thay thế được Cửa hàng trưởng về thẩm quyền. \"Không gián đoạn\" là ưu tiên sai trong tình huống này." },
+            { id:"C", text:"Cửa hàng trưởng ôm toàn bộ tiếp đoàn và chuẩn bị hồ sơ — không cắt nhân viên khỏi vị trí vì đội đang thiếu Lan, không nên xáo trộn thêm.", quality:"bad", reasoning:"Bẫy \"thiếu người\" điển hình. Cửa hàng trưởng không thể vừa tiếp đoàn vừa chuẩn bị hồ sơ vừa giám sát khu PCCC. Thanh tra thấy 1 người chạy vòng quanh = ấn tượng cửa hàng yếu quản trị." }
+          ]
+        },
+        {
+          ro:2, label:"Rõ việc",
+          q:"Các việc cụ thể phải triển khai?",
+          options:[
+            { id:"A", text:"Xem giấy ủy quyền thanh tra, lập biên bản bắt đầu, chuẩn bị đủ hồ sơ kiểm định + Hóa đơn điện tử + sổ PCCC, báo cấp trên ngay.", quality:"good", reasoning:"Bốn bước đúng quy trình chuẩn: xác thực → ghi nhận → cung cấp → báo cáo. \"Lập biên bản bắt đầu\" là bước thường bị bỏ qua nhưng quan trọng để sau có căn cứ thời điểm." },
+            { id:"B", text:"Hợp tác đầy đủ và cung cấp mọi thứ đoàn yêu cầu — thanh tra là cơ quan nhà nước, đối đầu không có lợi cho cửa hàng sau này.", quality:"mid", reasoning:"\"Hợp tác\" không đồng nghĩa \"cung cấp mọi thứ mà không xem ủy quyền\". CHXD có quyền xác minh phạm vi kiểm tra. Hợp tác đúng cách = trong giới hạn quy định, không là \"phục tùng\"." },
+            { id:"C", text:"Yêu cầu đoàn đợi 30 phút để Cửa hàng trưởng liên lạc cấp trên xin hướng dẫn trước khi cho vào — đây là quy trình an toàn của cửa hàng.", quality:"bad", reasoning:"VI PHẠM rất nặng. Thanh tra có QĐ kiểm đột xuất có quyền vào ngay lập tức. Yêu cầu đợi = chống đối cơ quan nhà nước, có thể bị xử phạt hành chính + ghi nhận vào hồ sơ." }
+          ]
+        },
+        {
+          ro:3, label:"Rõ mục tiêu",
+          q:"Kết quả cuối cùng kỳ vọng?",
+          options:[
+            { id:"A", text:"Kết luận 0 vi phạm, biên bản đủ chữ ký 2 bên, báo cáo kết quả lên cấp trên trước 17:00 cùng ngày kèm rút kinh nghiệm.", quality:"good", reasoning:"Ba mục tiêu: chất lượng thực thi (0 vi phạm) + thủ tục (biên bản) + học hỏi (rút kinh nghiệm). Mục tiêu \"rút kinh nghiệm\" cho thấy tư duy cải tiến liên tục, không chỉ qua ải." },
+            { id:"B", text:"Đoàn ra về sớm và không phát hiện vấn đề lớn — không ảnh hưởng quá nhiều đến nhịp phục vụ khách trong buổi trưa cao điểm.", quality:"mid", reasoning:"\"Ra về sớm\" là mục tiêu phụ, không phải chính. Mục tiêu chính phải là \"không có vi phạm\". Đặt thanh tra ở vị trí \"cản trở vận hành\" là sai tư duy về vai trò cơ quan quản lý." },
+            { id:"C", text:"Giữ quan hệ tốt với đoàn để các lần sau thuận lợi, không nhân viên nào bị căng thẳng khi làm việc với cơ quan nhà nước.", quality:"bad", reasoning:"Bẫy kép: \"giữ quan hệ\" dễ hiểu lầm thành \"thân quen\" (tiêu cực), và \"không nhân viên căng thẳng\" là cảm tính. Quan hệ tốt = qua thực thi đúng, không qua giao tiếp cá nhân." }
+          ]
+        },
+        {
+          ro:4, label:"Rõ thời hạn",
+          q:"Deadline cho các việc?",
+          options:[
+            { id:"A", text:"Hồ sơ chuẩn bị xong trong 15 phút, báo cấp trên trong 10 phút đầu, báo cáo kết quả chính thức trước 17:00 cùng ngày.", quality:"good", reasoning:"Ba deadline rõ cho ba hành động khác nhau. 10 phút báo cấp trên đầu tiên rất quan trọng — để cấp trên chủ động can thiệp NẾU cần, không để phát hiện sau khi đoàn đã đi." },
+            { id:"B", text:"Xong theo nhịp đoàn — 2 giờ dự kiến là ước lượng, thực tế tùy theo mức độ kiểm tra của từng nội dung chuyên môn.", quality:"mid", reasoning:"Chỉ gắn với thời gian đoàn = không có kỷ luật thực thi nội bộ. Báo cáo cấp trên sau 2 giờ hay ngay? Deadline nội bộ phải độc lập với đoàn để không phụ thuộc bên ngoài." },
+            { id:"C", text:"Không áp giới hạn thời gian lên đoàn — thanh tra có quyền kiểm đến khi họ đủ, cửa hàng không nên hối thúc cơ quan nhà nước.", quality:"bad", reasoning:"Nhầm lẫn giữa deadline CHO ĐOÀN và deadline CHO MÌNH. Tất nhiên không áp thời gian lên đoàn — nhưng CHXD phải có deadline riêng cho báo cáo, xử lý hồ sơ của mình." }
+          ]
+        },
+        {
+          ro:5, label:"Rõ trách nhiệm",
+          q:"Trách nhiệm cuối cùng về kết quả kiểm tra?",
+          options:[
+            { id:"A", text:"Cửa hàng trưởng là người chịu trách nhiệm cuối cùng với đoàn và cấp trên, Mai chịu hồ sơ, Dũng chịu khu vực kiểm tra.", quality:"good", reasoning:"Chuỗi trách nhiệm thẳng: Cửa hàng trưởng cuối cùng (với cả hai bên trên và dưới), nhân viên cụ thể cho mảng. Không ai có thể đẩy trách nhiệm — mọi mảng đều có \"chủ\"." },
+            { id:"B", text:"Mai chịu trách nhiệm hồ sơ vì cô vừa rảnh ca vệ sinh — Cửa hàng trưởng không thể ôm cả tiếp đoàn lẫn hồ sơ cùng lúc trong 2 giờ.", quality:"mid", reasoning:"Mai chịu THỰC HIỆN hồ sơ đúng, nhưng trách nhiệm CUỐI CÙNG về tính chính xác hồ sơ vẫn là Cửa hàng trưởng. Nhầm lẫn giữa \"ai làm\" và \"ai chịu trách nhiệm\" là sai lầm cơ bản của 5 Rõ." },
+            { id:"C", text:"Giám đốc CHXD khu vực chịu trách nhiệm vì kiểm tra ở cấp doanh nghiệp, Cửa hàng trưởng chỉ là người thực thi quy trình kiểm.", quality:"bad", reasoning:"Đẩy trách nhiệm lên trên. Thanh tra kiểm CHXD cụ thể này, tại địa điểm này, ở thời điểm này. Cửa hàng trưởng là người đại diện duy nhất có thẩm quyền — không thể ủy thác lên GĐ khu vực." }
+          ]
+        }
+      ],
+      lesson:"Cơ quan quản lý đến chính là lúc 5 Rõ trở thành \"tấm khiên pháp lý\". Không có chỗ cho \"tránh gián đoạn khách\" hay \"đội thiếu người\" — phải ưu tiên đoàn. Đồng thời không \"sợ\" đoàn: làm đúng quy trình (kiểm ủy quyền, lập biên bản) là bảo vệ cửa hàng, không phải đối đầu với đoàn.",
+      impactBase:{prestige:4, energy:-4, risk:-6}
+    },
+
+    {
+      id:6,
+      time:"13:00",
+      timePct:87.5,
+      badge:"Bàn giao ca",
+      badgeClass:"normal",
+      title:"Chuẩn bị bàn giao ca chiều lúc 14:00",
+      scenario:"Ca sáng sắp kết thúc. Cửa hàng trưởng ca chiều là anh Bình — người khó tính, từng phê bình bàn giao mơ hồ của ca khác. Cần bàn giao: tiền mặt (~50tr), tồn kho xăng, sổ sự cố (3 sự kiện ca sáng), quy trình WC 30'/lần vừa triển khai, và 1 nhiệm vụ tồn (báo cáo thanh tra chưa gửi xong). Đội đã làm việc 7 tiếng, ai cũng mệt.",
+      questions:[
+        {
+          ro:1, label:"Rõ người",
+          q:"Ai tham gia bàn giao cùng anh Bình?",
+          options:[
+            { id:"A", text:"Cửa hàng trưởng ca sáng + Lan (thu ngân) + Cửa hàng trưởng ca chiều cùng có mặt, ký biên bản 3 bên với thời điểm chuyển giao rõ ràng.", quality:"good", reasoning:"Ba bên đủ: người quản lý 2 ca (thẩm quyền) + người trực tiếp giữ tiền (thực thi). Biên bản 3 chữ ký = minh bạch, không bên nào có thể phủ nhận." },
+            { id:"B", text:"Lan bàn giao trực tiếp với thu ngân ca chiều, Cửa hàng trưởng chỉ ký xác nhận cuối — tiết kiệm thời gian khi đội đã mệt cả ngày.", quality:"mid", reasoning:"Bẫy cảm tính \"đội mệt\". Sự cố và nhiệm vụ tồn là việc cấp Cửa hàng trưởng — không thể ủy thác cho cấp nhân viên. \"Tiết kiệm 10 phút\" đổi lại rủi ro anh Bình phê bình là không đáng." },
+            { id:"C", text:"Cửa hàng trưởng ca sáng bàn giao qua Zalo với anh Bình trước khi về — anh đã quen cách này, không cần tụ tập chờ nhau vào đúng giờ.", quality:"bad", reasoning:"Zalo không phải kênh bàn giao ca có tiền mặt. Không có xác nhận hiểu. Nếu tiền mặt thiếu sau này = không ai chứng minh được thời điểm chuyển giao. Rủi ro pháp lý rất cao." }
+          ]
+        },
+        {
+          ro:2, label:"Rõ việc",
+          q:"Nội dung bàn giao gồm những gì?",
+          options:[
+            { id:"A", text:"Đối soát tiền mặt + POS, đo tồn kho 3 cột, sổ sự cố 3 sự kiện + quy trình WC 30'/lần, nhiệm vụ tồn (báo cáo thanh tra).", quality:"good", reasoning:"Năm nội dung theo đúng \"tiền - hàng - việc đã - việc tồn - quy trình mới\". Chuẩn bàn giao chuyên nghiệp. Đặc biệt \"quy trình mới\" không được bỏ — ca chiều phải nối tiếp ngay." },
+            { id:"B", text:"Tiền mặt, tồn kho, và tóm tắt chung các sự kiện — nhiệm vụ tồn ghi trong sổ bàn giao cho ca chiều đọc sau khi rảnh.", quality:"mid", reasoning:"Bẫy \"ghi sổ cho đọc sau\". Ca chiều đông khách, khó có thời gian đọc sổ. Nhiệm vụ tồn phải được NÓI TRỰC TIẾP + xác nhận hiểu — không để trong sổ." },
+            { id:"C", text:"Ký sổ bàn giao theo mẫu và ghi chú \"ca bình thường\" — các sự kiện đã xử lý xong, không cần nhắc lại trong bàn giao.", quality:"bad", reasoning:"Ca có 3 sự kiện + 1 quy trình mới + 1 nhiệm vụ tồn = KHÔNG phải \"bình thường\". Khai \"bình thường\" là khai sai, anh Bình sẽ phát hiện khi làm việc — mất niềm tin giữa 2 ca vĩnh viễn." }
+          ]
+        },
+        {
+          ro:3, label:"Rõ mục tiêu",
+          q:"Kết quả cần đạt khi bàn giao xong?",
+          options:[
+            { id:"A", text:"Tiền mặt khớp POS, tồn kho khớp sổ, ca chiều nắm rõ 3 sự kiện + quy trình mới, nhiệm vụ tồn có người nhận rõ ràng.", quality:"good", reasoning:"Bốn tiêu chí đo được cho bốn khía cạnh. \"Ca chiều nắm rõ\" có thể đo bằng: họ có hỏi thêm không? Có ký xác nhận không? Là đầu ra rõ của 5 Rõ." },
+            { id:"B", text:"Không có chênh lệch tiền mặt hoặc xăng trong đối soát — đó là tiêu chí quan trọng nhất của bàn giao ca giữa hai Cửa hàng trưởng.", quality:"mid", reasoning:"Chỉ kiểm \"tiền - hàng\", bỏ qua \"việc\". Đây là lỗi bàn giao phổ biến: kiểm cái đếm được, bỏ qua cái khó đo. Nhiệm vụ tồn bị lãng quên = ca chiều sẽ đổ lỗi ca sáng." },
+            { id:"C", text:"Bàn giao nhanh gọn để về nghỉ — đội đã làm cả ngày rất mệt, kéo dài bàn giao sẽ khiến mọi người thêm khó chịu.", quality:"bad", reasoning:"Bẫy \"đội mệt\" điển hình. Bàn giao là kỷ luật cuối ca — không được cắt ngắn vì mệt. Mất 15 phút bàn giao đúng < mất 2 giờ xử lý hậu quả nếu bàn giao lỏng." }
+          ]
+        },
+        {
+          ro:4, label:"Rõ thời hạn",
+          q:"Thời gian bàn giao và báo cáo?",
+          options:[
+            { id:"A", text:"Hoàn tất trong 13:00-14:00, báo cáo sự cố + quy trình mới lên GĐ CHXD khu vực trước 17:00 cùng ngày kèm biên bản.", quality:"good", reasoning:"Deadline nội bộ (1 giờ bàn giao) + deadline báo cáo ngoại (17:00). Đúng tinh thần \"đã nói là phải làm đến kết quả sau cùng\" của Chủ tịch — không dừng ở khép ca." },
+            { id:"B", text:"Xong trong 30 phút để Cửa hàng trưởng ca sáng về sớm — đội đã làm cao điểm và xử sự cố cả ngày, ai cũng cần nghỉ ngơi sớm.", quality:"bad", reasoning:"Bẫy \"về sớm vì mệt\". 30 phút cho 5 nội dung (tiền, hàng, sự cố, nhiệm vụ tồn, quy trình mới) là quá gấp. Anh Bình khó tính sẽ phát hiện ngay điểm sót — mất uy tín Cửa hàng trưởng ca sáng." },
+            { id:"C", text:"Bàn giao khi anh Bình đến thật sự — không cần chuẩn bị sớm, anh thường đến đúng giờ 14:00 không sớm không muộn.", quality:"mid", reasoning:"\"Khi anh Bình đến\" = reactive. Chuyên nghiệp = chuẩn bị trước, khi anh đến chỉ việc trình bày + ký. Không chuẩn bị = mất thời gian anh Bình + ấn tượng không chuyên nghiệp." }
+          ]
+        },
+        {
+          ro:5, label:"Rõ trách nhiệm",
+          q:"Ranh giới trách nhiệm giữa hai ca?",
+          options:[
+            { id:"A", text:"Cửa hàng trưởng ca sáng chịu trách nhiệm đến 14:00, Cửa hàng trưởng ca chiều từ 14:00 trở đi, biên bản có ký xác nhận thời điểm rõ ràng.", quality:"good", reasoning:"Ranh giới sắc bén theo thời điểm, có xác nhận ký — không có \"khoảng xám\" trách nhiệm. Nếu có sự cố lúc 13:55 hay 14:05 đều xác định được ca nào chịu." },
+            { id:"B", text:"Cửa hàng trưởng ca sáng chịu trách nhiệm đến khi ca chiều \"ổn định công việc\" — thường là 30-60 phút sau khi ca mới bắt đầu.", quality:"mid", reasoning:"\"Ổn định\" là trạng thái mơ hồ. Có thể kéo dài 30 phút hoặc 2 giờ — ai quyết định? Ranh giới trách nhiệm phải là MỘT ĐIỂM THỜI GIAN, không phải trạng thái." },
+            { id:"C", text:"Ký sổ vội rồi ai gặp vấn đề gì tự xử lý trong ca của mình — không nên kéo dài trách nhiệm qua ca của người khác.", quality:"bad", reasoning:"\"Ký vội\" = không rõ ranh giới = đổ lỗi sau này. \"Tự xử\" là mô hình cá nhân, không phải hệ thống. Anh Bình khó tính sẽ từ chối ký nếu thấy biên bản không chuẩn." }
+          ]
+        }
+      ],
+      lesson:"Bàn giao ca là điểm chuyển giao trách nhiệm — nơi dễ có khoảng trống nhất. 5 Rõ biến cuộc bàn giao thành hợp đồng. Đừng để bẫy cảm tính \"đội mệt\", \"về sớm\" hay bẫy thiếu hụt \"không đủ người họp 3 bên\" làm giảm chất lượng bàn giao — 15 phút bàn giao đúng tiết kiệm 2 giờ dọn hậu quả.",
+      impactBase:{prestige:2, energy:-1, risk:-3}
+    }
+  ];
+
+  // ═══════════════ STATE ═══════════════
+  var EVENT_TIME_LIMIT = 120;
+  var EVENT_SPEED_BONUS_MAX = 20;
+  var state = {
+    screen: "lobby",
+    eventIdx: 0,
+    picks: {},           // current event: {ro1:"A", ro2:"B", ...}
+    answered: false,
+    prestige: 70,
+    energy: 85,
+    risk: 15,
+    totalScore: 0,
+    maxScore: 0,
+    history: [],         // per event: {eventId, time, picks, score, quality, scores:[5]}
+    roTotals: [0,0,0,0,0], // Total score per Rõ (for mastery)
+    speedBonusTotal: 0,
+    clockTime: 360,      // minutes since 00:00 → 360 = 06:00
+    timerRemaining: EVENT_TIME_LIMIT,
+    timerId: null,
+    timedOut: false,
+    timerAudioContext: null,
+    lastWarningSecond: null,
+    playerRank: null,
+    gradeLabel: ""
+  };
+  var timerHtmlAudioPool = [];
+  var timerHtmlAudioIndex = 0;
+  var timerBeepUris = {};
+
+  // ═══════════════ HELPERS ═══════════════
+  function $(sel){ return document.querySelector(sel); }
+  function $$(sel){ return Array.prototype.slice.call(document.querySelectorAll(sel)); }
+
+  function showScreen(id){
+    if(id !== "game") stopEventTimer();
+    $$(".screen").forEach(function(s){ s.classList.remove("active"); });
+    var t = document.getElementById("screen-" + id);
+    if(t) t.classList.add("active");
+    state.screen = id;
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+
+  function scrollToCurrentEvent(){
+    var target = $(".shift-bar") || $(".stage");
+    if(!target) return;
+    var top = target.getBoundingClientRect().top + window.pageYOffset - 12;
+    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  }
+
+  function minsToClock(m){
+    var h = Math.floor(m/60) % 24;
+    var mm = m % 60;
+    return (h<10?"0":"") + h + ":" + (mm<10?"0":"") + mm;
+  }
+
+  function displayMetric(n){
+    return String(Math.round(n));
+  }
+
+  function calculateSpeedBonus(baseScore){
+    if(state.timedOut || baseScore <= 0) return 0;
+    var accuracyFactor = baseScore / 100;
+    var timeFactor = state.timerRemaining / EVENT_TIME_LIMIT;
+    return Math.round(EVENT_SPEED_BONUS_MAX * accuracyFactor * timeFactor);
+  }
+
+  function formatDuration(seconds){
+    var safeSeconds = Math.max(0, Math.round(Number(seconds) || 0));
+    var mins = Math.floor(safeSeconds / 60);
+    var secs = safeSeconds % 60;
+    return String(mins).padStart(2, "0") + ":" + String(secs).padStart(2, "0");
+  }
+
+  function getTotalResponseSeconds(){
+    return state.history.reduce(function(total, item){
+      return total + (Number(item.responseSeconds) || 0);
+    }, 0);
+  }
+
+  function peerScore(peer, doneCount){
+    return peer.scores.slice(0, doneCount).reduce(function(a,b){ return a + b; }, 0);
+  }
+
+  function getTimerAudioContext(){
+    if(state.timerAudioContext) return state.timerAudioContext;
+    var AudioCtor = window.AudioContext || window.webkitAudioContext;
+    if(!AudioCtor) return null;
+    try {
+      state.timerAudioContext = new AudioCtor();
+    } catch(error) {
+      state.timerAudioContext = null;
+    }
+    return state.timerAudioContext;
+  }
+
+  function initTimerAudio(){
+    getTimerAudioContext();
+    unlockTimerAudio();
+    primeTimerAudio();
+    initTimerHtmlAudio();
+  }
+
+  function unlockTimerAudio(){
+    var ctx = state.timerAudioContext;
+    if(!ctx) return;
+    if(ctx.state === "suspended"){
+      ctx.resume().catch(function(){});
+    }
+  }
+
+  function primeTimerAudio(){
+    var ctx = state.timerAudioContext;
+    if(!ctx) return;
+    try {
+      var buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+      var source = ctx.createBufferSource();
+      var gain = ctx.createGain();
+      source.buffer = buffer;
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      source.connect(gain);
+      gain.connect(ctx.destination);
+      source.start(0);
+    } catch(error) {}
+  }
+
+  function isIosAudioDevice(){
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  }
+
+  function makeBeepDataUri(freq){
+    var sampleRate = 12000;
+    var duration = 0.22;
+    var samples = Math.floor(sampleRate * duration);
+    var dataSize = samples * 2;
+    var bytes = [];
+    function str(s){ for(var i=0;i<s.length;i++) bytes.push(s.charCodeAt(i)); }
+    function u16(v){ bytes.push(v & 255, (v >> 8) & 255); }
+    function u32(v){ bytes.push(v & 255, (v >> 8) & 255, (v >> 16) & 255, (v >> 24) & 255); }
+    str("RIFF"); u32(36 + dataSize); str("WAVEfmt "); u32(16); u16(1); u16(1); u32(sampleRate); u32(sampleRate * 2); u16(2); u16(16); str("data"); u32(dataSize);
+    for(var i=0;i<samples;i++){
+      var attack = Math.min(1, i / (sampleRate * 0.015));
+      var release = Math.min(1, (samples - i) / (sampleRate * 0.04));
+      var env = Math.max(0, Math.min(1, attack * release));
+      var sample = Math.round(Math.sin(2 * Math.PI * freq * (i / sampleRate)) * 32767 * 0.85 * env);
+      if(sample < 0) sample += 65536;
+      u16(sample);
+    }
+    var chunk = "";
+    for(var j=0;j<bytes.length;j++) chunk += String.fromCharCode(bytes[j]);
+    return "data:audio/wav;base64," + btoa(chunk);
+  }
+
+  function getTimerBeepUri(secondLeft){
+    var key = secondLeft <= 3 ? "urgent" : "normal";
+    if(!timerBeepUris[key]) timerBeepUris[key] = makeBeepDataUri(key === "urgent" ? 1080 : 880);
+    return timerBeepUris[key];
+  }
+
+  function initTimerHtmlAudio(){
+    if(timerHtmlAudioPool.length || typeof Audio === "undefined") return;
+    timerHtmlAudioPool = [0,1,2].map(function(){
+      var audio = new Audio(getTimerBeepUri(10));
+      audio.preload = "auto";
+      audio.playsInline = true;
+      return audio;
+    });
+    var unlock = timerHtmlAudioPool[0];
+    unlock.muted = true;
+    unlock.volume = 0;
+    var played = unlock.play();
+    if(played && typeof played.then === "function"){
+      played.then(function(){
+        unlock.pause();
+        unlock.currentTime = 0;
+        unlock.muted = false;
+        unlock.volume = 1;
+      }).catch(function(){});
+    }
+  }
+
+  function playTimerHtmlAudio(secondLeft){
+    initTimerHtmlAudio();
+    if(!timerHtmlAudioPool.length) return;
+    var audio = timerHtmlAudioPool[timerHtmlAudioIndex++ % timerHtmlAudioPool.length];
+    audio.src = getTimerBeepUri(secondLeft);
+    audio.muted = false;
+    audio.volume = 1;
+    try { audio.currentTime = 0; } catch(error) {}
+    var played = audio.play();
+    if(played && typeof played.catch === "function") played.catch(function(){});
+  }
+
+  function playTimerBell(secondLeft){
+    if(isIosAudioDevice()){
+      playTimerHtmlAudio(secondLeft);
+      return;
+    }
+    var ctx = getTimerAudioContext();
+    if(!ctx) return;
+    if(ctx.state === "suspended" && ctx.resume){
+      ctx.resume().then(function(){ playTimerBell(secondLeft); }).catch(function(){});
+      return;
+    }
+    var now = ctx.currentTime;
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    var volume = secondLeft <= 3 ? 0.52 : 0.38;
+    var freq = secondLeft <= 3 ? 980 : 760;
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(freq, now);
+    osc.frequency.exponentialRampToValueAtTime(freq * 1.35, now + 0.08);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(volume, now + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.2);
+  }
+
+  function getLiveRankData(){
+    var rankData = state.playerRank || window.PLXPlayerRank || {};
+    var scores = Array.isArray(rankData.scores)
+      ? rankData.scores
+      : (Array.isArray(window.PLXLeaderboardScores) ? window.PLXLeaderboardScores : []);
+    var total = Number(rankData.total) > 0 ? Number(rankData.total) : scores.length;
+    var rankValue = 0;
+
+    if(scores.length){
+      var higherCount = scores.filter(function(score){
+        return (Number(score) || 0) > state.totalScore;
+      }).length;
+      rankValue = higherCount + 1;
+      total = Math.max(total, scores.length + (Number(rankData.rank) > 0 ? 0 : 1), rankValue);
+    } else if(Number(rankData.rank) > 0){
+      rankValue = Number(rankData.rank);
+      total = Math.max(total, rankValue);
+    }
+
+    return { rank: rankValue || null, total: total || null, scores: scores };
+  }
+
+  function formatLiveRank(){
+    var data = getLiveRankData();
+    if(data.rank && data.total) return "#" + data.rank + "/" + data.total;
+    if(data.rank) return "#" + data.rank;
+    return "Đang cập nhật";
+  }
+
+  function setPlayerRank(rankData){
+    state.playerRank = rankData || null;
+    renderLeaderboard();
+    if(state.screen === "results") renderHonorBanner();
+  }
+
+  function renderLeaderboard(){
+    var doneCount = state.history.length;
+    var rankText = formatLiveRank();
+    var rankEl = $("#lb-rank");
+    if(rankEl) rankEl.firstChild.nodeValue = rankText;
+    var rankCard = $("#lb-rank-card");
+    if(rankCard) rankCard.textContent = rankText;
+    var scoreCard = $("#lb-score");
+    if(scoreCard) scoreCard.textContent = String(state.totalScore);
+    var doneCard = $("#lb-done-count");
+    if(doneCard) doneCard.textContent = doneCount + "/6";
+    $("#lb-progress").textContent = "Sau " + doneCount + "/6 tình huống";
+  }
+
+  function formatTimer(sec){
+    sec = Math.max(0, sec);
+    var m = Math.floor(sec / 60);
+    var s = sec % 60;
+    return (m<10?"0":"") + m + ":" + (s<10?"0":"") + s;
+  }
+
+  function updateTimerDisplay(){
+    var text = formatTimer(state.timerRemaining);
+    var timer = $("#event-timer");
+    var formTimer = $("#form-timer");
+    var chip = $("#event-timer-chip");
+    var box = $("#event-countdown");
+    if(timer) timer.textContent = text;
+    if(formTimer) formTimer.textContent = text;
+    if(chip) chip.textContent = text;
+    [chip, box].forEach(function(el){
+      if(!el) return;
+      el.classList.remove("warn", "danger");
+      if(state.timerRemaining <= 10) el.classList.add("danger");
+      else if(state.timerRemaining <= 30) el.classList.add("warn");
+    });
+  }
+
+  function stopEventTimer(){
+    if(state.timerId){
+      clearInterval(state.timerId);
+      state.timerId = null;
+    }
+  }
+
+  function startEventTimer(){
+    stopEventTimer();
+    state.timerRemaining = EVENT_TIME_LIMIT;
+    state.timedOut = false;
+    state.lastWarningSecond = null;
+    updateTimerDisplay();
+    state.timerId = setInterval(function(){
+      if(state.screen !== "game" || state.answered){
+        stopEventTimer();
+        return;
+      }
+      state.timerRemaining -= 1;
+      updateTimerDisplay();
+      if(!state.answered && state.timerRemaining > 0 && state.timerRemaining <= 10 && state.lastWarningSecond !== state.timerRemaining){
+        state.lastWarningSecond = state.timerRemaining;
+        playTimerBell(state.timerRemaining);
+      }
+      if(state.timerRemaining <= 0){
+        state.timerRemaining = 0;
+        updateTimerDisplay();
+        stopEventTimer();
+        submitEvent(true);
+      }
+    }, 1000);
+  }
+
+  function animateNum(el, from, to, dur){
+    dur = dur || 500;
+    var start = performance.now();
+    function tick(now){
+      var p = Math.min(1, (now - start) / dur);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(from + (to - from) * eased);
+      if(p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // ═══════════════ LOBBY ═══════════════
+  function renderLobbyTeam(){
+    var row = $("#lobby-team");
+    row.innerHTML = "";
+    STAFF.forEach(function(s){
+      var chip = document.createElement("div");
+      chip.className = "team-chip";
+      chip.innerHTML = ''
+        + '<div class="team-avatar" style="background:' + s.color + '">' + initials(s.name) + '</div>'
+        + '<div class="team-meta"><div class="team-name"></div><div class="team-role"></div></div>';
+      chip.querySelector(".team-name").textContent = s.name;
+      chip.querySelector(".team-role").textContent = s.role;
+      row.appendChild(chip);
+    });
+  }
+
+  // ═══════════════ STAFF BOARD ═══════════════
+  function renderStaffBoard(){
+    var list = $("#staff-list");
+    list.innerHTML = "";
+    STAFF.forEach(function(s){
+      var item = document.createElement("div");
+      item.className = "staff";
+      if(s.energy < 50) item.classList.add("busy");
+      if(s.energy < 25) item.classList.add("alert");
+      item.innerHTML = ''
+        + '<div class="staff-avatar" style="background:' + s.color + '">' + initials(s.name) + '</div>'
+        + '<div class="staff-body">'
+        + '<div class="staff-name"></div>'
+        + '<div class="staff-role"></div>'
+        + '<div class="staff-energy"><div class="fill" style="width:' + s.energy + '%;background:' + (s.energy > 60 ? "var(--plx-green)" : s.energy > 30 ? "var(--plx-gold)" : "var(--plx-red)") + '"></div></div>'
+        + '</div>';
+      item.querySelector(".staff-name").textContent = s.name;
+      item.querySelector(".staff-role").textContent = s.role;
+      list.appendChild(item);
+    });
+  }
+
+  // ═══════════════ TIMELINE ═══════════════
+  function renderTimeline(){
+    var container = $("#tl-events");
+    container.innerHTML = "";
+    EVENTS.forEach(function(ev, i){
+      var m = document.createElement("div");
+      m.className = "tl-event-marker";
+      if(i < state.eventIdx) m.classList.add("done");
+      else if(i === state.eventIdx) m.classList.add("current");
+      if(ev.badgeClass === "critical" && i > state.eventIdx) m.classList.add("danger");
+      m.style.left = ev.timePct + "%";
+      m.setAttribute("data-time", ev.time);
+      container.appendChild(m);
+    });
+    // Fill progress
+    var pct = state.eventIdx === 0 ? 0 : (EVENTS[state.eventIdx].timePct);
+    if(state.eventIdx >= EVENTS.length) pct = 100;
+    $("#tl-fill").style.width = pct + "%";
+  }
+
+  // ═══════════════ EVENT RENDER ═══════════════
+  function renderEvent(){
+    stopEventTimer();
+    var ev = EVENTS[state.eventIdx];
+    state.picks = {};
+    state.answered = false;
+    state.timedOut = false;
+
+    // Clock display
+    $("#clock-chip").textContent = ev.time;
+
+    // Header
+    $("#event-time").textContent = ev.time;
+    $("#event-index").textContent = "Tình huống " + (state.eventIdx + 1) + "/6";
+    $("#event-badge").textContent = ev.badge;
+    $("#event-badge").className = "event-badge " + ev.badgeClass;
+    $("#event-title").textContent = ev.title;
+    $("#event-scenario").textContent = ev.scenario;
+
+    // Form
+    var form = $("#form-5ro");
+    form.innerHTML = "";
+    ev.questions.forEach(function(q, idx){
+      var field = document.createElement("div");
+      field.className = "ro-field";
+      field.setAttribute("data-ro", String(idx + 1));
+
+      var optsHtml = q.options.map(function(opt){
+        return '<button type="button" class="ro-opt" data-ro="' + (idx+1) + '" data-id="' + opt.id + '" data-quality="' + opt.quality + '">'
+          + '<div class="ro-opt-radio"></div>'
+          + '<div class="ro-opt-text">' + escapeHtml(opt.text) + '</div>'
+          + '</button>';
+      }).join("");
+
+      field.innerHTML = ''
+        + '<div class="ro-field-head">'
+        + '<div class="ro-badge r' + (idx+1) + '">' + (idx+1) + '</div>'
+        + '<div>'
+        + '<div class="ro-label-main">' + escapeHtml(q.label) + '</div>'
+        + '<div class="ro-q">' + escapeHtml(q.q) + '</div>'
+        + '</div>'
+        + '</div>'
+        + '<div class="ro-options">' + optsHtml + '</div>';
+
+      form.appendChild(field);
+    });
+
+    // Submit bar
+    var submitBar = document.createElement("div");
+    submitBar.className = "submit-bar";
+    submitBar.innerHTML = ''
+      + '<div class="progress-text">Đã chọn <strong id="pick-count">0</strong> / 5 quyết định</div>'
+      + '<div class="speed-note"><span>Bộ đếm thời gian tình huống: <strong id="form-timer">02:00</strong></span><span>Thưởng tốc độ tối đa +20 điểm</span></div>'
+      + '<button class="btn btn-primary" id="btn-submit" disabled>Xác nhận giao việc <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
+    form.appendChild(submitBar);
+
+    // Clear verdict
+    $("#verdict-slot").innerHTML = "";
+
+    // Bind option clicks
+    $$(".ro-opt").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        if(state.answered) return;
+        var ro = btn.getAttribute("data-ro");
+        // Clear previous pick in same field
+        $$('.ro-opt[data-ro="' + ro + '"]').forEach(function(b){ b.classList.remove("picked"); });
+        btn.classList.add("picked");
+        state.picks["ro" + ro] = {id: btn.getAttribute("data-id"), quality: btn.getAttribute("data-quality")};
+        updateSubmit();
+      });
+    });
+
+    $("#btn-submit").addEventListener("click", function(){ submitEvent(false); });
+
+    renderTimeline();
+    renderStaffBoard();
+    startEventTimer();
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, function(c){
+      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c];
+    });
+  }
+
+  function updateSubmit(){
+    var count = Object.keys(state.picks).length;
+    $("#pick-count").textContent = String(count);
+    $("#btn-submit").disabled = count < 5;
+  }
+
+  // ═══════════════ SUBMIT EVENT ═══════════════
+  function submitEvent(forceTimeout){
+    if(state.answered) return;
+    forceTimeout = forceTimeout === true;
+    if(Object.keys(state.picks).length < 5 && !forceTimeout) return;
+    state.answered = true;
+    state.timedOut = forceTimeout;
+    if(forceTimeout) state.timerRemaining = 0;
+    updateTimerDisplay();
+    stopEventTimer();
+
+    var ev = EVENTS[state.eventIdx];
+    var responseSeconds = forceTimeout
+      ? EVENT_TIME_LIMIT
+      : Math.max(0, Math.min(EVENT_TIME_LIMIT, EVENT_TIME_LIMIT - state.timerRemaining));
+    var scores = [0,0,0,0,0];
+    var qualities = [];
+
+    // Mark each option
+    ev.questions.forEach(function(q, idx){
+      var picked = state.picks["ro" + (idx+1)];
+      var quality = picked ? picked.quality : "bad";
+      var pts = quality === "good" ? 20 : quality === "mid" ? 10 : 0;
+      scores[idx] = pts;
+      qualities.push(quality);
+      state.roTotals[idx] += pts;
+
+      // Visual feedback
+      $$('.ro-opt[data-ro="' + (idx+1) + '"]').forEach(function(btn){
+        var btnId = btn.getAttribute("data-id");
+        var btnQ = btn.getAttribute("data-quality");
+        btn.disabled = true;
+        if(picked && btnId === picked.id){
+          btn.classList.remove("picked");
+          btn.classList.add("picked");
+          if(quality === "good") btn.classList.add("correct");
+          else if(quality === "mid") btn.classList.add("mid");
+          else btn.classList.add("wrong");
+        } else if(btnQ === "good"){
+          btn.classList.add("shown-correct");
+          var textEl = btn.querySelector(".ro-opt-text");
+          if(!textEl.querySelector(".tag")){
+            var tag = document.createElement("span");
+            tag.className = "tag good";
+            tag.textContent = "Chuẩn vàng";
+            textEl.appendChild(tag);
+          }
+        }
+      });
+    });
+
+    // Total score
+    var baseEventScore = scores.reduce(function(a,b){return a+b;}, 0);
+    var speedBonus = calculateSpeedBonus(baseEventScore);
+    var totalEventScore = baseEventScore + speedBonus;
+    var goodCount = qualities.filter(function(q){return q==="good";}).length;
+    var badCount = qualities.filter(function(q){return q==="bad";}).length;
+
+    state.totalScore += totalEventScore;
+    state.maxScore += 100 + EVENT_SPEED_BONUS_MAX;
+    state.speedBonusTotal += speedBonus;
+
+    var overallQuality = goodCount >= 4 ? "good" : goodCount >= 2 && badCount <= 1 ? "mid" : "bad";
+
+    // Apply resource impacts
+    var impact = ev.impactBase;
+    var mult = overallQuality === "good" ? 1.0 : overallQuality === "mid" ? 0.3 : -1.0;
+    var prevP = state.prestige, prevE = state.energy, prevR = state.risk;
+    state.prestige = clamp(state.prestige + impact.prestige * mult, 0, 100);
+    state.energy   = clamp(state.energy + impact.energy + (badCount * -1.5), 0, 100);
+    state.risk     = clamp(state.risk + impact.risk * -mult + (badCount * 3), 0, 100);
+
+    // Update staff energy based on how much effort spent
+    STAFF.forEach(function(s){
+      s.energy = clamp(s.energy - (overallQuality === "bad" ? 15 : overallQuality === "mid" ? 8 : 5), 0, 100);
+    });
+
+    // Update gauges
+    animateNum($("#g-prestige"), prevP, state.prestige);
+    animateNum($("#g-energy"), prevE, state.energy);
+    animateNum($("#g-risk"), prevR, state.risk);
+    $("#g-prestige-bar").style.width = state.prestige + "%";
+    $("#g-energy-bar").style.width = state.energy + "%";
+    $("#g-risk-bar").style.width = state.risk + "%";
+
+    renderStaffBoard();
+
+    // Update checklist marks (visual flavor)
+    updateChecklist();
+
+    // Save history
+    state.history.push({
+      eventId: ev.id,
+      time: ev.time,
+      title: ev.title,
+      picks: JSON.parse(JSON.stringify(state.picks)),
+      scores: scores.slice(),
+      qualities: qualities.slice(),
+      baseScore: baseEventScore,
+      speedBonus: speedBonus,
+      totalScore: totalEventScore,
+      responseSeconds: responseSeconds,
+      overallQuality: overallQuality
+    });
+
+    // Show verdict
+    renderVerdict(ev, scores, qualities, baseEventScore, speedBonus, totalEventScore, overallQuality);
+
+    // Add to event log
+    addEventLog(ev, overallQuality, totalEventScore);
+    renderLeaderboard();
+  }
+
+  function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+
+  // ═══════════════ VERDICT RENDER ═══════════════
+  function renderVerdict(ev, scores, qualities, baseScore, speedBonus, totalScore, overallQ){
+    var slot = $("#verdict-slot");
+
+    var iconChar = overallQ === "good" ? "★" : overallQ === "mid" ? "!" : "✕";
+    var title = overallQ === "good"
+      ? "Giao việc chuẩn — đúng tinh thần quản trị mới"
+      : overallQ === "mid"
+        ? "Giao việc chưa trọn — có điểm cần sửa"
+        : "Giao việc thiếu sót — đội khó thực thi";
+
+    var breakdownCells = qualities.map(function(q, i){
+      var cls = q === "good" ? "good" : q === "mid" ? "mid" : "bad";
+      return '<div class="vb-cell ' + cls + '">'
+        + '<div class="vb-cell-num">RÕ ' + (i+1) + '</div>'
+        + '<div class="vb-cell-score">' + scores[i] + '</div>'
+        + '</div>';
+    }).join("");
+
+    var isLast = state.eventIdx >= EVENTS.length - 1;
+    var ctaLabel = isLast ? "Kết thúc ca — xem tổng kết" : "Tình huống tiếp theo";
+
+    slot.innerHTML = ''
+      + '<div class="verdict ' + overallQ + '">'
+      + '<div class="v-head">'
+      + '<div class="v-icon">' + iconChar + '</div>'
+      + '<div class="v-head-text">'
+      + '<div class="v-title">' + escapeHtml(title) + '</div>'
+      + '<div class="v-score">Điểm 5 Rõ: <strong>' + baseScore + '</strong>/100 <span class="v-bonus">+ ' + speedBonus + ' điểm tốc độ</span> · Tổng <strong>' + totalScore + '</strong>/120</div>'
+      + '</div>'
+      + '</div>'
+      + '<div class="v-breakdown">' + breakdownCells + '</div>'
+      + '<div class="v-lesson">'
+      + '<div class="v-lesson-lbl">Bài học rút ra</div>'
+      + escapeHtml(ev.lesson)
+      + '</div>'
+      + '<div class="v-cta">'
+      + '<button class="btn btn-primary" id="btn-next-event">' + ctaLabel
+      + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      + '</button>'
+      + '</div>'
+      + '</div>';
+
+    $("#btn-next-event").addEventListener("click", function(){
+      if(isLast) showResults();
+      else {
+        state.eventIdx++;
+        renderEvent();
+        requestAnimationFrame(scrollToCurrentEvent);
+      }
+    });
+  }
+
+  // ═══════════════ CHECKLIST ═══════════════
+  function updateChecklist(){
+    var items = $$("#cl-list .cl-item");
+    var numDone = Math.min(items.length, state.eventIdx + 1);
+    items.forEach(function(it, i){
+      var box = it.querySelector(".cl-box");
+      if(i < numDone){
+        if(state.risk > 40 && i === items.length - 1){
+          it.classList.remove("done");
+          box.classList.remove("done");
+          box.classList.add("alert");
+          box.textContent = "!";
+        } else {
+          it.classList.add("done");
+          box.classList.add("done");
+          box.classList.remove("alert");
+          box.textContent = "✓";
+        }
+      }
+    });
+  }
+
+  // ═══════════════ EVENT LOG ═══════════════
+  function addEventLog(ev, quality, score){
+    var list = $("#el-list");
+    var empty = list.querySelector(".el-empty");
+    if(empty) empty.remove();
+
+    var item = document.createElement("div");
+    item.className = "el-item " + (quality === "good" ? "good" : quality === "bad" ? "bad" : "");
+    item.innerHTML = '<span class="el-time">' + ev.time + ' · ' + score + '/120</span>' + escapeHtml(ev.title);
+    list.insertBefore(item, list.firstChild);
+  }
+
+  function renderHonorBanner(){
+    var banner = $("#honor-banner");
+    if(!banner) return;
+    var rankData = getLiveRankData();
+    var rank = Number(rankData.rank) || 0;
+    banner.classList.remove("active", "rank-1", "rank-2", "rank-3");
+    [1, 2, 3].forEach(function(pos){
+      var step = $("#podium-" + pos);
+      if(step) step.classList.remove("active");
+    });
+    if(rank < 1 || rank > 3) return;
+
+    var labels = {
+      1: { cup:"1", title:"Cúp vàng Top 1 lớp", sub:"Bạn đang dẫn đầu bảng xếp hạng. Giữ nhịp ra quyết định rõ người, rõ việc, rõ trách nhiệm trong từng tình huống." },
+      2: { cup:"2", title:"Huy chương bạc Top 2", sub:"Bạn nằm trong nhóm xuất sắc của lớp. Chỉ cần tối ưu thêm tốc độ và độ trọn vẹn 5 Rõ để bứt lên." },
+      3: { cup:"3", title:"Huy chương đồng Top 3", sub:"Bạn đã vào nhóm vinh danh. Tiếp tục giữ điểm 5 Rõ ổn định để bảo vệ vị trí này." }
+    };
+    $("#honor-cup").textContent = labels[rank].cup;
+    $("#honor-title").textContent = labels[rank].title;
+    $("#honor-sub").textContent = labels[rank].sub;
+    var activeStep = $("#podium-" + rank);
+    if(activeStep) activeStep.classList.add("active");
+    banner.classList.add("active", "rank-" + rank);
+  }
+
+  // ═══════════════ RESULTS ═══════════════
+  function showResults(){
+    var pct = (state.totalScore / state.maxScore) * 100;
+
+    var rank, medal, title, sub;
+    if(pct >= 85){
+      rank = "A+"; medal = "A+";
+      title = "Cửa hàng trưởng đẳng cấp — ca sáng chuẩn mực PLX mới";
+      sub = "Bạn đã áp dụng triệt để '5 Rõ' trong cả 6 sự kiện. Đây là mô hình mẫu cho đồng nghiệp.";
+    } else if(pct >= 70){
+      rank = "A"; medal = "A";
+      title = "Cửa hàng trưởng vững — nắm chắc khung tư duy quản trị mới";
+      sub = "Có vài sự kiện chưa trọn 5 Rõ nhưng tổng thể ca sáng ổn định, đội ngũ không hao hụt.";
+    } else if(pct >= 55){
+      rank = "B"; medal = "B";
+      title = "Cửa hàng trưởng đang luyện — cần nhất quán hơn ở 5 Rõ";
+      sub = "Một số sự kiện bạn mới làm đúng 2-3 Rõ. Luyện lại ở các sự kiện áp lực cao.";
+    } else if(pct >= 40){
+      rank = "C"; medal = "C";
+      title = "Cần củng cố căn bản";
+      sub = "Nhiều lựa chọn theo phản xạ cũ. Hãy ôn lại khái niệm 'rõ việc' và 'rõ trách nhiệm'.";
+    } else {
+      rank = "D"; medal = "D";
+      title = "Cần học lại 5 Rõ từ đầu";
+      sub = "Ca sáng có quá nhiều lỗ hổng giao việc. Tham khảo tài liệu đào tạo trước khi thử lại.";
+    }
+
+    $("#rh-medal").textContent = medal;
+    $("#rh-title").textContent = title;
+    $("#rh-sub").textContent = sub;
+    $("#r-score").textContent = String(state.totalScore);
+    $("#r-rank").textContent = formatLiveRank();
+    $("#r-time").textContent = formatDuration(getTotalResponseSeconds());
+    $("#r-grade").textContent = rank;
+    state.gradeLabel = rank;
+    renderHonorBanner();
+
+    // Event review
+    var rev = $("#event-review");
+    rev.innerHTML = "";
+    state.history.forEach(function(h){
+      var row = document.createElement("div");
+      row.className = "er-row " + h.overallQuality;
+
+      var goodCount = h.qualities.filter(function(q){return q === "good";}).length;
+      var roSummary = goodCount + "/5 Rõ chuẩn";
+
+      row.innerHTML = ''
+        + '<div class="er-time">' + h.time + '</div>'
+        + '<div class="er-text"><strong></strong><span></span></div>'
+        + '<div class="er-score">' + h.totalScore + '<span class="max">/120</span></div>';
+      row.querySelector("strong").textContent = h.title;
+      row.querySelector("span").textContent = roSummary + " · +" + h.speedBonus + " tốc độ";
+      rev.appendChild(row);
+    });
+
+    // Rõ mastery
+    var roNames = ["Rõ người", "Rõ việc", "Rõ mục tiêu", "Rõ thời hạn", "Rõ trách nhiệm"];
+    var roColors = ["var(--plx-red)", "var(--plx-gold-deep)", "var(--plx-navy)", "var(--plx-green-deep)", "var(--plx-red-deep)"];
+    var roMaxPer = 20 * EVENTS.length; // 20 pts max per event × 6 events = 120
+    var mastery = $("#ro-mastery");
+    mastery.innerHTML = "";
+
+    var lowestRoIdx = 0, lowestScore = state.roTotals[0];
+    state.roTotals.forEach(function(score, i){
+      if(score < lowestScore){ lowestScore = score; lowestRoIdx = i; }
+    });
+
+    roNames.forEach(function(name, i){
+      var score = state.roTotals[i];
+      var pct = (score / roMaxPer) * 100;
+      var block = document.createElement("div");
+      block.className = "rm-row";
+      block.innerHTML = ''
+        + '<div class="rm-label"><span class="rm-dot" style="background:' + roColors[i] + '"></span>' + name + '</div>'
+        + '<div class="rm-score">' + score + '/' + roMaxPer + '</div>'
+        + '<div class="rm-bar"><div class="fill" style="width:' + pct + '%;background:' + roColors[i] + '"></div></div>';
+      mastery.appendChild(block);
+    });
+
+    // Commit based on lowest Rõ
+    var commits = [
+      "Mỗi đầu ca, tôi sẽ GỌI TÊN CỤ THỂ từng người cho từng nhiệm vụ — thay vì nói 'ai rảnh thì làm'.",
+      "Mỗi khi giao một nhiệm vụ, tôi sẽ NÓI ĐỦ 3 BƯỚC cụ thể — thay vì nói 'em làm giúp anh cái đó'.",
+      "Mỗi nhiệm vụ tôi giao phải có MỘT CON SỐ hoặc MỘT DẤU HIỆU đo lường được — thay vì 'làm cho tốt'.",
+      "Mỗi nhiệm vụ phải có DEADLINE CỤ THỂ bằng giờ/phút — thay vì 'xong sớm nhé'.",
+      "Mỗi nhiệm vụ phải có MỘT NGƯỜI DUY NHẤT chịu trách nhiệm cuối cùng — thay vì 'các bạn cùng lo'."
+    ];
+    $("#commit-text").textContent = commits[lowestRoIdx];
+
+    showScreen("results");
+  }
+
+  // ═══════════════ GAME START ═══════════════
+  function startGame(){
+    initTimerAudio();
+    state.eventIdx = 0;
+    state.picks = {};
+    state.answered = false;
+    state.prestige = 70;
+    state.energy = 85;
+    state.risk = 15;
+    state.totalScore = 0;
+    state.maxScore = 0;
+    state.history = [];
+    state.roTotals = [0,0,0,0,0];
+    state.speedBonusTotal = 0;
+    state.gradeLabel = "";
+    state.playerRank = window.PLXPlayerRank || state.playerRank;
+    STAFF.forEach(function(s){ s.energy = 100; });
+
+    // Reset gauges
+    $("#g-prestige").textContent = "70";
+    $("#g-energy").textContent = "85";
+    $("#g-risk").textContent = "15";
+    $("#g-prestige-bar").style.width = "70%";
+    $("#g-energy-bar").style.width = "85%";
+    $("#g-risk-bar").style.width = "15%";
+
+    // Reset checklist
+    $$("#cl-list .cl-item").forEach(function(it){
+      it.classList.remove("done");
+      var box = it.querySelector(".cl-box");
+      box.classList.remove("done", "alert");
+      box.textContent = it.querySelector(".cl-box").getAttribute("data-orig") || box.textContent;
+    });
+
+    // Reset log
+    $("#el-list").innerHTML = '<div class="el-empty">Chưa có sự kiện nào được xử lý</div>';
+    renderLeaderboard();
+
+    showScreen("game");
+    renderEvent();
+  }
+
+  // ═══════════════ INIT ═══════════════
+  function getLiveScoreData(){
+    return {
+      totalScore: Number(state.totalScore) || 0,
+      progress: Array.isArray(state.history) ? state.history.length : 0
+    };
+  }
+
+  function getResultData(){
+    return {
+      cxScore: Number(state.totalScore) || 0,
+      brandPts: 0,
+      maxStreak: Number(state.speedBonusTotal) || 0,
+      rankLabel: state.gradeLabel || ($("#r-grade") ? $("#r-grade").textContent : ""),
+      values: {
+        heritage: getTotalResponseSeconds(),
+        devoted: Number(state.speedBonusTotal) || 0,
+        pioneering: Number(state.maxScore) || 0
+      },
+      answers: state.history.map(function(item, index){
+        return {
+          tpId: "event-" + (index + 1),
+          tpLabel: "Tình huống " + (index + 1),
+          tpTitle: item.title || "Tình huống " + (index + 1),
+          choiceId: "",
+          choiceText: item.time || "",
+          quality: item.overallQuality || "mid",
+          cx: Number(item.totalScore) || 0,
+          brand: 0,
+          feedback: item.title || "",
+          timedOut: Number(item.responseSeconds) >= EVENT_TIME_LIMIT,
+          responseSeconds: Number(item.responseSeconds) || 0
+        };
+      })
+    };
+  }
+
+  window.PLXGame = window.PLXGame || {};
+  window.PLXGame.setPlayerRank = setPlayerRank;
+  window.PLXGame.getLiveScoreData = getLiveScoreData;
+  window.PLXGame.getResultData = getResultData;
+
+  document.addEventListener("DOMContentLoaded", function(){
+    // Save original checklist numbers
+    $$("#cl-list .cl-box").forEach(function(box){
+      box.setAttribute("data-orig", box.textContent);
+    });
+
+    renderLobbyTeam();
+    renderLeaderboard();
+
+    $("#btn-start").addEventListener("click", startGame);
+  });
+
+})();
+</script>
+<script src="/games/plx-bridge.js"></script>
+</body>
+</html>

@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VNPT HEART — Kiến trúc sư Văn hóa · 8 Điểm chạm Quản trị</title>
+<style>
+  :root{
+    --navy:#0a2540; --navy-2:#0e3a66; --blue:#1559b3; --blue-bright:#2f80ed;
+    --sky:#e8f1fc; --gold:#f2a900; --green:#2bb673; --red:#e8503a;
+    --ink:#0b1c30; --paper:#f6f9fd; --line:#d6e2f0;
+    --h:#2f80ed; --e:#2bb673; --a:#f2860c; --r:#e8503a; --t:#d6266f;
+    --shadow:0 18px 50px -18px rgba(10,37,64,.45);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Be Vietnam Pro','Segoe UI',system-ui,sans-serif;color:var(--ink);
+    background:
+      radial-gradient(1200px 600px at 15% -10%, #14457a 0%, transparent 55%),
+      radial-gradient(1000px 700px at 100% 0%, #0e3a66 0%, transparent 50%),
+      linear-gradient(160deg,#071a30 0%,#0a2540 45%,#0c2e54 100%);
+    min-height:100vh;display:flex;align-items:flex-start;justify-content:center;
+    padding:24px 16px 60px;overflow-x:hidden;
+  }
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:radial-gradient(rgba(255,255,255,.06) 1px,transparent 1px);
+    background-size:22px 22px;mask-image:linear-gradient(180deg,#000 0%,transparent 70%);}
+  .stage{width:100%;max-width:900px;position:relative;z-index:1}
+
+  .brand{display:flex;align-items:center;gap:14px;margin-bottom:18px;color:#fff}
+  .mark{width:46px;height:46px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,var(--gold),var(--blue-bright));border-radius:14px;
+    box-shadow:0 10px 30px -8px rgba(242,169,0,.6)}
+  .mark svg{width:26px;height:26px}
+  .brand h1{font-size:1.05rem;font-weight:800;letter-spacing:.3px;line-height:1.15}
+  .brand small{display:block;font-weight:500;opacity:.7;font-size:.74rem;letter-spacing:.4px;text-transform:uppercase}
+
+  .card{background:var(--paper);border-radius:24px;box-shadow:var(--shadow);overflow:hidden;border:1px solid rgba(255,255,255,.6)}
+  .screen{display:none;animation:fade .5s ease both}
+  .screen.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  /* INTRO */
+  .intro{padding:46px 40px 40px;text-align:center}
+  .tag{display:inline-block;margin-bottom:16px;padding:6px 16px;border-radius:999px;background:#fff4dc;color:#b07700;font-weight:700;font-size:.78rem;letter-spacing:.6px;text-transform:uppercase}
+  .intro h2{font-size:2rem;font-weight:800;color:var(--navy);line-height:1.12;letter-spacing:-.5px}
+  .intro p.lead{max-width:600px;margin:14px auto 0;color:#3c5572;font-size:1.02rem;line-height:1.6}
+  .steps{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:26px 0 6px}
+  .stepchip{flex:1 1 0;min-width:150px;max-width:200px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 14px;text-align:left;position:relative}
+  .stepchip .sn{position:absolute;top:-12px;left:14px;width:26px;height:26px;border-radius:8px;background:var(--blue-bright);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:.85rem}
+  .stepchip b{display:block;color:var(--navy);font-size:.92rem;margin-top:6px}
+  .stepchip span{font-size:.78rem;color:#647d96;line-height:1.4}
+  .stepchip .pts{margin-top:6px;font-size:.74rem;font-weight:700;color:var(--gold)}
+  .meta-row{display:flex;justify-content:center;gap:26px;margin:26px 0 6px;flex-wrap:wrap}
+  .meta-row .m{font-size:.82rem;color:#516a85}
+  .meta-row .m b{display:block;font-size:1.3rem;color:var(--navy);font-weight:800}
+  .namebox{margin:24px auto 0;max-width:380px}
+  .namebox input{width:100%;padding:15px 18px;border-radius:14px;border:2px solid var(--line);font-size:1rem;font-family:inherit;outline:none;transition:.2s;background:#fff;text-align:center}
+  .namebox input:focus{border-color:var(--blue-bright);box-shadow:0 0 0 4px rgba(47,128,237,.15)}
+  .btn{cursor:pointer;border:none;font-family:inherit;font-weight:800;letter-spacing:.3px;
+    background:linear-gradient(135deg,var(--blue-bright),var(--blue));color:#fff;
+    padding:16px 40px;border-radius:14px;font-size:1.05rem;
+    box-shadow:0 14px 30px -10px rgba(21,89,179,.8);transition:transform .15s, box-shadow .2s;margin-top:22px}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 18px 38px -10px rgba(21,89,179,.9)}
+  .btn:active{transform:translateY(0)}
+  .btn.ghost{background:#fff;color:var(--blue);border:2px solid var(--line);box-shadow:none}
+  .btn.ghost:hover{border-color:var(--blue-bright)}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+  /* PLAY HEADER */
+  .play-top{background:linear-gradient(120deg,var(--navy),var(--navy-2));color:#fff;padding:18px 26px}
+  .pt-line{display:flex;align-items:center;gap:18px}
+  .progress-wrap{flex:1}
+  .progress-meta{display:flex;justify-content:space-between;font-size:.78rem;opacity:.85;margin-bottom:7px}
+  .progress-meta b{opacity:1;font-weight:700}
+  .bar{height:8px;background:rgba(255,255,255,.18);border-radius:99px;overflow:hidden}
+  .bar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue-bright),var(--gold));border-radius:99px;transition:width .5s ease}
+  .score-pill{background:rgba(255,255,255,.12);padding:8px 16px;border-radius:12px;text-align:center}
+  .score-pill b{display:block;font-size:1.25rem;font-weight:800}
+  .score-pill small{font-size:.6rem;opacity:.7;letter-spacing:1px;text-transform:uppercase}
+  .round-dots{display:flex;gap:6px;margin-top:14px}
+  .round-dots .rd{flex:1;height:6px;border-radius:99px;background:rgba(255,255,255,.18);transition:.3s}
+  .round-dots .rd.active{background:var(--gold)}
+  .round-dots .rd.done{background:var(--green)}
+
+  /* QBODY */
+  .qbody{padding:28px 34px 34px}
+  .scen-card{background:#fff;border:1px solid var(--line);border-left:5px solid var(--blue-bright);border-radius:14px;padding:18px 20px;margin-bottom:8px}
+  .scen-title{font-size:1.2rem;font-weight:800;color:var(--navy);margin-bottom:10px;line-height:1.25}
+  .scen-text{font-size:.98rem;line-height:1.6;color:#28415c}
+  .round-head{margin:22px 0 6px;display:flex;align-items:center;gap:10px}
+  .round-badge{background:var(--navy);color:#fff;font-weight:800;font-size:.78rem;padding:5px 13px;border-radius:8px;letter-spacing:.5px}
+  .round-q{font-size:1.05rem;font-weight:700;color:var(--navy)}
+  .round-hint{font-size:.82rem;color:#7d93a8}
+  .hint{font-size:.82rem;color:#7d93a8;margin-bottom:10px}
+
+  /* GRID of choices */
+  .grid{display:grid;gap:10px;margin-top:8px}
+  .grid.touch{grid-template-columns:repeat(4,1fr)}
+  .grid.heart{grid-template-columns:repeat(5,1fr)}
+  .grid.list{grid-template-columns:1fr}
+  .cell{cursor:pointer;background:#fff;border:2px solid var(--line);border-radius:13px;padding:14px 12px;font-family:inherit;font-size:.9rem;color:var(--ink);text-align:center;transition:.16s;line-height:1.35;display:flex;flex-direction:column;gap:5px;align-items:center;justify-content:center;min-height:74px}
+  .cell:hover{border-color:var(--blue-bright);transform:translateY(-2px);box-shadow:0 10px 22px -14px rgba(21,89,179,.6)}
+  .cell .ic{font-weight:800;font-size:1.1rem;color:var(--blue)}
+  .cell.heartc .ic{width:34px;height:34px;border-radius:10px;color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.05rem}
+  .cell.sel{border-color:var(--blue-bright);background:var(--sky)}
+  .cell.correct{border-color:var(--green);background:#eafaf2}
+  .cell.partial{border-color:var(--gold);background:#fff7e8}
+  .cell.wrong{border-color:var(--red);background:#fdeeeb}
+  .cell:disabled{cursor:default}
+  .cell.list-opt{text-align:left;flex-direction:row;gap:12px;min-height:0}
+  .cell.list-opt .ic{flex:0 0 auto;width:28px;height:28px;border-radius:8px;background:var(--sky);display:flex;align-items:center;justify-content:center;font-size:.9rem}
+  .cell.list-opt span.tx{flex:1}
+  .cell.list-opt.correct .ic{background:var(--green);color:#fff}
+  .cell.list-opt.wrong .ic{background:var(--red);color:#fff}
+
+  .multi-actions{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:12px;flex-wrap:wrap}
+  .multi-actions .note{font-size:.8rem;color:#7d93a8}
+
+  /* feedback */
+  .fb{display:none;margin-top:16px;animation:fade .4s ease both}
+  .fb.show{display:block}
+  .fb-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+  .fb-badge{padding:6px 14px;border-radius:9px;font-weight:800;font-size:.85rem;color:#fff}
+  .fb-pts{font-weight:800;color:var(--navy)}
+  .fb-explain{background:var(--navy);color:#eaf2fb;border-radius:13px;padding:15px 18px;font-size:.94rem;line-height:1.55}
+  .fb-explain .lbl{display:block;font-size:.7rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px}
+  .reflect{margin-top:10px;background:var(--sky);border:1px dashed var(--blue-bright);border-radius:13px;padding:13px 16px;font-size:.92rem;color:var(--navy);line-height:1.5}
+  .reflect b{display:block;font-size:.7rem;letter-spacing:1px;text-transform:uppercase;color:var(--blue);margin-bottom:5px}
+  .next-row{display:flex;justify-content:flex-end;margin-top:16px}
+
+  /* RESULT */
+  .res-hero{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:40px 36px 30px;text-align:center;position:relative;overflow:hidden}
+  .res-hero::after{content:"";position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(242,169,0,.4),transparent 70%);top:-120px;right:-80px}
+  .rank-name{font-size:.85rem;letter-spacing:1px;text-transform:uppercase;opacity:.8}
+  .badge-name{font-size:1.8rem;font-weight:800;margin:6px 0 4px;position:relative}
+  .res-score{font-size:3.1rem;font-weight:800;line-height:1;margin-top:14px;position:relative}
+  .res-score small{font-size:1rem;opacity:.7;font-weight:600}
+  .res-body{padding:30px 36px 38px}
+  .res-body h3{font-size:1.05rem;color:var(--navy);margin-bottom:6px;font-weight:800}
+  .res-body p.sub{color:#54708d;font-size:.9rem;margin-bottom:16px}
+  .skills{display:flex;flex-direction:column;gap:14px;margin-bottom:26px}
+  .skill .sl-top{display:flex;justify-content:space-between;font-size:.88rem;margin-bottom:6px;color:var(--navy);font-weight:600}
+  .skill .sl-bar{height:12px;background:#e4edf7;border-radius:99px;overflow:hidden}
+  .skill .sl-bar > i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blue-bright),var(--gold));transition:width .8s ease}
+  .lb{border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:26px}
+  .lb-row{display:flex;align-items:center;gap:14px;padding:13px 18px;border-bottom:1px solid var(--line);font-size:.95rem}
+  .lb-row:last-child{border-bottom:none}
+  .lb-row .pos{width:26px;height:26px;border-radius:8px;background:var(--sky);color:var(--blue);font-weight:800;display:flex;align-items:center;justify-content:center;font-size:.85rem}
+  .lb-row.me{background:var(--sky)}
+  .lb-row.me .pos{background:var(--gold);color:#fff}
+  .lb-row .nm{font-weight:600}
+  .lb-row .sc{margin-left:auto;font-weight:800;color:var(--navy)}
+  .principles{background:var(--navy);color:#eaf2fb;border-radius:16px;padding:22px 24px;margin-bottom:24px}
+  .principles h4{color:var(--gold);font-size:.95rem;margin-bottom:12px;letter-spacing:.3px}
+  .principles .pr{display:flex;gap:12px;padding:8px 0;font-size:.95rem;line-height:1.5}
+  .principles .pr .n{color:var(--gold);font-weight:800;flex:0 0 auto}
+  .reflections .r-item{padding:13px 0;border-bottom:1px dashed var(--line);font-size:.92rem;color:#33506e;line-height:1.5;display:flex;gap:10px}
+  .reflections .r-item:last-child{border-bottom:none}
+  .reflections .r-item .n{flex:0 0 auto;color:var(--blue);font-weight:800}
+  .res-actions{display:flex;gap:12px;justify-content:center;margin-top:26px;flex-wrap:wrap}
+  .footer-note{text-align:center;color:rgba(255,255,255,.5);font-size:.74rem;margin-top:20px}
+
+  @media(max-width:600px){
+    .intro{padding:34px 22px}.intro h2{font-size:1.55rem}
+    .qbody{padding:22px 18px 26px}
+    .grid.touch{grid-template-columns:repeat(2,1fr)}
+    .grid.heart{grid-template-columns:repeat(3,1fr)}
+    .res-hero{padding:32px 22px 26px}.res-body{padding:24px 20px 30px}
+    .play-top{padding:16px 18px}
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <div class="brand">
+    <div class="mark">
+      <svg viewBox="0 0 24 24" fill="#fff"><path d="M3 21V9l9-6 9 6v12h-6v-7h-6v7H3z"/></svg>
+    </div>
+    <div>
+      <h1>KIẾN TRÚC SƯ VĂN HÓA</h1>
+      <small>8 Điểm chạm Quản trị · VNPT HEART</small>
+    </div>
+  </div>
+
+  <div class="card">
+
+    <!-- INTRO -->
+    <section class="screen active" id="introScreen">
+      <div class="intro">
+        <span class="tag">Gamification 2 · Team Challenge · NSQL cấp 3</span>
+        <h2>Đưa HEART vào<br>8 điểm chạm quản trị</h2>
+        <p class="lead">Văn hóa không nằm trong khẩu hiệu — nó nằm trong cách bạn giao việc, đánh giá, phối hợp và ghi nhận. Với mỗi tình huống, đội của bạn sẽ <b>chẩn đoán và thiết kế lại</b> cách quản trị qua 4 bước.</p>
+
+        <div class="steps">
+          <div class="stepchip"><span class="sn">1</span><b>Gọi tên điểm chạm</b><span>Vấn đề thuộc điểm chạm quản trị nào?</span><span class="pts">+10đ</span></div>
+          <div class="stepchip"><span class="sn">2</span><b>Soi giá trị HEART</b><span>Giá trị nào đang bị thử thách?</span><span class="pts">+10đ</span></div>
+          <div class="stepchip"><span class="sn">3</span><b>Chọn hành vi chuyển hóa</b><span>Thay đổi cách quản trị thế nào?</span><span class="pts">+20đ</span></div>
+          <div class="stepchip"><span class="sn">4</span><b>Chọn chỉ số theo dõi</b><span>Làm sao biết đã thay đổi thật?</span><span class="pts">+10đ</span></div>
+        </div>
+
+        <div class="meta-row">
+          <div class="m"><b>8</b> tình huống</div>
+          <div class="m"><b>~25</b> phút</div>
+          <div class="m"><b>50đ</b> mỗi tình huống</div>
+          <div class="m"><b>400đ</b> tối đa</div>
+        </div>
+
+        <div class="namebox">
+          <input id="teamName" type="text" placeholder="Nhập tên ĐỘI của bạn" maxlength="30" />
+        </div>
+        <button class="btn" id="startBtn">Khởi công →</button>
+        <p style="margin-top:16px;font-size:.8rem;color:#7d93a8">Mỗi đội dùng một thiết bị. Cùng bàn bạc trước khi chọn nhé!</p>
+      </div>
+    </section>
+
+    <!-- PLAY -->
+    <section class="screen" id="playScreen">
+      <div class="play-top">
+        <div class="pt-line">
+          <div class="progress-wrap">
+            <div class="progress-meta"><span>Tình huống <b id="qNum">1</b>/8</span><span id="qTitleMini"></span></div>
+            <div class="bar"><i id="progBar"></i></div>
+          </div>
+          <div class="score-pill"><b id="scoreVal">0</b><small>Điểm đội</small></div>
+        </div>
+        <div class="round-dots">
+          <div class="rd" id="rd0"></div><div class="rd" id="rd1"></div><div class="rd" id="rd2"></div><div class="rd" id="rd3"></div>
+        </div>
+      </div>
+      <div class="qbody">
+        <div class="scen-card">
+          <div class="scen-title" id="scenTitle"></div>
+          <div class="scen-text" id="scenText"></div>
+        </div>
+
+        <div class="round-head">
+          <span class="round-badge" id="roundBadge">VÒNG 1/4</span>
+          <span class="round-q" id="roundQ"></span>
+        </div>
+        <div class="hint" id="roundHint"></div>
+        <div class="grid" id="choices"></div>
+
+        <div class="multi-actions" id="multiActions" style="display:none">
+          <span class="note" id="multiNote"></span>
+          <button class="btn" id="confirmMulti" style="margin-top:0;padding:12px 28px;font-size:.95rem">Xác nhận lựa chọn</button>
+        </div>
+
+        <div class="fb" id="fb">
+          <div class="fb-row">
+            <span class="fb-badge" id="fbBadge"></span>
+            <span class="fb-pts" id="fbPts"></span>
+          </div>
+          <div class="fb-explain"><span class="lbl">Phân tích</span><span id="fbText"></span></div>
+          <div class="reflect" id="reflectBox" style="display:none"><b>Câu hỏi suy ngẫm</b><span id="fbReflect"></span></div>
+          <div class="next-row"><button class="btn" id="nextBtn">Tiếp →</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULT -->
+    <section class="screen" id="resultScreen">
+      <div class="res-hero">
+        <div class="rank-name">Danh hiệu của đội</div>
+        <div class="badge-name" id="badgeName">—</div>
+        <div class="res-score" id="finalScore">0<small> điểm</small></div>
+      </div>
+      <div class="res-body">
+        <h3>Năng lực chuyển hóa của đội</h3>
+        <p class="sub">Đội mạnh ở khâu nào trong quy trình 4 bước?</p>
+        <div class="skills" id="skills"></div>
+
+        <h3>Bảng xếp hạng đội</h3>
+        <p class="sub">So với các đội đã chơi trong phiên này.</p>
+        <div class="lb" id="leaderboard"></div>
+
+        <div class="principles">
+          <h4>3 NGUYÊN TẮC CHUYỂN HÓA — MANG VỀ ĐƠN VỊ</h4>
+          <div class="pr"><span class="n">1.</span><span>Không có văn hóa chung chung — văn hóa nằm trong từng điểm chạm quản trị.</span></div>
+          <div class="pr"><span class="n">2.</span><span>Mỗi điểm chạm cần một hành vi quan sát được.</span></div>
+          <div class="pr"><span class="n">3.</span><span>Cái gì đo được thì chuyển hóa được.</span></div>
+        </div>
+
+        <h3>Mang về: 8 câu hỏi suy ngẫm</h3>
+        <p class="sub">Chọn 1–2 câu chuyển thành cam kết hành động 60 ngày.</p>
+        <div class="reflections" id="reflections"></div>
+
+        <div class="res-actions">
+          <button class="btn ghost" id="reviewBtn">Xem lại</button>
+          <button class="btn" id="againBtn">Chơi lại</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+  <p class="footer-note">Chương trình VNPT HEART · WS2 · Chuyên đề 3 — Chuyển hóa văn hóa vào quản trị</p>
+</div>
+
+<script>
+/* ============ DATA ============ */
+const TOUCHPOINTS = [
+  {id:'goal', name:'Giao mục tiêu', ic:'①'},
+  {id:'eval', name:'Đánh giá', ic:'②'},
+  {id:'coord', name:'Phối hợp', ic:'③'},
+  {id:'decide', name:'Ra quyết định', ic:'④'},
+  {id:'quality', name:'Chuẩn chất lượng', ic:'⑤'},
+  {id:'feedback', name:'Phản hồi khách hàng', ic:'⑥'},
+  {id:'appoint', name:'Bổ nhiệm', ic:'⑦'},
+  {id:'reward', name:'Khen thưởng', ic:'⑧'}
+];
+const HEART = {
+  H:{name:'Hợp tác cùng vươn cao', hex:'#2f80ed'},
+  E:{name:'Thấu hiểu & Chia sẻ', hex:'#2bb673'},
+  A:{name:'Sáng tạo không giới hạn', hex:'#f2860c'},
+  R:{name:'Phụng sự để kiến tạo', hex:'#e8503a'},
+  T:{name:'Khách hàng là trái tim', hex:'#d6266f'}
+};
+
+/* For round1: correct = full point id, accept = partial */
+/* round2 heart: correct array (full), accept array (partial). multi=max selectable */
+/* round3 opts: {t, ok:true/false}; round4 same */
+const Q = [
+  {
+    title:"Cuộc họp tan, việc treo lơ lửng",
+    text:"Cuộc họp giao ban kéo dài 90 phút, bàn rất sôi nổi. Họp xong ai cũng nghĩ \"đã thống nhất\". Một tuần sau, không phần việc nào nhúc nhích — mỗi người nhớ một phiên bản khác về \"ai làm gì\", không ai chắc deadline.",
+    r1:{correct:['goal'], accept:['coord']},
+    r2:{correct:['R'], accept:['H'], max:1},
+    r3:{q:"Hành vi chuyển hóa phù hợp nhất?", opts:[
+      {t:"Gửi email biên bản nhắc lại nội dung họp cho mọi người tự nhớ.", ok:false},
+      {t:"Kết thúc mọi cuộc họp bằng bảng chốt \"Kết luận – Người phụ trách – Thời hạn\", gửi trong 1 giờ và yêu cầu xác nhận.", ok:true},
+      {t:"Họp lại từ đầu để bàn cho kỹ hơn.", ok:false}
+    ]},
+    r4:{opts:[
+      {t:"Tỷ lệ cuộc họp có biên bản chốt việc trong 24h", ok:true},
+      {t:"Số lượng cuộc họp mỗi tuần", ok:false},
+      {t:"Thời lượng trung bình mỗi cuộc họp", ok:false}
+    ]},
+    explain:"Gốc rễ là điểm chạm GIAO MỤC TIÊU: họp xong không chốt \"ai – làm gì – khi nào\". Hành vi chuyển hóa là thay đổi cách họp thành mặc định, không phải nhắc lại biên bản.",
+    reflect:"Bao nhiêu cuộc họp gần đây của bạn kết thúc mà không ai biết chắc bước tiếp theo?"
+  },
+  {
+    title:"Người giỏi số một, nhưng cả phòng ngại làm cùng",
+    text:"Một nhân viên có năng lực số liệu xuất sắc, luôn về đích đúng hạn, được xét \"nhân viên tiêu biểu quý\". Nhưng đồng nghiệp than: anh giành việc dễ, đẩy việc khó, nói cộc cằn, không ai muốn làm nhóm cùng. Nếu chỉ nhìn con số, anh xứng đáng được thưởng.",
+    r1:{correct:['eval'], accept:['reward']},
+    r2:{correct:['H','E'], accept:[], max:2},
+    r3:{q:"Hành vi chuyển hóa phù hợp nhất?", opts:[
+      {t:"Vẫn trao thưởng vì kết quả là khách quan, nhắc nhẹ về thái độ sau.", ok:false},
+      {t:"Bổ sung tiêu chí \"cách làm và tinh thần hợp tác\" vào đánh giá; trao đổi thẳng thắn về hành vi; ghi nhận cả người hỗ trợ đồng đội.", ok:true},
+      {t:"Không trao thưởng cho ai trong quý này để tránh tranh cãi.", ok:false}
+    ]},
+    r4:{opts:[
+      {t:"Tỷ lệ tiêu chí đánh giá có bao gồm yếu tố hành vi/hợp tác", ok:true},
+      {t:"Tổng doanh số của phòng", ok:false},
+      {t:"Số giờ làm thêm của nhân viên", ok:false}
+    ]},
+    explain:"Điểm chạm ĐÁNH GIÁ (và KHEN THƯỞNG). Nếu chỉ đo kết quả mà bỏ qua cách làm, tổ chức vô tình khuyến khích hành vi phản văn hóa. \"Điều gì được ghi nhận sẽ được lặp lại.\"",
+    reflect:"Người được khen thưởng nhiều nhất ở đơn vị bạn có phải người lan tỏa văn hóa tốt nhất không?"
+  },
+  {
+    title:"Hai phòng đúng, khách hàng vẫn chờ",
+    text:"Một yêu cầu của khách hàng liên quan cả phòng Kinh doanh lẫn Kỹ thuật. Cả hai làm xong phần mình rất nhanh, đều \"đúng phần việc\". Nhưng giữa hai phần có một khoảng trống không ai nhận, khách phải gọi đi gọi lại 4 ngày mới xong.",
+    r1:{correct:['coord'], accept:['feedback']},
+    r2:{correct:['H','T'], accept:['R'], max:2},
+    r3:{q:"Hành vi chuyển hóa phù hợp nhất?", opts:[
+      {t:"Gửi thêm email nhắc các bên phối hợp chặt chẽ hơn.", ok:false},
+      {t:"Xác định đầu mối điều phối cuối, thời hạn phản hồi, cơ chế cập nhật và trách nhiệm rõ ràng từng bên cho các việc liên phòng.", ok:true},
+      {t:"Chờ cấp trên chỉ đạo phân công.", ok:false}
+    ]},
+    r4:{opts:[
+      {t:"Thời gian xử lý trung bình các yêu cầu liên phòng", ok:true},
+      {t:"Số email nội bộ gửi mỗi ngày", ok:false},
+      {t:"Số lượng cuộc họp phối hợp", ok:false}
+    ]},
+    explain:"Điểm chạm PHỐI HỢP. Khách hàng chỉ thấy một VNPT. OneVNPT là cùng chịu trách nhiệm cho kết quả cuối — kể cả phần \"khoảng trống\" giữa hai phòng. Chuyển hóa là thiết kế cơ chế có đầu mối điều phối cuối.",
+    reflect:"Ở đơn vị bạn, \"khoảng trống trách nhiệm\" giữa các bộ phận thường nằm ở đâu?"
+  },
+  {
+    title:"Lỗi nhỏ, nhưng quay lại lần thứ tư",
+    text:"Một thao tác cấu hình bị sai theo cùng một kiểu, đã xảy ra 4 lần trong 2 tháng ở các ca trực khác nhau. Mỗi lần khắc phục trong vài phút nên không ai coi là lớn. Nhưng khách bắt đầu thấy thiếu ổn định, và một nhân viên trẻ ngại báo cáo vì sợ bị quy trách nhiệm.",
+    r1:{correct:['quality'], accept:['feedback']},
+    r2:{correct:['R'], accept:['E'], max:1},
+    r3:{q:"Hành vi chuyển hóa phù hợp nhất?", opts:[
+      {t:"Nhắc nhở các ca trực cẩn thận hơn để tránh lặp lỗi.", ok:false},
+      {t:"Phân tích nguyên nhân gốc cùng đội, chuẩn hóa thao tác thành checklist bắt buộc, tạo cơ chế báo lỗi không quy chụp để mọi người dám nói sớm.", ok:true},
+      {t:"Quy trách nhiệm cho ca trực gần nhất để răn đe.", ok:false}
+    ]},
+    r4:{opts:[
+      {t:"Số lỗi lặp lại cùng loại theo tháng", ok:true},
+      {t:"Tổng số ca trực trong tháng", ok:false},
+      {t:"Số nhân viên bị kỷ luật", ok:false}
+    ]},
+    explain:"Điểm chạm CHUẨN CHẤT LƯỢNG: làm đúng ngay, làm đến cùng, không để lỗi lặp lại. Lỗi lặp lại thường là vấn đề hệ thống, không phải một cá nhân. Cần chuẩn hóa + môi trường an toàn để báo lỗi sớm.",
+    reflect:"Đội của bạn có dám báo lỗi sớm không, hay thường giấu đến khi thành chuyện lớn?"
+  },
+  {
+    title:"Ai cũng im lặng về một phản ánh",
+    text:"Một khách hàng gửi phản ánh gay gắt về trải nghiệm dịch vụ. Phản ánh được ghi nhận, lưu hệ thống, đóng ticket \"đã tiếp nhận\". Nhưng không ai phân tích, không ai gọi lại cho khách, không có thay đổi nào. Quý sau, ba khách khác phản ánh y hệt.",
+    r1:{correct:['feedback'], accept:['quality']},
+    r2:{correct:['T','E'], accept:[], max:2},
+    r3:{q:"Hành vi chuyển hóa phù hợp nhất?", opts:[
+      {t:"Đảm bảo mọi phản ánh đều được ghi nhận và đóng ticket đúng quy trình.", ok:false},
+      {t:"Định kỳ rà soát phản ánh để tìm vấn đề lặp lại, phân công người phân tích nguyên nhân và phản hồi lại khách về thay đổi đã thực hiện.", ok:true},
+      {t:"Tăng thêm nhân sự trực kênh chăm sóc để tiếp nhận nhanh hơn.", ok:false}
+    ]},
+    r4:{opts:[
+      {t:"Tỷ lệ phản ánh được phản hồi kết quả cải tiến / số phản ánh lặp lại", ok:true},
+      {t:"Số ticket được đóng mỗi ngày", ok:false},
+      {t:"Thời gian tiếp nhận phản ánh ban đầu", ok:false}
+    ]},
+    explain:"Điểm chạm PHẢN HỒI KHÁCH HÀNG. \"Tiếp nhận\" không phải \"lắng nghe\". Mỗi phản ánh là tín hiệu để điều chỉnh — chỉ khi được phân tích, hành động và khép vòng bằng việc báo lại cho khách.",
+    reflect:"Phản ánh của khách hàng ở đơn vị bạn kết thúc ở \"đóng ticket\" hay ở \"thay đổi thật\"?"
+  },
+  {
+    title:"Quyết định theo cảm tính",
+    text:"Một quản lý chọn nhà cung cấp cho một hạng mục dựa vào \"đối tác quen, làm việc dễ chịu\", dù có lựa chọn khác rẻ hơn 15% với chất lượng tương đương đã được nêu trong bảng so sánh dữ liệu. Khi được hỏi, anh giải thích: \"Làm với người quen cho yên tâm.\"",
+    r1:{correct:['decide'], accept:[]},
+    r2:{correct:['R'], accept:['E'], max:1},
+    r3:{q:"Hành vi chuyển hóa phù hợp nhất?", opts:[
+      {t:"Tôn trọng quyết định vì đó là quyền của người quản lý.", ok:false},
+      {t:"Thiết lập nguyên tắc: mọi quyết định lựa chọn phải kèm bảng so sánh dữ liệu và lý do chọn ghi lại được.", ok:true},
+      {t:"Báo cáo cấp trên để xử lý người quản lý đó.", ok:false}
+    ]},
+    r4:{opts:[
+      {t:"Tỷ lệ quyết định có căn cứ dữ liệu/hồ sơ so sánh kèm theo", ok:true},
+      {t:"Số quyết định được đưa ra mỗi tháng", ok:false},
+      {t:"Số nhà cung cấp đang hợp tác", ok:false}
+    ]},
+    explain:"Điểm chạm RA QUYẾT ĐỊNH: cần dựa trên dữ liệu, lợi ích chung và trải nghiệm khách hàng. Chuyển hóa là biến \"dữ liệu dẫn dắt\" thành nguyên tắc bắt buộc, không phụ thuộc cảm tính hay quan hệ cá nhân.",
+    reflect:"Quyết định gần nhất của bạn dựa nhiều hơn vào dữ liệu hay vào thói quen?"
+  },
+  {
+    title:"Đề bạt người \"dễ bảo\"",
+    text:"Cần chọn một tổ trưởng mới. Ứng viên A giỏi chuyên môn nhưng hay nói thẳng, đôi khi phản biện cấp trên. Ứng viên B chuyên môn khá, luôn \"vâng dạ\", ít gây phiền. Có ý kiến nên chọn B cho \"êm\".",
+    r1:{correct:['appoint'], accept:[]},
+    r2:{correct:['R','H'], accept:[], max:2},
+    r3:{q:"Hành vi chuyển hóa phù hợp nhất?", opts:[
+      {t:"Chọn B cho êm, dễ phối hợp về sau.", ok:false},
+      {t:"Đánh giá ứng viên theo cả năng lực lẫn mức độ sống đúng giá trị (dám nói thật, dám chịu trách nhiệm), không chọn theo \"dễ quản\".", ok:true},
+      {t:"Hoãn bổ nhiệm để tránh phải quyết định khó.", ok:false}
+    ]},
+    r4:{opts:[
+      {t:"Tỷ lệ vị trí bổ nhiệm có tiêu chí đánh giá về giá trị/hành vi văn hóa", ok:true},
+      {t:"Số lần bổ nhiệm trong năm", ok:false},
+      {t:"Thâm niên trung bình của người được bổ nhiệm", ok:false}
+    ]},
+    explain:"Điểm chạm BỔ NHIỆM: người được giao vai trò không chỉ cần chuyên môn mà còn phải thể hiện đúng giá trị văn hóa. Chọn theo \"dễ quản\" sẽ nhân lên văn hóa né tránh, không dám nói thật.",
+    reflect:"Người được đề bạt gần đây ở đơn vị bạn được chọn vì \"đúng giá trị\" hay vì \"dễ quản\"?"
+  },
+  {
+    title:"Khen người to tiếng nhất",
+    text:"Cuối tháng, người được tuyên dương là một nhân viên hay phát biểu, chủ động khoe thành tích trong các cuộc họp. Trong khi đó, một nhân viên thầm lặng đã âm thầm hỗ trợ cả nhóm về đích thì không ai nhắc tới.",
+    r1:{correct:['reward'], accept:['eval']},
+    r2:{correct:['E','H'], accept:[], max:2},
+    r3:{q:"Hành vi chuyển hóa phù hợp nhất?", opts:[
+      {t:"Giữ nguyên vì người nói nhiều thì thành tích dễ được nhìn thấy.", ok:false},
+      {t:"Thiết lập cơ chế ghi nhận dựa trên đóng góp thực và tinh thần hợp tác, gồm cả đóng góp thầm lặng; hỏi ý kiến đồng đội khi bình xét.", ok:true},
+      {t:"Bỏ tuyên dương hằng tháng để cho công bằng.", ok:false}
+    ]},
+    r4:{opts:[
+      {t:"Mức độ đa dạng người được ghi nhận / phản hồi của đội về tính công bằng khi bình xét", ok:true},
+      {t:"Số lần tổ chức lễ tuyên dương", ok:false},
+      {t:"Ngân sách dành cho khen thưởng", ok:false}
+    ]},
+    explain:"Điểm chạm KHEN THƯỞNG: cái gì được ghi nhận sẽ được lặp lại. Nếu chỉ người \"to tiếng\" được thấy, đội ngũ học rằng phải khoe mới được ghi nhận. Chuyển hóa là ghi nhận đúng đóng góp thực, kể cả thầm lặng.",
+    reflect:"Ở đơn vị bạn, người đóng góp thầm lặng có được nhìn thấy không?"
+  }
+];
+
+const TOTAL_Q = Q.length;
+const ROUND_PTS = [10,10,20,10];
+
+/* ============ STATE ============ */
+let st = {qi:0, round:0, score:0, team:"", picked:[], log:[],
+  skill:[0,0,0,0], skillMax:[0,0,0,0]};
+Q.forEach(()=>{ROUND_PTS.forEach((p,i)=>{st.skillMax[i]+=p});});
+
+let realtimeLeaderboard = [];
+
+function escapeHtml(value){
+  return String(value || '').replace(/[&<>"']/g,(char)=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[char]));
+}
+
+function normalizeLeaderboardRows(rows){
+  return (Array.isArray(rows) ? rows : [])
+    .map((row)=>({
+      name: String(row.playerName || row.name || '').trim(),
+      groupName: String(row.groupName || '').trim(),
+      score: Math.max(0, Math.round(Number(row.totalScore ?? row.score ?? 0) || 0)),
+      bestScore: Math.max(0, Math.round(Number(row.bestScore ?? row.totalScore ?? row.score ?? 0) || 0)),
+      runCount: Math.max(1, Math.round(Number(row.runCount || 1) || 1)),
+      rankLabel: String(row.latestRankLabel || row.rankLabel || '').trim()
+    }))
+    .filter((row)=>row.name && row.score >= 0)
+    .sort((a,b)=>b.score-a.score || b.bestScore-a.bestScore || b.runCount-a.runCount || a.name.localeCompare(b.name,'vi'));
+}
+
+function buildLeaderboardRows(currentName, currentScore){
+  const rows = realtimeLeaderboard.slice();
+  const name = String(currentName || '').trim();
+  if(name){
+    const idx = rows.findIndex((row)=>row.name === name);
+    const localRow = {
+      name,
+      groupName: name || 'Public',
+      score: Math.max(0, Math.round(Number(currentScore) || 0)),
+      bestScore: Math.max(0, Math.round(Number(currentScore) || 0)),
+      runCount: 1,
+      me: true
+    };
+    if(idx >= 0){
+      rows[idx] = {...rows[idx], ...localRow, bestScore: Math.max(rows[idx].bestScore || 0, localRow.bestScore)};
+    } else {
+      rows.push(localRow);
+    }
+  }
+  return rows.sort((a,b)=>b.score-a.score || b.bestScore-a.bestScore || b.runCount-a.runCount || a.name.localeCompare(b.name,'vi')).slice(0,8);
+}
+
+function renderLeaderboard(rows){
+  const lb=document.getElementById('leaderboard');
+  if(!lb)return;
+  lb.innerHTML='';
+  const finalRows = Array.isArray(rows) ? rows : buildLeaderboardRows(st.team, st.score);
+  if(!finalRows.length){
+    const row=document.createElement('div');
+    row.className='lb-row';
+    row.innerHTML='<span class="pos">-</span><span class="nm">Chưa có kết quả realtime</span><span class="sc">0đ</span>';
+    lb.appendChild(row);
+    return;
+  }
+  finalRows.forEach((r,i)=>{
+    const row=document.createElement('div');
+    row.className='lb-row'+(r.me?' me':'');
+    row.innerHTML=`<span class="pos">${i+1}</span><span class="nm">${escapeHtml(r.name)}</span><span class="sc">${r.score}đ</span>`;
+    lb.appendChild(row);
+  });
+}
+
+function setRealtimeLeaderboard(rows){
+  realtimeLeaderboard = normalizeLeaderboardRows(rows);
+  if(document.getElementById('resultScreen')?.classList.contains('active')){
+    renderLeaderboard(buildLeaderboardRows(st.team, st.score));
+  }
+}
+
+window.VContentGame = Object.assign(window.VContentGame || {}, {setLeaderboard:setRealtimeLeaderboard});
+window.addEventListener('message',(event)=>{
+  const data=event.data || {};
+  if(data.type === 'vcontent-leaderboard' && data.gameId === 'vnpt-heart-02'){
+    setRealtimeLeaderboard(data.rows);
+  }
+});
+if(Array.isArray(window.VContentGameLeaderboard)){
+  setRealtimeLeaderboard(window.VContentGameLeaderboard);
+}
+
+/* ============ NAV ============ */
+const screens={intro:document.getElementById('introScreen'),play:document.getElementById('playScreen'),result:document.getElementById('resultScreen')};
+function show(s){Object.values(screens).forEach(x=>x.classList.remove('active'));screens[s].classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+
+document.getElementById('startBtn').addEventListener('click',()=>{
+  const n=document.getElementById('teamName').value.trim();
+  st.team=n||"Đội ẩn danh";
+  st.qi=0;st.score=0;st.log=[];st.skill=[0,0,0,0];
+  show('play');renderRound();
+});
+
+/* ============ RENDER ROUND ============ */
+function renderRound(){
+  const q=Q[st.qi];
+  document.getElementById('qNum').textContent=st.qi+1;
+  document.getElementById('progBar').style.width=((st.qi*4+st.round)/(TOTAL_Q*4)*100)+'%';
+  document.getElementById('scoreVal').textContent=st.score;
+  document.getElementById('qTitleMini').textContent=q.title;
+  document.getElementById('scenTitle').textContent=(st.qi+1)+". "+q.title;
+  document.getElementById('scenText').textContent=q.text;
+  for(let i=0;i<4;i++){const d=document.getElementById('rd'+i);d.className='rd'+(i<st.round?' done':i===st.round?' active':'');}
+  document.getElementById('roundBadge').textContent='VÒNG '+(st.round+1)+'/4';
+  document.getElementById('fb').classList.remove('show');
+  st.picked=[];
+  const choices=document.getElementById('choices');choices.innerHTML='';
+  const ma=document.getElementById('multiActions');ma.style.display='none';
+  const roundQ=document.getElementById('roundQ');
+  const hint=document.getElementById('roundHint');
+
+  if(st.round===0){ // touchpoint
+    roundQ.textContent='Vấn đề thuộc điểm chạm quản trị nào?';
+    choices.className='grid touch';
+    TOUCHPOINTS.forEach(tp=>{
+      const c=document.createElement('button');c.className='cell';c.dataset.id=tp.id;
+      c.innerHTML=`<span class="ic">${tp.ic}</span>${tp.name}`;
+      c.addEventListener('click',()=>pickSingle(c,tp.id));
+      choices.appendChild(c);
+    });
+  } else if(st.round===1){ // heart
+    const max=q.r2.max;
+    roundQ.textContent = max>1 ? `Giá trị HEART nào liên quan nhất? (chọn tối đa ${max})` : 'Giá trị HEART nào liên quan nhất?';
+    choices.className='grid heart';
+    Object.entries(HEART).forEach(([k,v])=>{
+      const c=document.createElement('button');c.className='cell heartc';c.dataset.id=k;
+      c.innerHTML=`<span class="ic" style="background:${v.hex}">${k}</span><span style="font-size:.78rem">${v.name}</span>`;
+      if(max>1) c.addEventListener('click',()=>toggleMulti(c,k,max));
+      else c.addEventListener('click',()=>{ st.picked=[k]; confirmHeart(); });
+      choices.appendChild(c);
+    });
+    if(max>1){ma.style.display='flex';document.getElementById('multiNote').textContent=`Đã chọn 0/${max}`;document.getElementById('confirmMulti').disabled=true;}
+  } else if(st.round===2){ // behavior
+    roundQ.textContent=q.r3.q;
+    choices.className='grid list';
+    const letters=['A','B','C'];
+    const order=[0,1,2].sort(()=>Math.random()-0.5);
+    order.forEach((oi,pos)=>{
+      const o=q.r3.opts[oi];
+      const c=document.createElement('button');c.className='cell list-opt';c.dataset.ok=o.ok;
+      c.innerHTML=`<span class="ic">${letters[pos]}</span><span class="tx">${o.t}</span>`;
+      c.addEventListener('click',()=>pickBehavior(c,o.ok));
+      choices.appendChild(c);
+    });
+  } else { // measure
+    roundQ.textContent='Chỉ số nào phù hợp để theo dõi chuyển biến?';
+    choices.className='grid list';
+    const order=[0,1,2].sort(()=>Math.random()-0.5);
+    const letters=['A','B','C'];
+    order.forEach((oi,pos)=>{
+      const o=q.r4.opts[oi];
+      const c=document.createElement('button');c.className='cell list-opt';c.dataset.ok=o.ok;
+      c.innerHTML=`<span class="ic">${letters[pos]}</span><span class="tx">${o.t}</span>`;
+      c.addEventListener('click',()=>pickBehavior(c,o.ok));
+      choices.appendChild(c);
+    });
+  }
+}
+
+/* ---- round 0: single touchpoint ---- */
+function pickSingle(cell,id){
+  const q=Q[st.qi];const r=q.r1;
+  let pts=0,cls='wrong',lvl='SAI';
+  if(r.correct.includes(id)){pts=10;cls='correct';lvl='CHÍNH XÁC';}
+  else if(r.accept.includes(id)){pts=10;cls='correct';lvl='CHẤP NHẬN';}
+  // reveal
+  [...document.querySelectorAll('.cell')].forEach(c=>{
+    c.disabled=true;
+    const cid=c.dataset.id;
+    if(r.correct.includes(cid)||r.accept.includes(cid))c.classList.add('correct');
+  });
+  if(cls==='wrong')cell.classList.add('wrong');
+  st.score+=pts;st.skill[0]+=pts;
+  feedback(lvl, pts, 0);
+}
+
+/* ---- round 1: multi heart ---- */
+function toggleMulti(cell,k,max){
+  if(cell.classList.contains('locked'))return;
+  const idx=st.picked.indexOf(k);
+  if(idx>=0){st.picked.splice(idx,1);cell.classList.remove('sel');}
+  else{ if(st.picked.length>=max)return; st.picked.push(k);cell.classList.add('sel');}
+  document.getElementById('multiNote').textContent=`Đã chọn ${st.picked.length}/${max}`;
+  document.getElementById('confirmMulti').disabled=st.picked.length===0;
+}
+document.getElementById('confirmMulti').addEventListener('click',confirmHeart);
+function confirmHeart(){
+  const q=Q[st.qi];const r=q.r2;
+  const correct=r.correct, accept=r.accept;
+  let hit=0, partial=0;
+  st.picked.forEach(k=>{ if(correct.includes(k))hit++; else if(accept.includes(k))partial++; });
+  // scoring: full 10 if all correct chosen & no wrong; proportional otherwise
+  const need=correct.length;
+  let pts;
+  const wrongChosen = st.picked.filter(k=>!correct.includes(k)&&!accept.includes(k)).length;
+  if(hit===need && wrongChosen===0 && st.picked.length===need){pts=10;}
+  else { pts = Math.round(10*(hit/need)) ; if(partial>0&&pts<10)pts=Math.max(pts,5); if(wrongChosen>0)pts=Math.max(0,pts-3);}
+  pts=Math.max(0,Math.min(10,pts));
+  // reveal
+  [...document.querySelectorAll('.cell')].forEach(c=>{
+    c.disabled=true;c.classList.add('locked');
+    const k=c.dataset.id;
+    if(correct.includes(k))c.classList.add('correct');
+    else if(accept.includes(k))c.classList.add('partial');
+    else if(st.picked.includes(k))c.classList.add('wrong');
+  });
+  document.getElementById('multiActions').style.display='none';
+  st.score+=pts;st.skill[1]+=pts;
+  let lvl = pts===10?'CHÍNH XÁC':(pts>=5?'ĐÚNG MỘT PHẦN':'CHƯA ĐÚNG');
+  feedback(lvl,pts,1);
+}
+
+/* ---- round 2/3: behavior & measure ---- */
+function pickBehavior(cell,ok){
+  const ri=st.round;
+  let pts = ok ? ROUND_PTS[ri] : 0;
+  [...document.querySelectorAll('.cell')].forEach(c=>{
+    c.disabled=true;
+    if(c.dataset.ok==='true')c.classList.add('correct');
+  });
+  if(!ok)cell.classList.add('wrong');
+  st.score+=pts;st.skill[ri]+=pts;
+  feedback(ok?'CHÍNH XÁC':'CHƯA TỐI ƯU', pts, ri);
+}
+
+/* ---- feedback ---- */
+function feedback(lvl,pts,ri){
+  st.log.push({qi:st.qi,round:ri,pts});
+  document.getElementById('scoreVal').textContent=st.score;
+  document.getElementById('progBar').style.width=((st.qi*4+st.round+1)/(TOTAL_Q*4)*100)+'%';
+  const fb=document.getElementById('fb');
+  const badge=document.getElementById('fbBadge');
+  badge.textContent=lvl;
+  badge.style.background = pts===ROUND_PTS[ri]?'var(--green)':(pts>0?'var(--gold)':'var(--red)');
+  document.getElementById('fbPts').textContent='+'+pts+'đ';
+  // show explanation only on the last round (full picture), short note otherwise
+  const q=Q[st.qi];
+  if(st.round===3){
+    document.getElementById('fbText').textContent=q.explain;
+    document.getElementById('reflectBox').style.display='block';
+    document.getElementById('fbReflect').textContent=q.reflect;
+    document.getElementById('nextBtn').textContent = st.qi===TOTAL_Q-1?'Xem kết quả →':'Tình huống tiếp theo →';
+  } else {
+    const notes=[
+      'Gọi đúng tên điểm chạm là bước đầu của chẩn đoán. Tiếp theo: giá trị HEART nào đang bị thử thách?',
+      'Đã xác định giá trị. Giờ đến phần quan trọng nhất: chọn hành vi chuyển hóa cụ thể.',
+      'Hành vi chuyển hóa là trái tim của bài tập. Bước cuối: làm sao đo được nó có hiệu quả?'
+    ];
+    document.getElementById('fbText').textContent=notes[st.round];
+    document.getElementById('reflectBox').style.display='none';
+    document.getElementById('nextBtn').textContent='Vòng tiếp theo →';
+  }
+  fb.classList.add('show');
+  fb.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+document.getElementById('nextBtn').addEventListener('click',()=>{
+  if(st.round<3){st.round++;renderRound();}
+  else { if(st.qi<TOTAL_Q-1){st.qi++;st.round=0;renderRound();} else finish(); }
+});
+
+/* ============ RESULT ============ */
+function emitGameResult(badge, maxScore){
+  const payload = {
+    playerName: st.team,
+    groupName: st.team || 'Public',
+    score: st.score,
+    maxScore,
+    rankLabel: badge,
+    values: {
+      touchpoint: st.skill[0],
+      heart: st.skill[1],
+      behavior: st.skill[2],
+      metric: st.skill[3]
+    },
+    answers: st.log.map(item => ({
+      questionIndex: item.qi,
+      round: item.round,
+      title: Q[item.qi] ? Q[item.qi].title : '',
+      score: item.pts
+    })),
+    meta: { gameKey: 'vnpt-heart-02', logCount: st.log.length }
+  };
+  try {
+    window.parent && window.parent.postMessage({type:'game-result-ready', gameId:'vnpt-heart-02', payload}, window.location.origin);
+  } catch(e) {}
+  try {
+    const bc = new BroadcastChannel('vnpt-heart-02-results');
+    bc.postMessage({type:'game-result-ready', gameId:'vnpt-heart-02', payload});
+    bc.close();
+  } catch(e) {}
+}
+
+function finish(){
+  let score=st.score, badge;
+  const maxScore=TOTAL_Q*50;
+  const pct=score/maxScore;
+  if(pct>=0.84)badge="Đội Kiến trúc sư Văn hóa";
+  else if(pct>=0.6)badge="Đội Đang định hình";
+  else badge="Đội Khởi công";
+  document.getElementById('badgeName').textContent=badge;
+  document.getElementById('finalScore').innerHTML=score+'<small> / '+maxScore+' điểm</small>';
+
+  const skillNames=['Nhận diện điểm chạm','Soi giá trị HEART','Chọn hành vi chuyển hóa','Chọn chỉ số đo lường'];
+  const sk=document.getElementById('skills');sk.innerHTML='';
+  st.skill.forEach((v,i)=>{
+    const p=Math.round(v/st.skillMax[i]*100);
+    const d=document.createElement('div');d.className='skill';
+    d.innerHTML=`<div class="sl-top"><span>${skillNames[i]}</span><span>${v}/${st.skillMax[i]}đ</span></div><div class="sl-bar"><i style="width:${p}%"></i></div>`;
+    sk.appendChild(d);
+  });
+
+  renderLeaderboard(buildLeaderboardRows(st.team, score));
+
+  const rf=document.getElementById('reflections');rf.innerHTML='';
+  Q.forEach((q,i)=>{
+    const it=document.createElement('div');it.className='r-item';
+    it.innerHTML=`<span class="n">${i+1}.</span><span>${q.reflect}</span>`;
+    rf.appendChild(it);
+  });
+  emitGameResult(badge, maxScore);
+  show('result');
+}
+
+document.getElementById('againBtn').addEventListener('click',()=>{
+  document.getElementById('teamName').value=st.team;
+  st.round=0;
+  show('intro');
+});
+document.getElementById('reviewBtn').addEventListener('click',()=>{
+  let msg="TÓM TẮT ĐIỂM THEO TÌNH HUỐNG\n\n";
+  for(let qi=0;qi<TOTAL_Q;qi++){
+    const rounds=st.log.filter(l=>l.qi===qi);
+    const sum=rounds.reduce((a,b)=>a+b.pts,0);
+    msg+=`${qi+1}. ${Q[qi].title}: ${sum}/50đ\n`;
+  }
+  msg+=`\nTỔNG: ${st.score}/${TOTAL_Q*50}đ`;
+  alert(msg);
+});
+window.render_game_to_text = function(){
+  const active = Object.entries(screens).find(([,node])=>node.classList.contains('active'));
+  const q = Q[st.qi] || null;
+  const choices = Array.from(document.querySelectorAll('#choices .cell')).map((node, index)=>({
+    index,
+    id: node.dataset.id || '',
+    ok: node.dataset.ok || '',
+    disabled: Boolean(node.disabled),
+    selected: node.classList.contains('sel'),
+    text: (node.textContent || '').replace(/\s+/g,' ').trim()
+  }));
+  return JSON.stringify({
+    gameId: 'vnpt-heart-02',
+    coordinateSystem: 'DOM quiz flow; no canvas coordinates',
+    screen: active ? active[0] : 'unknown',
+    team: st.team,
+    scenarioIndex: st.qi,
+    scenarioCount: TOTAL_Q,
+    round: st.round,
+    roundCount: 4,
+    title: q ? q.title : '',
+    score: st.score,
+    picked: st.picked.slice(),
+    logCount: st.log.length,
+    choices
+  });
+};
+
+window.advanceTime = function(){
+  return window.render_game_to_text();
+};
+</script>
+</body>
+</html>

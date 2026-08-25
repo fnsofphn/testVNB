@@ -1,0 +1,150 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "outputDirectory": "dist",
+  "regions": [
+    "sin1"
+  ],
+  "functions": {
+    "api/vevent-join.js": {
+      "maxDuration": 10
+    },
+    "api/notice-dispatch.js": {
+      "maxDuration": 30
+    },
+    "api/**/*.js": {
+      "maxDuration": 60
+    }
+  },
+  "env": {
+    "VITE_REALTIME_SYNC_MODE": "off",
+    "VITE_CONCURRENCY_TARGET": "1000",
+    "VITE_DISCUSSION_REALTIME_MODE": "hybrid",
+    "VITE_DISCUSSION_POLL_MS": "20000",
+    "VITE_DISCUSSION_SESSION_POLL_MS": "20000",
+    "VITE_DISCUSSION_MONITOR_POLL_MS": "30000",
+    "VITE_EVENTS_REALTIME_MODE": "polling",
+    "VITE_EVENTS_POLL_MS": "5000",
+    "VITE_DISCUSSION_FULL_REALTIME": "false",
+    "VITE_GLOBAL_SUNI_REALTIME": "false"
+  },
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/index.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/scorm-content-file/:packageId",
+      "destination": "/api/scorm-content?packageId=:packageId&path=index_lms.html"
+    },
+    {
+      "source": "/api/scorm-content-file/:packageId/:path*",
+      "destination": "/api/scorm-content?packageId=:packageId&path=:path*"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
+      "source": "/v-events/join",
+      "destination": "/api/vevent-join"
+    },
+    {
+      "source": "/v-events/join/:code",
+      "destination": "/api/vevent-join?code=:code"
+    },
+    {
+      "source": "/vuni-api/(.*)",
+      "destination": "https://vuniversity-api.southeastasia.cloudapp.azure.com/api/$1"
+    },
+    {
+      "source": "/vbusiness",
+      "destination": "/vbusiness/index.html"
+    },
+    {
+      "source": "/vbusiness/(.*)",
+      "destination": "/vbusiness/index.html"
+    },
+    {
+      "source": "/vculture/vnpt-rising",
+      "destination": "/vculture/vnpt-rising/index.html"
+    },
+    {
+      "source": "/vculture/vnpt-rising/",
+      "destination": "/vculture/vnpt-rising/index.html"
+    },
+    {
+      "source": "/vculture/evn-quytac",
+      "destination": "/vculture/evn-quytac/index.html"
+    },
+    {
+      "source": "/vculture/evn-quytac/",
+      "destination": "/vculture/evn-quytac/index.html"
+    },
+    {
+      "source": "/vculture/evn-tinh huong",
+      "destination": "/vculture/evn-tinh huong/index.html"
+    },
+    {
+      "source": "/vculture/evn-tinh huong/",
+      "destination": "/vculture/evn-tinh huong/index.html"
+    },
+    {
+      "source": "/vculture/evn-tinh%20huong",
+      "destination": "/vculture/evn-tinh huong/index.html"
+    },
+    {
+      "source": "/vculture/evn-tinh%20huong/",
+      "destination": "/vculture/evn-tinh huong/index.html"
+    },
+    {
+      "source": "/vculture/evn-tinh-huong",
+      "destination": "/vculture/evn-tinh huong/index.html"
+    },
+    {
+      "source": "/vculture/evn-tinh-huong/",
+      "destination": "/vculture/evn-tinh huong/index.html"
+    },
+    {
+      "source": "/vuniversity",
+      "destination": "https://vuniversity.vercel.app/vuniversity/"
+    },
+    {
+      "source": "/vuniversity/(.*)",
+      "destination": "https://vuniversity.vercel.app/vuniversity/$1"
+    },
+    {
+      "source": "/suni/vdiscussion/manager/(.*)",
+      "destination": "/suni/vdiscussion/index.html"
+    },
+    {
+      "source": "/suni/vdiscussion/training/(.*)",
+      "destination": "/suni/vdiscussion/index.html"
+    },
+    {
+      "source": "/suni/vdiscussion/discussion-events/(.*)",
+      "destination": "/suni/vdiscussion/index.html"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EVNSPC — Khảo sát TNKH | 6 HT × 42 ĐC</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.2/babel.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;background:#F5F7FA;color:#333;font-size:13px;line-height:1.6}
+textarea:focus,input:focus{border-color:#F7941D!important;box-shadow:0 0 0 2px rgba(247,148,29,.15);outline:none}
+button{font-family:inherit}
+::-webkit-scrollbar{height:6px}::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const{useState,useCallback,useEffect}=React;
+const B="#003C8F",O="#F7941D",LB="#EBF0F7",LO="#FFF8EE",DK="#333",MG="#777";
+const SH=[{id:"sh1",v:"Hộ cư dân thông thường"},{id:"sh2",v:"Chung cư, Khu đô thị mới"},{id:"sh3",v:"Hộ nghèo, cận nghèo, gia đình chính sách"},{id:"sh4",v:"Người cao tuổi sống một mình, người khuyết tật"},{id:"sh5",v:"Hộ dân vùng sâu, vùng xa, hải đảo"},{id:"sh6",v:"Hộ dân có nhu cầu chuyển dịch năng lượng"}];
+const NSH=[{id:"nsh1",v:"Doanh nghiệp sản xuất vừa và nhỏ"},{id:"nsh2",v:"Doanh nghiệp, Tập đoàn lớn trong nước"},{id:"nsh3",v:"Doanh nghiệp có vốn đầu tư nước ngoài (FDI)"},{id:"nsh4",v:"Hộ sản xuất kinh doanh cá thể, tiểu thương"},{id:"nsh5",v:"Cơ quan hành chính, trường học, bệnh viện"},{id:"nsh6",v:"Doanh nghiệp chuyển dịch năng lượng"}];
+const ALL=[...SH,...NSH];
+const gs=id=>ALL.find(s=>s.id===id);
+const cleanTpTitle=(v)=>String(v||"").replace(/^\d+\.\d+\s*/,"");
+const cleanLeadingNumber=(v)=>String(v||"").replace(/^\d+\.\s*/,"");
+const JR=[
+{id:"j1",l:"Cấp điện mới",d:"Toàn bộ quy trình từ khi khách hàng có nhu cầu sử dụng điện đến khi đóng điện.",s:ALL.map(x=>x.id),tp:[
+{id:"t1",n:"Tìm kiếm thông tin dịch vụ cấp điện",ds:3,is:["Khách hàng không biết liên hệ ai, qua kênh nào","Thông tin trên website/app khó tìm","Nhân viên trả lời không đầy đủ, phải gọi lại nhiều lần"]},
+{id:"t2",n:"Liên hệ tổng đài / đến quầy giao dịch",ds:4,is:["Tổng đài bận, chờ lâu mới được tiếp nhận (tiêu chuẩn: dưới 20 giây)","ĐTV không khai thác đủ thông tin","Không phân biệt khách hàng cần hạ áp hay trung áp","Không hướng dẫn hồ sơ đầy đủ ngay lần đầu"]},
+{id:"t3",n:"Nhân viên tư vấn quy trình và tiếp nhận hồ sơ",ds:3,is:["Nhân viên tư vấn hời hợt, không giải thích rõ","Hồ sơ phức tạp, bổ sung nhiều lần","Thái độ thiếu kiên nhẫn"]},
+{id:"t4",n:"Nộp hồ sơ (trực tuyến hoặc trực tiếp)",ds:3,is:["Khó khăn trong triển khai ký hợp đồng điện tử với khách hàng","Yêu cầu bổ sung giấy tờ gây mất thời gian","Hệ thống trực tuyến lỗi"]},
+{id:"t5",n:"Nhân viên khảo sát hiện trường",ds:3,is:["Trễ hẹn không báo trước","Thái độ vội vã, không giải thích phương án","Không giới thiệu bản thân, không xuất trình thẻ","Dùng thuật ngữ chuyên ngành Khách hàng không hiểu"]},
+{id:"t6",n:"Lập phương án và báo giá (trung áp)",ds:3,is:["Chi phí không minh bạch, phát sinh ngoài dự kiến","Thời gian ra báo giá chậm","Nhân viên không giải thích ranh giới phân định tài sản"]},
+{id:"t7",n:"Ký HĐMBĐ và thanh toán chi phí",ds:2,is:["Nhân viên không giải thích rõ các khoản phí","Khách hàng không hiểu các điều khoản pháp lý"]},
+{id:"t8",n:"Thi công lắp đặt",ds:4,is:["Trễ tiến độ, không thông báo","Gây ảnh hưởng sinh hoạt/kinh doanh","Không dọn dẹp sau thi công"]},
+{id:"t9",n:"Đóng điện, bàn giao và hướng dẫn",ds:3,is:["Không hướng dẫn cài app CSKH","Không thông tin quyền lợi và kênh liên hệ","Không hỏi thăm sau đóng điện"]}]},
+{id:"j2",l:"Quản lý sử dụng điện và Thanh toán tiền điện, thu phí dịch vụ",d:"Ghi chỉ số, hóa đơn, thanh toán, kiểm tra công tơ, ngừng CCĐ do nợ.",s:ALL.map(x=>x.id),tp:[
+{id:"t1",n:"Nhân viên ghi chỉ số công tơ",ds:3,is:["Sản lượng ghi nhận không khớp thực tế","Khách hàng vắng — Nhân viên tạm tính mà không thông báo","Không cho khách hàng biết kết quả ghi chỉ số"]},
+{id:"t2",n:"Kiểm tra / Kiểm định công tơ",ds:3,is:["Khách hàng không hiểu tại sao phải thay công tơ định kỳ","Nhân viên thay công tơ không hẹn trước, không giải thích","Khách hàng nghi ngờ công tơ mới chạy nhanh hơn","Kết quả kiểm định không được giải thích rõ"]},
+{id:"t3",n:"Lập và phát hành hóa đơn",ds:5,is:["Hóa đơn tăng bất thường","Khách hàng không hiểu cơ chế giá bậc thang","Chuyển phiên ghi dẫn đến số ngày tính tăng","Không nhận được hóa đơn đúng kỳ"]},
+{id:"t4",n:"Khách hàng nhận thông báo thanh toán",ds:4,is:["App CSKH bị lỗi khi lượng truy cập cao","Khách hàng không có điện thoại thông minh","Thông báo SMS/Zalo đôi khi không nhận","Thông tin hóa đơn dùng thuật ngữ kỹ thuật"]},
+{id:"t5",n:"Thanh toán tiền điện qua các kênh",ds:4,is:["Ứng dụng thanh toán khó dùng, khó thao tác, không có thông báo rõ ràng","Lỗi hệ thống — trừ tiền nhưng chưa ghi nhận","Thanh toán rồi vẫn báo nợ","Ít lựa chọn về phương thức và hình thức thanh toán"]},
+{id:"t6",n:"Ngừng cấp điện do nợ",ds:5,is:["Cắt điện không thông báo đầy đủ theo trình tự","Khách hàng đã thanh toán nhưng bị cắt do lỗi đồng bộ","Nhân viên thái độ lạnh lùng khi đến cắt điện","Không cập nhật CMIS nên tổng đài không biết"]},
+{id:"t7",n:"Cấp điện trở lại sau thanh toán nợ",ds:4,is:["Chậm cấp lại sau thanh toán","Nhân viên không xin lỗi sau khi cắt nhầm","Khách hàng phải gọi nhiều lần hỏi khi nào có điện lại"]},
+{id:"t8",n:"Khiếu nại hóa đơn tiền điện",ds:4,is:["Quy trình giải quyết chậm (chuẩn: 3 ngày)","Kết quả không thỏa đáng","Nhân viên coi thường thắc mắc khách hàng"]}]},
+{id:"j3",l:"Xử lý sự cố mất điện",d:"Ngừng giảm kế hoạch + sự cố đột xuất.",s:["sh1","sh2","sh3","sh4","sh5","nsh1","nsh2","nsh3","nsh5"],tp:[
+{id:"t1",n:"Thông báo ngừng giảm CCĐ kế hoạch",ds:4,is:["Khách hàng không nhận được thông báo trước (chuẩn: 5 ngày)","Thời gian mất điện thực tế dài hơn thông báo","Không thông báo riêng cho khách hàng quan trọng (Thông tư 22/2020)"]},
+{id:"t2",n:"Khách hàng phát hiện mất điện đột ngột (sự cố)",ds:5,is:["Không biết nguyên nhân và thời gian khôi phục","Tin nhắn hoặc ứng dụng thông báo bị chậm hoặc không nhận được","Khách hàng có trang thiết bị, dây chuyền sản xuất cần xử lý gấp"]},
+{id:"t3",n:"Khách hàng liên hệ tổng đài / app báo sự cố",ds:5,is:["Tổng đài bận (đặc biệt sự cố trên 5.000 KH)","ĐTV tra OMS nhưng Đơn vị chưa cập nhật","Khách hàng không biết mã khách hàng, chậm tra cứu","Kênh báo trên app không hoạt động tốt"]},
+{id:"t4",n:"Đơn vị tiếp nhận phiếu CRM (chuẩn: 10 phút)",ds:4,is:["Đơn vị không tiếp nhận đúng 10 phút","Mất kết nối điện thoại IP","Nhân viên không liên hệ khách hàng trong 30 phút theo quy định"]},
+{id:"t5",n:"Nhân viên kiểm tra, sửa chữa tại hiện trường",ds:5,is:["Không có thông tin về lịch trình, kế hoạch sửa chữa rõ ràng","Thời gian chờ kéo dài, bức xúc cao","Nhân viên không chủ động cập nhật tiến độ","Nhân viên dùng thuật ngữ kỹ thuật","Sự cố trên tài sản khách hàng — Nhân viên bỏ đi không hỗ trợ"]},
+{id:"t6",n:"Hoàn tất / Đóng phiếu (3 TH theo QĐ 2286)",ds:4,is:["Đóng phiếu khi chưa liên hệ khách hàng xin đồng ý","Quá 2h nhưng không liên hệ khách hàng thỏa thuận","Sự cố diện rộng nhưng không lập OMS trong 30 phút","Không ghi rõ lý do vào phiếu"]},
+{id:"t7",n:"Theo dõi sau khôi phục điện",ds:3,is:["Không hỏi thăm khách hàng sau sự cố","Không giải thích nguyên nhân chính thức","Không hướng dẫn quyền lợi bồi thường"]}]},
+{id:"j4",l:"Thay đổi trong quá trình sử dụng điện",d:"Thay đổi công suất, di dời điện kế, chủ thể HĐMBĐ, mục đích sử dụng điện, ngừng/cấp lại, dịch vụ sau công tơ.",s:ALL.map(x=>x.id),tp:[
+{id:"t1",n:"Khách hàng liên hệ yêu cầu thay đổi",ds:3,is:["Khách hàng không biết gửi yêu cầu qua kênh nào","Nhân viên không phân biệt được loại dịch vụ phù hợp","Không hướng dẫn hồ sơ đầy đủ ngay lần đầu","Khách hàng không hiểu sự khác biệt giữa các loại thay đổi"]},
+{id:"t2",n:"Nhân viên tư vấn quy trình và hồ sơ",ds:4,is:["Nhân viên hướng dẫn sơ sài, khách hàng phải đi lại 2-3 lần","Thay đổi chủ thể HĐMBĐ – quy trình 15 ngày chờ, nhưng nhân viên không giải thích","Khách hàng lắp thêm thiết bị sử dụng điện phải tăng công suất sử dụng điện – không hiểu tại sao phải như vậy","Thay đổi mục đích sử dụng điện — không biết ảnh hưởng giá điện"]},
+{id:"t3",n:"Nhân viên khảo sát hiện trường (thay đổi công suất, di dời)",ds:3,is:["Trễ hẹn — Khách hàng phiền phức, mất niềm tin","Nhân viên không giải thích phương án kỹ thuật dễ hiểu","Không giới thiệu bản thân, không xuất trình thẻ","Nhân viên vội vã, không lắng nghe yêu cầu khách hàng"]},
+{id:"t4",n:"Thực hiện thay đổi (thi công, treo tháo công tơ)",ds:4,is:["Chi phí phát sinh — Khách hàng không hiểu ai chịu phí gì","Thay công tơ gây gián đoạn sinh hoạt/kinh doanh","Điện lực tự ý thay đổi công suất mà không hỏi khách hàng trước","Không dọn dẹp sau thi công"]},
+{id:"t5",n:"Ký Hợp đồng sửa đổi bổ sung / Chấm dứt Hợp đồng",ds:3,is:["Khách hàng không hiểu nội dung pháp lý hợp đồng sửa đổi","Thay đổi chủ thể HĐMBĐ – giấy tờ phức tạp, nhân viên thiếu đồng cảm","Khách hàng không biết quy định chấm dứt hợp đồng khi không sử dụng quá 6 tháng"]},
+{id:"t6",n:"Hoàn tất, xác nhận với khách hàng",ds:3,is:["Không xác nhận lại rằng thay đổi đã hoàn tất","Không giải thích hóa đơn tháng sau thay đổi thế nào","Không hướng dẫn theo dõi trên app sau thay đổi"]}]},
+{id:"j5",l:"Khiếu nại và Phản ánh",d:"Tiếp nhận, xử lý, trả lời và theo dõi sau khiếu nại.",s:ALL.map(x=>x.id),tp:[
+{id:"t1",n:"Tiếp nhận khiếu nại (mọi hình thức)",ds:5,is:["Nhân viên ngắt lời khách hàng khi đang trình bày","Không ghi chép, không xác nhận lại vấn đề","Không cam kết thời gian phản hồi cụ thể","Thái độ phòng thủ, đổ lỗi","Khách hàng bị chuyển tiếp nhiều người, kể lại từ đầu"]},
+{id:"t2",n:"Xác minh, phân loại (chuẩn: 2 ngày)",ds:4,is:["Khách hàng bị chuyển qua chuyển lại giữa TTCSKH và Công ty Điện lực","Phân loại sai dịch vụ dẫn đến xử lý chậm","Khách hàng gọi hỏi thông tin xử lý nhiều lần nhưng ĐTV chỉ lặp lại một câu trả lời cũ","Khách hàng đặc biệt không được cử nhân viên liên hệ trực tiếp"]},
+{id:"t3",n:"Tra soát nội bộ (chuẩn: 5 ngày)",ds:4,is:["Khách hàng không được cập nhật tiến độ","Phải liên hệ nhiều lần, mỗi lần gặp nhân viên khác","Thời gian xử lý kéo dài quá cam kết","Đơn vị đóng phiếu nhưng chưa giải quyết"]},
+{id:"t4",n:"Trả lời khách hàng (chuẩn: 2 ngày sau tra soát)",ds:4,is:["Kết quả không thỏa đáng, không giải thích cơ sở","Nhân viên không thể hiện đồng cảm","Không đề xuất giải pháp bổ sung","Khách hàng khiếu nại lần 2+ nhưng không được phản hồi và trả lời thỏa đáng"]},
+{id:"t5",n:"Lưu trữ và giám sát nội bộ",ds:3,is:["Không ghi nhận bài học cải tiến","Không phân tích xu hướng khiếu nại lặp lại","Ban Kinh doanh chưa rà soát phản ánh nhũng nhiễu"]},
+{id:"t6",n:"Theo dõi sau khiếu nại",ds:3,is:["Không gọi hỏi thăm khách hàng sau xử lý","Thiếu quy trình xử lý khủng hoảng khi khách hàng bức xúc, đăng lên mạng xã hội","Vấn đề tái diễn — Khách hàng phản ánh quá 3 lần"]}]},
+{id:"j6",l:"Chuyển dịch năng lượng",d:"ĐMTAM, trạm sạc xe điện, mua bán điện dư.",s:["sh2","sh6","nsh1","nsh2","nsh3","nsh6"],tp:[
+{id:"t1",n:"Khách hàng tìm hiểu thông tin ĐMTAM / xe điện",ds:4,is:["Nhân viên thiếu kiến thức chuyên môn","Chính sách giá mua điện dư thay đổi liên tục","Thông tin phân tán giữa nhiều kênh","Về xe điện: chưa có nhân viên nào được đào tạo"]},
+{id:"t2",n:"Nhân viên tư vấn phương án kỹ thuật",ds:4,is:["Không tư vấn được phương án tối ưu","Quy trình đấu nối phức tạp, thiếu tài liệu dễ hiểu","DN FDI cần tư vấn tiếng Anh — nhân viên không đáp ứng","Chi phí đấu nối không minh bạch"]},
+{id:"t3",n:"Nộp hồ sơ, thủ tục đấu nối",ds:4,is:["Thời gian xử lý chậm (khách hàng kỳ vọng 15 ngày, thực tế 35 ngày)","Yêu cầu kỹ thuật phức tạp Khách hàng không hiểu","Phải ký cam kết không tự ý tăng công suất — Khách hàng thắc mắc"]},
+{id:"t4",n:"Lắp đặt, kiểm tra, nghiệm thu",ds:3,is:["Phối hợp đơn vị bên thứ 3 chưa đồng bộ","Thời gian nghiệm thu kéo dài","Nhân viên kiểm tra thiếu chuyên nghiệp"]},
+{id:"t5",n:"Vận hành, thanh quyết toán điện dư",ds:4,is:["Thanh toán tiền điện dư chậm (khách hàng chờ 6 tháng)","Công tơ 2 chiều ghi sai do lỗi cài đặt","Không có kênh hỗ trợ riêng cho khách hàng ĐMTAM","Thay đổi chính sách giá không thông báo kịp thời"]},
+{id:"t6",n:"Thay đổi chủ thể / Chấm dứt Hợp đồng ĐMTMN",ds:3,is:["Quy trình thay đổi chủ thể phức tạp (Thỏa thuận 3 bên: Chủ đầu tư cũ, Chủ đầu tư mới, Bên mua điện)","Thừa kế — giấy tờ phức tạp, nhân viên thiếu kinh nghiệm","Chuyển địa điểm không duy trì hợp đồng cũ — Khách hàng không hiểu"]}]}
+];
+const NB=["Lời nói thiếu tôn trọng, cộc lốc, khó nghe","Thái độ thờ ơ, không quan tâm vấn đề của khách hàng","Không giữ cam kết (hẹn không đến, hứa gọi lại không gọi)","Thiếu chuyên nghiệp (không đồng phục, không thẻ, làm việc riêng)","Đổ lỗi, từ chối trách nhiệm, đùn đẩy giữa các bộ phận"];
+const SN=[{id:"sn1",t:"Người cao tuổi (trên 70) sống một mình",f:["Tỷ lệ ước tính (%)","Khó khăn chính khi tiếp cận dịch vụ điện","Giải pháp hỗ trợ hiện tại"]},{id:"sn2",t:"Người khuyết tật (vận động, thị giác, thính giác)",f:["Tỷ lệ ước tính (%)","Khó khăn chính","Giải pháp hỗ trợ hiện tại"]},{id:"sn3",t:"3. Khách hàng không sử dụng điện thoại thông minh hoặc không biết chữ",f:["Tỷ lệ ước tính (%)","Kênh liên lạc thay thế đang dùng","Khó khăn khi thanh toán"]},{id:"sn4",t:"Hộ dân vùng đặc biệt khó khăn",f:["Số lượng hộ","Thời gian đến điểm giao dịch gần nhất","Cách nhân viên tiếp cận hiện tại"]},{id:"sn5",t:"Khách hàng quan trọng theo Thông tư 22/2020 (bệnh viện, trạm bơm, an ninh QP)",f:["Số lượng khách hàng","Quy trình ưu tiên hiện tại","Cách thông báo ngừng CCĐ riêng"]}];
+const EF=[{k:"pv1",l:"Số lượng khách hàng đã lắp đặt ĐMTAM",r:1},{k:"pv2",l:"Số lượng khách hàng đang tìm hiểu / đang trong quy trình",r:1},{k:"pv3",l:"Khó khăn chính khách hàng gặp khi làm thủ tục lắp ĐMTAM",r:3},{k:"pv4",l:"Năng lực tư vấn của NV về ĐMTAM, xe điện (Tốt/TB/Yếu)",r:2},{k:"pv5",l:"Vướng mắc về cơ chế mua bán điện dư, thanh quyết toán",r:3},{k:"pv6",l:"Nhu cầu trạm sạc xe điện tại địa bàn",r:2},{k:"pv7",l:"Đề xuất cải thiện dịch vụ cho khách hàng chuyển dịch năng lượng",r:3}];
+const MF=[{k:"m1",l:"Đơn vị có thực hiện đo Chỉ số đo mức độ hài lòng khách hàng (CSAT)? Kết quả gần nhất",r:2},{k:"m2",l:"Đơn vị có đo Chỉ số đo mức độ sẵn sàng giới thiệu (NPS)? Kết quả gần nhất?",r:2},{k:"m3",l:"Đơn vị có đo Chỉ số đo mức độ “dễ hay khó” khi khách hàng sử dụng dịch vụ (CES)? Kết quả gần nhất",r:2},{k:"m4",l:"Thời gian trung bình Công ty Điện lực tiếp nhận phiếu CRM (chuẩn: 10 phút)",r:1},{k:"m5",l:"Tỷ lệ liên hệ khách hàng trong 30 phút sau tiếp nhận phiếu",r:1},{k:"m6",l:"Tỷ lệ đóng phiếu đúng quy trình (có thỏa thuận khách hàng)",r:1},{k:"m7",l:"Số trường hợp đóng phiếu khi chưa hoàn tất dịch vụ (6 tháng)",r:1}];
+const FORM_ID="__FORM_ID__";
+const SUPABASE_URL="__SUPABASE_URL__";
+const SUPABASE_ANON_KEY="__SUPABASE_ANON_KEY__";
+const SK=`evnspc_ks_${FORM_ID||"default"}`;
+function ld(){try{const r=localStorage.getItem(SK);return r?JSON.parse(r):null}catch{return null}}
+function Stars({v=0,set}){return <span style={{display:"inline-flex",gap:1,alignItems:"center"}}>{[1,2,3,4,5].map(i=><button key={i} onClick={()=>set(i)} style={{background:"none",border:"none",cursor:"pointer",fontSize:15,padding:0,color:i<=v?O:"#d0d0d0",transition:"transform .1s"}} onMouseEnter={e=>e.target.style.transform="scale(1.25)"} onMouseLeave={e=>e.target.style.transform="scale(1)"}>{"★"}</button>)}<span style={{fontSize:10,color:"#aaa",marginLeft:3}}>{v}/5</span></span>}
+function TA({label,hint,value,onChange,rows=3}){return <div style={{marginBottom:12}}><label style={{display:"block",fontWeight:600,color:B,fontSize:12.5,marginBottom:2}}>{label}</label>{hint&&<div style={{fontSize:11,color:"#999",marginBottom:2,fontStyle:"italic"}}>{hint}</div>}<textarea rows={rows} value={value||""} onChange={e=>onChange(e.target.value)} placeholder="Nhập thông tin..." style={{width:"100%",border:"1px solid #cfd4da",borderRadius:4,padding:"7px 10px",fontSize:13,fontFamily:"inherit",resize:"vertical",outline:"none",boxSizing:"border-box"}}/></div>}
+
+function App(){
+const init=ld()||{};
+const[tab,setTab]=useState("intro");
+const[aj,setAj]=useState("j1");
+const firstSegId=(jId)=>{const j=JR.find(x=>x.id===jId);return j&&j.s&&j.s.length?j.s[0]:null;};
+const[as2,setAs]=useState(firstSegId("j1"));
+const[unit,setUnit]=useState(init.unit||{});
+const[iw,setIw]=useState(init.iw||{});
+const[notes,setNotes]=useState(init.notes||{});
+const[dr,setDr]=useState(init.dr||{c1:[""]});
+const[ns,setNs]=useState(init.ns||{});
+const[nn,setNn]=useState(init.nn||{});
+const[snd,setSnd]=useState(init.snd||{});
+const[ed,setEd]=useState(init.ed||{});
+const[mf,setMf]=useState(init.mf||{});
+const[sending,setSending]=useState(false);
+const[popup,setPopup]=useState({open:false,msg:""});
+useEffect(()=>{try{localStorage.setItem(SK,JSON.stringify({unit,iw,notes,dr,ns,nn,snd,ed,mf}))}catch{}},[unit,iw,notes,dr,ns,nn,snd,ed,mf]);
+const cj=JR.find(j=>j.id===aj);
+const rSegs=ALL.filter(x=>cj&&cj.s.indexOf(x.id)>=0);
+const cSeg=as2?gs(as2):null;
+const addR=useCallback(k=>setDr(p=>({...p,[k]:[...(p[k]||[""]),""]  })),[]);
+const updR=useCallback((k,i,v)=>setDr(p=>{const r=[...(p[k]||[])];r[i]=v;return{...p,[k]:r}}),[]);
+const delR=useCallback((k,i)=>setDr(p=>{const r=[...(p[k]||[])];r.splice(i,1);return{...p,[k]:r}}),[]);
+const hasD=(jId,sId)=>Object.keys(notes).some(k=>k.startsWith(`${sId}_${jId}_`)&&(notes[k]&&notes[k].trim()));
+const fc=Object.values(notes).filter(v=>v&&v.trim()).length+Object.values(dr).reduce((s,a)=>s+a.filter(v=>v&&v.trim()).length,0)+Object.keys(ns).filter(k=>ns[k]>0).length+Object.values(snd).filter(v=>v&&v.trim()).length+Object.values(ed).filter(v=>v&&v.trim()).length+Object.values(mf).filter(v=>v&&v.trim()).length;
+const showPopup=(msg)=>{setPopup({open:true,msg});window.setTimeout(()=>setPopup({open:false,msg:""}),2400)};
+const makeSubmissionId=()=>`SSS-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
+const exp=async()=>{
+if(sending)return;
+const unitName=(unit.ten||"").trim();
+const contactName=(unit.nguoi||"").trim();
+if(!unitName||!contactName){showPopup("Vui lòng nhập Tên đơn vị và Người phụ trách trước khi gửi.");return}
+if(!SUPABASE_URL||!SUPABASE_ANON_KEY){showPopup("Thiếu cấu hình Supabase, chưa thể gửi kết quả.");return}
+try{
+setSending(true);
+const answers={unit,iw,notes,dr,ns,nn,snd,ed,mf,at:new Date().toISOString()};
+const payload={
+id:makeSubmissionId(),
+form_id:FORM_ID||"evnspc",
+unit_name:unitName,
+contact_name:contactName,
+position_name:(unit.cv||"").trim()||null,
+phone:(unit.dt||"").trim()||null,
+email:(unit.email||"").trim()||null,
+completed_on:(unit.ngay||"").trim()||null,
+answers,
+};
+const res=await fetch(`${SUPABASE_URL}/rest/v1/vcontent_student_survey_submissions`,{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+"apikey":SUPABASE_ANON_KEY,
+"Authorization":`Bearer ${SUPABASE_ANON_KEY}`,
+"Prefer":"return=minimal",
+},
+body:JSON.stringify(payload),
+});
+if(!res.ok){throw new Error(await res.text())}
+try{localStorage.removeItem(SK)}catch{}
+showPopup("Gửi kết quả khảo sát thành công");
+}catch{
+showPopup("Gửi kết quả chưa thành công");
+}finally{
+setSending(false);
+}
+};
+
+return <div style={{fontFamily:"Arial,Helvetica,sans-serif",background:"#F5F7FA",minHeight:"100vh",color:DK}}>
+{/* HEADER */}
+<div style={{background:B,color:"#fff",padding:"13px 20px"}}>
+<div style={{fontSize:9.5,opacity:.5,letterSpacing:1.2,textTransform:"uppercase",marginBottom:3}}>Tập đoàn Điện lực Việt Nam — Tổng Công ty Điện lực miền Nam</div>
+<div style={{fontSize:15,fontWeight:700}}>Phiếu thu thập thông tin phục vụ xây dựng Bộ Chuẩn mực Hành vi TNKH</div>
+<div style={{fontSize:10.5,opacity:.4,marginTop:2}}>Theo Chỉ thị 840/CT-EVN | Đơn vị tư vấn: Peopleone</div>
+</div>
+{/* NAV */}
+<div style={{background:"#fff",borderBottom:"1px solid #ddd",display:"flex",overflowX:"auto"}}>
+{[["intro","Giới thiệu"],["unit","Thông tin chung"],["survey","Khảo sát theo hành trình"],["extra","Nội dung bổ sung"]].map(([id,lb])=><button key={id} onClick={()=>{setTab(id);if(id==="survey")setAs(firstSegId(aj))}} style={{padding:"9px 16px",border:"none",background:"none",fontFamily:"inherit",fontSize:12.5,fontWeight:tab===id?700:500,color:tab===id?B:MG,cursor:"pointer",borderBottom:tab===id?`3px solid ${O}`:"3px solid transparent",whiteSpace:"nowrap"}}>{lb}</button>)}
+</div>
+
+<div style={{maxWidth:960,margin:"0 auto",padding:"14px 12px"}}>
+{popup.open&&<div style={{position:"fixed",inset:0,background:"rgba(15,23,42,.28)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:9999,padding:16}}><div style={{background:"#fff",borderRadius:12,padding:"18px 22px",minWidth:300,maxWidth:420,boxShadow:"0 22px 45px rgba(15,23,42,.24)",textAlign:"center",border:"1px solid #e2e8f0"}}><div style={{width:52,height:52,borderRadius:999,margin:"0 auto 10px",background:"linear-gradient(135deg,#16a34a,#22c55e)",color:"#fff",display:"grid",placeItems:"center",fontSize:30,fontWeight:700,lineHeight:1}}>✓</div><div style={{fontSize:18,fontWeight:700,color:"#0f172a",marginBottom:4}}>Thông báo</div><div style={{fontSize:14,color:"#334155"}}>{popup.msg}</div></div></div>}
+
+{/* INTRO */}
+{tab==="intro"&&<div>
+<div style={{background:"#fff",borderRadius:6,padding:20,marginBottom:12,borderLeft:`4px solid ${B}`}}>
+<h2 style={{color:B,fontSize:16,marginTop:0,marginBottom:8}}>Mục đích</h2>
+<p style={{fontSize:13,lineHeight:1.8,color:"#555",margin:0}}>Phiếu khảo sát được xây dựng qua việc rà soát 4 văn bản quy trình EVNSPC, tổ chức theo hành trình khách hàng 6 nhóm dịch vụ với các điểm chạm cụ thể, áp dụng cho 12 phân khúc khách hàng.</p>
+</div>
+<div style={{background:"#fff",borderRadius:6,padding:20,marginBottom:12,borderLeft:`4px solid ${O}`}}>
+<h2 style={{color:B,fontSize:16,marginTop:0,marginBottom:8}}>Yêu cầu thực hiện</h2>
+<p style={{fontSize:13,lineHeight:1.8,color:"#555",margin:0}}>Thực hiện đầy đủ 3 phần:<br/>(1) Thông tin chung<br/>(2) Khảo sát theo hành trình – đầy đủ 6 hành trình<br/>(3) Nội dung bổ sung.</p>
+</div>
+<div style={{background:"#fff",borderRadius:6,padding:20,marginBottom:12}}>
+<h3 style={{color:B,fontSize:14,marginTop:0,marginBottom:10}}>6 hành trình</h3>
+{JR.map((j,i)=><div key={j.id} style={{padding:"5px 0",borderBottom:i<JR.length-1?"1px solid #f0f0f0":"none"}}><div style={{fontWeight:700,color:B,fontSize:13}}>{i+1}. {j.l}</div><div style={{fontSize:12,color:MG}}>{j.d}</div><div style={{fontSize:11,color:"#bbb"}}>{j.s.length} nhóm khách hàng | {j.tp.length} điểm chạm</div></div>)}
+</div>
+<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
+<div style={{background:"#fff",borderRadius:6,padding:14,borderTop:`3px solid ${B}`}}><h4 style={{color:B,fontSize:13,marginTop:0}}>6 nhóm khách hàng sinh hoạt</h4>{SH.map((s,i)=><div key={s.id} style={{fontSize:12,padding:"2px 0",color:"#555"}}>{i+1}. {s.v}</div>)}</div>
+<div style={{background:"#fff",borderRadius:6,padding:14,borderTop:`3px solid ${O}`}}><h4 style={{color:O,fontSize:13,marginTop:0}}>6 nhóm khách hàng ngoài sinh hoạt</h4>{NSH.map((s,i)=><div key={s.id} style={{fontSize:12,padding:"2px 0",color:"#555"}}>{i+1}. {s.v}</div>)}</div>
+</div>
+<div style={{background:LO,borderRadius:6,padding:14,borderLeft:`4px solid ${O}`,fontSize:12,color:"#666",lineHeight:1.7,marginBottom:12}}><b style={{color:"#8B6914"}}>Nguyên tắc:</b> Cung cấp theo thực tế vận hành. Ưu tiên dữ liệu có con số cụ thể. Phân biệt rõ vấn đề quy trình và vấn đề hành vi nhân viên.</div>
+<div style={{textAlign:"center"}}><button onClick={()=>setTab("unit")} style={{background:B,color:"#fff",border:"none",padding:"10px 28px",borderRadius:4,fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>Bắt đầu</button></div>
+</div>}
+
+{/* UNIT */}
+{tab==="unit"&&<div style={{background:"#fff",borderRadius:6,padding:20}}>
+{[["ten","Tên đơn vị"],["nguoi","Người phụ trách"],["cv","Chức vụ"],["email","Email"],].map(([k,l])=><div key={k} style={{marginBottom:10}}><label style={{display:"block",fontWeight:600,color:B,fontSize:12.5,marginBottom:2}}>{l}</label><input type="text" value={unit[k]||""} onChange={e=>setUnit({...unit,[k]:e.target.value})} style={{width:"100%",border:"1px solid #cfd4da",borderRadius:4,padding:"7px 10px",fontSize:13,fontFamily:"inherit",outline:"none",boxSizing:"border-box"}}/></div>)}
+<div style={{textAlign:"right",marginTop:12}}><button onClick={()=>setTab("survey")} style={{background:B,color:"#fff",border:"none",padding:"8px 20px",borderRadius:4,fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>Tiếp tục</button></div>
+</div>}
+
+{/* SURVEY OVERVIEW */}
+{tab==="survey"&&<div>
+<div style={{display:"flex",borderBottom:"2px solid #e0e0e0",marginBottom:14,overflowX:"auto"}}>{JR.map(j=><button key={j.id} onClick={()=>{setAj(j.id);setAs(firstSegId(j.id))}} style={{padding:"7px 14px",border:"none",background:aj===j.id?"#fff":"transparent",fontFamily:"inherit",fontSize:12,fontWeight:aj===j.id?700:500,color:aj===j.id?B:MG,cursor:"pointer",borderBottom:aj===j.id?`3px solid ${O}`:"3px solid transparent",whiteSpace:"nowrap"}}>{j.l}</button>)}</div>
+<div style={{background:"#fff",borderRadius:6,padding:"14px 18px",marginBottom:14,borderLeft:`4px solid ${B}`}}><h2 style={{color:B,fontSize:16,margin:0}}>{cj.l}</h2><p style={{color:MG,fontSize:12,margin:"4px 0 0"}}>{cj.d}</p><div style={{fontSize:11,color:"#aaa",marginTop:6}}>{cj.tp.length} điểm chạm</div></div>
+<div style={{background:"#fff",borderRadius:6,padding:"14px 18px"}}><h3 style={{color:B,fontSize:13,marginTop:0,marginBottom:8}}>Các điểm chạm trong hành trình</h3>{cj.tp.map((tp,i)=><div key={tp.id} style={{display:"flex",gap:8,alignItems:"flex-start",padding:"5px 0",borderBottom:i<cj.tp.length-1?"1px solid #f0f0f0":"none"}}><span style={{background:B,color:"#fff",borderRadius:3,width:20,height:20,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:700,flexShrink:0}}>{i+1}</span><div><div style={{fontWeight:600,color:B,fontSize:13}}>{cleanTpTitle(tp.n)}</div><div style={{fontSize:11,color:"#aaa"}}>{tp.is.length} vấn đề cần đánh giá</div></div></div>)}</div>
+</div>}
+
+{/* SURVEY DETAIL */}
+{tab==="survey"&&as2&&<div>
+<div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10,fontSize:12}}><span style={{color:B,fontWeight:700}}>{cj.l}</span></div>
+<div style={{background:LO,borderLeft:`4px solid ${O}`,padding:"10px 14px",borderRadius:4,marginBottom:14,fontSize:12,lineHeight:1.6,fontVariantNumeric:"tabular-nums"}}>Đánh giá mức ảnh hưởng tại mỗi điểm chạm (1-5 sao), trong đó:<br/>- 1 ⭐: Ảnh hưởng rất thấp – hầu như không đáng kể<br/>- 2 ⭐: Ảnh hưởng thấp – có vấn đề nhưng chưa nghiêm trọng<br/>- 3 ⭐: Ảnh hưởng trung bình – có tác động rõ, cần cải thiện<br/>- 4 ⭐: Ảnh hưởng cao – gây khó chịu đáng kể cho khách hàng<br/>- 5 ⭐: Ảnh hưởng rất cao – điểm đau nghiêm trọng, cần ưu tiên xử lý ngay</div>
+{cj.tp.map((tp,tI)=>{const tK=`${as2}_${aj}_${tp.id}`;const bg2="#fafafa";
+return <div key={tp.id} style={{border:"1px solid #e0e0e0",borderRadius:4,marginBottom:10,overflow:"hidden"}}>
+<div style={{background:bg2,padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:6}}>
+<div style={{display:"flex",alignItems:"center",gap:8}}><span style={{background:B,color:"#fff",borderRadius:3,width:20,height:20,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:700}}>{tI+1}</span><span style={{fontWeight:700,color:B,fontSize:13}}>{cleanTpTitle(tp.n)}</span></div>
+</div>
+<div style={{padding:"10px 14px"}}>
+{tp.is.map((is2,iI)=>{const iK=`${tK}_i${iI}`;return <div key={iI} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"4px 0",borderBottom:iI<tp.is.length-1?"1px solid #f5f5f5":"none",gap:10}}><span style={{fontSize:12.5,color:"#555",flex:1,lineHeight:1.5}}>{is2}</span><Stars v={(iw[iK]!=null?iw[iK]:0)} set={v=>setIw({...iw,[iK]:v})}/></div>})}
+<div style={{marginTop:8}}><TA label="Ghi chú thực tế tại đơn vị:" hint="Bối cảnh thực tế tại điểm chạm này." value={notes[`${tK}_note`]} onChange={v=>setNotes({...notes,[`${tK}_note`]:v})} rows={2}/></div>
+</div></div>})}
+<div style={{display:"flex",justifyContent:"space-between",marginTop:14}}>
+<button onClick={()=>setTab("survey")} style={{background:"#f3f4f6",border:"1px solid #ddd",borderRadius:4,padding:"8px 16px",fontSize:12,cursor:"pointer",fontFamily:"inherit",color:"#666"}}>Quay lại hành trình</button>
+{(()=>{const jIdx=JR.findIndex(j=>j.id===aj);const nxJ=JR[jIdx+1];return nxJ?<button onClick={()=>{setAj(nxJ.id);setAs(firstSegId(nxJ.id));window.scrollTo({top:0,behavior:"smooth"});}} style={{background:B,color:"#fff",border:"none",borderRadius:4,padding:"8px 16px",fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>Hành trình tiếp theo</button>:<button onClick={()=>setTab("extra")} style={{background:O,color:"#fff",border:"none",borderRadius:4,padding:"8px 16px",fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>Đi tiếp: Nội dung bổ sung</button>})()}
+</div></div>}
+
+{/* EXTRA */}
+{tab==="extra"&&<div>
+{/* C1 */}
+<div style={{background:"#fff",borderRadius:6,marginBottom:14,overflow:"hidden",border:"1px solid #e0e0e0"}}>
+<div style={{background:B,color:"#fff",padding:"9px 16px",fontSize:13,fontWeight:700}}>Nội dung 1 — Câu hỏi và tình huống thường gặp nhất</div>
+<div style={{padding:"14px 16px"}}>
+<div style={{background:LO,borderLeft:`4px solid ${O}`,padding:"8px 12px",borderRadius:4,marginBottom:12,fontSize:12}}>Liệt kê câu hỏi khách hàng thường hỏi hoặc tình huống nhân viên thường gặp, chọn tần suất xuất hiện. Bấm <b>Thêm dòng</b> để nhập ý kiến mới.</div>
+{(dr.c1||[""]).map((r,i)=><div key={i} style={{display:"flex",gap:6,marginBottom:6,alignItems:"flex-start"}}>
+<span style={{color:B,fontWeight:700,fontSize:11,minWidth:20,paddingTop:7}}>{i+1}.</span>
+<textarea rows={2} value={r} onChange={e=>updR("c1",i,e.target.value)} placeholder="Nhập câu hỏi / tình huống..." style={{flex:1,border:"1px solid #cfd4da",borderRadius:4,padding:"6px 8px",fontSize:12.5,fontFamily:"inherit",resize:"vertical",outline:"none"}}/>
+<select style={{width:105,border:"1px solid #cfd4da",borderRadius:4,padding:"6px 4px",fontSize:11,fontFamily:"inherit"}}><option>Tần suất</option><option>Rất thường xuyên</option><option>Thường xuyên</option><option>Thỉnh thoảng</option><option>Hiếm khi</option></select>
+{(dr.c1||[]).length>1&&<button onClick={()=>delR("c1",i)} style={{background:"#fee2e2",border:"none",borderRadius:4,padding:"4px 7px",cursor:"pointer",color:"#c00",fontWeight:700,fontSize:14}}>x</button>}
+</div>)}
+<button onClick={()=>addR("c1")} style={{width:"100%",marginTop:4,background:LB,border:`1px dashed ${B}`,borderRadius:4,padding:"7px",fontSize:11.5,fontWeight:600,color:B,cursor:"pointer",fontFamily:"inherit"}}>+ Thêm dòng</button>
+</div></div>
+{/* C2 */}
+<div style={{background:"#fff",borderRadius:6,marginBottom:14,overflow:"hidden",border:"1px solid #e0e0e0"}}>
+<div style={{background:B,color:"#fff",padding:"9px 16px",fontSize:13,fontWeight:700}}>Nội dung 2 — Hành vi tiêu cực lặp lại trong 12 tháng</div>
+<div style={{padding:"14px 16px"}}>
+{NB.map((t,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:"1px solid #f5f5f5"}}><span style={{fontSize:12.5,color:"#555",flex:1}}>{t}</span><Stars v={ns[`nb${i}`]||0} set={v=>setNs({...ns,[`nb${i}`]:v})}/></div>)}
+<div style={{marginTop:12}}><TA label="Hành vi tiêu cực khác (bổ sung):" value={nn.other} onChange={v=>setNn({...nn,other:v})} rows={2}/><TA label="Ví dụ cụ thể (bối cảnh, lời nói, phản ứng khách hàng):" value={nn.ex} onChange={v=>setNn({...nn,ex:v})} rows={3}/></div>
+</div></div>
+{/* C3 */}
+<div style={{background:"#fff",borderRadius:6,marginBottom:14,overflow:"hidden",border:"1px solid #e0e0e0"}}>
+<div style={{background:B,color:"#fff",padding:"9px 16px",fontSize:13,fontWeight:700}}>Nội dung 3 — Nhu cầu hỗ trợ nhóm yếu thế</div>
+<div style={{padding:"14px 16px"}}>
+{SN.map((sn,si)=><div key={sn.id} style={{border:"1px solid #e0e0e0",borderRadius:4,padding:12,marginBottom:8}}>
+<div style={{fontWeight:700,color:B,fontSize:12.5,marginBottom:8}}>{si+1}. {cleanLeadingNumber(sn.t)}</div>
+{sn.f.map((f,fi)=>{const k=`${sn.id}_${fi}`;return <div key={fi} style={{marginBottom:5}}><label style={{fontSize:11.5,fontWeight:600,color:"#555",display:"block",marginBottom:1}}>{f}</label><input type="text" value={snd[k]||""} onChange={e=>setSnd({...snd,[k]:e.target.value})} placeholder="Nhập..." style={{width:"100%",border:"1px solid #cfd4da",borderRadius:4,padding:"5px 8px",fontSize:12,fontFamily:"inherit",outline:"none",boxSizing:"border-box"}}/></div>})}
+</div>)}
+</div></div>
+{/* C4 */}
+<div style={{background:"#fff",borderRadius:6,marginBottom:14,overflow:"hidden",border:"1px solid #e0e0e0"}}>
+<div style={{background:O,color:"#fff",padding:"9px 16px",fontSize:13,fontWeight:700}}>Chuyển dịch năng lượng — Nhu cầu thực tế tại địa bàn</div>
+<div style={{padding:"14px 16px"}}>
+<div style={{background:"#fff7ed",borderLeft:`4px solid ${O}`,padding:"8px 12px",borderRadius:4,marginBottom:12,fontSize:12,lineHeight:1.6}}>Thu thập nhu cầu thực tế về điện mặt trời áp mái, xe điện, tiết kiệm năng lượng.</div>
+{EF.map(f=><TA key={f.k} label={f.l} value={ed[f.k]||""} onChange={v=>setEd({...ed,[f.k]:v})} rows={f.r}/>)}
+</div></div>
+
+<div style={{background:"#fff",borderRadius:6,marginBottom:14,overflow:"hidden",border:"1px solid #e0e0e0"}}>
+<div style={{background:B,color:"#fff",padding:"9px 16px",fontSize:13,fontWeight:700}}>Đo lường CSAT/NPS/CES và phối hợp nội bộ TTCSKH – Công ty Điện lực</div>
+<div style={{padding:"14px 16px"}}>
+<div style={{background:LO,borderLeft:`4px solid ${O}`,padding:"8px 12px",borderRadius:4,marginBottom:12,fontSize:12,lineHeight:1.6}}>Căn cứ QT CSKH EVNSPC Điều 10-11 và QĐ 2286. Thu thập thực trạng đo lường và chỉ số phối hợp.</div>
+{MF.map(f=><TA key={f.k} label={f.l} value={mf[f.k]||""} onChange={v=>setMf({...mf,[f.k]:v})} rows={f.r}/>)}
+</div></div>
+<div style={{background:LO,borderRadius:6,padding:18,textAlign:"center"}}><p style={{color:"#8B6914",fontWeight:600,fontSize:13,margin:"0 0 10px"}}>Cảm ơn Anh/Chị đã dành thời gian cung cấp thông tin.</p><button onClick={exp} disabled={sending} style={{background:B,color:"#fff",border:"none",padding:"10px 28px",borderRadius:4,fontSize:13,fontWeight:600,cursor:sending?"wait":"pointer",opacity:sending?0.75:1,fontFamily:"inherit"}}>{sending?"Đang gửi kết quả...":"Gửi kết quả khảo sát"}</button></div>
+</div>}
+
+</div>
+<div style={{textAlign:"center",padding:14,color:"#bbb",fontSize:10,borderTop:"1px solid #eee",marginTop:14}}>Tập đoàn Điện lực Việt Nam | Tổng Công ty Điện lực miền Nam | Peopleone | ISO 10001:2018</div>
+</div>}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>

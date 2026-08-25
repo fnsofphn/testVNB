@@ -1,0 +1,104 @@
+import assert from 'node:assert/strict';
+
+process.env.SUPABASE_URL = 'https://supabase.test';
+process.env.SUPABASE_ANON_KEY = 'anon-test';
+process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-test';
+
+const calls = [];
+let persistedRequest = null;
+globalThis.fetch = async (url, options = {}) => {
+  const value = String(url);
+  calls.push({ url: value, method: options.method || 'GET', headers: options.headers, body: options.body });
+  if (value.endsWith('/auth/v1/user')) return Response.json({ id: 'auth-operations', email: 'ops@peopleone.vn' });
+  if (value.includes('/vcontent_profiles?')) return Response.json([{ id: 'profile-operations', email: 'ops@peopleone.vn', full_name: 'Quản lý vận hành', role: 'training_manager', active: true, auth_user_id: 'auth-operations' }]);
+  if (value.includes('/vplanning_users?') && value.includes('email=eq.')) return Response.json([]);
+  if (value.includes('/vplanning_users?')) return Response.json([
+    { email: 'manager@peopleone.vn', full_name: 'Ngọc Trần', roles: ['vplanning_manager'] },
+    { email: 'member@peopleone.vn', full_name: 'Nam Nguyễn', roles: ['vplanning_member'] },
+  ]);
+  if (value.includes('/vwork_training_operations_state?') && (options.method || 'GET') === 'GET') return Response.json([]);
+  if (value.includes('/vwork_training_operations_tasks?') && (options.method || 'GET') === 'GET') return Response.json([]);
+  if (value.includes('/vwork_training_operations_audit_events?') && (options.method || 'GET') === 'GET') return Response.json([]);
+  if (value.includes('/vwork_training_operations_command_requests?') && (options.method || 'GET') === 'GET') return Response.json(persistedRequest ? [persistedRequest] : []);
+  if (value.endsWith('/rpc/persist_vwork_training_operations_state')) {
+    const body = JSON.parse(options.body);
+    assert.equal(body.p_state_id, 'default');
+    assert.equal(body.p_expected_version, 0);
+    assert.ok(Array.isArray(body.p_tasks) && body.p_tasks.length === 33);
+    assert.equal(body.p_payload.tasks, undefined);
+    assert.equal(body.p_payload.auditEvents, undefined);
+    persistedRequest = { request_id: body.p_request_id, state_id: 'default', actor_id: 'profile-operations', result: { version: 1, updatedAt: '2026-08-25T02:00:00.000Z', auditCount: 1 } };
+    return Response.json({ version: 1, updatedAt: '2026-08-25T02:00:00.000Z', taskCount: 33, auditCount: 1, idempotentReplay: false });
+  }
+  throw new Error(`Unexpected fetch: ${options.method || 'GET'} ${value}`);
+};
+
+const { default: handler } = await import('../api/vwork-training-operations.js');
+
+function responseRecorder() {
+  return {
+    statusCode: 200,
+    headers: {},
+    payload: null,
+    status(code) { this.statusCode = code; return this; },
+    setHeader(name, value) { this.headers[name] = value; },
+    json(value) { this.payload = value; return this; },
+  };
+}
+
+function request(method, body) {
+  return {
+    method,
+    body,
+    headers: { authorization: 'Bearer session-test', 'x-forwarded-for': `127.0.0.${calls.length + 1}` },
+    socket: { remoteAddress: `127.0.0.${calls.length + 1}` },
+  };
+}
+
+const getResponse = responseRecorder();
+await handler(request('GET'), getResponse);
+assert.equal(getResponse.statusCode, 200);
+assert.equal(getResponse.payload.ok, true);
+assert.equal(getResponse.payload.role, 'operations');
+assert.equal(getResponse.payload.storage, 'seed');
+assert.equal(getResponse.payload.state.tasks.length, 33);
+assert.deepEqual(getResponse.payload.directory.map((item) => [item.id, item.role]), [['manager@peopleone.vn', 'manager'], ['member@peopleone.vn', 'member']]);
+
+const postResponse = responseRecorder();
+await handler(request('POST', {
+  expectedVersion: 0,
+  requestId: '11111111-1111-4111-8111-111111111111',
+  command: { type: 'ASSIGN_GROUP_MANAGER', payload: { classCode: 'TNKH01', group: 'setup', managerId: 'manager-01', managerName: 'Ngọc Trần' } },
+}), postResponse);
+assert.equal(postResponse.statusCode, 200);
+assert.equal(postResponse.payload.version, 1);
+assert.ok(postResponse.payload.state.tasks.filter((item) => item.classCode === 'TNKH01' && item.group === 'setup').every((item) => item.manager === 'Ngọc Trần'));
+assert.ok(calls.some((item) => item.url.endsWith('/rpc/persist_vwork_training_operations_state') && item.method === 'POST'));
+assert.ok(calls.filter((item) => item.url.includes('/vwork_training_operations_')).every((item) => String(item.headers?.Authorization || '').includes('service-test')));
+
+const rpcCallsBeforeReplay = calls.filter((item) => item.url.endsWith('/rpc/persist_vwork_training_operations_state')).length;
+const replayResponse = responseRecorder();
+await handler(request('POST', {
+  expectedVersion: 0,
+  requestId: '11111111-1111-4111-8111-111111111111',
+  command: { type: 'ASSIGN_GROUP_MANAGER', payload: { classCode: 'TNKH01', group: 'setup', managerId: 'manager-01', managerName: 'Ngọc Trần' } },
+}), replayResponse);
+assert.equal(replayResponse.statusCode, 200);
+assert.equal(replayResponse.payload.idempotentReplay, true);
+assert.equal(replayResponse.payload.version, 1);
+assert.equal(calls.filter((item) => item.url.endsWith('/rpc/persist_vwork_training_operations_state')).length, rpcCallsBeforeReplay);
+
+persistedRequest = null;
+
+const badVersion = responseRecorder();
+await handler(request('POST', { expectedVersion: 4, requestId: '22222222-2222-4222-8222-222222222222', command: { type: 'ASSIGN_GROUP_MANAGER', payload: {} } }), badVersion);
+assert.equal(badVersion.statusCode, 409);
+assert.equal(badVersion.payload.code, 'TRAINING_OPERATIONS_VERSION_CONFLICT');
+
+const missingRequestId = responseRecorder();
+await handler(request('POST', { expectedVersion: 0, command: { type: 'ASSIGN_GROUP_MANAGER', payload: {} } }), missingRequestId);
+assert.equal(missingRequestId.statusCode, 400);
+assert.equal(missingRequestId.payload.code, 'TRAINING_OPERATIONS_REQUEST_ID_REQUIRED');
+
+console.log('V-Work Training Operations API auth, persistence and concurrency checks passed.');
+

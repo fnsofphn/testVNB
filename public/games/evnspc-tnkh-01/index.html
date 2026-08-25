@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>Một ca điều hành của Trưởng Điện lực · Điều hành &amp; TNKH</title>
+  <style>
+    :root {
+      --evn-red: #c00000;
+      --evn-red-dark: #9f0000;
+      --green: #1f6f54;
+      --green-soft: #e9f5ef;
+      --gold: #b8860b;
+      --gold-soft: #fbf3e2;
+      --ink: #171717;
+      --muted: #666a70;
+      --line: #e5e5e5;
+      --surface: #ffffff;
+      --canvas: #f5f5f5;
+      --shadow: 0 18px 45px rgba(31, 31, 31, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-width: 320px;
+      background: var(--canvas);
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      background:
+        radial-gradient(circle at top right, rgba(192, 0, 0, 0.055), transparent 34rem),
+        var(--canvas);
+      color: var(--ink);
+      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .app-shell {
+      width: 100%;
+      min-height: 100vh;
+      padding: 40px 16px;
+    }
+
+    .game-card {
+      width: min(100%, 768px);
+      margin: 0 auto;
+      padding: clamp(20px, 4vw, 34px);
+      border: 1px solid #dedede;
+      border-radius: 22px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .content {
+      width: min(100%, 672px);
+      margin: 0 auto;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      flex: 0 0 auto;
+      place-items: center;
+      border-radius: 10px;
+      background: var(--evn-red);
+      color: #fff;
+      font-size: 20px;
+      font-weight: 900;
+      box-shadow: 0 8px 16px rgba(192, 0, 0, 0.2);
+    }
+
+    .eyebrow {
+      color: #707070;
+      font-size: 13px;
+      font-weight: 750;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 0;
+      font-size: clamp(30px, 6vw, 42px);
+      font-weight: 900;
+      letter-spacing: -0.035em;
+      line-height: 1.12;
+    }
+
+    h1 span {
+      color: var(--evn-red);
+    }
+
+    .lead {
+      margin: 18px 0 0;
+      color: #555b62;
+      font-size: clamp(16px, 2.6vw, 18px);
+      line-height: 1.72;
+    }
+
+    .intro-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: 20px;
+      padding: 15px 16px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: #fafafa;
+      color: #5b6066;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .intro-note-icon {
+      flex: 0 0 auto;
+      color: var(--gold);
+      font-size: 18px;
+      line-height: 1.3;
+    }
+
+    .field {
+      display: block;
+      margin-top: 26px;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 7px;
+      color: #45484d;
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    .text-input {
+      width: 100%;
+      min-height: 48px;
+      padding: 12px 14px;
+      border: 1px solid #cfcfcf;
+      border-radius: 10px;
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .text-input:focus {
+      border-color: var(--evn-red);
+      box-shadow: 0 0 0 3px rgba(192, 0, 0, 0.12);
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .btn {
+      display: inline-flex;
+      min-height: 44px;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 20px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 800;
+      text-decoration: none;
+      transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn:focus-visible,
+    .option-button:focus-visible,
+    .text-link:focus-visible {
+      outline: 3px solid rgba(192, 0, 0, 0.24);
+      outline-offset: 2px;
+    }
+
+    .btn-primary {
+      background: var(--evn-red);
+      color: #fff;
+      box-shadow: 0 8px 18px rgba(192, 0, 0, 0.18);
+    }
+
+    .btn-primary:hover {
+      background: var(--evn-red-dark);
+    }
+
+    .btn-secondary {
+      border: 2px solid #d2d2d2;
+      background: #fff;
+      color: #42464b;
+    }
+
+    .btn-secondary:hover {
+      border-color: #aaa;
+    }
+
+    .text-link {
+      margin-top: 22px;
+      border: 0;
+      background: transparent;
+      color: #8a8a8a;
+      cursor: pointer;
+      font-size: 12px;
+      text-decoration: underline;
+    }
+
+    .meter-panel {
+      position: sticky;
+      z-index: 10;
+      top: 0;
+      margin: -10px -10px 0;
+      padding: 12px 10px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.97);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.04);
+    }
+
+    .meter-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: clamp(10px, 3vw, 22px);
+    }
+
+    .meter {
+      min-width: 0;
+    }
+
+    .meter-head {
+      display: flex;
+      min-height: 19px;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 7px;
+    }
+
+    .meter-icon {
+      flex: 0 0 auto;
+      font-size: 14px;
+    }
+
+    .meter-label {
+      overflow: hidden;
+      color: #777;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-overflow: ellipsis;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .meter-delta {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .meter-body {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .meter-track {
+      height: 10px;
+      min-width: 0;
+      flex: 1;
+      overflow: hidden;
+      border-radius: 99px;
+      background: #e7e7e7;
+    }
+
+    .meter-fill {
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform 500ms cubic-bezier(0.2, 0.75, 0.25, 1);
+    }
+
+    .meter-value {
+      width: 30px;
+      flex: 0 0 auto;
+      font-size: 14px;
+      font-variant-numeric: tabular-nums;
+      font-weight: 850;
+      text-align: right;
+    }
+
+    .situation-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 21px;
+    }
+
+    .journey-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 5px 11px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .progress-label {
+      margin-left: auto;
+      color: #999;
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .situation-title {
+      margin: 13px 0 0;
+      font-size: clamp(21px, 4vw, 27px);
+      letter-spacing: -0.018em;
+      line-height: 1.25;
+    }
+
+    .situation-context {
+      margin: 9px 0 0;
+      color: #4d5258;
+      font-size: 16px;
+      line-height: 1.65;
+    }
+
+    .options {
+      display: grid;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .option-button {
+      display: flex;
+      width: 100%;
+      align-items: flex-start;
+      gap: 12px;
+      border: 2px solid var(--line);
+      border-radius: 13px;
+      padding: 14px 15px;
+      background: #fff;
+      color: #2f3337;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease, opacity 160ms ease;
+    }
+
+    .option-button:not(:disabled):hover {
+      border-color: #aaa;
+      transform: translateY(-1px);
+    }
+
+    .option-button:disabled {
+      cursor: default;
+    }
+
+    .option-button.is-dimmed {
+      opacity: 0.45;
+    }
+
+    .option-letter {
+      display: grid;
+      width: 25px;
+      height: 25px;
+      flex: 0 0 auto;
+      place-items: center;
+      border-radius: 50%;
+      background: #eeeeee;
+      color: #666;
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .option-copy {
+      padding-top: 1px;
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .feedback {
+      margin-top: 16px;
+      border: 1px solid;
+      border-radius: 13px;
+      padding: 16px;
+    }
+
+    .feedback-label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 14px;
+      font-weight: 850;
+    }
+
+    .feedback-why {
+      margin: 9px 0 0;
+      color: #33373b;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .survey-note {
+      margin: 11px 0 0;
+      padding-top: 11px;
+      border-top: 1px solid rgba(90, 90, 90, 0.16);
+      color: #70757a;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .result-hero {
+      border: 2px solid;
+      border-radius: 18px;
+      padding: clamp(22px, 5vw, 30px);
+      text-align: center;
+    }
+
+    .result-icon {
+      font-size: 40px;
+      line-height: 1;
+    }
+
+    .result-player {
+      margin-top: 9px;
+      color: #6d7277;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .result-score {
+      margin-top: 2px;
+      font-size: clamp(46px, 10vw, 58px);
+      font-variant-numeric: tabular-nums;
+      font-weight: 950;
+      letter-spacing: -0.04em;
+      line-height: 1;
+    }
+
+    .result-rank {
+      margin-top: 4px;
+      font-size: 18px;
+      font-weight: 850;
+    }
+
+    .result-stats {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px 22px;
+      margin-top: 14px;
+      color: #5f6469;
+      font-size: 14px;
+    }
+
+    .score-formula {
+      margin: 7px 0 0;
+      color: #8a8e93;
+      font-size: 12px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin: 26px 0 0;
+      color: #686d72;
+      font-size: 13px;
+      font-weight: 850;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .coaching-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .coaching-card {
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 15px;
+      background: #fff;
+    }
+
+    .coaching-journey {
+      color: #999;
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .coaching-title {
+      margin-top: 2px;
+      font-size: 15px;
+      font-weight: 850;
+    }
+
+    .coaching-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-top: 8px;
+      color: #5d6267;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .coaching-row.better {
+      margin-top: 5px;
+      color: #2f3438;
+    }
+
+    .coaching-symbol {
+      flex: 0 0 auto;
+      font-weight: 900;
+    }
+
+    .perfect-note {
+      margin-top: 24px;
+      border: 1px solid rgba(31, 111, 84, 0.24);
+      border-radius: 13px;
+      padding: 15px;
+      background: var(--green-soft);
+      color: #38453f;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .closing-message {
+      margin-top: 24px;
+      border-radius: 13px;
+      padding: 15px;
+      background: var(--evn-red);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1.55;
+      text-align: center;
+    }
+
+    .leaderboard {
+      margin-top: 28px;
+    }
+
+    .leaderboard-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: #686d72;
+      font-size: 13px;
+      font-weight: 850;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .leaderboard-table {
+      margin-top: 9px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+    }
+
+    .leaderboard-row {
+      display: grid;
+      grid-template-columns: 30px minmax(0, 1fr) auto 48px;
+      align-items: center;
+      gap: 9px;
+      min-height: 42px;
+      padding: 8px 13px;
+      background: #fff;
+      font-size: 14px;
+    }
+
+    .leaderboard-row:nth-child(even) {
+      background: #fafafa;
+    }
+
+    .leaderboard-row.is-highlight {
+      background: #fbeaea;
+    }
+
+    .leaderboard-position {
+      color: #999;
+      font-variant-numeric: tabular-nums;
+      font-weight: 850;
+      text-align: center;
+    }
+
+    .leaderboard-position.is-first {
+      color: var(--gold);
+    }
+
+    .leaderboard-name {
+      overflow: hidden;
+      color: #34383c;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .leaderboard-tnkh {
+      color: #929292;
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .leaderboard-score {
+      color: var(--evn-red);
+      font-variant-numeric: tabular-nums;
+      font-weight: 900;
+      text-align: right;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    @media (max-width: 620px) {
+      .app-shell {
+        padding: 0;
+      }
+
+      .game-card {
+        min-height: 100vh;
+        border: 0;
+        border-radius: 0;
+        padding: 22px 16px 34px;
+        box-shadow: none;
+      }
+
+      .meter-panel {
+        top: 0;
+        margin: -8px -6px 0;
+        padding: 10px 7px;
+        border-radius: 11px;
+      }
+
+      .meter-grid {
+        gap: 7px;
+      }
+
+      .meter-head {
+        flex-wrap: wrap;
+        gap: 3px;
+      }
+
+      .meter-label {
+        font-size: 9px;
+        letter-spacing: 0.025em;
+      }
+
+      .meter-delta {
+        width: 100%;
+        margin-left: 19px;
+        font-size: 10px;
+      }
+
+      .meter-body {
+        gap: 5px;
+      }
+
+      .meter-value {
+        width: 24px;
+        font-size: 12px;
+      }
+
+      .option-button {
+        padding: 13px 12px;
+      }
+
+      .leaderboard-row {
+        grid-template-columns: 26px minmax(0, 1fr) 43px;
+        padding-inline: 9px;
+      }
+
+      .leaderboard-tnkh {
+        display: none;
+      }
+
+      .action-row .btn {
+        flex: 1 1 190px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell" id="gameApp" aria-live="polite"></main>
+  <script>
+    (function () {
+      "use strict";
+
+      var JOURNEYS = {
+        capdien: { key: "capdien", name: "Cấp điện mới", icon: "▤", color: "#c00000" },
+        suco: { key: "suco", name: "Xử lý mất điện do sự cố", icon: "⚡", color: "#b8860b" },
+        hoadon: { key: "hoadon", name: "Hóa đơn tiền điện", icon: "☎", color: "#1f6f54" }
+      };
+
+      var SITUATIONS = [
+        {
+          id: "TH1",
+          journey: "capdien",
+          title: "Chuẩn bị đi khảo sát hiện trường",
+          context: "7h45 sáng. Một nhân viên sắp xuống hiện trường khảo sát cấp điện cho khách hàng mới. Anh/Chị dặn dò thế nào trước khi họ đi?",
+          survey: "Kết quả khảo sát chỉ ra: 30,1% khách hàng đánh giá “thái độ vội vã, không giải thích phương án kỹ thuật” ở mức ảnh hưởng cao - cao nhất trong Top 10 điểm đau.",
+          options: [
+            { label: "Nhắc nhân viên khảo sát nhanh, còn tập trung các việc khác.", effect: [-8, 1, 2], type: "suvu", why: "Nhanh trước mắt nhưng rơi đúng điểm đau lớn nhất hệ thống: khách hàng thấy vội vã, không được giải thích." },
+            { label: "Chốt nguyên tắc: hẹn khách trước, tại hiện trường giải thích rõ phương án + các bước tiếp theo; giao một đầu mối theo dõi.", effect: [9, -1, -1], type: "coche", why: "Một nguyên tắc điều hành áp cho mọi ca khảo sát — không phụ thuộc tâm trạng từng nhân viên." },
+            { label: "Không yên tâm để nhân viên đi 1 mình, sắp xếp đi cùng nhân viên đó xuống hiện trường cho chắc.", effect: [2, 3, 5], type: "suvu", why: "Ôm việc: một ca ổn nhưng đội không lớn lên và tải dồn lên chính Anh/Chị." }
+          ]
+        },
+        {
+          id: "TH2",
+          journey: "capdien",
+          title: "Lập phương án & báo giá đấu nối trung áp",
+          context: "Tổ kinh doanh vừa lập xong phương án và báo giá đấu nối cho một khách hàng trung áp, chuẩn bị gửi phản hồi cho khách hàng. Là Trưởng Điện lực, Anh/Chị sẽ chỉ đạo gửi thế nào?",
+          survey: "Kết quả khảo sát chỉ ra: “không giải thích rõ các khoản phí / ranh giới tài sản” — 30,1%; “chi phí phát sinh ngoài dự kiến” — 29,5%.",
+          options: [
+            { label: "Gửi báo giá kèm giải thích rõ từng khoản phí + ranh giới tài sản EVN/khách, hẹn mốc trả lời thắc mắc.", effect: [9, 0, 0], type: "coche", why: "Minh bạch từ đầu chặn khiếu nại về sau: khách hiểu mình trả tiền cho cái gì, phần nào của ai." },
+            { label: "Gửi báo giá tổng, khách hỏi gì trả lời nấy.", effect: [-6, 1, 1], type: "suvu", why: "Bị động: khách không đủ thông tin để tự hiểu, thắc mắc dồn lại thành bức xúc." },
+            { label: "Gửi báo giá, ghi chú “liên hệ Điện lực nếu có thắc mắc”, kèm thông tin liên lạc của Điện lực.", effect: [-3, 1, 0], type: "suvu", why: "Đẩy trách nhiệm tìm hiểu sang khách hàng — vẫn là thiếu chủ động minh bạch." }
+          ]
+        },
+        {
+          id: "TH3",
+          journey: "capdien",
+          title: "Nguy cơ trễ hẹn thi công lắp đặt",
+          context: "Đội thi công cập nhật tiến độ cấp điện cho công trình mới của khách hàng X sẽ trễ hẹn 01 ngày do vướng mặt bằng. Là Trưởng Điện lực, Anh/Chị xử lý ra sao?",
+          survey: "Kết quả khảo sát chỉ ra: “trễ tiến độ, không thông báo” — 29,9%; riêng nhóm hộ dân thông thường chịu ảnh hưởng cao tới 33,3%.",
+          options: [
+            { label: "Chủ động báo khách hàng mốc mới + lý do, chốt đầu mối cập nhật, đưa hồ sơ vào theo dõi giao ban.", effect: [10, 0, -1], type: "coche", why: "Khách hàng sợ nhất là bị bỏ rơi trong bóng tối, không phải sợ chờ đợi. Chủ động thông tin trước để giữ được niềm tin." },
+            { label: "Cứ làm cho xong rồi báo sau.", effect: [-9, 2, 3], type: "suvu", why: "Im lặng đúng vào điểm đau khảo sát: khách không biết hồ sơ đang ở đâu, bức xúc leo thang." },
+            { label: "Nhắc miệng đội thi công “làm nhanh lên”.", effect: [-3, 1, 1], type: "suvu", why: "Nhắc suông không có cơ chế: việc vẫn trễ và khách vẫn không được báo." }
+          ]
+        },
+        {
+          id: "TH4",
+          journey: "suco",
+          title: "Sự cố diện rộng, Tổng đài & App quá tải",
+          context: "Mất điện trên diện rộng khu vực. Tổng đài bị nghẽn, App CSKH bị lỗi vì lượng truy cập tăng vọt trong cùng một thời gian. Ưu tiên điều hành của Anh/Chị là gì?",
+          survey: "Kết quả khảo sát chỉ ra: “tổng đài bận khi sự cố diện rộng” — 24,5%; “App CSKH lỗi lúc cao điểm” — 25,2% (điểm bình quân 2,43, cao nhất hệ thống).",
+          options: [
+            { label: "Tập trung xử lý kỹ thuật, kênh thông tin để đội trực lo.", effect: [-8, 0, 3], type: "suvu", why: "Bỏ khách hàng trong bóng tối đúng lúc họ cần EVN nhất — điểm đau nặng nhất của cụm kênh số." },
+            { label: "Đăng một thông báo chung rồi thôi.", effect: [2, 0, 0], type: "trungtinh", why: "Tốt hơn im lặng, nhưng thiếu đầu mối cập nhật nên khách hàng vẫn mù thông tin sau đó." },
+            { label: "Chủ động thông báo cho khách hàng bằng các kênh thông tin khác về thông tin sự cố, giúp giảm nghẽn qua kênh Tổng đài, App CSKH mà khách hàng vẫn được biết thông tin kịp thời.", effect: [10, 0, -1], type: "coche", why: "Chủ động đẩy tin ra chặn dòng khách hàng đổ vào tổng đài — giảm nghẽn mà khách hàng vẫn được biết." }
+          ]
+        },
+        {
+          id: "TH5",
+          journey: "suco",
+          title: "Khôi phục sự cố chậm hơn so với mốc đã hẹn khách hàng",
+          context: "Đã gửi thông báo và hẹn khách hàng sẽ khôi phục điện trong 2 giờ, nhưng thực tế sẽ chậm hơn đáng kể. Là Trưởng Điện lực, Anh/Chị làm gì tại thời điểm này?",
+          survey: "Kết quả khảo sát chỉ ra: “quá 2 giờ nhưng không liên hệ khách hàng” — 21,0% đánh giá ảnh hưởng cao.",
+          options: [
+            { label: "Tiếp tục xử lý kỹ thuật, chỉ thông báo thêm nếu khách hàng gọi hỏi.", effect: [-6, 0, 2], type: "suvu", why: "Vẫn để khách hàng rơi vào trạng thái chờ không chắc chắn, dễ chuyển thành bức xúc." },
+            { label: "Chủ động thông báo lại cho khách hàng về mốc thời gian khôi phục chậm hơn so với dự kiến, kèm giải thích rõ ràng và giao đầu mối cập nhật thông tin cho khách hàng.", effect: [10, 1, -1], type: "coche", why: "Một lần cập nhật chủ động giảm đáng kể bức xúc — gần như không tốn thêm nguồn lực." },
+            { label: "Cứ tiếp tục xử lý, nếu đến mốc hẹn mà không kịp khôi phục sẽ lại thông báo giờ hẹn mới cho khách hàng sau.", effect: [-10, 0, 3], type: "suvu", why: "Vi phạm đúng cam kết đã hứa: khách hàng ngồi chờ quá hẹn trong trạng thái không biết rõ thông tin." }
+          ]
+        },
+        {
+          id: "TH6",
+          journey: "suco",
+          title: "Đóng phiếu sự cố vào thời điểm cuối ca",
+          context: "Cuối ca, một phiếu sự cố sắp đến hạn chỉ tiêu thời gian xử lý. Theo như ước tính thời gian khắc phục sự cố được báo, điện có vẻ đã được khôi phục trở lại cho khách hàng. Là Trưởng Điện lực, Anh/Chị quyết định đóng phiếu này như thế nào?",
+          survey: "Kết quả khảo sát chỉ ra: “đóng phiếu khi chưa liên hệ xác nhận khách hàng” — 20,0%; “không hướng dẫn quyền lợi bồi thường” — 20,0%.",
+          options: [
+            { label: "Đóng phiếu cho đúng chỉ tiêu thời gian, khách hàng tự báo lại nếu còn lỗi.", effect: [-9, 1, 2], type: "suvu", why: "Bẫy “đẹp số”: chỉ tiêu đạt nhưng nếu khách hàng vẫn mất điện thì niềm tin sụp — đúng điểm đau khảo sát." },
+            { label: "Chỉ đóng phiếu sau khi xác nhận khách hàng đã có điện ổn định + ghi rõ đầu mối theo dõi sau khôi phục.", effect: [8, 0, -1], type: "coche", why: "Đóng phiếu là để khách hàng hết vấn đề, không phải để đẹp chỉ tiêu. Xác nhận trước rồi mới chốt." },
+            { label: "Cứ đóng phiếu cho đẹp chỉ tiêu, và nghĩ chắc chắn sự cố sẽ được khắc phục xung quanh thời điểm đó.", effect: [-10, 1, 3], type: "suvu", why: "Đóng phiếu theo phỏng đoán khiến số liệu đẹp nhưng trải nghiệm khách hàng có thể xấu đi ngay sau ca trực." }
+          ]
+        },
+        {
+          id: "TH7",
+          journey: "hoadon",
+          title: "Số lượng khách hàng khiếu nại hóa đơn tăng bất thường",
+          context: "Tháng 6 xuất hiện một số lượng lớn khách hàng khiếu nại/có thắc mắc về việc hóa đơn tiền điện tăng, nghi ngờ chỉ số tiêu thụ điện. Là Trưởng Điện lực, Anh/Chị điều hành giải quyết việc này như thế nào?",
+          survey: "Kết quả khảo sát chỉ ra: “chuyển phiên ghi làm tăng số ngày tính điện” — 25,2%; “sản lượng ghi nhận không khớp thực tế” — 24,6%; “hóa đơn tăng bất thường” — 20,8%.",
+          options: [
+            { label: "Tiếp nhận và giải thích từng khiếu nại một với suy nghĩ “chắc do nắng nóng, khách hàng tiêu điện nhiều hơn”.", effect: [-7, 1, 2], type: "suvu", why: "Phán đoán vội, không dựa chỉ số: khách hàng thấy bị coi nhẹ, khiếu nại lan rộng." },
+            { label: "Tự mình xuống hiện trường, cùng một nhân viên nữa để phúc tra các trường hợp nghi ngờ công tơ.", effect: [2, 3, 4], type: "suvu", why: "Ôm việc: giải quyết được vài ca nhưng tải dồn lên Anh/Chị, cụm khiếu nại vẫn còn." },
+            { label: "Hướng dẫn khách hàng gửi thông tin rồi chờ phản hồi.", effect: [-5, 2, 0], type: "suvu", why: "Đẩy khách hàng vào quy trình chờ mà không cam kết mốc — bức xúc tích lại." },
+            { label: "Đưa “thắc mắc hóa đơn” thành mục cố định trong giao ban; giao tổ soạn phản hồi mẫu giải thích rõ kỳ ghi / số ngày tính; chốt đầu mối tiếp nhận.", effect: [9, -1, -1], type: "coche", why: "Xử lý tất cả các phản ánh bằng cơ chế thay vì chữa từng ca — vừa nhanh vừa nhất quán." }
+          ]
+        },
+        {
+          id: "TH8",
+          journey: "hoadon",
+          title: "Khách hàng bị “chuyển qua chuyển lại” giữa Tổng đài CSKH và Điện lực",
+          context: "Một khách hàng khiếu nại đã bị chuyển qua chuyển lại giữa Tổng đài CSKH và Điện lực mấy lần khi có thắc mắc về hóa đơn tiền điện, và khách hàng phải kể lại cùng một vấn đề từ đầu. Là Trưởng Điện lực, Anh/Chị xử lý phiếu này như thế nào?",
+          survey: "Kết quả khảo sát chỉ ra: “chuyển qua chuyển lại / chuyển tiếp phải kể lại từ đầu / đóng phiếu chưa giải quyết xong” — mỗi hành vi 18,3%.",
+          options: [
+            { label: "Chốt một đầu mối duy nhất bên Điện lực chịu trách nhiệm xuyên suốt ca khiếu nại, cam kết mốc phản hồi cụ thể cho khách hàng.", effect: [10, -1, -1], type: "coche", why: "Một đầu mối xuyên suốt cắt đứt vòng đùn đẩy — khách hàng không phải kể lại lần nào nữa." },
+            { label: "Chuyển khách hàng về Tổng đài CSKH vì “đúng quy trình”.", effect: [-8, 2, 1], type: "suvu", why: "Đúng quy trình nhưng đùn đẩy — chính là điểm đau cụm 4 mà khách hàng ghét nhất." },
+            { label: "Cứ tiếp nhận phiếu trước đã, đợi tổ kinh doanh rảnh rồi đề xuất phương án xử lý.", effect: [-4, 2, 2], type: "suvu", why: "Không chốt rõ đầu mối: việc dễ rơi vùng xám, khách hàng tiếp tục chờ vô định." }
+          ]
+        }
+      ];
+
+      var TYPE_META = {
+        coche: { label: "Quyết định theo CƠ CHẾ", color: "#1f6f54", background: "#e9f5ef", icon: "✓" },
+        suvu: { label: "Quyết định theo SỰ VỤ", color: "#c00000", background: "#fbeaea", icon: "✕" },
+        trungtinh: { label: "Quyết định TRUNG TÍNH", color: "#b8860b", background: "#fbf3e2", icon: "●" }
+      };
+
+      var START = { tnkh: 50, time: 50, load: 50 };
+      var app = document.getElementById("gameApp");
+      var initialIdentity = readIdentityParams();
+      var enteredGameMs = Date.now();
+      var state = {
+        screen: "intro",
+        player: initialIdentity.playerName || initialIdentity.email || "",
+        groupName: initialIdentity.groupName || "",
+        className: initialIdentity.className || "",
+        classId: initialIdentity.classId || "",
+        activityId: initialIdentity.activityId || "",
+        profileId: initialIdentity.profileId || "",
+        email: initialIdentity.email || "",
+        participantId: initialIdentity.participantId || "",
+        identityLocked: Boolean(initialIdentity.playerName || initialIdentity.groupName),
+        order: [],
+        idx: 0,
+        stats: copyStats(START),
+        prevStats: copyStats(START),
+        pickedIndex: null,
+        choices: [],
+        board: [],
+        remoteBoard: [],
+        remoteBoardSignature: "",
+        runSequence: 0,
+        attemptStartedAt: "",
+        attemptFinishedAt: "",
+        attemptStartedMs: 0,
+        attemptDurationMs: 0,
+        attemptClockOffsetMs: 0
+      };
+
+      function copyStats(value) {
+        return { tnkh: value.tnkh, time: value.time, load: value.load };
+      }
+
+      function clamp(value, low, high) {
+        var min = typeof low === "number" ? low : 0;
+        var max = typeof high === "number" ? high : 100;
+        return Math.max(min, Math.min(max, value));
+      }
+
+      function shuffle(values) {
+        var result = values.slice();
+        var index;
+        var swap;
+        for (index = result.length - 1; index > 0; index -= 1) {
+          swap = Math.floor(Math.random() * (index + 1));
+          var temporary = result[index];
+          result[index] = result[swap];
+          result[swap] = temporary;
+        }
+        return result;
+      }
+
+      function escapeHtml(value) {
+        return String(value == null ? "" : value).replace(/[&<>"']/g, function (character) {
+          return {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            "\"": "&quot;",
+            "'": "&#39;"
+          }[character];
+        });
+      }
+
+      function readIdentityParams() {
+        var params = new URLSearchParams(window.location.search || "");
+        function clean(key) {
+          return String(params.get(key) || "").trim();
+        }
+        return {
+          playerName: clean("playerName"),
+          groupName: clean("groupName"),
+          className: clean("className"),
+          classId: clean("classId"),
+          activityId: clean("activityId"),
+          profileId: clean("profileId"),
+          email: clean("email"),
+          participantId: clean("participantId")
+        };
+      }
+
+      function playerDisplayName() {
+        var player = String(state.player || "").trim();
+        var group = String(state.groupName || "").trim();
+        if (player && group && player !== group) {
+          return player + " · " + group;
+        }
+        return player || group || "Nhóm chưa đặt tên";
+      }
+
+      function currentSituation() {
+        var situationIndex = state.order[state.idx];
+        return typeof situationIndex === "number" ? SITUATIONS[situationIndex] : null;
+      }
+
+      function calculateScore() {
+        var loadBonus = Math.round((50 - state.stats.load) * 0.3);
+        var timeBonus = Math.round((50 - state.stats.time) * 0.2);
+        return {
+          loadBonus: loadBonus,
+          timeBonus: timeBonus,
+          score: clamp(Math.round(state.stats.tnkh + loadBonus + timeBonus), 0, 120)
+        };
+      }
+
+      function currentRankLabel(score) {
+        if (score >= 95) {
+          return "Điều hành theo cơ chế — Xuất sắc";
+        }
+        if (score >= 75) {
+          return "Điều hành theo cơ chế — Khá";
+        }
+        return "Còn nghiêng về sự vụ";
+      }
+
+      function beginAttemptTiming() {
+        var now = state.runSequence === 0 ? enteredGameMs : Date.now();
+        state.attemptStartedMs = now;
+        state.attemptStartedAt = new Date(now).toISOString();
+        state.attemptFinishedAt = "";
+        state.attemptDurationMs = 0;
+        state.attemptClockOffsetMs = 0;
+      }
+
+      function finishAttemptTiming() {
+        var finishedMs = Date.now() + state.attemptClockOffsetMs;
+        if (!state.attemptStartedMs) {
+          state.attemptStartedMs = finishedMs;
+          state.attemptStartedAt = new Date(finishedMs).toISOString();
+        }
+        state.attemptFinishedAt = new Date(finishedMs).toISOString();
+        state.attemptDurationMs = Math.max(0, Math.round(finishedMs - state.attemptStartedMs));
+      }
+
+      function buildResultPayload(result) {
+        return {
+          playerName: state.player || state.email || state.groupName || "Người chơi chưa đặt tên",
+          groupName: state.groupName || state.player || "Nhóm chưa đặt tên",
+          score: result.score,
+          maxScore: 120,
+          rankLabel: currentRankLabel(result.score),
+          values: {
+            tnkh: state.stats.tnkh,
+            time: state.stats.time,
+            load: state.stats.load,
+            loadBonus: result.loadBonus,
+            timeBonus: result.timeBonus
+          },
+          meta: {
+            source: "evnspc-tnkh-01",
+            completedSituations: state.choices.length,
+            evnspcTnkhTiming: {
+              startedAt: state.attemptStartedAt,
+              finishedAt: state.attemptFinishedAt,
+              durationMs: state.attemptDurationMs,
+              durationSeconds: Math.round(state.attemptDurationMs / 1000),
+              calculation: "game_entry_to_first_completion"
+            }
+          },
+          answers: state.choices.map(function (choice, index) {
+            var situation = SITUATIONS.find(function (item) { return item.id === choice.situationId; });
+            var option = situation && situation.options[choice.optionIndex];
+            return {
+              tpId: choice.situationId,
+              tpLabel: choice.situationId,
+              tpTitle: situation ? situation.title : choice.situationId,
+              choiceId: String.fromCharCode(65 + choice.optionIndex),
+              choiceText: option ? option.label : "",
+              quality: option ? option.type : "",
+              cx: option ? option.effect[0] : 0,
+              brand: 0,
+              feedback: option ? option.why : "",
+              order: index + 1
+            };
+          })
+        };
+      }
+
+      function publishResult(result) {
+        var payload = buildResultPayload(result);
+        try {
+          window.parent && window.parent.postMessage({ type: "game-result-ready", gameId: "evnspc-tnkh-01", payload: payload }, window.location.origin);
+        } catch (error) {
+          console.warn("Unable to send game result to parent", error);
+        }
+        try {
+          if (typeof BroadcastChannel !== "undefined") {
+            var channel = new BroadcastChannel("evnspc-tnkh-01-results");
+            channel.postMessage({ type: "game-result-ready", gameId: "evnspc-tnkh-01", payload: payload });
+            channel.close();
+          }
+        } catch (error) {
+          console.warn("Unable to broadcast game result", error);
+        }
+      }
+
+      function formatAdjustment(value, positiveLabel, negativeLabel) {
+        if (!value) {
+          return "";
+        }
+        var sign = value > 0 ? " +" : " −";
+        var label = value > 0 ? positiveLabel : negativeLabel;
+        return sign + Math.abs(value) + " (" + label + ")";
+      }
+
+      function startGame() {
+        var input = document.getElementById("playerName");
+        var name = state.identityLocked ? String(state.player || "").trim() : (input ? input.value.trim() : "");
+        var groupName = state.identityLocked ? String(state.groupName || "").trim() : name;
+        state.player = name || state.email || groupName || "Người chơi chưa đặt tên";
+        state.groupName = groupName || state.player || "Nhóm chưa đặt tên";
+        state.order = shuffle(SITUATIONS.map(function (_, index) { return index; }));
+        state.idx = 0;
+        state.stats = copyStats(START);
+        state.prevStats = copyStats(START);
+        state.pickedIndex = null;
+        state.choices = [];
+        beginAttemptTiming();
+        state.screen = "play";
+        render();
+      }
+
+      function chooseOption(optionIndex) {
+        var situation = currentSituation();
+        if (!situation || state.pickedIndex !== null || !situation.options[optionIndex]) {
+          return;
+        }
+        var option = situation.options[optionIndex];
+        state.pickedIndex = optionIndex;
+        state.prevStats = copyStats(state.stats);
+        state.stats = {
+          tnkh: clamp(state.stats.tnkh + option.effect[0]),
+          time: clamp(state.stats.time + option.effect[1]),
+          load: clamp(state.stats.load + option.effect[2])
+        };
+        state.choices.push({ situationId: situation.id, optionIndex: optionIndex });
+        render();
+        var feedback = document.querySelector("[data-testid='feedback-panel']");
+        if (feedback) {
+          feedback.focus({ preventScroll: true });
+        }
+      }
+
+      function nextSituation() {
+        if (state.idx + 1 >= state.order.length) {
+          finishGame();
+          return;
+        }
+        state.prevStats = copyStats(state.stats);
+        state.idx += 1;
+        state.pickedIndex = null;
+        render();
+        window.scrollTo(0, 0);
+      }
+
+      function finishGame() {
+        var result = calculateScore();
+        finishAttemptTiming();
+        state.runSequence += 1;
+        state.board.push({
+          id: state.runSequence,
+          name: playerDisplayName(),
+          score: result.score,
+          tnkh: state.stats.tnkh,
+          load: state.stats.load
+        });
+        state.board.sort(function (left, right) {
+          if (right.score !== left.score) {
+            return right.score - left.score;
+          }
+          return left.id - right.id;
+        });
+        publishResult(result);
+        state.screen = "result";
+        render();
+        window.scrollTo(0, 0);
+      }
+
+      function playAgain() {
+        state.order = shuffle(SITUATIONS.map(function (_, index) { return index; }));
+        state.idx = 0;
+        state.stats = copyStats(START);
+        state.prevStats = copyStats(START);
+        state.pickedIndex = null;
+        state.choices = [];
+        beginAttemptTiming();
+        state.screen = "play";
+        render();
+        window.scrollTo(0, 0);
+      }
+
+      function newRound() {
+        if (!state.identityLocked) {
+          state.player = "";
+          state.groupName = "";
+        }
+        state.attemptStartedAt = "";
+        state.attemptFinishedAt = "";
+        state.attemptStartedMs = 0;
+        state.attemptDurationMs = 0;
+        state.attemptClockOffsetMs = 0;
+        state.screen = "intro";
+        render();
+        window.scrollTo(0, 0);
+      }
+
+      function meterMarkup(key, label, icon, value, previousValue, invert, accent) {
+        var delta = value - previousValue;
+        var rising = delta > 0;
+        var good = invert ? !rising : rising;
+        var barColor = delta === 0 ? accent : good ? "#1f6f54" : "#c00000";
+        var deltaMarkup = "";
+        if (delta !== 0) {
+          deltaMarkup =
+            "<span class=\"meter-delta\" style=\"color:" + (good ? "#1f6f54" : "#c00000") + "\">" +
+              (delta > 0 ? "▲" : "▼") + Math.abs(delta) +
+            "</span>";
+        }
+        return (
+          "<div class=\"meter\" data-testid=\"meter-" + key + "\">" +
+            "<div class=\"meter-head\">" +
+              "<span class=\"meter-icon\" style=\"color:" + accent + "\" aria-hidden=\"true\">" + icon + "</span>" +
+              "<span class=\"meter-label\">" + escapeHtml(label) + "</span>" +
+              deltaMarkup +
+            "</div>" +
+            "<div class=\"meter-body\">" +
+              "<div class=\"meter-track\" role=\"progressbar\" aria-label=\"" + escapeHtml(label) + "\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"" + value + "\">" +
+                "<div class=\"meter-fill\" style=\"background:" + barColor + ";transform:scaleX(" + (clamp(value) / 100) + ")\"></div>" +
+              "</div>" +
+              "<span class=\"meter-value\" style=\"color:" + barColor + "\" data-testid=\"meter-" + key + "-value\">" + value + "</span>" +
+            "</div>" +
+          "</div>"
+        );
+      }
+
+      function leaderboardMarkup(highlight) {
+        var sourceRows = state.remoteBoard && state.remoteBoard.length ? state.remoteBoard : state.board;
+        if (!sourceRows.length) {
+          return "";
+        }
+        var rows = sourceRows.slice(0, 8).map(function (row, index) {
+          var highlighted = Boolean(highlight && row.name === highlight);
+          return (
+            "<div class=\"leaderboard-row" + (highlighted ? " is-highlight" : "") + "\" data-testid=\"leaderboard-row\">" +
+              "<span class=\"leaderboard-position" + (index === 0 ? " is-first" : "") + "\">" + (index + 1) + "</span>" +
+              "<span class=\"leaderboard-name\">" + escapeHtml(row.name) + "</span>" +
+              "<span class=\"leaderboard-tnkh\">TNKH " + row.tnkh + "</span>" +
+              "<span class=\"leaderboard-score\">" + row.score + "</span>" +
+            "</div>"
+          );
+        }).join("");
+        return (
+          "<section class=\"leaderboard\" data-testid=\"leaderboard\" aria-label=\"Bảng xếp hạng\">" +
+            "<div class=\"leaderboard-title\"><span aria-hidden=\"true\">🏆</span> Bảng xếp hạng</div>" +
+            "<div class=\"leaderboard-table\">" + rows + "</div>" +
+          "</section>"
+        );
+      }
+
+      function renderIntro() {
+        var identityMarkup = state.identityLocked
+          ? (
+            "<div class=\"intro-note\" data-testid=\"player-identity\">" +
+              "<span class=\"intro-note-icon\" aria-hidden=\"true\">✓</span>" +
+              "<span><strong>Học viên:</strong> " + escapeHtml(state.player || state.email || "Người chơi") +
+              (state.groupName ? " · <strong>Nhóm:</strong> " + escapeHtml(state.groupName) : "") +
+              (state.className ? " · <strong>Lớp:</strong> " + escapeHtml(state.className) : "") +
+              "</span>" +
+            "</div>"
+          )
+          : (
+            "<label class=\"field\" for=\"playerName\">" +
+              "<span class=\"field-label\">Nhóm của Anh/Chị</span>" +
+              "<input class=\"text-input\" id=\"playerName\" data-testid=\"player-name-input\" maxlength=\"80\" autocomplete=\"off\" placeholder=\"VD: Điện lực Bến Lức — Nhóm 3\">" +
+            "</label>"
+          );
+        app.innerHTML =
+          "<section class=\"game-card\" data-testid=\"intro\">" +
+            "<div class=\"content\">" +
+              "<div class=\"brand-row\">" +
+                "<div class=\"brand-mark\" aria-hidden=\"true\">⚡</div>" +
+                "<div class=\"eyebrow\">Chuyên đề 2b · Điều hành &amp; TNKH</div>" +
+              "</div>" +
+              "<h1>Một ca điều hành của <span>Trưởng Điện lực</span></h1>" +
+              "<p class=\"lead\">Hãy nhập vai Trưởng Điện lực trong một ca điều hành. Tổng cộng có 8 tình huống – sự cố, khiếu nại, phối hợp liên tổ, hồ sơ tồn chưa giải quyết. Trong mỗi tình huống, lựa chọn của Anh/Chị sẽ quyết định ngay đến trải nghiệm khách hàng (TNKH), thời gian xử lý công việc và khả năng chịu tải của đội ngũ.</p>" +
+              "<div class=\"intro-note\">" +
+                "<span class=\"intro-note-icon\" aria-hidden=\"true\">✦</span>" +
+                "<span>Các tình huống được tham khảo từ kết quả khảo sát TNKH thực tế của EVNSPC (thực hiện T4/2026). Hãy cùng khám phá cách điều hành “quyết định theo cơ chế” và “quyết định theo sự vụ” của người quản lý.</span>" +
+              "</div>" +
+              identityMarkup +
+              "<div class=\"action-row\">" +
+                "<button class=\"btn btn-primary\" type=\"button\" id=\"startButton\" data-testid=\"start-game\"><span aria-hidden=\"true\">▶</span> Bắt đầu ca trực</button>" +
+              "</div>" +
+            "</div>" +
+          "</section>";
+
+        var input = document.getElementById("playerName");
+        var startButton = document.getElementById("startButton");
+        if (input) {
+          input.value = state.player;
+          input.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              startGame();
+            }
+          });
+        }
+        if (startButton) {
+          startButton.addEventListener("click", startGame);
+        }
+      }
+
+      function renderPlay() {
+        var situation = currentSituation();
+        if (!situation) {
+          return;
+        }
+        var journey = JOURNEYS[situation.journey];
+        var picked = state.pickedIndex === null ? null : situation.options[state.pickedIndex];
+        var optionsMarkup = situation.options.map(function (option, index) {
+          var selected = state.pickedIndex === index;
+          var dimmed = state.pickedIndex !== null && !selected;
+          var meta = TYPE_META[option.type];
+          var style = selected ? "border-color:" + meta.color + ";background:" + meta.background : "";
+          return (
+            "<button class=\"option-button" + (selected ? " is-selected" : "") + (dimmed ? " is-dimmed" : "") + "\" type=\"button\" data-option-index=\"" + index + "\" data-testid=\"option\" aria-pressed=\"" + (selected ? "true" : "false") + "\"" + (state.pickedIndex !== null ? " disabled" : "") + " style=\"" + style + "\">" +
+              "<span class=\"option-letter\" style=\"" + (selected ? "background:" + meta.color + ";color:#fff" : "") + "\" aria-hidden=\"true\">" + String.fromCharCode(65 + index) + "</span>" +
+              "<span class=\"option-copy\">" + escapeHtml(option.label) + "</span>" +
+            "</button>"
+          );
+        }).join("");
+
+        var feedbackMarkup = "";
+        if (picked) {
+          var pickedMeta = TYPE_META[picked.type];
+          feedbackMarkup =
+            "<section class=\"feedback\" data-testid=\"feedback-panel\" tabindex=\"-1\" style=\"border-color:" + pickedMeta.color + "40;background:" + pickedMeta.background + "\">" +
+              "<div class=\"feedback-label\" style=\"color:" + pickedMeta.color + "\"><span aria-hidden=\"true\">" + pickedMeta.icon + "</span>" + pickedMeta.label + "</div>" +
+              "<p class=\"feedback-why\">" + escapeHtml(picked.why) + "</p>" +
+              "<p class=\"survey-note\">" + escapeHtml(situation.survey) + "</p>" +
+              "<div class=\"action-row\">" +
+                "<button class=\"btn btn-primary\" type=\"button\" id=\"nextButton\" data-testid=\"next-button\">" + (state.idx + 1 >= state.order.length ? "Xem kết quả" : "Tiếp theo") + " <span aria-hidden=\"true\">→</span></button>" +
+              "</div>" +
+            "</section>";
+        }
+
+        app.innerHTML =
+          "<section class=\"game-card\" data-testid=\"play-screen\">" +
+            "<div class=\"content\">" +
+              "<div class=\"meter-panel\" aria-label=\"Chỉ số ca trực\">" +
+                "<div class=\"meter-grid\">" +
+                  meterMarkup("tnkh", "TNKH", "↗", state.stats.tnkh, state.prevStats.tnkh, false, "#c00000") +
+                  meterMarkup("time", "Thời gian", "◷", state.stats.time, state.prevStats.time, true, "#b8860b") +
+                  meterMarkup("load", "Tải đội ngũ", "●", state.stats.load, state.prevStats.load, true, "#4b5563") +
+                "</div>" +
+              "</div>" +
+              "<div class=\"situation-meta\">" +
+                "<span class=\"journey-badge\" style=\"background:" + journey.color + "\"><span aria-hidden=\"true\">" + journey.icon + "</span>" + escapeHtml(journey.name) + "</span>" +
+                "<span class=\"progress-label\" data-testid=\"situation-progress\">Tình huống " + (state.idx + 1) + "/" + state.order.length + "</span>" +
+              "</div>" +
+              "<h2 class=\"situation-title\" data-testid=\"situation-title\">" + escapeHtml(situation.title) + "</h2>" +
+              "<p class=\"situation-context\">" + escapeHtml(situation.context) + "</p>" +
+              "<div class=\"options\" data-testid=\"options-list\">" + optionsMarkup + "</div>" +
+              feedbackMarkup +
+              "<button class=\"text-link\" type=\"button\" id=\"exitButton\">Thoát về màn đầu</button>" +
+            "</div>" +
+          "</section>";
+
+        Array.prototype.forEach.call(document.querySelectorAll("[data-option-index]"), function (button) {
+          button.addEventListener("click", function () {
+            chooseOption(Number(button.getAttribute("data-option-index")));
+          });
+        });
+        var nextButton = document.getElementById("nextButton");
+        if (nextButton) {
+          nextButton.addEventListener("click", nextSituation);
+        }
+        var exitButton = document.getElementById("exitButton");
+        if (exitButton) {
+          exitButton.addEventListener("click", newRound);
+        }
+      }
+
+      function renderResult() {
+        var result = calculateScore();
+        var rank;
+        if (result.score >= 95) {
+          rank = { title: "Điều hành theo cơ chế — Xuất sắc", color: "#1f6f54", icon: "🏆" };
+        } else if (result.score >= 75) {
+          rank = { title: "Điều hành theo cơ chế — Khá", color: "#b8860b", icon: "★" };
+        } else {
+          rank = { title: "Còn nghiêng về sự vụ", color: "#c00000", icon: "◎" };
+        }
+
+        var situationalChoices = state.choices.filter(function (choice) {
+          var situation = SITUATIONS.find(function (item) { return item.id === choice.situationId; });
+          return situation && situation.options[choice.optionIndex] && situation.options[choice.optionIndex].type === "suvu";
+        });
+
+        var coachingMarkup = "";
+        if (situationalChoices.length) {
+          coachingMarkup =
+            "<section data-testid=\"coaching-section\">" +
+              "<h3 class=\"section-heading\"><span aria-hidden=\"true\">◎</span> Những chỗ “cơ chế” thắng “sự vụ”</h3>" +
+              "<div class=\"coaching-list\">" +
+                situationalChoices.map(function (choice) {
+                  var situation = SITUATIONS.find(function (item) { return item.id === choice.situationId; });
+                  var selected = situation.options[choice.optionIndex];
+                  var better = situation.options.find(function (option) { return option.type === "coche"; });
+                  return (
+                    "<article class=\"coaching-card\">" +
+                      "<div class=\"coaching-journey\">" + escapeHtml(JOURNEYS[situation.journey].name) + "</div>" +
+                      "<div class=\"coaching-title\">" + escapeHtml(situation.title) + "</div>" +
+                      "<div class=\"coaching-row\"><span class=\"coaching-symbol\" style=\"color:#c00000\" aria-hidden=\"true\">✕</span><span>Anh/chị đã chọn: " + escapeHtml(selected.label) + "</span></div>" +
+                      (better ? "<div class=\"coaching-row better\"><span class=\"coaching-symbol\" style=\"color:#1f6f54\" aria-hidden=\"true\">✓</span><span>Hướng cơ chế: " + escapeHtml(better.label) + "</span></div>" : "") +
+                    "</article>"
+                  );
+                }).join("") +
+              "</div>" +
+            "</section>";
+        } else {
+          coachingMarkup =
+            "<div class=\"perfect-note\" data-testid=\"coaching-section\"><strong>Trọn vẹn theo cơ chế.</strong> Cả ca trực không có quyết định sự vụ nào — anh/chị đã điều hành bằng cơ chế ở mọi tình huống.</div>";
+        }
+
+        var formula =
+          "Điểm = TNKH" +
+          formatAdjustment(result.loadBonus, "tải thấp", "tải cao") +
+          formatAdjustment(result.timeBonus, "thời gian tốt", "thời gian cao");
+
+        app.innerHTML =
+          "<section class=\"game-card\" data-testid=\"result\">" +
+            "<div class=\"content\">" +
+              "<div class=\"result-hero\" style=\"border-color:" + rank.color + "40;background:" + rank.color + "0d\">" +
+                "<div class=\"result-icon\" aria-hidden=\"true\">" + rank.icon + "</div>" +
+                "<div class=\"result-player\">" + escapeHtml(state.player) + "</div>" +
+                "<div class=\"result-score\" data-testid=\"final-score\" style=\"color:" + rank.color + "\">" + result.score + "</div>" +
+                "<div class=\"result-rank\" style=\"color:" + rank.color + "\">" + escapeHtml(rank.title) + "</div>" +
+                "<div class=\"result-stats\"><span>TNKH cuối ca: <strong>" + state.stats.tnkh + "</strong></span><span>Tải đội ngũ: <strong>" + state.stats.load + "</strong></span></div>" +
+                "<p class=\"score-formula\" data-testid=\"score-formula\">" + escapeHtml(formula) + "</p>" +
+              "</div>" +
+              coachingMarkup +
+              "<div class=\"closing-message\">10/10 điểm đau lớn nhất của EVNSPC là hành vi &amp; giao tiếp — nằm trong tầm quyết định điều hành của chính anh/chị.</div>" +
+              leaderboardMarkup(state.player) +
+              "<div class=\"action-row\">" +
+                "<button class=\"btn btn-primary\" type=\"button\" id=\"playAgainButton\" data-testid=\"play-again-button\"><span aria-hidden=\"true\">↻</span> Chơi lại (giữ bảng xếp hạng)</button>" +
+                "<button class=\"btn btn-secondary\" type=\"button\" id=\"newRoundButton\" data-testid=\"new-round-button\"><span aria-hidden=\"true\">●</span> Lượt mới (đổi tên nhóm)</button>" +
+              "</div>" +
+            "</div>" +
+          "</section>";
+
+        document.getElementById("playAgainButton").addEventListener("click", playAgain);
+        document.getElementById("newRoundButton").addEventListener("click", newRound);
+      }
+
+      function render() {
+        if (state.screen === "intro") {
+          renderIntro();
+          return;
+        }
+        if (state.screen === "play") {
+          renderPlay();
+          return;
+        }
+        renderResult();
+      }
+
+      window.render_game_to_text = function () {
+        var situation = currentSituation();
+        var picked = situation && state.pickedIndex !== null ? situation.options[state.pickedIndex] : null;
+        return JSON.stringify({
+          screen: state.screen,
+          player: state.player,
+          progress: state.screen === "play" ? { current: state.idx + 1, total: state.order.length } : null,
+          situation: state.screen === "play" && situation ? {
+            id: situation.id,
+            title: situation.title,
+            options: state.pickedIndex === null ? situation.options.map(function (option, index) {
+              return { index: index, label: option.label };
+            }) : [],
+            picked: picked ? picked.label : null
+          } : null,
+          stats: copyStats(state.stats),
+          attemptTiming: state.attemptStartedAt ? {
+            startedAt: state.attemptStartedAt,
+            finishedAt: state.attemptFinishedAt || null,
+            durationMs: state.attemptFinishedAt ? state.attemptDurationMs : Math.max(0, Math.round(Date.now() + state.attemptClockOffsetMs - state.attemptStartedMs))
+          } : null,
+          result: state.screen === "result" ? calculateScore().score : null,
+          board: state.board.slice(0, 8).map(function (row, index) {
+            return { rank: index + 1, name: row.name, score: row.score, tnkh: row.tnkh };
+          }),
+          remoteBoard: (state.remoteBoard || []).slice(0, 8).map(function (row, index) {
+            return { rank: index + 1, name: row.name, score: row.score, tnkh: row.tnkh };
+          })
+        });
+      };
+
+      window.advanceTime = function (milliseconds) {
+        var delta = Math.max(0, Number(milliseconds) || 0);
+        if (state.screen === "play" && state.attemptStartedMs) {
+          state.attemptClockOffsetMs += delta;
+        }
+        return window.render_game_to_text();
+      };
+
+      function setLeaderboard(rows) {
+        var nextBoard;
+        if (!Array.isArray(rows)) {
+          nextBoard = [];
+        } else {
+          nextBoard = rows.map(function (row, index) {
+            var score = Math.max(0, Math.round(Number(row.totalScore || row.bestScore || row.score) || 0));
+            return {
+              id: index + 1,
+              name: String(row.playerName || row.groupName || row.name || "Nhóm chưa đặt tên"),
+              score: score,
+              tnkh: row.values && Number.isFinite(Number(row.values.tnkh)) ? Math.round(Number(row.values.tnkh)) : score
+            };
+          }).sort(function (left, right) {
+            if (right.score !== left.score) {
+              return right.score - left.score;
+            }
+            return left.id - right.id;
+          });
+        }
+        var nextSignature = JSON.stringify(nextBoard.map(function (row) {
+          return [row.name, row.score, row.tnkh];
+        }));
+        if (nextSignature === state.remoteBoardSignature) {
+          return;
+        }
+        state.remoteBoard = nextBoard;
+        state.remoteBoardSignature = nextSignature;
+        var activeElement = document.activeElement;
+        var isTypingPlayerName = activeElement && activeElement.id === "playerName";
+        if (state.screen === "result" || (state.screen === "intro" && !isTypingPlayerName)) {
+          render();
+        }
+      }
+
+      window.VContentGame = {
+        setLeaderboard: setLeaderboard
+      };
+
+      window.addEventListener("message", function (event) {
+        if (event.origin !== window.location.origin) {
+          return;
+        }
+        var data = event.data || {};
+        if (data.type === "vcontent-leaderboard" && data.gameId === "evnspc-tnkh-01") {
+          setLeaderboard(data.rows || []);
+        }
+      });
+
+      render();
+    }());
+  </script>
+</body>
+</html>

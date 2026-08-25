@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>__SURVEY_TITLE__</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:"Segoe UI",Tahoma,Arial,sans-serif;background:#f7f7f9;color:#2c2c2c}.wrap{max-width:980px;margin:0 auto;padding:22px 14px 44px}.hero{background:linear-gradient(120deg,var(--primary),#8a0000);color:#fff;border-radius:16px;padding:24px 26px;overflow:hidden;position:relative}.hero::after{content:"";position:absolute;right:-40px;top:-40px;width:180px;height:180px;background:rgba(255,255,255,.08);border-radius:50%}.hero .imark{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;background:#fff;color:var(--primary);border-radius:50%;font-weight:900;font-size:22px;margin-bottom:12px}.hero .meta{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap}.chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.14);border-radius:999px;padding:8px 12px;font-size:13px;font-weight:800}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.9}.hero h1{margin:8px 0;font-size:26px;line-height:1.2}.hero p{margin:0;font-size:14.5px;line-height:1.55;opacity:.96;max-width:680px}.panel,.intro-card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;margin-top:18px;padding:26px;box-shadow:0 10px 28px rgba(15,23,42,.06)}.intro{line-height:1.6;color:#4b5563}.sit-label{color:var(--primary);font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.sit-title{font-size:22px;font-weight:900;margin:8px 0 18px}.intro-layers{display:grid;gap:14px}.intro-layer{border:1px solid #e5e7eb;border-radius:14px;padding:16px;background:#fff}.intro-layer-head{display:flex;align-items:center;gap:12px;font-weight:900;font-size:16px}.intro-layer-num{width:30px;height:30px;border-radius:50%;color:#fff;display:inline-grid;place-items:center;background:#2980b9}.intro-layer:nth-child(2) .intro-layer-num{background:#f59e0b}.intro-layer:nth-child(3) .intro-layer-num{background:#16a085}.intro-layer-desc{font-size:13.5px;color:#6b7280;margin-top:10px}.foundation{margin-top:16px;background:#fff7f7;border-radius:8px;padding:12px 14px;line-height:1.55;color:#4b5563}.foundation b{color:var(--primary)}.footer-note,.footer{text-align:center;color:#9ca3af;font-size:12px;margin-top:24px}.identity-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field span,.layer-title{display:block;font-weight:800;margin-bottom:7px}.field input,.layer textarea{width:100%;border:1px solid #cfd4da;border-radius:7px;padding:11px;font:inherit}.layer{border:1.5px solid #e6e6ea;border-radius:8px;padding:14px;margin-top:12px}.layer:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px rgba(192,0,0,.08)}.layer-head{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;margin-bottom:8px}.layer-index{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;display:inline-grid;place-items:center;font-weight:800;flex:0 0 26px}.layer-label{display:flex;align-items:center;gap:9px;font-weight:800}.hint{font-size:12.5px;color:#6b7280;text-align:right;max-width:48%;line-height:1.4}.layer textarea{min-height:78px;resize:vertical;line-height:1.5}.progress{display:flex;gap:8px;margin-top:14px}.dot{height:8px;flex:1;border-radius:999px;background:#e5e7eb}.dot.active{background:var(--accent)}.dot.done{background:#16a085}.case-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.case-title{margin:0;font-size:20px}.case-box{background:#f4f6f8;border-left:4px solid #2980b9;border-radius:7px;padding:12px 14px;margin-top:12px;line-height:1.55}.requirement-box{background:#fff7ed;border-left:4px solid var(--accent);border-radius:7px;margin-top:10px;padding:11px 14px;line-height:1.55;color:#7c2d12}.requirement-box b{color:#9a3412}.score-box{display:grid;grid-template-columns:80px 1fr;gap:14px;align-items:center;margin-top:14px;border:1px solid #ececf0;border-radius:8px;overflow:hidden}.score-mark{height:100%;min-height:86px;display:grid;place-items:center;background:#16a085;color:#fff;font-weight:900;font-size:28px}.score-mark small{display:block;font-size:11px;font-weight:700;text-align:center}.score-body{padding:12px 12px 12px 0}.crit{font-size:13.5px;margin-top:5px;color:#4b5563}.tip{margin-top:10px;background:#fff7ed;border-radius:7px;padding:10px;color:#9a3412;font-size:13px}.sample-prompt{margin-top:12px;background:#eefdf6;border:1px solid #c8f3df;border-radius:8px;padding:12px;color:#174d37;font-size:13.5px;line-height:1.55}.sample-prompt strong{display:block;margin-bottom:6px;color:#047857}.sample-prompt p{margin:4px 0}.actions{display:flex;justify-content:space-between;gap:10px;margin-top:18px}.btn{border:0;border-radius:10px;padding:12px 18px;font:inherit;font-weight:900;cursor:pointer}.primary{background:var(--primary);color:#fff;box-shadow:0 4px 0 #8a0000}.ghost{background:#eef2f7;color:#1f2937}.btn:disabled{opacity:.58;cursor:not-allowed}.notice{margin-top:12px;padding:11px;border-radius:7px;background:#fff7ed;color:#9a3412}.thanks{text-align:center}.big-score{font-size:46px;font-weight:900;color:var(--primary)}.summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}.summary-card{border:1px solid #e5e7eb;border-radius:8px;padding:12px;background:#fafafa}@media(max-width:680px){.hero h1{font-size:22px}.identity-grid,.summary-grid{grid-template-columns:1fr}.actions{flex-direction:column}.btn{width:100%}.layer-head{display:block}.hint{text-align:left;max-width:none;margin:4px 0 0 35px}.score-box{grid-template-columns:1fr}.score-body{padding:12px}.score-mark{min-height:68px}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const FORM_ID="__FORM_ID__";
+const SUPABASE_URL="__SUPABASE_URL__";
+const SUPABASE_ANON_KEY="__SUPABASE_ANON_KEY__";
+const SETTINGS=__DISPLAY_CONFIG__;
+const QUESTIONS=__SURVEY_QUESTIONS__;
+const STORE_KEY=`prompt_practice_${FORM_ID}`;
+const root=document.getElementById('app');
+document.documentElement.style.setProperty('--primary',SETTINGS.primaryColor||'#C00000');
+document.documentElement.style.setProperty('--accent',SETTINGS.accentColor||'#F58220');
+
+const CASES=[
+  {
+    diff:"Cơ bản", diffClass:"d1",
+    label:"Tình huống 1",
+    title:"Tóm tắt công văn chỉ đạo",
+    scenario:"Anh/chị nhận được một công văn chỉ đạo dài 6 trang của Công ty về công tác an toàn mùa mưa bão. Cần nắm nhanh các nội dung chính để phổ biến trong giao ban sáng.",
+    goal:"Hãy viết prompt yêu cầu AI tóm tắt công văn này thành các ý chính, phù hợp để phổ biến cho tổ/đội.",
+    hints:{
+      goal:"Tóm tắt để làm gì? Bao nhiêu ý?",
+      context:"Ai dùng bản tóm tắt? Trong tình huống nào?",
+      output:"Trình bày dạng gì? Mỗi ý dài bao nhiêu?"
+    },
+    model:"[Mục tiêu] Tóm tắt công văn chỉ đạo về an toàn mùa mưa bão dưới đây thành 5 ý chính quan trọng nhất.\n[Bối cảnh] Tôi là Trưởng Điện lực, cần bản tóm tắt để phổ biến nhanh cho các tổ/đội trong buổi giao ban sáng.\n[Đầu ra] Trình bày dạng gạch đầu dòng, mỗi ý không quá 2 dòng, ưu tiên các yêu cầu bắt buộc phải làm.",
+    keys:{
+      goal:["tóm tắt","ý chính","số","5","điểm","ngắn"],
+      context:["trưởng điện lực","giao ban","tổ","đội","phổ biến","quản lý","vai trò"],
+      output:["gạch đầu dòng","bảng","dòng","ý","dạng","định dạng","bullet","mục"]
+    }
+  },
+  {
+    diff:"Trung bình", diffClass:"d2",
+    label:"Tình huống 2",
+    title:"Phân tích số liệu sự cố tuần",
+    scenario:"Cuối tuần, anh/chị có bảng dữ liệu sự cố lưới điện (đường dây, trạm biến áp các cấp điện áp, cảnh báo SCADA) với thời gian, khu vực, loại sự cố và thời gian mất điện. Cần một bức tranh tổng hợp để nhận ra vấn đề trọng tâm.",
+    goal:"Hãy viết prompt yêu cầu AI tổng hợp và phân tích bảng số liệu sự cố, nhận diện điểm nóng.",
+    hints:{
+      goal:"Tổng hợp theo tiêu chí nào? Cần nhận diện gì?",
+      context:"Vai trò của anh/chị? Dữ liệu về cái gì?",
+      output:"Bảng? Kèm nhận xét? Bao nhiêu?"
+    },
+    model:"[Mục tiêu] Tổng hợp bảng sự cố lưới điện trong tuần: đếm số vụ theo cấp điện áp và theo loại đối tượng (đường dây/trạm biến áp/SCADA), tính tổng thời gian mất điện, và nhận diện 5 điểm nóng (tuyến/khu vực lặp sự cố hoặc mất điện lâu nhất).\n[Bối cảnh] Tôi là Trưởng Điện lực, dữ liệu đầu vào dữ liệu là sự cố tuần đã mã hóa, gồm các cấp 110/35/22kV và cảnh báo SCADA – đo xa, trong file excel được đính kèm, không làm thay đổi, không tự sinh thêm dữ liệu bên ngoài.\n[Đầu ra] Trình bày dạng bảng tổng hợp, và danh sách 5 điểm nóng cần lưu ý, kèm 3 nhận xét ngắn về xu hướng và danh sách các điểm nóng cần lưu ý, đưa ra cảnh báo hoặc đề xuất hành động cần làm ngay với mỗi điểm nóng",
+    keys:{
+      goal:["tổng hợp","phân tích","điểm nóng","theo","phân loại","nhận diện","thống kê","xu hướng"],
+      context:["trưởng điện lực","sự cố","mã hóa","excel","đính kèm","không làm thay đổi","không tự sinh","tuần","110","35","22","scada","lưới","dữ liệu"],
+      output:["bảng","danh sách","điểm nóng","cảnh báo","đề xuất","hành động","lưu ý","dạng"]
+    }
+  },
+  {
+    diff:"Nâng cao", diffClass:"d3",
+    label:"Tình huống 3",
+    title:"Xây dựng phương án xử lý tình huống khách hàng",
+    scenario:"Một khách hàng phản ánh gay gắt về việc mình đã thanh toán tiền điện đúng hạn qua ứng dụng Smart Banking nhưng vẫn bị cắt điện với lý do “chưa thanh toán” tiền điện; thời điểm cắt điện đúng vào cao điểm nắng nóng; liên hệ tổng đài luôn trong trạng thái máy bận; đến khi nhận được thông tin liên lạc, khách hàng dọa sẽ khiếu nại lên cấp trên. Anh/chị cần các phương án xử lý vừa giải quyết kỹ thuật, vừa giữ được trải nghiệm khách hàng — nhưng AI không được đưa dữ liệu thật của khách và không hứa điều chưa kiểm chứng.",
+    goal:"Hãy viết prompt yêu cầu AI đề xuất phương án xử lý, có ràng buộc về bảo mật và thẩm quyền.",
+    hints:{
+      goal:"Đề xuất gì? Bao nhiêu phương án? Gồm yếu tố nào?",
+      context:"Vai trò? Tình huống (ẩn danh)? Ràng buộc gì?",
+      output:"Cấu trúc mỗi phương án? Có tiêu chí TNKH không?"
+    },
+    model:"[Mục tiêu] Đề xuất 3 phương án xử lý tình huống khách hàng phản ánh gay gắt về việc bị cắt điện do chưa thanh toán tiền điện, vừa giải quyết kỹ thuật, vừa giữ được trải nghiệm khách hàng, căn cứ theo Quy trình kinh doanh điện năng áp dụng trong EVNSPC.\n[Bối cảnh] Tôi là Trưởng Điện lực. Tình huống: khách hàng X ở khu vực Y bức xúc vì khách hàng đã thanh toán tiền điện đầy đủ qua Smart Banking, nhưng đột nhiên bị cắt điện với lý do “chưa thanh toán” tiền điện - thời tiết thì nắng nóng, khách hàng liên hệ tổng đài nhưng luôn trong tình trạng máy bận, đến khi điện lực nhận được thông tin, khách hàng bức xúc, có ý định khiếu nại.\n[Đầu ra] Trình bày dạng bảng so sánh 3 phương án theo các tiêu chí: thời gian xử lý, nguồn lực, mức cải thiện trải nghiệm khách hàng; kèm khuyến nghị phương án ưu tiên.",
+    keys:{
+      goal:["đề xuất","phương án","3","cắt điện","thanh toán","kỹ thuật","trải nghiệm khách hàng","quy trình kinh doanh điện năng","evnspc"],
+      context:["trưởng điện lực","smart banking","chưa thanh toán","nắng nóng","tổng đài","máy bận","khiếu nại","khách hàng x","khu vực y","không hứa","không dùng thông tin thật","bảo mật","thẩm quyền","kiểm chứng"],
+      output:["bảng","so sánh","tiêu chí","tnkh","trải nghiệm","khuyến nghị","ưu tiên","cấu trúc"]
+    }
+  }
+];
+let state=loadDraft();
+if(!state.caseIndex)state.caseIndex=0;
+if(!state.answers)state.answers={};
+if(!state.scores)state.scores={};
+let sending=false;
+
+function esc(v){return String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
+function loadDraft(){try{return JSON.parse(localStorage.getItem(STORE_KEY)||'{}')}catch{return {}}}
+function saveDraft(){try{localStorage.setItem(STORE_KEY,JSON.stringify(state))}catch{}}
+function setIdentity(key,value){state[key]=value;saveDraft()}
+function setAnswer(id,value){state.answers={...state.answers,[id]:value};delete state.scores[`p${state.caseIndex+1}`];saveDraft()}
+function questionById(id){return QUESTIONS.find(q=>q.id===id)||{}}
+function caseAnswer(caseNumber){
+  return {
+    goal:String(state.answers[`p${caseNumber}_goal`]||'').trim(),
+    context:String(state.answers[`p${caseNumber}_context`]||'').trim(),
+    output:String(state.answers[`p${caseNumber}_output`]||'').trim(),
+  };
+}
+function layerScore(text,keys){
+  const value=String(text||'').toLowerCase();
+  if(value.length<8)return {score:0,note:'Còn trống hoặc quá ngắn.'};
+  const hit=keys.filter(key=>value.includes(key)).length;
+  const hasNumber=/\d|một|hai|ba|bốn|năm|tuần|ngày|giờ/.test(value);
+  if(value.length>=35&&(hit>=2||hasNumber))return {score:2,note:'Rõ và có chi tiết cụ thể.'};
+  if(value.length>=18)return {score:1,note:'Đã có ý chính, cần cụ thể hơn.'};
+  return {score:0,note:'Còn chung chung, cần bổ sung chi tiết.'};
+}
+function scorePromptAnswer(answer,caseItem={}){
+  const keys=caseItem.keys||{};
+  const goal=layerScore(answer.goal,keys.goal||[]);
+  const context=layerScore(answer.context,keys.context||[]);
+  const output=layerScore(answer.output,keys.output||[]);
+  const total=goal.score+context.score+output.score;
+  return {
+    total,
+    max:6,
+    level:total>=5?'Tốt':total>=3?'Đạt':'Cần bổ sung',
+    prompt_score_total:total,
+    criteria:[
+      {name:'Mục tiêu',...goal},
+      {name:'Bối cảnh',...context},
+      {name:'Đầu ra',...output},
+    ],
+    tip:total>=5?'Prompt đã đủ 3 lớp, có thể dùng để thử với AI.':'Hãy bổ sung số lượng, tiêu chí, vai trò người dùng và định dạng đầu ra mong muốn.',
+  };
+}
+function validateIdentity(){
+  if(SETTINGS.requireRespondentName&&!String(state.contactName||'').trim())return 'Vui lòng nhập họ tên.';
+  if(SETTINGS.requireRespondentEmail&&!String(state.email||'').trim())return 'Vui lòng nhập email.';
+  if(SETTINGS.requireRespondentEmail&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(state.email||'').trim()))return 'Email chưa đúng định dạng.';
+  return '';
+}
+function visibleQuestionIds(caseNumber){return [`p${caseNumber}_goal`,`p${caseNumber}_context`,`p${caseNumber}_output`]}
+function missingForCase(caseNumber){return visibleQuestionIds(caseNumber).filter(id=>!String(state.answers[id]||'').trim())}
+function scoreCurrent(){
+  const identityError=validateIdentity();
+  if(identityError){alert(identityError);return}
+  const caseNumber=state.caseIndex+1;
+  const missing=missingForCase(caseNumber);
+  if(missing.length){alert(`Vui lòng hoàn thành đủ 3 lớp trước khi chấm điểm.`);return}
+  state.scores[`p${caseNumber}`]=scorePromptAnswer(caseAnswer(caseNumber),CASES[state.caseIndex]||CASES[0]);
+  saveDraft();
+  render();
+}
+function goNext(){
+  const caseNumber=state.caseIndex+1;
+  if(!state.scores[`p${caseNumber}`]){scoreCurrent();return}
+  if(state.caseIndex<CASES.length-1){state.caseIndex+=1;saveDraft();render();window.scrollTo({top:0,left:0,behavior:'auto'});return}
+  renderResult();
+}
+function goBack(){if(state.caseIndex>0){state.caseIndex-=1;saveDraft();render();window.scrollTo({top:0,left:0,behavior:'auto'}) }else renderIntro()}
+function retryCurrent(){
+  const caseNumber=state.caseIndex+1;
+  delete state.scores[`p${caseNumber}`];
+  saveDraft();
+  render();
+  window.scrollTo({top:0,left:0,behavior:'auto'});
+}
+function progressHtml(){return `<div class="progress">${CASES.map((_,i)=>`<div class="dot ${i===state.caseIndex?'active':i<state.caseIndex?'done':''}"></div>`).join('')}</div>`}
+function identityHtml(){return `<div class="panel"><div class="identity-grid"><label class="field"><span>Họ tên<span style="color:#dc2626"> *</span></span><input type="text" autocomplete="name" value="${esc(state.contactName||'')}" oninput="setIdentity('contactName',this.value)" placeholder="Nhập họ tên"></label><label class="field"><span>Email<span style="color:#dc2626"> *</span></span><input type="email" autocomplete="email" value="${esc(state.email||'')}" oninput="setIdentity('email',this.value)" placeholder="name@company.com"></label></div></div>`}
+function layerHtml(caseNumber,layer,index){
+  const id=`p${caseNumber}_${layer}`;
+  const q=questionById(id);
+  const current=CASES[caseNumber-1]||{};
+  const layerHint=(current.hints&&current.hints[layer])||q.hint||'';
+  return `<div class="layer"><div class="layer-head"><div class="layer-label"><span class="layer-index">${index}</span><span>${esc(q.prompt||layer)}</span></div><div class="hint">${esc(layerHint)}</div></div><textarea placeholder="${esc(q.placeholder||'Nh\u1eadp c\u00e2u tr\u1ea3 l\u1eddi...')}" oninput="setAnswer('${id}',this.value)">${esc(state.answers[id]||'')}</textarea></div>`;
+}
+function samplePromptHtml(caseItem){
+  if(!caseItem||!caseItem.model)return '';
+  const lines=String(caseItem.model).split(/\n+/).filter(Boolean);
+  return `<div class="sample-prompt"><strong>\u2726 Prompt m\u1eabu tham kh\u1ea3o</strong>${lines.map(line=>`<p>${esc(line)}</p>`).join('')}</div>`;
+}
+function scoreHtml(score,caseItem){
+  if(!score)return '';
+  return `<div class="score-box"><div class="score-mark"><div>${score.total}<small>/ ${score.max}</small></div></div><div class="score-body"><strong>X\u1ebfp lo\u1ea1i: ${esc(score.level)}</strong>${score.criteria.map(item=>`<div class="crit"><b>${esc(item.name)} (${item.score}/2):</b> ${esc(item.note)}</div>`).join('')}<div class="tip">${esc(score.tip)}</div>${samplePromptHtml(caseItem)}</div></div>`;
+}
+function requirementHtml(caseItem){
+  if(!caseItem||!caseItem.goal)return '';
+  return `<div class="requirement-box"><b>Yêu cầu:</b> ${esc(caseItem.goal)}</div>`;
+}
+function footerHtml(text='Chương trình QL01A · Chuyên đề 1 — Ứng dụng AI trong quản lý · Tổng công ty Điện lực miền Nam'){
+  return `<div class="footer-note">${esc(text)}</div>`;
+}
+function renderIntro(){
+  root.innerHTML=`<div class="wrap"><div class="hero"><div class="imark">i</div><h1>Bài tập 2: Luyện viết prompt</h1><p>Thời lượng: 15 phút (03 tình huống x 5 phút/tình huống)</p><div class="meta"><span class="chip">⏱ 15 phút</span><span class="chip">📝 3 tình huống</span><span class="chip">⭐ Chấm điểm tự động</span></div></div><div class="intro-card"><div class="sit-label">Cách chơi</div><div class="sit-title">Mỗi tình huống – Viết prompt theo công thức 3 lớp</div><div class="intro-layers"><div class="intro-layer"><div class="intro-layer-head"><span class="intro-layer-num">1</span><span>Mục tiêu</span></div><div class="intro-layer-desc">Muốn AI làm gì? Càng cụ thể càng tốt (nêu số lượng, tiêu chí...).</div></div><div class="intro-layer"><div class="intro-layer-head"><span class="intro-layer-num">2</span><span>Bối cảnh</span></div><div class="intro-layer-desc">Ai dùng? Tình huống nào? Có ràng buộc gì (bảo mật, thẩm quyền)?</div></div><div class="intro-layer"><div class="intro-layer-head"><span class="intro-layer-num">3</span><span>Đầu ra</span></div><div class="intro-layer-desc">Trình bày kết quả thế nào? (bảng, số mục, độ dài...)</div></div></div><div class="foundation"><b>Nguyên tắc nền:</b> AI đề xuất – Người quản lý quyết định</div><div class="actions"><button class="btn primary" onclick="render()">Bắt đầu →</button></div></div>${footerHtml()}</div>`;
+}
+function render(){
+  const current=CASES[state.caseIndex]||CASES[0];
+  const caseNumber=state.caseIndex+1;
+  const score=state.scores[`p${caseNumber}`];
+  root.innerHTML=`<div class="wrap"><div class="hero"><div class="eyebrow">${esc(SETTINGS.bannerEyebrow||'Bài tập cá nhân')}</div><h1>${esc(SETTINGS.bannerTitle||'Luyện viết Prompt 3 lớp')}</h1><p>${esc(SETTINGS.bannerSubtitle||'')}</p>${progressHtml()}</div>${identityHtml()}<div class="panel"><div class="case-head"><div><div class="eyebrow" style="color:var(--primary)">Tình huống ${caseNumber} · ${esc(current.level||current.diff||'')}</div><h2 class="case-title">${esc(current.title)}</h2></div></div><div class="case-box">${esc(current.scenario)}</div>${requirementHtml(current)}${layerHtml(caseNumber,'goal',1)}${layerHtml(caseNumber,'context',2)}${layerHtml(caseNumber,'output',3)}${scoreHtml(score,current)}<div class="actions"><button class="btn ghost" onclick="goBack()">Quay lại</button><span style="display:flex;gap:10px;flex-wrap:wrap">${score?'<button class="btn ghost" onclick="retryCurrent()">Thử lại tình huống này</button>':''}<button class="btn primary" onclick="${score?'goNext()':'scoreCurrent()'}">${score?(state.caseIndex<CASES.length-1?'Tình huống tiếp theo':'Xem kết quả'):'Chấm điểm prompt'}</button></span></div></div>${footerHtml('Gợi ý: prompt đủ 3 lớp thường 3–5 câu. Không cần viết dài — cần rõ.')}</div>`;
+}
+function totalScore(){
+  return CASES.reduce((sum,_,index)=>sum+(state.scores[`p${index+1}`]?.total||0),0);
+}
+function levelFromPercent(percent){return percent>=80?'Tốt':percent>=60?'Khá':percent>=40?'Đạt':'Cần luyện thêm'}
+function renderResult(){
+  const missing=CASES.filter((_,index)=>!state.scores[`p${index+1}`]);
+  if(missing.length){state.caseIndex=CASES.findIndex((_,index)=>!state.scores[`p${index+1}`]);saveDraft();render();return}
+  const total=totalScore();
+  const percent=Math.round(total/18*100);
+  const level=levelFromPercent(percent);
+  root.innerHTML=`<div class="wrap"><div class="hero"><div class="eyebrow">Hoàn thành</div><h1>Kết quả bài luyện Prompt</h1><p>Kiểm tra lại thông tin rồi nộp bài để Ban tổ chức ghi nhận và export kết quả.</p></div>${identityHtml()}<div class="panel thanks"><div class="big-score">${total}<span style="font-size:22px;color:#6b7280">/18</span></div><strong>Xếp loại: ${esc(level)} · ${percent}%</strong><div class="summary-grid">${CASES.map((item,index)=>`<div class="summary-card"><strong>${esc(item.title)}</strong><div>${state.scores[`p${index+1}`].total}/6 · ${esc(state.scores[`p${index+1}`].level)}</div></div>`).join('')}</div><div class="actions"><button class="btn ghost" onclick="state.caseIndex=0;saveDraft();render()">Xem lại bài</button><button class="btn primary" ${sending?'disabled':''} onclick="submitPractice()">${sending?'Đang nộp...':esc(SETTINGS.submitButtonLabel||'Nộp bài')}</button></div><div id="submitNotice"></div></div>${footerHtml('“AI đề xuất – người quản lý quyết định.” · QL01A — Chuyên đề 1')}</div>`;
+}
+async function submitPractice(){
+  if(sending)return;
+  const identityError=validateIdentity();
+  if(identityError){alert(identityError);return}
+  const answers={...state.answers};
+  CASES.forEach((_,index)=>{const key=`p${index+1}`;answers[`prompt_score_${key}`]=String(state.scores[key]?.total??'');});
+  answers.prompt_score_total=String(totalScore());
+  answers.prompt_level=levelFromPercent(Math.round(totalScore()/18*100));
+  answers.prompt_score_detail=JSON.stringify(state.scores);
+  sending=true;renderResult();
+  const payload={
+    id:`SSS-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`,
+    form_id:FORM_ID,
+    unit_name:'',
+    contact_name:String(state.contactName||'').trim(),
+    position_name:'QL01A learner',
+    phone:null,
+    email:String(state.email||'').trim(),
+    completed_on:new Date().toISOString().slice(0,10),
+    answers,
+  };
+  const response=await fetch(`${SUPABASE_URL}/rest/v1/vcontent_student_survey_submissions`,{method:'POST',headers:{apikey:SUPABASE_ANON_KEY,Authorization:`Bearer ${SUPABASE_ANON_KEY}`,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(payload)});
+  if(!response.ok){sending=false;renderResult();document.getElementById('submitNotice').innerHTML='<div class="notice">Chưa nộp được bài. Anh/Chị vui lòng thử lại.</div>';return}
+  localStorage.removeItem(STORE_KEY);
+  root.innerHTML=`<div class="wrap"><div class="panel thanks"><div class="big-score">${totalScore()}<span style="font-size:22px;color:#6b7280">/18</span></div><h2>${esc(SETTINGS.thankYouMessage||'Cảm ơn Anh/Chị đã hoàn thành bài luyện viết prompt.')}</h2><p>Ban tổ chức đã ghi nhận bài nộp của Anh/Chị.</p></div></div>`;
+  window.scrollTo({top:0,left:0,behavior:'auto'});
+}
+window.setIdentity=setIdentity;window.setAnswer=setAnswer;window.scoreCurrent=scoreCurrent;window.goNext=goNext;window.goBack=goBack;window.retryCurrent=retryCurrent;window.render=render;window.renderIntro=renderIntro;window.submitPractice=submitPractice;
+renderIntro();
+</script>
+</body>
+</html>

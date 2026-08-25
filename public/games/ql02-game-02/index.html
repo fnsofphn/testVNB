@@ -1,0 +1,1882 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" href="data:," />
+    <title>QL02 Game 02 – Đèn tín hiệu dữ liệu</title>
+    <style>
+      :root {
+        --navy: #082f49;
+        --blue: #0b5ea8;
+        --green: #15803d;
+        --yellow: #d97706;
+        --red: #c2413b;
+        --ink: #17324d;
+        --muted: #64748b;
+        --line: #d9e5ef;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        min-height: 100%;
+        overflow-x: hidden;
+      }
+      body {
+        margin: 0;
+        background: linear-gradient(#f9fcfd, #e9f2f5);
+        font-family: Inter, system-ui, sans-serif;
+        color: var(--ink);
+        min-height: 100vh;
+        min-height: 100dvh;
+        overflow-x: hidden;
+      }
+      button,
+      input {
+        font: inherit;
+      }
+      button:focus-visible,
+      input:focus-visible {
+        outline: 3px solid #f2a900;
+        outline-offset: 3px;
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: auto;
+        padding: 0 18px 60px;
+      }
+      .top {
+        height: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .brand {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .logo {
+        width: 40px;
+        height: 40px;
+        border-radius: 13px;
+        background: linear-gradient(145deg, var(--navy), var(--blue));
+        color: #fff;
+        display: grid;
+        place-items: center;
+        font-weight: 900;
+      }
+      .brand b,
+      .brand small {
+        display: block;
+      }
+      .brand small {
+        color: var(--muted);
+      }
+      .game-status {
+        display: grid;
+        justify-items: end;
+        gap: 3px;
+      }
+      .game-status strong {
+        color: var(--blue);
+        font-variant-numeric: tabular-nums;
+      }
+      .screen {
+        display: none;
+      }
+      .screen.on {
+        display: block;
+      }
+      .welcome {
+        min-height: calc(100vh - 100px);
+        display: grid !important;
+        grid-template-columns: 1.1fr 0.75fr;
+        gap: 50px;
+        align-items: center;
+      }
+      .welcome:not(.on) {
+        display: none !important;
+      }
+      .hero h1 {
+        font-size: clamp(42px, 6vw, 72px);
+        line-height: 0.98;
+        letter-spacing: -0.05em;
+        color: var(--navy);
+        margin: 12px 0;
+      }
+      .hero h1 em {
+        color: var(--green);
+        font-style: normal;
+      }
+      .hero p {
+        font-size: 17px;
+        color: #52657f;
+        line-height: 1.65;
+      }
+      .welcome-rules {
+        display: grid;
+        gap: 8px;
+        margin-top: 20px;
+      }
+      .welcome-rules div {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 12px;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        color: #52657f;
+      }
+      .welcome-rules b {
+        color: var(--blue);
+        white-space: nowrap;
+      }
+      .lights {
+        display: flex;
+        gap: 12px;
+        margin-top: 26px;
+      }
+      .light {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-weight: 800;
+      }
+      .dot {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        padding: 26px;
+        box-shadow: 0 20px 55px rgba(19, 55, 85, 0.13);
+      }
+      label {
+        display: block;
+        margin: 14px 0 5px;
+        font-weight: 800;
+        font-size: 13px;
+      }
+      input {
+        width: 100%;
+        padding: 13px;
+        border: 1px solid #cad9e2;
+        border-radius: 12px;
+      }
+      .primary,
+      .secondary {
+        border: 0;
+        border-radius: 13px;
+        min-height: 48px;
+        padding: 0 18px;
+        font-weight: 850;
+      }
+      .primary {
+        background: linear-gradient(135deg, var(--navy), var(--blue));
+        color: #fff;
+        width: 100%;
+        margin-top: 18px;
+      }
+      .secondary {
+        background: #edf5fa;
+        color: var(--blue);
+      }
+      .guide {
+        text-align: center;
+        padding: 30px 0;
+      }
+      .guide h1,
+      .intro h1 {
+        color: var(--navy);
+        font-size: 42px;
+      }
+      .case {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        text-align: left;
+      }
+      .case article,
+      .zoneGuide article {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 17px;
+      }
+      .case b {
+        color: var(--blue);
+        font-size: 11px;
+      }
+      .case p {
+        color: #52657b;
+        line-height: 1.55;
+      }
+      .zoneGuide {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin: 18px 0;
+      }
+      .zoneGuide article {
+        border-top: 6px solid var(--c);
+      }
+      .zoneGuide i {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--c);
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-style: normal;
+        font-weight: 900;
+      }
+      .zoneGuide h3 {
+        color: var(--c);
+      }
+      .intro {
+        text-align: center;
+        padding: 100px 0;
+      }
+      .intro .n {
+        font-size: 90px;
+        color: transparent;
+        -webkit-text-stroke: 2px #aac5cf;
+        font-weight: 950;
+      }
+      .game {
+        padding: 15px 0 60px;
+      }
+      .meta {
+        display: flex;
+        justify-content: space-between;
+      }
+      .score {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 8px 12px;
+        color: var(--green);
+        font-weight: 900;
+      }
+      .bar {
+        height: 8px;
+        background: #dce8ed;
+        border-radius: 99px;
+        margin: 14px 0 28px;
+        overflow: hidden;
+      }
+      .bar i {
+        display: block;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          var(--green),
+          var(--yellow),
+          var(--red)
+        );
+        width: 0;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 0.95fr 1.05fr;
+        gap: 22px;
+      }
+      .question {
+        background: linear-gradient(145deg, #073550, #0b5e82);
+        color: #fff;
+        border-radius: 23px;
+        padding: 28px;
+        min-height: 420px;
+      }
+      .question small {
+        color: #a9d2e4;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+      .question blockquote {
+        margin: 10px 0 20px;
+        border-left: 4px solid #f6c453;
+        padding: 14px;
+        background: #ffffff12;
+        border-radius: 0 12px 12px 0;
+        font-size: 20px;
+        font-weight: 800;
+      }
+      .question h2 {
+        font-size: 25px;
+      }
+      .question ul {
+        color: #d6e9f3;
+      }
+      .panel {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 23px;
+        padding: 24px;
+      }
+      .panel h3 {
+        font-size: 14px;
+        color: var(--navy);
+      }
+      .zoneBtns {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+      .zoneBtns button {
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 14px;
+        padding: 12px;
+        color: var(--c);
+      }
+      .zoneBtns button b {
+        width: 32px;
+        height: 32px;
+        margin: auto;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: var(--c);
+        color: #fff;
+      }
+      .zoneBtns button span,
+      .zoneBtns button small {
+        display: block;
+      }
+      .zoneBtns button span {
+        font-weight: 900;
+        margin: 5px 0;
+      }
+      .zoneBtns button.sel {
+        border-color: var(--c);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 15%, transparent);
+      }
+      .checks {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 7px;
+      }
+      .checks button,
+      .actions button,
+      .choices button {
+        border: 1px solid var(--line);
+        background: #f8fbfc;
+        border-radius: 11px;
+        padding: 10px;
+        text-align: left;
+        color: #4d6176;
+      }
+      .checks button.sel,
+      .actions button.sel,
+      .choices button.sel {
+        border-color: var(--blue);
+        background: #eaf5fb;
+      }
+      .hint {
+        display: flex;
+        gap: 8px;
+        margin: 15px 0;
+      }
+      .hint button {
+        flex: 1;
+        border: 1px solid var(--line);
+        background: #f8fbfc;
+        border-radius: 11px;
+        padding: 10px;
+      }
+      .actions,
+      .choices {
+        display: grid;
+        gap: 8px;
+      }
+      .actions button,
+      .choices button {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .actions button b,
+      .choices button b {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        background: #eaf3f7;
+        color: var(--blue);
+        display: grid;
+        place-items: center;
+        flex: none;
+      }
+      .board {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+      .col {
+        border-top: 6px solid var(--c);
+        background: #fff;
+        border-radius: 16px;
+        border-left: 1px solid var(--line);
+        border-right: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        padding: 12px;
+        min-height: 150px;
+      }
+      .col h3 {
+        color: var(--c);
+      }
+      .col article {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 9px;
+        margin-top: 8px;
+        font-size: 11px;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 9px;
+        margin: 15px 0;
+      }
+      .cards article {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 12px;
+      }
+      .cards p {
+        font-size: 12px;
+        color: #52657b;
+      }
+      .cards button {
+        border: 1px solid var(--line);
+        background: #f7fafb;
+        border-radius: 8px;
+        padding: 7px;
+        margin-right: 5px;
+      }
+      .cards button.sel {
+        background: var(--c);
+        color: #fff;
+        border-color: var(--c);
+      }
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: #05192899;
+        display: none;
+        place-items: center;
+        padding: 18px;
+      }
+      .modal.on {
+        display: grid;
+      }
+      .modalbox {
+        max-width: 580px;
+        background: #fff;
+        border-radius: 22px;
+        padding: 25px;
+        text-align: center;
+      }
+      .modalbox .ico {
+        width: 55px;
+        height: 55px;
+        border-radius: 18px;
+        margin: auto;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-size: 25px;
+      }
+      .modalbox.good .ico {
+        background: var(--green);
+      }
+      .modalbox.bad .ico {
+        background: var(--red);
+      }
+      .modalbox.notice .ico {
+        background: var(--yellow);
+      }
+      .modalbox.notice p {
+        color: #41566d;
+        font-size: 16px;
+        line-height: 1.55;
+        margin: 12px auto 20px;
+        max-width: 440px;
+      }
+      .whygrid {
+        display: grid;
+        grid-template-columns: 0.8fr 1.7fr;
+        gap: 8px;
+        text-align: left;
+      }
+      .whygrid section {
+        background: #f7fafb;
+        border: 1px solid var(--line);
+        border-radius: 11px;
+        padding: 10px;
+      }
+      .whygrid b {
+        color: var(--blue);
+        font-size: 10px;
+      }
+      .whygrid p {
+        font-size: 12px;
+        color: #576a7f;
+      }
+      .result {
+        text-align: center;
+        padding: 35px 0;
+      }
+      .result h1 {
+        color: var(--navy);
+        font-size: 48px;
+      }
+      .ring {
+        width: 170px;
+        height: 170px;
+        border-radius: 50%;
+        margin: 20px auto;
+        display: grid;
+        place-items: center;
+        background: conic-gradient(var(--green) var(--d), #dce8e4 0);
+        position: relative;
+      }
+      .ring:after {
+        content: "";
+        position: absolute;
+        inset: 13px;
+        background: #f8fbfa;
+        border-radius: 50%;
+      }
+      .ring div {
+        z-index: 1;
+      }
+      .ring strong {
+        display: block;
+        font-size: 40px;
+        color: var(--navy);
+      }
+      .summary {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+        text-align: left;
+      }
+      .summary article {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 18px;
+      }
+      .memory {
+        background: #073550;
+        color: #fff;
+        border-radius: 20px;
+        padding: 22px;
+        margin-top: 16px;
+      }
+      .memory .zoneGuide article {
+        background: #ffffff14;
+        border-color: #ffffff20;
+      }
+      .memory .zoneGuide p {
+        color: #cfe3ed;
+      }
+      @media (min-width: 801px) and (max-height: 760px) {
+        .wrap {
+          padding-bottom: 32px;
+        }
+        .top {
+          height: 56px;
+        }
+        .guide {
+          padding: 10px 0 28px;
+        }
+        .guide h1,
+        .intro h1 {
+          margin: 6px 0;
+          font-size: 34px;
+        }
+        .guide > p {
+          margin: 8px 0 12px;
+          line-height: 1.45;
+        }
+        .case,
+        .zoneGuide {
+          gap: 8px;
+        }
+        .case article,
+        .zoneGuide article {
+          padding: 12px;
+        }
+        .case p,
+        .zoneGuide p {
+          margin: 8px 0;
+          line-height: 1.4;
+        }
+        .zoneGuide {
+          margin: 10px 0;
+        }
+        .zoneGuide h3 {
+          margin: 8px 0;
+        }
+        .primary {
+          margin-top: 4px;
+        }
+      }
+      @media (max-width: 800px) {
+        .top {
+          height: 60px;
+        }
+        .welcome {
+          grid-template-columns: 1fr;
+          min-height: auto;
+          gap: 24px;
+          padding-bottom: 32px;
+        }
+        .guide {
+          padding: 12px 0 36px;
+        }
+        .guide h1,
+        .intro h1 {
+          font-size: clamp(30px, 8vw, 38px);
+        }
+        .card {
+          padding: clamp(18px, 4vw, 24px);
+          border-radius: 18px;
+        }
+        .case,
+        .zoneGuide,
+        .layout,
+        .board,
+        .summary {
+          grid-template-columns: 1fr;
+        }
+        .cards {
+          grid-template-columns: 1fr;
+        }
+        .whygrid {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 520px) {
+        .wrap {
+          padding: 0 12px 40px;
+        }
+        .hero h1 {
+          font-size: 36px;
+          line-height: 1.03;
+        }
+        .guide h1,
+        .intro h1 {
+          font-size: 30px;
+        }
+        .zoneBtns {
+          grid-template-columns: 1fr;
+        }
+        .checks {
+          grid-template-columns: 1fr 1fr;
+        }
+        .question {
+          padding: 20px;
+        }
+        .question h2 {
+          font-size: 21px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="top">
+        <div class="brand">
+          <div class="logo">QL</div>
+          <div><b>QL02 · Game 02</b><small>Đèn tín hiệu dữ liệu</small></div>
+        </div>
+        <div class="game-status">
+          <small id="mode">Chế độ cá nhân</small>
+          <strong id="elapsed">00:00</strong>
+        </div>
+      </header>
+      <section id="welcome" class="screen welcome on">
+        <div class="hero">
+          <small>GAMIFICATION CÁ NHÂN</small>
+          <h1>Xác định đúng vùng dữ liệu <em>trước khi quyết định</em></h1>
+          <p>
+            Bạn là một Trưởng/Phó phòng chuyên môn và có 10 phút chuẩn bị các dữ
+            liệu trước cuộc họp. Hãy dùng đúng phần dữ liệu có căn cứ, ghi giới
+            hạn phần chưa đủ và dừng đúng nơi có thể làm sai quyết định.
+          </p>
+          <p><b>Cách thức:</b> Tổng cộng 2 vòng.</p>
+          <div class="welcome-rules">
+            <div>
+              <span>Vòng 1 · Xác định dữ liệu thuộc vùng nào · 8 câu · 10 điểm/câu</span
+              ><b>80 điểm</b>
+            </div>
+            <div>
+              <span>Vòng 2 · Chọn hành động · 5 câu · 20 điểm/câu</span><b>100 điểm</b>
+            </div>
+          </div>
+          <div class="lights" id="heroLights"></div>
+        </div>
+        <div class="card">
+          <h2>Nhận vai người duyệt dữ liệu</h2>
+          <label>Tên hiển thị</label
+          ><input id="name" placeholder="Ví dụ: Nguyễn Minh Anh" /><button
+            class="primary"
+            onclick="start()"
+          >
+            Tìm hiểu 3 vùng dữ liệu →
+          </button>
+        </div>
+      </section>
+      <section id="guide" class="screen guide">
+        <h1 id="caseTitle"></h1>
+        <p id="caseRole"></p>
+        <div class="case" id="caseGrid"></div>
+        <div class="zoneGuide" id="zoneGuide"></div>
+        <button class="primary" style="width: auto" onclick="intro(1)">
+          Bắt đầu Vòng 1 – Xác định đèn dữ liệu →
+        </button>
+      </section>
+      <section id="intro" class="screen intro">
+        <div class="n" id="introN">01</div>
+        <small id="introSmall"></small>
+        <h1 id="introTitle"></h1>
+        <p id="introText"></p>
+        <button
+          id="introButton"
+          class="primary"
+          style="width: auto"
+          onclick="play()"
+        >
+          Bắt đầu chơi →
+        </button>
+      </section>
+      <section id="game" class="screen game">
+        <div class="meta">
+          <div>
+            <b id="roundLabel"></b>
+            <div id="stepLabel"></div>
+          </div>
+          <div class="score">Điểm <span id="score">0</span></div>
+        </div>
+        <div class="bar"><i id="bar"></i></div>
+        <div id="stage"></div>
+      </section>
+      <section id="result" class="screen result">
+        <small>HOÀN THÀNH GAME 02</small>
+        <div class="ring" id="ring">
+          <div><strong id="percent">0%</strong><small id="points"></small></div>
+        </div>
+        <p>Thời gian hoàn thành: <b id="duration">00:00</b></p>
+        <h1 id="level"></h1>
+        <p id="levelNote"></p>
+        <div class="summary">
+          <article>
+            <h3>Kết quả từng vòng</h3>
+            <div id="stats"></div>
+          </article>
+        </div>
+        <div class="memory">
+          <h2>Ba nguyên tắc cần mang về</h2>
+          <div class="zoneGuide" id="memoryZones"></div>
+          <blockquote>
+            Dùng đúng dữ liệu, khai thác đúng giới hạn và xác minh đúng chỗ.
+          </blockquote>
+        </div>
+        <button class="primary" style="width: auto" onclick="location.reload()">
+          Chơi lại
+        </button>
+      </section>
+    </div>
+    <div id="modal" class="modal">
+      <div id="modalbox" class="modalbox">
+        <div class="ico" id="modalIco"></div>
+        <h2 id="modalTitle"></h2>
+        <div class="whygrid">
+          <section>
+            <b>ĐÁP ÁN</b>
+            <p id="modalExpected"></p>
+          </section>
+          <section>
+            <b>DIỄN GIẢI</b>
+            <p id="modalWhat"></p>
+            <p id="modalWhy"></p>
+            <p id="modalNext"></p>
+          </section>
+        </div>
+        <button class="primary" onclick="modalNext()">Tiếp tục →</button>
+      </div>
+    </div>
+    <div
+      id="selectionNotice"
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="selectionNoticeTitle"
+      onclick="if(event.target===this) closeSelectionNotice()"
+    >
+      <div class="modalbox notice">
+        <div class="ico" aria-hidden="true">!</div>
+        <h2 id="selectionNoticeTitle">Bạn chưa chọn đủ thông tin</h2>
+        <p id="selectionNoticeMessage"></p>
+        <button
+          id="selectionNoticeClose"
+          class="primary"
+          onclick="closeSelectionNotice()"
+        >
+          Quay lại chọn
+        </button>
+      </div>
+    </div>
+    <script>
+      const D = {
+        zones: [
+          {
+            id: "green",
+            short: "Xanh",
+            name: "Vùng Xanh · Có thể sử dụng",
+            decision: "Có thể dùng được và cần dẫn nguồn",
+            description:
+              "Dữ liệu có nguồn rõ, cùng kỳ và thống nhất định nghĩa, đủ dữ liệu trọng yếu; có lỗi nhỏ nhưng không làm thay đổi kết luận.",
+            accent: "#15803d",
+            icon: "✓",
+          },
+          {
+            id: "yellow",
+            short: "Vàng",
+            name: "Vùng Vàng · Sử dụng có điều kiện",
+            decision: "Dùng đúng phạm vi, ghi giới hạn",
+            description:
+              "Dữ liệu còn thiếu một phần hoặc chưa so sánh cùng điều kiện, chỉ được kết luận trong phạm vi có căn cứ.",
+            accent: "#d97706",
+            icon: "!",
+          },
+          {
+            id: "red",
+            short: "Đỏ",
+            name: "Vùng Đỏ · Chưa được sử dụng",
+            decision: "Dừng kết luận để xác minh",
+            description:
+              "Dữ liệu có nguồn không rõ, công thức/tính toán sai, có sự trùng lặp lớn, thiếu dữ liệu trọng yếu dễ dẫn đến kết luận ngược.",
+            accent: "#c2413b",
+            icon: "×",
+          },
+        ],
+        checks: [
+          {
+            id: "source",
+            name: "Nguồn",
+            question: "Dữ liệu lấy từ hệ thống/đơn vị nào, ai xác nhận?",
+            detail: "Dữ liệu lấy từ hệ thống/đơn vị nào, ai xác nhận?",
+          },
+          {
+            id: "period",
+            name: "Thời điểm",
+            question: "Dữ liệu cập nhật đến ngày nào, các kỳ có cùng phạm vi?",
+            detail:
+              "Dữ liệu cập nhật đến ngày nào, các kỳ có cùng phạm vi?",
+          },
+          {
+            id: "definition",
+            name: "Định nghĩa",
+            question: "Các đơn vị có tính cùng một cách?",
+            detail:
+              "Các đơn vị có tính cùng một cách?",
+          },
+          {
+            id: "complete",
+            name: "Đầy đủ",
+            question: "Có thiếu đơn vị, kỳ hoặc trường dữ liệu nào?",
+            detail:
+              "Có thiếu đơn vị, kỳ hoặc trường dữ liệu nào?",
+          },
+          {
+            id: "valid",
+            name: "Hợp lệ",
+            question: "Có trùng, sai đơn vị, giá trị vô lý hoặc lỗi khác?",
+            detail:
+              "Có trùng, sai đơn vị, giá trị vô lý hoặc lỗi khác?",
+          },
+          {
+            id: "comparable",
+            name: "So sánh được",
+            question: "Có cùng quy mô, loại công việc và điều kiện hay chưa?",
+            detail:
+              "Có cùng quy mô, loại công việc và điều kiện hay chưa?",
+          },
+        ],
+        caseBrief: {
+          title: "Xác định đúng vùng dữ liệu trước khi quyết định",
+          role: "Bạn là Trưởng/Phó phòng chuyên môn đang kiểm tra dữ liệu trước cuộc họp.",
+          what: "Chuyên viên gửi nhiều thẻ dữ liệu có chất lượng khác nhau. Một số có thể dùng ngay; một số chỉ dùng được cho một phần kết luận; một số có thể làm lãnh đạo quyết định sai.",
+          why: "Là người kiểm tra dữ liệu, bạn phải bảo đảm báo cáo không quá dễ tin dữ liệu, nhưng cũng không quá thận trọng đến mức bỏ toàn bộ thông tin chưa hoàn hảo.",
+          mission:
+            "Xác định đúng dữ liệu thuộc vùng nào: Xanh – Vàng – Đỏ và chọn hành động phù hợp trước giờ họp.",
+          facts: [
+            { label: "Đơn vị", value: "06", note: "cần tổng hợp cùng kỳ" },
+            { label: "Sự cố", value: "31", note: "số lượng đã đủ" },
+            {
+              label: "Họp",
+              value: "10 phút",
+              note: "không đủ thời gian làm lại toàn bộ",
+            },
+            {
+              label: "Mục tiêu",
+              value: "Dùng đúng phần",
+              note: "không đòi dữ liệu hoàn hảo",
+            },
+          ],
+          sourceNotes: [
+            "Số lượng sự cố lấy từ hệ thống chính thức và đã đủ 06 đơn vị.",
+            "Ba hồ sơ chưa có nguyên nhân cuối cùng; hai đơn vị dùng cách phân loại nguyên nhân khác nhau.",
+            "Một đơn vị chưa cập nhật thời gian khôi phục của sự cố cuối tháng.",
+            "Một số tỷ lệ trong bảng phụ cần kiểm tra lại mẫu số trước khi xếp hạng.",
+          ],
+        },
+        r1: [
+          {
+            id: "G2-01",
+            source: "Hệ thống quản lý sự cố",
+            context:
+              "Bảng dữ liệu được xuất từ hệ thống OMS, đủ dữ liệu của 6 đơn vị, theo cùng kỳ tháng 6, đã xác định và khóa công thức tính tổng sự cố.",
+            intendedUse:
+              "Dùng để báo cáo tổng số sự cố và xu hướng toàn Công ty trong tháng 6.",
+            evidence: [
+              "Nguồn hệ thống chính thức",
+              "Cùng kỳ tháng 6",
+              "Đủ 06 đơn vị",
+              "Công thức tổng đã khóa",
+            ],
+            prompt: "Dữ liệu này nên được bật đèn nào cho mục đích nêu trên?",
+            answer: "green",
+            primaryCheck: "source",
+            explanation:
+              "Các điều kiện trọng yếu về nguồn, kỳ, định nghĩa và độ đầy đủ đều rõ; có thể sử dụng và trích dẫn nguồn.",
+            why: "Dữ liệu không cần hoàn hảo tuyệt đối, nhưng phải đủ tốt cho quyết định cụ thể đang phục vụ.",
+            next: "Ghi rõ nguồn và thời điểm xuất dữ liệu trong báo cáo.",
+            hint: "Hãy xét đúng mục đích: báo cáo tổng số và xu hướng, không phải kết luận nguyên nhân.",
+          },
+          {
+            id: "G2-02",
+            source: "Bảng nguyên nhân sự cố",
+            context:
+              "Tổng số sự cố: 31; trong đó 28/31 hồ sơ sự cố có nguyên nhân, 3/31 hồ sơ sự cố đang để trống nguyên nhân.",
+            intendedUse:
+              "Dùng để mô tả tổng số sự cố và đồng thời kết luận nhóm nguyên nhân chiếm tỷ trọng cao nhất.",
+            evidence: [
+              "31/31 sự cố đã ghi nhận",
+              "28/31 hồ sơ có nguyên nhân cuối",
+              "03 hồ sơ còn để trống nguyên nhân",
+            ],
+            prompt:
+              "Một phần bảng dùng được, một phần chưa đủ. Dữ liệu này nên được bật đèn nào cho mục đích nêu trên?",
+            answer: "yellow",
+            primaryCheck: "complete",
+            explanation:
+              "Có thể dùng số lượng và xu hướng; chưa được kết luận chắc về cơ cấu nguyên nhân cho đến khi ba hồ sơ được hoàn tất.",
+            why: "Vùng Vàng không có nghĩa bỏ dữ liệu. Nó yêu cầu tách rõ phần có căn cứ và phần còn giới hạn.",
+            next: "Trình phần số lượng, ghi chú giới hạn nguyên nhân và yêu cầu cập nhật ba hồ sơ còn trống nguyên nhân.",
+            hint: "Câu hỏi không phải ‘bảng có thiếu gì không’, mà là thiếu đó ảnh hưởng đến kết luận nào.",
+          },
+          {
+            id: "G2-03",
+            source:
+              "File Excel tổng hợp thủ công sự cố theo 4 tuyến A, B, C, D gồm 20 dòng",
+            context:
+              "Dòng 5 và dòng 17 cùng một tuyến xuất hiện lặp lại 2 lần trong bảng, trùng nhau về thời gian, mã sự cố và thiết bị; tổng số sự cố đang tính cả 2 dòng trùng.",
+            intendedUse: "Dùng để xếp hạng các tuyến có nhiều sự cố nhất.",
+            evidence: [
+              "Hai dòng cùng mã sự cố",
+              "Tổng sự cố đang tính cả hai dòng",
+              "Chưa xác minh khóa nhận diện",
+            ],
+            prompt:
+              "Nếu dùng ngay file Excel trên để xếp hạng, rủi ro lớn nhất nằm ở đâu? Dữ liệu này nên được bật đèn nào cho mục đích nêu trên?",
+            answer: "red",
+            primaryCheck: "valid",
+            explanation:
+              "Bản ghi trùng có thể làm sai tổng số và đảo thứ tự xếp hạng; phải dừng kết luận trước khi xác minh và làm sạch.",
+            why: "Lỗi tác động trực tiếp đến kết quả ra quyết định là lỗi Đỏ, không chỉ là một ghi chú kỹ thuật.",
+            next: "Xác minh, loại trùng lặp rồi tính lại.",
+            hint: "Hãy tự hỏi: lỗi này có thể làm lãnh đạo ưu tiên sai tuyến không?",
+          },
+          {
+            id: "G2-04",
+            source: "So sánh sự cố giữa 2 Điện lực",
+            context:
+              "Điện lực A quản lý 510 km đường dây, xảy ra 12 sự cố; Điện lực B quản lý 230 km với 9 sự cố trong tháng; bảng chỉ so số sự cố tuyệt đối, chưa phân tích theo quy mô đường dây, chưa đánh giá thêm SAIDI.",
+            intendedUse:
+              "Dùng để kết luận đơn vị nào quản lý vận hành kém hơn.",
+            evidence: [
+              "A: 12 sự cố/510 km",
+              "B: 9 sự cố/230 km",
+              "Chưa chuẩn hóa theo quy mô",
+              "Chưa xem thêm SAIDI",
+            ],
+            prompt:
+              "Số liệu đúng, nhưng phép so sánh chưa công bằng. Dữ liệu này nên được bật đèn nào cho mục đích nêu trên?",
+            answer: "yellow",
+            primaryCheck: "comparable",
+            explanation:
+              "Có thể tham khảo số tuyệt đối nhưng chưa được xếp hạng năng lực; cần chuẩn hóa theo 100 km và đối chiếu thêm chỉ số tác động.",
+            why: "",
+            next: "Chuẩn hóa theo quy mô, sau đó so sánh trong nhóm điều kiện tương đồng.",
+            hint: "Đừng hỏi ‘con số có đúng không’; hãy hỏi ‘hai đối tượng có đang được đặt trên cùng mẫu số không’. ",
+          },
+          {
+            id: "G2-05",
+            source: "Tỷ lệ sự cố lặp",
+            context:
+              "Chuyên viên ghi tỷ lệ sự cố lặp là 12/9 = 133%, nhưng không giải thích 12 và 9 đại diện cho gì. Cũng không rõ cách tính công thức này.",
+            intendedUse:
+              "Dùng để kết luận sự cố lặp đang vượt ngưỡng nghiêm trọng.",
+            evidence: [
+              "Tử số lớn hơn mẫu số",
+              "Mẫu số không có định nghĩa",
+              "Công thức không có trong quy định chỉ tiêu",
+            ],
+            prompt:
+              "Tỷ lệ nghe đáng báo động nhưng chưa thể truy vết. Dữ liệu này nên được bật đèn nào cho mục đích nêu trên?",
+            answer: "red",
+            primaryCheck: "definition",
+            explanation:
+              "Công thức không rõ nên không được dùng làm căn cứ; cần xác định định nghĩa rồi tính lại.",
+            why: "",
+            next: "Yêu cầu định nghĩa chỉ tiêu, nguồn tử số/mẫu số và tái tính toán.",
+            hint: "Đừng bị thuyết phục bởi ký hiệu %. Hãy hỏi mẫu số là gì.",
+          },
+          {
+            id: "G2-06",
+            source: "Nhật ký vận hành và biên bản hiện trường",
+            context:
+              "Một giá trị SAIDI rất cao khác hẳn các tuyến khác, nhưng đã được đối chiếu với hai nguồn độc lập (nhật ký vận hành, biên bản hiện trường) và xác nhận thời gian mất điện, không có lỗi nhập.",
+            intendedUse: "Dùng để nhận diện ngoại lệ cần ưu tiên phân tích.",
+            evidence: [
+              "Khớp nhật ký vận hành",
+              "Khớp biên bản hiện trường",
+              "Thời gian mất điện đã xác nhận",
+              "Không có lỗi nhập",
+            ],
+            prompt:
+              "Giá trị bất thường có tự động là dữ liệu Đỏ không? Dữ liệu này nên được bật đèn nào cho mục đích nêu trên?",
+            answer: "green",
+            primaryCheck: "valid",
+            explanation:
+              "Ngoại lệ đã được kiểm chứng nên là dữ liệu Xanh; chính sự khác thường này có thể là tín hiệu quản trị quan trọng.",
+            why: "Không được xóa hoặc chỉnh sửa một giá trị chỉ vì nó khác xa bình thường; phải kiểm chứng trước.",
+            next: "Giữ nguyên, dẫn nguồn kiểm chứng và phân tích nguyên nhân của ngoại lệ.",
+            hint: "Bất thường dữ liệu và lỗi dữ liệu là hai việc khác nhau.",
+          },
+          {
+            id: "G2-07",
+            source: "Ảnh chụp màn hình gửi trong email",
+            context:
+              "Ảnh không có ngày tháng, không rõ nguồn gốc; tổng số sai khác so với dữ liệu từ hệ thống chính thức 4 sự cố.",
+            intendedUse:
+              "Dùng để lấy con số chính thức đưa vào báo cáo trình Giám đốc.",
+            evidence: [
+              "Không rõ nguồn gốc phiên bản",
+              "Không có ngày xuất",
+              "Chênh 4 sự cố với hệ thống",
+              "Không truy được bản ghi chi tiết",
+            ],
+            prompt:
+              "Dù người gửi là cán bộ phụ trách trực tiếp, có kinh nghiệm, dữ liệu này nên được bật đèn nào cho mục đích nêu trên?",
+            answer: "red",
+            primaryCheck: "source",
+            explanation:
+              "Nguồn và phiên bản không thể truy vết, lại xung đột với hệ thống chính thức; không được thay số báo cáo trước khi xác minh.",
+            why: "",
+            next: "Yêu cầu file nguồn hoặc truy xuất lại từ hệ thống và đối chiếu chênh lệch.",
+            hint: "Hãy tách ‘tôi tin người gửi’ khỏi ‘tôi kiểm chứng được dữ liệu’. ",
+          },
+          {
+            id: "G2-08",
+            source: "Bảng thời gian khôi phục",
+            context:
+              "Một sự cố cuối tháng chưa có thời gian khôi phục; 30/31 sự cố còn lại đã đủ và cùng cách tính. Sự cố thiếu đang ảnh hưởng đến xếp hạng đơn vị.",
+            intendedUse:
+              "Dùng để kết luận thời gian khôi phục bình quân chính xác của toàn bộ 31 sự cố và xếp hạng đơn vị.",
+            evidence: [
+              "30/31 bản ghi hoàn chỉnh",
+              "01 bản ghi thiếu trường thời gian",
+              "Sự cố thiếu thuộc đơn vị đang gần ngưỡng xếp hạng",
+            ],
+            prompt:
+              "Thiếu 1 thông tin nhưng có thể làm thay đổi quyết định xếp hạng, dữ liệu này nên được bật đèn nào cho mục đích nêu trên?",
+            answer: "yellow",
+            primaryCheck: "complete",
+            explanation:
+              "Có thể dùng thông tin 30 sự cố để nhận định sơ bộ, nhưng chưa chốt bình quân và xếp hạng cuối cùng vì thông tin sự cố thiếu có thể làm đổi kết quả.",
+            why: "",
+            next: "Ghi rõ kết quả tạm tính, bổ sung sự cố cuối tháng trước khi công bố xếp hạng.",
+            hint: "Một dòng thiếu có ít về số lượng, nhưng hãy xét nó có thể đảo thứ tự quyết định không.",
+          },
+        ],
+        r2: [
+          {
+            id: "G2-A01",
+            zone: "yellow",
+            source: "Ba hồ sơ thiếu nguyên nhân cuối cùng",
+            situation:
+              "Số lượng sự cố đã đủ, nhưng thông tin nguyên nhân sự cố chưa hoàn chỉnh (3/31 hồ sơ sự cố thiếu nguyên nhân).",
+            prompt:
+              "Cách xử lý nào vừa không bỏ phí dữ liệu, vừa không kết luận quá mức?",
+            options: [
+              {
+                id: "A",
+                text: "Tạm dừng toàn bộ bảng, yêu cầu hoàn thiện đủ nguyên nhân của 31 hồ sơ rồi mới trình bất kỳ số liệu nào.",
+                note: "Nghe an toàn nhưng bỏ phí phần dữ liệu đã đủ căn cứ",
+              },
+              {
+                id: "B",
+                text: "Dùng số lượng/xu hướng, ghi giới hạn nguyên nhân và yêu cầu bổ sung.",
+                note: "Dùng đúng phạm vi",
+              },
+              {
+                id: "C",
+                text: "Dựa vào kinh nghiệm các tháng trước để tạm điền ba hồ sơ còn thiếu vào nhóm nguyên nhân thời tiết và ghi chú sẽ cập nhật sau.",
+                note: "Có ghi chú nhưng vẫn tự suy diễn dữ liệu nguồn",
+              },
+            ],
+            answer: "B",
+            primaryCheck: "complete",
+            explanation:
+              "Vùng Vàng cho phép dùng phần đã đủ căn cứ và bắt buộc ghi rõ phần chưa được phép kết luận.",
+            why: "Người quản lý không đòi dữ liệu hoàn hảo; phải biết dữ liệu đủ tốt cho quyết định nào.",
+            next: "Tạo yêu cầu cập nhật có người phụ trách và thời hạn.",
+          },
+          {
+            id: "G2-A02",
+            zone: "red",
+            source: "Dữ liệu nghi ngờ trùng lặp",
+            situation:
+              "Hai dòng dữ liệu trùng nhau đang được tính vào tổng và xếp hạng số vụ sự cố trong bảng dữ liệu tổng sự cố theo các tuyến.",
+            prompt:
+              "Hành động nào bảo vệ được tính đúng mà không tự ý xóa/sửa dữ liệu?",
+            options: [
+              {
+                id: "A",
+                text: "Xác minh khóa nhận diện, sau đó loại trùng và tính lại.",
+                note: "Kiểm chứng trước làm sạch",
+              },
+              {
+                id: "B",
+                text: "Giữ cả hai dòng nhưng lấy giá trị trung bình của chúng để giảm ảnh hưởng nếu một trong hai bản ghi bị sai.",
+                note: "có vẻ thận trọng nhưng không dựa trên khóa nhận diện",
+              },
+              {
+                id: "C",
+                text: "Giữ nguyên cả hai bản ghi vì chúng đều xuất từ hệ thống chính thức và bổ sung chú thích có khả năng trùng lặp.",
+                note: "minh bạch nghi vấn nhưng vẫn để lỗi làm sai xếp hạng",
+              },
+            ],
+            answer: "A",
+            primaryCheck: "valid",
+            explanation:
+              "Không tự sửa/xóa; phải xác minh bản ghi có thực sự trùng rồi mới làm sạch và tính toán lại.",
+            why: "Dữ liệu Đỏ yêu cầu dừng kết luận, không có nghĩa tùy ý sửa dữ liệu.",
+            next: "",
+          },
+          {
+            id: "G2-A03",
+            zone: "yellow",
+            source: "Hai đơn vị khác quy mô đường dây",
+            situation:
+              "Số sự cố tuyệt đối là đúng nhưng không phản ánh cùng mức độ xử lý do thiếu đánh giá, phân tích trên cùng một quy mô.",
+            prompt: "Cách chuẩn hóa nào có ý nghĩa quản trị hơn?",
+            options: [
+              {
+                id: "A",
+                text: "Xếp hạng trước theo tổng số sự cố tuyệt đối, sau đó ghi chú quy mô đường dây của từng đơn vị để lãnh đạo tự cân nhắc.",
+                note: "có nêu quy mô nhưng thứ hạng vẫn dùng sai mẫu số",
+              },
+              {
+                id: "B",
+                text: "Quy chuẩn số sự cố theo 100 km đường dây và xem thêm chỉ số SAIDI, điều kiện vận hành của từng đơn vị.",
+                note: "So sánh cùng điều kiện",
+              },
+              {
+                id: "C",
+                text: "Không công bố bất kỳ so sánh nào giữa hai đơn vị cho đến khi toàn bộ điều kiện vận hành và đặc điểm lưới hoàn toàn giống nhau.",
+                note: "quá thận trọng và bỏ mất phép so sánh có thể chuẩn hóa",
+              },
+            ],
+            answer: "B",
+            primaryCheck: "comparable",
+            explanation:
+              "Chuẩn hóa theo quy mô và xem thêm chỉ số tác động giúp phép so sánh công bằng hơn.",
+            why: "Vùng Vàng thường cần một bước chuẩn hóa, không nhất thiết phải dừng toàn bộ phân tích.",
+            next: "",
+          },
+          {
+            id: "G2-A04",
+            zone: "red",
+            source: "Đỏ – Công thức tính tỷ lệ sự cố chưa đúng (12/9 = 133%)",
+            situation:
+              "Chuyên viên ghi tỷ lệ sự cố lặp lại cao, 12/9 = 133%, nhưng không giải thích 12 và 9 đại diện cho gì. Cũng không rõ cách tính công thức này.",
+            prompt:
+              "Trước khi dùng công thức này, điều gì phải được thực hiện?",
+            options: [
+              {
+                id: "A",
+                text: "Dùng tỷ lệ 133% như một cảnh báo sơ bộ vì mức vượt 100% đủ cho thấy vấn đề nghiêm trọng, đồng thời chú thích công thức đang rà soát.",
+                note: "có cảnh báo giới hạn nhưng vẫn để số chưa rõ nghĩa dẫn dắt",
+              },
+              {
+                id: "B",
+                text: "Yêu cầu định nghĩa/mẫu số, truy nguồn và tính lại.",
+                note: "Dừng kết luận đúng cách",
+              },
+              {
+                id: "C",
+                text: "Chuyển tỷ lệ sang biểu đồ màu đỏ, đặt cạnh ngưỡng cảnh báo và yêu cầu các đơn vị giải trình nguyên nhân chênh lệch.",
+                note: "tăng sức thuyết phục nhưng chưa sửa định nghĩa và mẫu số",
+              },
+            ],
+            answer: "B",
+            primaryCheck: "definition",
+            explanation:
+              "Không có định nghĩa và công thức chuẩn thì tỷ lệ chưa có ý nghĩa quản trị.",
+            why: "",
+            next: "Chỉ đưa lại vào báo cáo sau khi công thức được xác nhận.",
+          },
+          {
+            id: "G2-A05",
+            zone: "green",
+            source: "Giá trị SAIDI ngoại lệ đã kiểm chứng",
+            situation:
+              "Giá trị rất cao, nhưng đã khớp nhật ký, biên bản hiện trường và xác nhận đúng số liệu.",
+            prompt:
+              "Phản ứng nào giúp tránh cả 2 sai lầm: có thể sửa/xóa dữ liệu bất thường hoặc tin vào dữ liệu mà không dẫn nguồn kiểm chứng?",
+            options: [
+              {
+                id: "A",
+                text: "Loại giá trị khỏi báo cáo chính vì chênh lệch quá xa mặt bằng chung, chỉ giữ trong phụ lục để tránh làm méo xu hướng.",
+                note: "trình bày gọn hơn nhưng xóa một ngoại lệ đã kiểm chứng",
+              },
+              {
+                id: "B",
+                text: "Giữ giá trị, dẫn hai nguồn kiểm chứng và phân tích sâu nguyên nhân.",
+                note: "Dùng dữ liệu Xanh đúng cách",
+              },
+              {
+                id: "C",
+                text: "Thay giá trị bằng mức trung bình của các tuyến tương đồng, đồng thời chú thích số gốc trong phần thuyết minh để biểu đồ dễ đọc.",
+                note: "vẫn lưu dấu số gốc nhưng làm sai dữ liệu dùng ra quyết định",
+              },
+            ],
+            answer: "B",
+            primaryCheck: "valid",
+            explanation:
+              "Giá trị SAIDI đã xác nhận là dữ liệu Xanh và có thể chính là tín hiệu quan trọng nhất.",
+            why: "Làm sạch dữ liệu không đồng nghĩa với làm cho dữ liệu phải “đẹp”.",
+            next: "",
+          },
+        ],
+        max: 180,
+      };
+      let S = {
+        screen: "welcome",
+        round: 1,
+        index: 0,
+        score: 0,
+        answers: [],
+        zone: null,
+        check: null,
+        action: null,
+        feedback: null,
+        attemptStartedMs: 0,
+        attemptStartedAt: "",
+        attemptFinishedAt: "",
+        attemptDurationMs: 0,
+        resultPublished: false,
+        clockOffsetMs: 0,
+        r1ZoneOrders: {},
+        r1CheckOrders: {},
+        r2ActionOrders: {},
+      };
+      const $ = (id) => document.getElementById(id);
+      function shuf(items) {
+        const result = [...items];
+        for (let index = result.length - 1; index > 0; index -= 1) {
+          const swapIndex = Math.floor(Math.random() * (index + 1));
+          [result[index], result[swapIndex]] = [
+            result[swapIndex],
+            result[index],
+          ];
+        }
+        return result;
+      }
+      function orderedByIds(items, ids) {
+        const byId = new Map(items.map((item) => [item.id, item]));
+        return (ids || []).map((id) => byId.get(id)).filter(Boolean);
+      }
+      function prepareAnswerOrders() {
+        S.r1ZoneOrders = Object.fromEntries(
+          D.r1.map((question) => [
+            question.id,
+            shuf(D.zones.map((item) => item.id)),
+          ]),
+        );
+        S.r1CheckOrders = Object.fromEntries(
+          D.r1.map((question) => [
+            question.id,
+            shuf(D.checks.map((item) => item.id)),
+          ]),
+        );
+        S.r2ActionOrders = Object.fromEntries(
+          D.r2.map((question) => [
+            question.id,
+            shuf(question.options.map((item) => item.id)),
+          ]),
+        );
+      }
+      function nowMs() {
+        return Date.now() + S.clockOffsetMs;
+      }
+      function startAttempt() {
+        const startedMs = nowMs();
+        S.attemptStartedMs = startedMs;
+        S.attemptStartedAt = new Date(startedMs).toISOString();
+        S.attemptFinishedAt = "";
+        S.attemptDurationMs = 0;
+        S.resultPublished = false;
+        updateElapsedClock();
+      }
+      function finishAttempt() {
+        if (!S.attemptStartedMs) startAttempt();
+        const finishedMs = nowMs();
+        S.attemptFinishedAt = new Date(finishedMs).toISOString();
+        S.attemptDurationMs = Math.max(
+          0,
+          Math.round(finishedMs - S.attemptStartedMs),
+        );
+        updateElapsedClock();
+      }
+      function formatDuration(milliseconds) {
+        const totalSeconds = Math.max(
+          0,
+          Math.floor((Number(milliseconds) || 0) / 1000),
+        );
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        const base =
+          String(minutes).padStart(2, "0") +
+          ":" +
+          String(seconds).padStart(2, "0");
+        return hours
+          ? String(hours).padStart(2, "0") + ":" + base
+          : base;
+      }
+      function updateElapsedClock() {
+        const elapsed = S.attemptStartedMs
+          ? S.attemptFinishedAt
+            ? S.attemptDurationMs
+            : nowMs() - S.attemptStartedMs
+          : 0;
+        $("elapsed").textContent = formatDuration(elapsed);
+      }
+      function show(id) {
+        document
+          .querySelectorAll(".screen")
+          .forEach((x) => x.classList.remove("on"));
+        $(id).classList.add("on");
+        S.screen = id;
+        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        requestAnimationFrame(() => {
+          window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        });
+      }
+      function zone(id) {
+        return D.zones.find((x) => x.id === id);
+      }
+      function check(id) {
+        return D.checks.find((x) => x.id === id);
+      }
+      function init() {
+        $("heroLights").innerHTML = D.zones
+          .map(
+            (z) =>
+              '<div class="light"><span class="dot" style="background:' +
+              z.accent +
+              '">' +
+              z.icon +
+              "</span>" +
+              z.short +
+              "</div>",
+          )
+          .join("");
+        $("caseTitle").textContent = D.caseBrief.title;
+        $("caseRole").textContent = D.caseBrief.role;
+        $("caseGrid").innerHTML =
+          "<article><b>BỐI CẢNH</b><p>" +
+          D.caseBrief.what +
+          "</p></article><article><b>YÊU CẦU</b><p>" +
+          D.caseBrief.why +
+          "</p></article><article><b>NHIỆM VỤ</b><p>" +
+          D.caseBrief.mission +
+          "</p></article>";
+        $("zoneGuide").innerHTML = D.zones
+          .map(
+            (z) =>
+              '<article style="--c:' +
+              z.accent +
+              '"><i>' +
+              z.icon +
+              "</i><h3>" +
+              z.name +
+              "</h3><p>" +
+              z.description +
+              "</p><b>" +
+              z.decision +
+              "</b></article>",
+          )
+          .join("");
+        $("memoryZones").innerHTML = $("zoneGuide").innerHTML;
+      }
+      init();
+      updateElapsedClock();
+      setInterval(updateElapsedClock, 1000);
+      function start() {
+        S.name = $("name").value || "Học viên";
+        prepareAnswerOrders();
+        startAttempt();
+        show("guide");
+      }
+      function intro(r) {
+        S.round = r;
+        S.index = 0;
+        S.zone = null;
+        S.check = null;
+        S.action = null;
+        show("intro");
+        $("introN").textContent = "0" + r;
+        $("introSmall").textContent = "VÒNG " + r;
+        $("introTitle").textContent =
+          r === 1
+            ? "Xác định đèn dữ liệu và kiểm tra “Chốt” dữ liệu"
+            : "Chọn cách xử lý dữ liệu";
+        $("introText").textContent =
+          r === 1
+            ? "Tổng cộng 8 dữ liệu – Xác định màu và chốt dữ liệu dẫn đến quyết định màu đó."
+            : "Dùng đúng dữ liệu, khai thác đúng giới hạn và xác minh đúng chỗ.";
+        $("introButton").textContent =
+          r === 1 ? "Bắt đầu chơi →" : "Bắt đầu vòng 2 →";
+      }
+      function play() {
+        show("game");
+        render();
+      }
+      function progress() {
+        return S.round === 1
+          ? ((S.index + 1) / D.r1.length) * 100
+          : ((S.index + 1) / D.r2.length) * 100;
+      }
+      function renderTopBar() {
+        $("roundLabel").textContent = "Vòng " + S.round;
+        $("stepLabel").textContent =
+          S.round === 1
+            ? "Thẻ " + (S.index + 1) + "/" + D.r1.length
+            : "Tình huống " + (S.index + 1) + "/" + D.r2.length;
+        $("score").textContent = S.score;
+        $("bar").style.width = progress() + "%";
+      }
+      function zbuttons(orderIds) {
+        return (
+          '<div class="zoneBtns">' +
+          orderedByIds(D.zones, orderIds)
+            .map(
+              (z) =>
+                '<button style="--c:' +
+                z.accent +
+                '" class="' +
+                (S.zone === z.id ? "sel" : "") +
+                '" onclick="S.zone=\'' +
+                z.id +
+                "';render()\"><b>" +
+                z.icon +
+                "</b><span>" +
+                z.short +
+                "</span><small>" +
+                z.decision +
+                "</small></button>",
+            )
+            .join("") +
+          "</div>"
+        );
+      }
+      function cbuttons(orderIds) {
+        return (
+          '<div class="checks">' +
+          orderedByIds(D.checks, orderIds)
+            .map(
+              (c) =>
+                '<button class="' +
+                (S.check === c.id ? "sel" : "") +
+                '" onclick="S.check=\'' +
+                c.id +
+                "';render()\"><b>" +
+                c.name +
+                "</b><br><small>" +
+                c.question +
+                "</small></button>",
+            )
+            .join("") +
+          "</div>"
+        );
+      }
+      function render() {
+        renderTopBar();
+        if (S.round === 1) r1();
+        else r2();
+      }
+      function r1() {
+        let q = D.r1[S.index];
+        $("stage").innerHTML =
+          '<div class="layout"><article class="question"><small>' +
+          q.source +
+          "</small><p>" +
+          q.context +
+          "</p><small>Mục đích sử dụng</small><blockquote>" +
+          q.intendedUse +
+          "</blockquote><h2>" +
+          q.prompt +
+          '</h2></article><div class="panel"><h3>1. Dữ liệu thuộc vùng nào?</h3>' +
+          zbuttons(S.r1ZoneOrders[q.id]) +
+          "<h3>2. Chốt kiểm tra nào đang cần xem xét?</h3>" +
+          cbuttons(S.r1CheckOrders[q.id]) +
+          '<button class="primary" onclick="submit1()">Chốt đèn tín hiệu</button></div></div>';
+      }
+      let selectionNoticeReturnFocus = null;
+      function showSelectionNotice() {
+        const missing = [];
+        if (S.round === 1) {
+          if (!S.zone) missing.push("chọn vùng Xanh, Vàng hoặc Đỏ");
+          if (!S.check) missing.push("chọn chốt dữ liệu quyết định màu");
+        } else if (!S.action) {
+          missing.push("chọn một cách xử lý dữ liệu");
+        }
+        if (!missing.length) return false;
+        selectionNoticeReturnFocus = document.activeElement;
+        $("selectionNoticeMessage").textContent =
+          "Để chốt đèn tín hiệu, bạn cần " + missing.join(" và ") + ".";
+        $("selectionNotice").classList.add("on");
+        $("selectionNoticeClose").focus();
+        return true;
+      }
+      function closeSelectionNotice() {
+        $("selectionNotice").classList.remove("on");
+        if (selectionNoticeReturnFocus instanceof HTMLElement) {
+          selectionNoticeReturnFocus.focus();
+        }
+      }
+      function submit1() {
+        if (showSelectionNotice()) return;
+        let q = D.r1[S.index],
+          zc = S.zone === q.answer,
+          cc = S.check === q.primaryCheck,
+          add = (zc ? 5 : 0) + (cc ? 5 : 0),
+          needsDecisionContextTitle = q.id === "G2-04" || q.id === "G2-05";
+        S.score += add;
+        S.answers.push({
+          round: 1,
+          questionId: q.id,
+          correct: zc && cc,
+          selectedZone: S.zone,
+          selectedCheck: S.check,
+          expectedZone: q.answer,
+          expectedCheck: q.primaryCheck,
+          points: add,
+        });
+        feedback(
+          zc && cc,
+          needsDecisionContextTitle
+            ? "Cần xét theo quyết định đang phục vụ"
+            : zc && cc
+            ? "Đúng màu và đúng chốt dữ liệu"
+            : zc
+              ? "Đúng màu, chưa đúng lý do chính"
+              : "Cần xét theo quyết định đang phục vụ",
+          q.explanation,
+          q.why,
+          q.next,
+          "Đèn " +
+            zone(q.answer).short +
+            " – Chốt “" +
+            check(q.primaryCheck).name +
+            "”",
+          add,
+          "next",
+        );
+      }
+      function r2() {
+        let q = D.r2[S.index];
+        $("stage").innerHTML =
+          '<div class="layout"><article class="question"><small>' +
+          zone(q.zone).short +
+          " · " +
+          q.source +
+          "</small><blockquote>" +
+          q.situation +
+          "</blockquote><h2>" +
+          q.prompt +
+          '</h2></article><div class="panel"><h3>1. Cách xử lý dữ liệu</h3><div class="actions">' +
+          orderedByIds(q.options, S.r2ActionOrders[q.id])
+            .map(
+              (o, optionIndex) =>
+                '<button class="' +
+                (S.action === o.id ? "sel" : "") +
+                '" onclick="S.action=\'' +
+                o.id +
+                "';render()\"><b>" +
+                (optionIndex + 1) +
+                "</b><span>" +
+                o.text +
+                "<br><small>" +
+                o.note +
+                "</small></span></button>",
+            )
+            .join("") +
+          '</div><button class="primary" onclick="submit2()">Chốt cách xử lý</button></div></div>';
+      }
+      function submit2() {
+        if (showSelectionNotice()) return;
+        let q = D.r2[S.index],
+          ac = S.action === q.answer,
+          orderedOptions = orderedByIds(q.options, S.r2ActionOrders[q.id]),
+          correctOption = q.options.find((option) => option.id === q.answer),
+          correctDisplayIndex =
+            orderedOptions.findIndex((option) => option.id === q.answer) + 1,
+          add = ac ? 20 : 0;
+        S.score += add;
+        S.answers.push({
+          round: 2,
+          questionId: q.id,
+          correct: ac,
+          selectedAction: S.action,
+          expectedAction: q.answer,
+          points: add,
+        });
+        feedback(
+          ac,
+          ac ? "Đúng cách xử lý dữ liệu" : "Cách xử lý chưa bảo vệ quyết định",
+          q.explanation,
+          q.why,
+          q.next,
+          "Phương án " +
+            correctDisplayIndex +
+            ": " +
+            correctOption.text,
+          add,
+          "next",
+        );
+      }
+      function feedback(ok, title, what, why, next, expected, add, action) {
+        S.feedback = { action };
+        $("modalbox").className = "modalbox " + (ok ? "good" : "bad");
+        $("modalIco").textContent = ok ? "✓" : "×";
+        $("modalTitle").textContent = title;
+        $("modalWhat").textContent = what;
+        $("modalWhy").textContent = why;
+        $("modalNext").textContent = next;
+        $("modalWhy").hidden = !why;
+        $("modalNext").hidden = !next;
+        $("modalExpected").textContent = expected;
+        $("modal").classList.add("on");
+      }
+      function modalNext() {
+        $("modal").classList.remove("on");
+        let a = S.feedback.action;
+        if (a === "next") {
+          S.index++;
+          S.zone = S.check = S.action = null;
+          if (S.round === 1 && S.index >= D.r1.length) intro(2);
+          else if (S.round === 2 && S.index >= D.r2.length) finish();
+          else render();
+        } else finish();
+      }
+      function finish() {
+        finishAttempt();
+        show("result");
+        let p = Math.round((S.score / D.max) * 100),
+          l =
+            p >= 90
+              ? [
+                  "Người gác cổng dữ liệu",
+                  "Bạn phân vùng cân bằng và biết dùng đúng phần dữ liệu có căn cứ.",
+                ]
+              : p >= 72
+                ? [
+                    "Đọc dữ liệu có điều kiện",
+                    "Bạn có phản xạ tốt; cần tinh hơn ở ranh giới Vàng – Đỏ.",
+                  ]
+                : [
+                    "Cần luyện lại đèn tín hiệu",
+                    "Hãy phân biệt phần có thể dùng, phần cần giới hạn và phần phải xác minh.",
+                  ];
+        $("ring").style.setProperty("--d", p * 3.6 + "deg");
+        $("percent").textContent = p + "%";
+        $("points").textContent = S.score + "/" + D.max + " điểm";
+        $("duration").textContent = formatDuration(S.attemptDurationMs);
+        $("level").textContent = l[0];
+        $("levelNote").textContent = l[1];
+        let r1 = S.answers.filter((a) => a.round === 1 && a.correct).length,
+          r2 = S.answers.filter((a) => a.round === 2 && a.correct).length;
+        $("stats").innerHTML =
+          "<p>Vòng 1: <b>" +
+          r1 +
+          "/" +
+          D.r1.length +
+          "</b></p><p>Vòng 2: <b>" +
+          r2 +
+          "/" +
+          D.r2.length +
+          "</b></p>";
+        publishResult();
+      }
+      function publishResult() {
+        if (S.resultPublished) return;
+        const scorePercent = Math.min(100, Math.round((S.score / D.max) * 100));
+        const round1Correct = S.answers.filter(
+          (answer) => answer.round === 1 && answer.correct,
+        ).length;
+        const round2Correct = S.answers.filter(
+          (answer) => answer.round === 2 && answer.correct,
+        ).length;
+        const payload = {
+          playerName: S.name || "",
+          groupName: "",
+          score: S.score,
+          maxScore: D.max,
+          rankLabel:
+            scorePercent >= 90
+              ? "Xuất sắc"
+              : scorePercent >= 72
+                ? "Đạt"
+                : "Cần luyện lại",
+          values: {
+            scorePercent,
+            round1Correct,
+            round2Correct,
+            round1Total: D.r1.length,
+            round2Total: D.r2.length,
+            gameTitle: "Xác định đúng vùng dữ liệu trước khi quyết định",
+          },
+          answers: S.answers,
+          meta: {
+            source: "ql02-game-02",
+            version: "v1.1.0",
+            evnspcTnkhTiming: {
+              startedAt: S.attemptStartedAt,
+              finishedAt: S.attemptFinishedAt,
+              durationMs: S.attemptDurationMs,
+              durationSeconds: Math.round(S.attemptDurationMs / 1000),
+              calculation: "game_entry_to_first_completion",
+            },
+          },
+        };
+
+        S.resultPublished = true;
+        try {
+          window.parent?.postMessage(
+            {
+              type: "game-result-ready",
+              gameId: "ql02-game-02",
+              payload,
+            },
+            window.location.origin,
+          );
+          if (typeof BroadcastChannel !== "undefined") {
+            const broadcast = new BroadcastChannel("ql02-game-02-results");
+            broadcast.postMessage({
+              type: "game-result-ready",
+              gameId: "ql02-game-02",
+              payload,
+            });
+            broadcast.close();
+          }
+        } catch (error) {
+          console.warn("Không gửi được kết quả QL02 Game 02", error);
+        }
+      }
+      function visibleAnswerOptions() {
+        if (S.screen !== "game") return { primary: [], secondary: [] };
+        if (S.round === 1) {
+          const question = D.r1[S.index];
+          return {
+            primary: orderedByIds(D.zones, S.r1ZoneOrders[question.id]).map(
+              (option) => option.short,
+            ),
+            secondary: orderedByIds(D.checks, S.r1CheckOrders[question.id]).map(
+              (option) => option.name,
+            ),
+          };
+        }
+        if (S.round === 2) {
+          const question = D.r2[S.index];
+          return {
+            primary: orderedByIds(
+              question.options,
+              S.r2ActionOrders[question.id],
+            ).map((option) => option.text),
+            secondary: [],
+          };
+        }
+        return { primary: [], secondary: [] };
+      }
+      window.render_game_to_text = () => {
+        const totalSteps = D.r1.length + D.r2.length;
+        return JSON.stringify({
+          screen: S.screen,
+          playerName: S.name || "",
+          round: S.round,
+          prompt:
+            S.screen === "game"
+              ? $("stepLabel")?.textContent || ""
+              : document.querySelector(".screen.on h1")?.textContent || "",
+          visibleOptions: visibleAnswerOptions(),
+          progress: {
+            current: Math.min(totalSteps, S.answers.length),
+            total: totalSteps,
+          },
+          stats: {
+            tnkh: S.score,
+            maxScore: D.max,
+          },
+          result: S.screen === "result" ? S.score : null,
+          modalOpen: $("modal").classList.contains("on"),
+          selectionNotice: {
+            open: $("selectionNotice").classList.contains("on"),
+            message: $("selectionNoticeMessage").textContent || "",
+          },
+        });
+      };
+      window.advanceTime = (milliseconds) => {
+        const delta = Math.max(0, Number(milliseconds) || 0);
+        S.clockOffsetMs += delta;
+        updateElapsedClock();
+        return S.clockOffsetMs;
+      };
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && $("selectionNotice").classList.contains("on")) {
+          closeSelectionNotice();
+        }
+      });
+    </script>
+  </body>
+</html>

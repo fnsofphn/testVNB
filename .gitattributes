@@ -1,0 +1,19 @@
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.mp3 binary
+*.mp4 binary
+*.mov binary
+*.xlsx binary
+*.pptx filter=lfs diff=lfs merge=lfs -text
+*.tmp filter=lfs diff=lfs merge=lfs -text

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Sổ tay giảng viên · CĐ02b ? Điều hành nội bộ & TNKH · QL01A</title>
+<style>
+:root{
+  --red:#C00000;--red-d:#8f0000;--ink:#1a1a1a;--grey:#565656;--lgrey:#8a8a8a;
+  --line:#e7e7e8;--bg:#f4f4f5;--card:#fff;--gold:#B8860B;--green:#1F6F54;
+  --blue:#1F5F8B;--violet:#6B4E9E;--teal:#127475;
+  --sh:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.05);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.62;-webkit-font-smoothing:antialiased}
+.wrap{display:flex;min-height:100vh}
+aside{width:296px;flex:0 0 296px;background:#fff;border-right:1px solid var(--line);
+  position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{padding:20px 18px 14px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:5}
+.brand .k{display:flex;align-items:center;gap:10px}
+.logo{width:36px;height:36px;border-radius:9px;background:var(--red);display:grid;place-items:center;color:#fff;font-weight:800}
+.brand h1{font-size:14px;margin:0;font-weight:800;letter-spacing:.02em}
+.brand p{margin:2px 0 0;font-size:11.5px;color:var(--lgrey)}
+.nav{padding:6px 0 60px}
+.nav-sec{padding:13px 18px 4px;font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--lgrey)}
+.nav a{display:flex;gap:9px;align-items:baseline;padding:7px 18px;font-size:13px;color:var(--ink);border-left:3px solid transparent;cursor:pointer;user-select:none}
+.nav a:hover{background:#faf6f6}
+.nav a.active{background:#fbeaea;border-left-color:var(--red);color:var(--red);font-weight:700}
+.nav a .sn{flex:0 0 24px;font-variant-numeric:tabular-nums;color:var(--lgrey);font-size:12px}
+.nav a.active .sn{color:var(--red)}
+.nav a .tt{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav a .dur{font-size:11px;color:var(--lgrey);font-variant-numeric:tabular-nums}
+main{flex:1;min-width:0;max-width:940px;margin:0 auto;padding:34px 42px 100px}
+.eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--red);margin-bottom:6px}
+h2.page{font-size:27px;margin:0 0 6px;font-weight:800;line-height:1.2}
+.sub{color:var(--grey);font-size:15px;margin:0 0 20px}
+.metabar{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 24px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:5px 11px;border-radius:999px;background:#f0f0f0;color:var(--grey)}
+.chip b{color:var(--ink)}
+.chip.red{background:#fbeaea;color:var(--red)}.chip.green{background:#e9f5ef;color:var(--green)}
+.chip.gold{background:#fbf3e2;color:var(--gold)}.chip.blue{background:#e9f1f7;color:var(--blue)}
+.chip.violet{background:#efe9f6;color:var(--violet)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:16px 0;box-shadow:var(--sh)}
+.card h3{margin:0 0 12px;font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px}
+.card h3 .ic{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:12px;color:#fff}
+.card.content h3 .ic{background:var(--red)}.card.speak h3 .ic{background:var(--ink)}
+.card.act h3 .ic{background:var(--green)}.card.guide h3 .ic{background:var(--gold)}
+.card ul{margin:0;padding-left:20px}.card li{margin:5px 0}
+.card .lead{margin:0 0 12px;color:#2f2f2f;font-size:14.5px}
+.card .mini-title{margin:14px 0 7px;font-size:13px;font-weight:900;color:var(--red-d);text-transform:uppercase;letter-spacing:.04em}
+.card .bullet-card{margin:8px 0 14px;padding:12px 14px;border-radius:12px;background:#fafafa;border:1px solid var(--line)}
+.card .bullet-card ul{margin:0}
+.card .question-box{margin:12px 0;padding:13px 15px;border-radius:12px;background:#f7fbff;border:1px solid #cfe1ef;color:#173a54}
+.card .question-box b{color:var(--blue)}
+.card .note-box{margin:12px 0;padding:13px 15px;border-radius:12px;background:#fff8e6;border:1px solid #efd99c;color:#5a4a1a}
+.card .note-box b{color:var(--gold)}
+.message-box{margin:16px 0;border:1px solid #f0c36d;border-left:6px solid var(--gold);background:linear-gradient(135deg,#fffaf0,#fff);box-shadow:var(--sh);padding:16px 18px;border-radius:12px}
+.message-box .message-title{font-weight:900;color:var(--red-d);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px}
+.message-box p{margin:0;color:var(--ink);font-weight:650}
+td .strong-line{font-weight:800}
+.speak p{margin:0;color:#2c2c2c;font-size:14.5px;white-space:pre-line}
+.act p{margin:0;font-size:14.5px;white-space:pre-line}
+.callout{border-left:4px solid var(--gold);background:#fdf9ef;padding:10px 14px;border-radius:0 8px 8px 0;margin:14px 0;font-size:13.5px;color:#5a4a1a}
+.callout b{color:var(--gold)}
+.slidenav{display:flex;justify-content:space-between;gap:12px;margin-top:26px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:.15s;font-family:inherit}
+.btn.primary{background:var(--red);color:#fff}.btn.primary:hover{background:var(--red-d)}
+.btn.ghost{background:#fff;border:1.5px solid var(--line);color:var(--ink)}.btn.ghost:hover{border-color:#c9c9c9}
+.btn:disabled{opacity:.4;cursor:default}
+table{width:100%;border-collapse:collapse;margin:8px 0;font-size:13px}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--red);color:#fff;font-weight:700;font-size:12px}
+tr.part td{background:#fbeaea;font-weight:800;color:var(--red)}
+tr.brk td{background:#fdf6e3;font-weight:800;color:var(--gold)}
+tr.tot td{background:var(--red);color:#fff;font-weight:800}
+td.c{text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
+.loai{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px}
+.loai.Giảng,.loai.GiảngTH,.loai.GiảngDemo{background:#eef;color:#3a3a8a}
+.loai.Demo{background:#fbf3e2;color:var(--gold)}
+.loai.Thựchành{background:#e9f5ef;color:var(--green)}
+.loai.Đúckết{background:#f0f0f0;color:var(--grey)}
+.grid{display:grid;grid-template-columns:1fr;gap:16px}
+.gcard{border-radius:14px;padding:20px 22px;color:#fff;box-shadow:var(--sh)}
+.gcard.v{background:linear-gradient(135deg,#1F5F8B,#144463)}
+.gcard.g{background:linear-gradient(135deg,#C00000,#7d0000)}
+.gcard.d{background:linear-gradient(135deg,#6B4E9E,#463168)}
+.gcard.t{background:linear-gradient(135deg,#127475,#0b4a4b)}
+.gcard h3{margin:0 0 4px;font-size:18px;font-weight:800}
+.gcard .tag{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.85}
+.gcard ol{margin:12px 0 0;padding-left:20px}.gcard li{margin:6px 0;font-size:14px}
+.gcard .foot{margin-top:12px;font-size:12.5px;opacity:.92;border-top:1px solid rgba(255,255,255,.25);padding-top:10px}
+/* prompt cards */
+.pcard{background:#fff;border:1px solid var(--line);border-radius:12px;margin:14px 0;overflow:hidden;box-shadow:var(--sh)}
+.pcard .ph{background:#faf6f6;padding:12px 18px;font-weight:800;font-size:15px;color:var(--red);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:9px}
+.pcard .ph .no{width:26px;height:26px;border-radius:50%;background:var(--red);color:#fff;display:grid;place-items:center;font-size:13px}
+.pcard .pb{padding:6px 18px 14px}
+.prow{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid #f0f0f0;font-size:14px}
+.prow:last-child{border-bottom:none}
+.prow .k{flex:0 0 168px;font-weight:700;color:var(--grey);font-size:13px}
+.prow .v{flex:1;white-space:pre-line}
+.prow .v code,.mono{font-family:"SF Mono",Consolas,monospace;font-size:12.5px}
+.promptbox{background:#f7f7f9;border:1px solid var(--line);border-radius:9px;padding:12px 14px;font-family:"SF Mono",Consolas,monospace;font-size:12.5px;white-space:pre-wrap;color:#2a2a2a;line-height:1.55;margin:6px 0}
+/* good/bad compare */
+.cmp{display:grid;grid-template-columns:1fr;gap:14px;margin:14px 0}
+.cmp .col{border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.cmp .col .h{padding:10px 16px;font-weight:800;font-size:14px;color:#fff;display:flex;align-items:center;gap:8px}
+.cmp .bad .h{background:var(--red)}.cmp .good .h{background:var(--green)}
+.cmp .col .b{padding:14px 16px;background:#fff}
+.cmp .col .b p{margin:0 0 8px;font-size:14px}
+.cmp .col .b p:last-child{margin-bottom:0}
+/* quiz */
+.progress{height:8px;background:#e6e6e6;border-radius:999px;overflow:hidden;margin:10px 0 22px}
+.progress>i{display:block;height:100%;background:var(--red);transition:width .4s}
+.q-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:24px;box-shadow:var(--sh)}
+.q-meta{font-size:12px;color:var(--lgrey);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.q-ref{font-size:12px;color:var(--red);font-weight:700;margin-bottom:12px;cursor:pointer}
+.q-text{font-size:17px;font-weight:700;margin:0 0 18px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:13px 16px;border:2px solid var(--line);border-radius:11px;margin:9px 0;font-size:14.5px;cursor:pointer;background:#fff;transition:.12s;font-family:inherit}
+.opt:hover{border-color:#c9c9c9}
+.opt .l{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#f0f0f0;color:#666;font-weight:800;font-size:12px;margin-right:10px;vertical-align:middle}
+.opt.correct{border-color:var(--green);background:#e9f5ef}.opt.correct .l{background:var(--green);color:#fff}
+.opt.wrong{border-color:var(--red);background:#fbeaea}.opt.wrong .l{background:var(--red);color:#fff}
+.opt.dim{opacity:.5}
+.q-why{margin-top:16px;padding:13px 16px;border-radius:10px;background:#f6faf8;border:1px solid #d9ece4;font-size:14px;color:#264c3d;display:none}
+.q-why.show{display:block}.q-why b{color:var(--green)}
+.result{text-align:center;padding:26px}
+.result .score{font-size:56px;font-weight:900;color:var(--red);line-height:1}
+.result .lab{font-size:18px;font-weight:800;margin-top:6px}
+.rev-item{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:9px 0;font-size:13.5px;text-align:left}
+.rev-item .ok{color:var(--green);font-weight:700}.rev-item .no{color:var(--red);font-weight:700}
+.menuBtn{display:none}
+@media(max-width:880px){
+  aside{position:fixed;left:-310px;z-index:40;transition:.25s;box-shadow:0 0 40px rgba(0,0,0,.2)}
+  aside.open{left:0}
+  .menuBtn{display:inline-flex;position:fixed;top:12px;left:12px;z-index:50;background:var(--red);color:#fff;border:none;border-radius:9px;padding:9px 12px;font-size:16px;cursor:pointer;box-shadow:var(--sh)}
+  main{padding:60px 18px 90px}
+  .backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:35}.backdrop.open{display:block}
+  .prow{flex-direction:column;gap:2px}.prow .k{flex:none}
+}
+</style>
+</head>
+<body>
+<button class="menuBtn" onclick="toggleNav()">☰</button>
+<div class="backdrop" id="backdrop" onclick="toggleNav()"></div>
+<div class="wrap">
+  <aside id="aside">
+    <div class="brand"><div class="k"><div class="logo">AI</div>
+      <div><h1>SỔ TAY GIẢNG VIÊN</h1><p>CĐ01 · Ứng dụng AI · QL01A</p></div></div></div>
+    <nav class="nav" id="nav"></nav>
+  </aside>
+  <main id="main"></main>
+</div>
+<script>
+const DATA={"slides":[{"n":1,"title":"MỤC LỤC CHUYÊN ĐỀ","part":"Mở đầu","loai":"Giảng","dur":5,"content":["1. TNKH trong ngành điện — và sự khác biệt với dịch vụ khách hàng","2. Ba hành trình khách hàng — điểm chạm, điểm đau, \"điểm đau cơ chế\"","3. Vai trò người quản lý cấp Điện lực trong định hình TNKH","4. Video tình huống + Gamification \"Điều hành & TNKH\"","5. Thảo luận nhóm — đề xuất giải pháp & cam kết 30 ngày"],"loithoai":"Đây là lộ trình năm nội dung. Ta bắt đầu bằng việc làm rõ một khái niệm mà ai cũng nghe quen nhưng dễ hiểu lệch — trải nghiệm khách hàng là gì, và nó khác dịch vụ khách hàng ở chỗ nào; phân biệt được hai cái này là chìa khóa của cả chuyên đề. Sau đó ta đi qua ba hành trình khách hàng điển hình của ngành điện, nhận diện đâu là điểm chạm, đâu là điểm đau, và một phát hiện quan trọng: phần lớn điểm đau không phải do nhân viên kém, mà do cơ chế. Nội dung ba trả lời câu hỏi trực tiếp nhất với vai trò của anh/chị: người Trưởng/Phó Điện lực tác động đến trải nghiệm khách hàng bằng cách nào — qua nhịp điều hành và chất lượng thực thi. Rồi ta xem một video tình huống theo chân một yêu cầu của khách đi qua các khâu nội bộ, và chơi một mô phỏng: anh/chị ra quyết định điều hành và quan sát ngay tác động lên chỉ số trải nghiệm khách hàng. Cuối cùng, sáu mươi phút thảo luận nhóm để mỗi đơn vị đề xuất giải pháp gắn điều hành nội bộ với TNKH và cam kết một thay đổi.","hoatdong":"","callouts":["\"Khách hàng không đánh giá quy trình của ta — khách hàng đánh giá cảm xúc của họ.\""],"tables":[]},{"n":2,"title":"KẾT NỐI TỪ CHUYÊN ĐỀ 2a","part":"Mở đầu","loai":"Giảng","dur":5,"content":["CĐ2a: Xây cơ chế điều hành — nhịp Ngày/Tuần/Tháng, phân tầng, tam giác trách nhiệm (nhìn vào trong)","CĐ2b: Đo cơ chế đó bằng cảm nhận khách hàng — TNKH là thước đo (nhìn ra ngoài)","Mũi tên: Cơ chế tốt bên trong → Trải nghiệm tốt bên ngoài"],"loithoai":"Nối lại một nhịp với Chuyên đề 2a để thấy mạch liền. Ở 2a, toàn bộ công cụ anh/chị học đều hướng vào bên trong đơn vị: dựng nhịp giao ban, phân tầng để biết giữ gì giao gì, lập tam giác trách nhiệm để việc liên tổ không rơi vào vùng xám. Đó là xây cơ chế. Nhưng xây cơ chế để làm gì? Không phải để nội bộ gọn cho vui, mà để cái gọn đó khách hàng cảm nhận được. Chuyên đề 2b lật mặt còn lại của tấm huy chương: ta lấy trải nghiệm khách hàng làm thước đo để kiểm tra xem cơ chế điều hành của mình có thực sự tốt không. Có một câu tôi muốn anh/chị giữ suốt buổi: nếu cơ chế điều hành trông có vẻ ổn nhưng khách vẫn phàn nàn, thì cơ chế đó chưa đủ tốt. Ở 2a, trải nghiệm khách hàng là sợi chỉ đỏ chạy ngầm; sang 2b, nó là tâm điểm ta soi vào. Cùng một việc điều hành, nhưng nhìn từ hai phía — bên trong là cơ chế, bên ngoài là cảm nhận.","hoatdong":"","callouts":["Ở 2a, TNKH là sợi chỉ đỏ. Ở 2b, TNKH là tâm điểm."],"tables":[]},{"n":3,"title":"VÌ SAO CHUYÊN ĐỀ NÀY QUAN TRỌNG","part":"Mở đầu","loai":"Giảng","dur":5,"content":["3 thực tế + callout","Khách so sánh chéo ngành → quen dịch vụ ngân hàng, viễn thông nhanh–minh bạch, mang kỳ vọng đó sang ngành điện","Hầu hết phàn nàn KH không phải về kỹ thuật → mà về không được thông báo, phối hợp chậm, phải hỏi mới biết","Điểm đau nằm ở \"giữa các khâu\" → nơi không tổ nào sở hữu trọn vẹn → chính là vùng người quản lý phải thiết kế"],"loithoai":"Vì sao nội dung này quan trọng với riêng vai trò của anh/chị? Ba thực tế. Thứ nhất, khách hàng ngày nay đánh giá ngành điện bằng thước đo họ mang từ nơi khác sang: họ quen đặt xe, chuyển khoản, mua hàng online — mọi thứ nhanh, minh bạch, chủ động báo tin. Khi sang ngành điện mà phải gọi nhiều lần mới biết tiến độ, họ thấy tụt hậu, dù về kỹ thuật ta làm đúng. Thứ hai, và đây là con số đáng suy nghĩ: phần lớn phàn nàn của khách — khoảng bảy mươi đến bảy mươi lăm phần trăm — không phải về chất lượng kỹ thuật, mà về việc không được thông báo, phối hợp chậm, phải chủ động hỏi mới biết chuyện của chính mình. Nghĩa là gốc của phàn nàn nằm ở điều hành, không nằm ở tay nghề. Thứ ba, những điểm đau lớn nhất thường không nằm gọn trong một tổ, mà nằm ở khoảng giữa các khâu — chỗ hồ sơ chuyển từ tổ này sang tổ kia, chỗ không ai sở hữu trọn vẹn. Mà khoảng giữa đó chính là nơi người quản lý — chứ không phải nhân viên — có thẩm quyền thiết kế. Thông điệp gói trong một câu: nâng cao trải nghiệm khách hàng phần lớn không đòi thêm người hay thêm máy, mà đòi thiết kế lại cơ chế điều hành. Và đó đúng là việc của anh/chị.\n\nNỘI DUNG 1: TNKH trong ngành điện & sự khác biệt với dịch vụ khách hàng\n\nHai câu chuyện · Ba yếu tố · Ba đặc trưng · Vì sao \"làm đúng quy trình\" mà khách vẫn chưa hài lòng\n\nVào Nội dung 1. Trước khi bàn cách làm, ta phải thống nhất một khái niệm nền: trải nghiệm khách hàng thật ra là gì, và vì sao nó không đồng nghĩa với dịch vụ khách hàng. Cách tiếp cận dễ nhất không phải qua định nghĩa khô khan, mà qua hai câu chuyện có thật — hai khách hàng, cùng một việc, nhưng ra về với hai cảm nhận trái ngược.","hoatdong":"","callouts":["Nâng cao TNKH phần lớn không cần thêm nhân lực hay công nghệ — mà cần thiết kế lại cơ chế điều hành."],"tables":[]},{"n":4,"title":"HAI CÂU CHUYỆN KHÁCH HÀNG","part":"NỘI DUNG 1 · TNKH trong ngành điện & khác biệt với dịch vụ khách hàng","loai":"Demo","dur":3,"content":["Cùng đầu ra: được cấp điện. Khác trải nghiệm do quá trình và cảm xúc khác nhau."],"loithoai":"Hai câu chuyện. Chị N là chủ tạp hóa, xin cấp điện cho mặt bằng mới. Chị nộp hồ sơ qua kênh trực tuyến, vài phút sau có tin nhắn xác nhận kèm mã hồ sơ. Sáng hôm sau nhân viên gọi hẹn khảo sát mười giờ, và đúng mười giờ có mặt, khảo sát ba mươi phút, giải thích rõ các bước tiếp theo. Hai ngày sau có thông báo chi phí, thanh toán ngay trên ứng dụng. Tuần sau thợ đến đúng hẹn, còn báo trước ba mươi phút. Đóng điện xong có biên bản, có số hotline. Chị N nhận xét: chuyên nghiệp. Anh H cũng xin cấp điện mới, cùng khoảng thời gian, địa bàn ngay cạnh chị N. Nhưng anh nộp tại quầy, không nhận được xác nhận, phải gọi lên hỏi mới biết hồ sơ đã tiếp nhận. Hẹn khảo sát ba ngày nhưng bốn ngày mới có người đến. Nhân viên lịch sự nhưng không nói rõ bước tiếp theo. Anh phải gọi hai lần mới biết chi phí. Ngày thi công, thợ đến trễ ba giờ mà không báo — anh đã gọi thợ nội thất chờ sẵn, họ phải về và tính tiền trống buổi. Điện vẫn được đóng, nhưng anh H nói một câu rất đáng nhớ: \"việc thì xong nhưng không có cảm giác được quan tâm\". Xin anh/chị lưu ý: cùng một đầu ra — cả hai đều được cấp điện. Khác biệt duy nhất nằm ở trải nghiệm dọc đường. Và chính khác biệt đó quyết định chị N sẽ quay lại, giới thiệu bạn bè; còn anh H có thể im lặng nhưng kể chuyện không hay ở nơi khác.","hoatdong":"","callouts":[],"tables":[{"title":"Hai câu chuyện khách hàng","rows":[["Chị N ? cấp điện mới","Anh H ? cấp điện mới"],["Nộp online, xác nhận và hẹn khảo sát rõ ràng, báo chi phí và tiến độ chủ động, đóng điện đúng hẹn.","Nộp tại quầy, thiếu xác nhận, chờ lâu, phải gọi nhiều lần, thợ trễ không báo."],["Cảm nhận: chuyên nghiệp","Cảm nhận: việc xong nhưng không thấy được quan tâm"]]}]},{"n":5,"title":"TNKH LÀ GÌ: BA YẾU TỐ","part":"NỘI DUNG 1 · TNKH trong ngành điện & khác biệt với dịch vụ khách hàng","loai":"Giảng","dur":3,"content":["Định nghĩa: Trải nghiệm khách hàng = tổng thể cảm nhận của khách về đơn vị trong suốt quá trình tiếp xúc và sử dụng dịch vụ","3 yếu tố cấu thành: Kết quả khách nhận được · Quá trình khách trải qua · Cảm xúc đọng lại sau cùng","Ở hai câu chuyện: kết quả giống nhau, quá trình và cảm xúc khác nhau → trải nghiệm khác nhau"],"loithoai":"Từ hai câu chuyện, ta rút ra định nghĩa. Trải nghiệm khách hàng là tổng thể cảm nhận của khách về đơn vị trong suốt quá trình tiếp xúc và sử dụng dịch vụ. Nó gồm ba yếu tố. Một là kết quả — cái khách thực sự nhận được; ở đây cả chị N và anh H đều nhận được kết quả như nhau: có điện. Hai là quá trình — chuỗi các bước khách phải đi qua để nhận kết quả đó; và đây là chỗ hai câu chuyện bắt đầu tách ra. Ba là cảm xúc đọng lại sau cùng — điều khách mang theo khi mọi việc đã xong; chị N mang theo sự tin cậy, anh H mang theo cảm giác bị bỏ mặc. Điểm mấu chốt: khi kết quả giống hệt nhau mà trải nghiệm vẫn khác nhau một trời một vực, thì khác biệt nằm ở quá trình và cảm xúc — đúng hai thứ mà cơ chế điều hành của anh/chị chi phối trực tiếp.","hoatdong":"","callouts":[],"tables":[]},{"n":6,"title":"PHÂN BIỆT: DỊCH VỤ KH ≠ TRẢI NGHIỆM KH","part":"NỘI DUNG 1 · TNKH trong ngành điện & khác biệt với dịch vụ khách hàng","loai":"Giảng","dur":3,"content":[],"loithoai":"Đây là slide bản lề của Nội dung 1: phân biệt hai khái niệm hay bị nhập làm một. Dịch vụ khách hàng là hành động cụ thể tại một điểm tiếp xúc — nhân viên trả lời điện thoại, tư vấn tại quầy, xử lý một khiếu nại. Nó gắn với một khoảnh khắc, một con người. Trải nghiệm khách hàng thì rộng hơn: là cảm nhận tổng thể qua toàn bộ chuỗi điểm tiếp xúc, từ đầu đến cuối hành trình. Sự khác biệt này quan trọng vì nó quyết định \"ai chịu trách nhiệm\". Nếu coi đây là dịch vụ khách hàng, ta dễ đẩy hết cho tổ kinh doanh, cho bộ phận chăm sóc khách hàng. Nhưng nếu hiểu đúng là trải nghiệm, thì nó là việc của cả đơn vị — và người điều hành có vai trò lớn nhất, vì chính người điều hành quyết định các khâu nối với nhau ra sao. Một ví dụ để thấy rõ: một nhân viên tổng đài nói năng cực kỳ lịch sự — đó là dịch vụ tốt, không chê được. Nhưng nếu khách phải gọi năm lần mới gặp được người ấy, rồi chờ hai tuần mới có phản hồi, thì trải nghiệm tổng thể vẫn tệ, dù từng điểm tiếp xúc đều ổn. Dịch vụ tốt ở từng điểm không tự động cộng thành trải nghiệm tốt — cái nối các điểm lại mới quyết định, và cái nối đó chính là điều hành.","hoatdong":"","callouts":["NV tổng đài rất lịch sự (dịch vụ tốt) — nhưng khách gọi 5 lần mới gặp, chờ 2 tuần mới có phản hồi → trải nghiệm tổng thể vẫn kém"],"tables":[{"title":"Nội dung trình bày trên slide","rows":[["Tiêu chí","Dịch vụ khách hàng","Trải nghiệm khách hàng"],["Phạm vi","Một điểm tiếp xúc cụ thể","Toàn bộ chuỗi điểm tiếp xúc"],["Ví dụ","NV tổng đài trả lời lịch sự","Cả hành trình từ lúc gọi đến lúc xong"],["Ai lo","Bộ phận CSKH / tổ KD","Cả đơn vị ? trong đó có người điều hành"]]}]},{"n":7,"title":"BA ĐẶC TRƯNG CỦA TNKH","part":"NỘI DUNG 1 · TNKH trong ngành điện & khác biệt với dịch vụ khách hàng","loai":"Giảng","dur":3,"content":["Tính tổng thể — khách nhớ cả hành trình, không nhớ từng điểm rời; một khâu hỏng làm hỏng cảm nhận cả chuỗi","Tính cảm tính — cảm xúc thường quyết định đánh giá, không phải quy trình đúng hay sai","Tính tích lũy — mỗi lần tiếp xúc cộng/trừ vào \"tài khoản niềm tin\"; xây thì lâu, mất thì nhanh"],"loithoai":"Trải nghiệm khách hàng có ba đặc trưng cần nắm, vì hiểu chúng thì mới thôi thắc mắc \"tại sao tôi làm đúng quy trình mà khách vẫn không hài lòng\". Đặc trưng thứ nhất là tính tổng thể: khách hàng nhớ toàn bộ hành trình như một khối, chứ không chấm điểm từng khâu riêng lẻ; chỉ một khâu hỏng — như thợ đến trễ ba giờ của anh H — cũng đủ nhuộm màu tiêu cực lên cả những khâu trước đó vốn không tệ. Đặc trưng thứ hai là tính cảm tính: cái quyết định đánh giá của khách thường là cảm xúc, không phải việc quy trình có được tuân thủ đúng hay không. Khách không cầm bản quy trình ra chấm; khách cảm nhận mình có được tôn trọng, có được quan tâm hay không. Đặc trưng thứ ba là tính tích lũy: mỗi lần tiếp xúc là một khoản cộng hoặc trừ vào tài khoản niềm tin của khách với đơn vị; và như mọi tài khoản niềm tin, nó xây thì chậm mà sụt thì nhanh. Ba đặc trưng này giải thích vì sao \"đúng quy trình\" là điều kiện cần nhưng chưa đủ — vì khách không đánh giá quy trình, khách đánh giá cảm xúc, mà cảm xúc phụ thuộc vào cách quy trình được triển khai.","hoatdong":"","callouts":[],"tables":[]},{"n":8,"title":"QUẢN TRỊ TNKH KHÁC QUẢN TRỊ DỊCH VỤ KH","part":"NỘI DUNG 1 · TNKH trong ngành điện & khác biệt với dịch vụ khách hàng","loai":"Giảng","dur":3,"content":["so sánh 2 cách quản trị","Quản trị dịch vụ KH","Quản trị TNKH","Cải thiện từng điểm chạm rời rạc","Thiết kế cả hành trình liền mạch","Đo bằng: thái độ NV tại quầy/tổng đài","Đo bằng: cảm nhận suốt hành trình (nhanh–minh bạch–nhất quán)","Trách nhiệm: bộ phận tiền tuyến","Trách nhiệm: người thiết kế cơ chế = quản lý","Sửa khi khách phàn nàn","Phòng trước khi khách phàn nàn"],"loithoai":"Từ phân biệt khái niệm, ta rút ra khác biệt trong cách quản trị — đây chính là tên của chuyên đề. Quản trị dịch vụ khách hàng tập trung cải thiện từng điểm chạm: tập huấn nhân viên quầy nói năng dễ nghe hơn, nhắc tổng đài trả lời nhanh hơn. Việc đó tốt, nhưng rời rạc — vá từng chỗ. Quản trị trải nghiệm khách hàng thì thiết kế cả hành trình cho liền mạch: quan tâm việc các khâu nối với nhau ra sao, thông tin có chảy suốt không, khách có phải kể lại nhiều lần không. Về thước đo: quản trị dịch vụ đo thái độ nhân viên tại điểm chạm; quản trị trải nghiệm đo cảm nhận của khách suốt hành trình — nhanh không, minh bạch không, nhất quán không. Về trách nhiệm: quản trị dịch vụ giao cho tiền tuyến; quản trị trải nghiệm thuộc về người thiết kế cơ chế — tức người quản lý. Và về thời điểm: quản trị dịch vụ thường sửa sau khi khách đã phàn nàn; quản trị trải nghiệm phòng trước, chặn điểm đau từ khi nó còn chưa thành khiếu nại. Nói gọn: chuyển từ quản trị dịch vụ sang quản trị trải nghiệm chính là chuyển từ vá điểm sang thiết kế hành trình — và đó là việc của người điều hành.","hoatdong":"","callouts":[],"tables":[]},{"n":9,"title":"ĐÚC KẾT NỘI DUNG 1","part":"NỘI DUNG 1 · TNKH trong ngành điện & khác biệt với dịch vụ khách hàng","loai":"Đúc kết","dur":5,"content":["3 ý chốt + cầu nối","TNKH = kết quả + quá trình + cảm xúc; khách đánh giá cảm xúc, không đánh giá quy trình","Dịch vụ KH (một điểm) ≠ Trải nghiệm KH (cả hành trình) → trách nhiệm thuộc người điều hành","Quản trị TNKH = thiết kế cả hành trình, phòng trước, đo bằng cảm nhận khách"],"loithoai":"Khép Nội dung 1. Ba điều mang theo. Một: trải nghiệm khách hàng gồm kết quả, quá trình và cảm xúc; và khách đánh giá bằng cảm xúc chứ không bằng việc ta có đúng quy trình hay không — nên \"đúng quy trình\" chưa bảo đảm khách hài lòng. Hai: dịch vụ khách hàng là một điểm tiếp xúc, trải nghiệm khách hàng là cả hành trình; hiểu đúng điều này thì thấy trải nghiệm là trách nhiệm của người điều hành chứ không riêng bộ phận tiền tuyến. Ba: quản trị trải nghiệm nghĩa là thiết kế cả hành trình cho liền mạch, phòng điểm đau từ sớm, và lấy cảm nhận khách làm thước đo. Bây giờ câu hỏi tự nhiên là: hành trình khách hàng của ngành điện trông ra sao, điểm chạm nằm ở đâu, điểm đau xuất hiện chỗ nào? Đó là Nội dung 2.\n\nNỘI DUNG 2: Ba hành trình khách hàng — điểm chạm, điểm đau & \"điểm đau cơ chế\"\n\nHành trình cấp điện mới · đang dùng điện · sự cố–khiếu nại · Phát hiện then chốt về nguyên nhân gốc\n\nNội dung 2 đưa ta vào bản đồ thực tế. Trong ngành điện có ba hành trình khách hàng điển hình mà người Trưởng/Phó Điện lực cần thuộc nằm lòng: khách hàng mới xin cấp điện, khách hàng đang sử dụng điện, và khách hàng gặp sự cố hoặc khiếu nại. Với mỗi hành trình, ta xác định các điểm chạm — nơi khách tiếp xúc với đơn vị — và các điểm đau — nơi khách dễ bực bội, mất niềm tin. Rồi ta sẽ đến một phát hiện then chốt về việc các điểm đau đó thực sự bắt nguồn từ đâu.","hoatdong":"","callouts":["Muốn thiết kế được hành trình, trước hết phải nhìn thấy hành trình đó — với các điểm chạm và điểm đau của nó."],"tables":[]},{"n":10,"title":"HÀNH TRÌNH 1: KHÁCH HÀNG MỚI XIN CẤP ĐIỆN","part":"NỘI DUNG 2 · Ba hành trình khách hàng, điểm chạm và điểm đau cơ chế","loai":"Giảng","dur":3,"content":["7 bước (dòng thời gian) + điểm đau","Bước: Tìm hiểu → Nộp hồ sơ (Zalo OA/quầy) → Chờ khảo sát → Nhận thông báo chi phí → Thanh toán → Chờ thi công → Đóng điện & nghiệm thu","Điểm đau thường gặp: thiếu thông tin chủ động trong giai đoạn chờ · không minh bạch thời gian thi công · thợ đến trễ không báo trước"],"loithoai":"Hành trình thứ nhất — khách hàng mới xin cấp điện — có bảy bước điển hình. Khách tìm hiểu thông tin; nộp hồ sơ qua Zalo OA hoặc quầy giao dịch; chờ khảo sát hiện trường; nhận thông báo chi phí và thủ tục; thanh toán; chờ thi công; và cuối cùng đóng điện, nghiệm thu. Bảy bước này chính là hành trình của cả chị N lẫn anh H mà ta đã gặp. Điểm đau tập trung ở đâu? Ở những khoảng chờ — chờ khảo sát, chờ thi công — nơi khách không có thông tin và bắt đầu bồn chồn; ở việc thời gian thi công không minh bạch, khách không biết chính xác khi nào xong để sắp xếp; và ở chuyện thợ đến trễ mà không báo trước, đúng cái đã làm hỏng trải nghiệm của anh H. Xin anh/chị để ý: cả ba điểm đau này đều nằm ở khoảng giữa các bước, và đều liên quan đến thông tin — chứ không phải liên quan đến tay nghề kỹ thuật.","hoatdong":"","callouts":[],"tables":[]},{"n":11,"title":"HÀNH TRÌNH 2: KHÁCH HÀNG ĐANG SỬ DỤNG ĐIỆN","part":"NỘI DUNG 2 · Ba hành trình khách hàng, điểm chạm và điểm đau cơ chế","loai":"Demo","dur":3,"content":["điểm chạm định kỳ + điểm đau","Điểm chạm: Ghi chỉ số công tơ → Thông báo hóa đơn → Thanh toán → Tin nhắn lịch cắt điện bảo trì → Liên hệ khi thắc mắc hóa đơn","Điểm đau thường gặp: hóa đơn tăng bất thường không được giải thích · thông báo cắt điện gấp · khó liên hệ khi có thắc mắc"],"loithoai":"Hành trình thứ hai — khách hàng đang sử dụng điện — không có điểm khởi đầu và kết thúc rõ như cấp điện mới, mà là chuỗi điểm chạm định kỳ lặp lại: ghi chỉ số công tơ, nhận thông báo hóa đơn, thanh toán, nhận tin nhắn báo lịch cắt điện bảo trì, và liên hệ khi có thắc mắc về hóa đơn. Đây là hành trình dài nhất về thời gian — kéo dài suốt vòng đời khách hàng — nên từng điểm chạm nhỏ tích lũy thành ấn tượng lớn. Điểm đau đặc trưng: hóa đơn tăng bất thường mà không được giải thích trước, khiến khách nghi ngờ; thông báo cắt điện quá gấp, khách không kịp chuẩn bị, nhất là hộ kinh doanh; và khó liên hệ khi có thắc mắc, gọi mãi không được, hỏi mãi không rõ. Lại một lần nữa, nhìn kỹ: điểm đau nằm ở thông tin và ở sự chủ động — báo trước hay không, giải thích hay không, dễ liên hệ hay không.","hoatdong":"","callouts":[],"tables":[]},{"n":12,"title":"HÀNH TRÌNH 3: KHÁCH HÀNG GẶP SỰ CỐ / KHIẾU NẠI","part":"NỘI DUNG 2 · Ba hành trình khách hàng, điểm chạm và điểm đau cơ chế","loai":"Giảng","dur":3,"content":["điểm chạm + cảnh báo cảm xúc","Điểm chạm: Báo sự cố (tổng đài/Zalo OA) → Chờ tiếp nhận → Chờ xử lý → Nhận cập nhật → Kết thúc sự cố → Phản hồi sau sự cố","Điểm đau: khó tiếp cận kênh báo lúc cao điểm · không có cập nhật tiến độ · NV hiện trường thiếu thông tin để giải thích"],"loithoai":"Hành trình thứ ba — khách gặp sự cố hoặc khiếu nại — là hành trình nhạy cảm nhất. Điểm chạm gồm: báo sự cố qua tổng đài hoặc Zalo OA, chờ tiếp nhận, chờ xử lý, nhận thông tin cập nhật, kết thúc sự cố, và phản hồi sau sự cố. Điều khác biệt căn bản của hành trình này là khách đang ở thế bất lợi — mất điện, gặp trục trặc, có khi đang lo lắng — nên cảm xúc vốn đã tiêu cực. Trong trạng thái đó, mọi sự chậm trễ hay thiếu thông tin không cộng thêm mà nhân lên: chờ mười lăm phút khi đang bực có thể cảm thấy như một giờ. Điểm đau: khó gọi được vào kênh báo sự cố đúng lúc cao điểm, khi ai cũng gọi cùng lúc; không có ai cập nhật tiến độ, khách ngồi chờ trong vô định; và nhân viên hiện trường đến nơi lại không đủ thông tin để giải thích cho khách, khiến khách càng mất niềm tin. Với hành trình này, tốc độ và thông tin không chỉ là tiện lợi — chúng là thứ giữ hoặc phá vỡ niềm tin của khách vào đơn vị.","hoatdong":"","callouts":["⚠ Hành trình có tác động cảm xúc lớn nhất — khách đang ở thế bất lợi, mọi chậm trễ/thiếu tin nhân lên nhiều lần"],"tables":[]},{"n":13,"title":"PHÁT HIỆN THEN CHỐT: \"ĐIỂM ĐAU CƠ CHẾ\" ≠ \"ĐIỂM ĐAU THÁI ĐỘ\"","part":"NỘI DUNG 2 · Ba hành trình khách hàng, điểm chạm và điểm đau cơ chế","loai":"Giảng","dur":3,"content":[],"loithoai":"Đây là slide quan trọng nhất của Nội dung 2, và có lẽ là một trong những ý cốt lõi của cả chuyên đề. Khi nhìn ba hành trình vừa rồi, ta dễ có phản xạ đổ lỗi cho con người: thợ trễ là do thợ vô trách nhiệm, nhân viên không giải thích được là do kém chuyên môn, khách phải gọi nhiều lần là do nhân viên lười. Nhưng hãy truy ngược đến gốc. Thợ đến trễ mà không báo — gốc thường không phải thái độ, mà là đơn vị chưa có quy định buộc phải thông báo khi thay đổi lịch; nếu có quy định rõ, phần lớn sẽ báo. Nhân viên hiện trường không giải thích được cho khách — gốc thường là thiếu kênh nội bộ để cập nhật tiến độ cho nhân viên, chứ bản thân họ không tự bịa ra thông tin được. Khách phải gọi đi gọi lại để hỏi tiến độ — gốc là thiếu quy định thông báo chủ động các mốc xử lý, nên mặc định là khách phải tự hỏi. Cả ba, bản chất là \"điểm đau cơ chế\", không phải \"điểm đau thái độ\". Ý nghĩa của phân biệt này rất lớn: nếu chẩn đoán sai là do thái độ, ta sẽ đi khiển trách nhân viên — mà khiển trách thì không sửa được gốc, điểm đau vẫn tái diễn với người khác. Nếu chẩn đoán đúng là do cơ chế, ta thiết kế lại quy định, kênh, phân vai — và điểm đau biến mất một cách hệ thống. Đây chính là cầu nối tự nhiên sang vai trò của người quản lý.","hoatdong":"","callouts":["Phần lớn điểm đau là \"điểm đau cơ chế\" — sửa bằng thiết kế cơ chế, không sửa bằng khiển trách nhân viên."],"tables":[{"title":"Nội dung trình bày trên slide","rows":[["3 ví dụ truy nguyên nhân gốc","Điểm đau khách thấy"],["Tưởng là do","Thực ra do (gốc cơ chế)"],["Thợ đến trễ không báo","NV vô trách nhiệm"],["Thiếu quy định báo khi đổi lịch","NV hiện trường không giải thích được"],["NV kém chuyên môn","Thiếu kênh nội bộ cập nhật tiến độ"],["Khách phải gọi nhiều lần hỏi tiến độ","NV lười"],["Thiếu quy định thông báo chủ động các mốc",""]]}]},{"n":14,"title":"VÌ SAO ĐIỂM ĐAU CƠ CHẾ CHỈ QUẢN LÝ MỚI SỬA ĐƯỢC","part":"NỘI DUNG 2 · Ba hành trình khách hàng, điểm chạm và điểm đau cơ chế","loai":"Giảng","dur":3,"content":["3 lớp thẩm quyền","Nhân viên: không có thẩm quyền tự đặt quy định thông báo, tự lập kênh liên lạc nội bộ","Khách hàng: không thể tự yêu cầu đơn vị cải tiến cơ chế","Người quản lý cấp Điện lực: là người duy nhất có thẩm quyền thiết kế lại quy trình, kênh liên lạc, phân vai phối hợp","Kết luận: TNKH là một phần trách nhiệm điều hành của quản lý — không chỉ việc của tổ CSKH"],"loithoai":"Nếu phần lớn điểm đau là điểm đau cơ chế, thì câu hỏi tiếp theo là: ai sửa được cơ chế? Hãy nhìn ba lớp. Nhân viên tuyến đầu — dù tận tâm đến đâu — không có thẩm quyền tự ban hành một quy định \"phải báo khách khi đổi lịch\", cũng không tự lập được một kênh liên lạc nội bộ giữa các tổ; những việc đó vượt tầm của họ. Khách hàng thì càng không: khách chỉ có thể phàn nàn hoặc bỏ đi, không thể yêu cầu đơn vị thiết kế lại cơ chế bên trong. Vậy còn lại ai? Người quản lý cấp Điện lực — chính là anh/chị — là người duy nhất trong bức tranh này có thẩm quyền thiết kế lại quy trình, lập kênh liên lạc, phân vai phối hợp giữa các tổ. Đó là lý do vì sao trải nghiệm khách hàng phải được nhìn nhận là một phần trách nhiệm điều hành của quản lý cấp trung, chứ không phải chỉ là việc của tổ chăm sóc khách hàng. Bộ phận chăm sóc khách hàng là điểm chạm cuối, nhưng phần lớn trải nghiệm đã được định hình từ các khâu trước đó — những khâu mà anh/chị tổ chức và điều hành.","hoatdong":"","callouts":[],"tables":[]},{"n":15,"title":"TỰ VẼ BẢN ĐỒ HÀNH TRÌNH TẠI ĐƠN VỊ (giới thiệu công cụ)","part":"NỘI DUNG 2 · Ba hành trình khách hàng, điểm chạm và điểm đau cơ chế","loai":"Thực hành","dur":8,"content":["3 bước tư duy bản đồ hành trình","Bước 1 – Liệt kê điểm chạm: ghi ra mọi nơi khách tiếp xúc với đơn vị trong 1 hành trình","Bước 2 – Đánh dấu điểm đau: khoanh những chỗ khách hay bực/mất niềm tin","Bước 3 – Truy nguyên nhân gốc: với mỗi điểm đau hỏi \"đây là điểm đau cơ chế hay thái độ? cơ chế nào đang thiếu?\"","Ghi chú: đây là cách tư duy sẽ dùng trong thảo luận nhóm (ND5)"],"loithoai":"Trước khi đúc kết, tôi giới thiệu nhanh một công cụ mà anh/chị sẽ dùng thực sự ở phần thảo luận nhóm cuối buổi: vẽ bản đồ hành trình khách hàng tại chính đơn vị mình. Ba bước. Bước một, liệt kê điểm chạm: chọn một hành trình — ví dụ cấp điện mới — và ghi ra tuần tự mọi nơi khách chạm vào đơn vị, từ lúc tìm hiểu đến lúc nghiệm thu. Bước hai, đánh dấu điểm đau: nhìn lại danh sách đó và khoanh những chỗ khách hay bực bội, hay mất kiên nhẫn, hay gọi lên phàn nàn. Bước ba — và đây là bước tạo ra giá trị — với mỗi điểm đau, đặt câu hỏi: đây là điểm đau cơ chế hay điểm đau thái độ? Nếu là cơ chế, thì cơ chế nào đang thiếu — thiếu quy định, thiếu kênh, hay thiếu phân vai? Ba bước này biến một cảm giác mơ hồ \"khách hay than phiền\" thành một danh sách vấn đề cụ thể có địa chỉ để sửa. Chúng ta sẽ làm đúng bài này trong sáu mươi phút thảo luận cuối buổi.","hoatdong":"","callouts":[],"tables":[]},{"n":16,"title":"ĐÚC KẾT NỘI DUNG 2","part":"NỘI DUNG 2 · Ba hành trình khách hàng, điểm chạm và điểm đau cơ chế","loai":"Đúc kết","dur":5,"content":["chốt + cầu nối","Ba hành trình: cấp điện mới · đang dùng điện · sự cố–khiếu nại — mỗi hành trình có điểm chạm & điểm đau riêng","Phần lớn điểm đau nằm ở thông tin & khoảng giữa các khâu, không ở tay nghề","Phát hiện then chốt: điểm đau cơ chế ≠ điểm đau thái độ → chỉ người quản lý sửa được gốc"],"loithoai":"Đúc kết Nội dung 2. Ta đã dựng bản đồ ba hành trình khách hàng: cấp điện mới, đang dùng điện, và sự cố–khiếu nại; mỗi hành trình có điểm chạm và điểm đau riêng. Nhìn xuyên suốt, phần lớn điểm đau tập trung ở thông tin và ở khoảng giữa các khâu — nơi hồ sơ chuyển tay, nơi thông tin dễ đứt — chứ không phải ở tay nghề kỹ thuật. Và phát hiện then chốt: phần lớn là điểm đau cơ chế, không phải điểm đau thái độ; mà điểm đau cơ chế thì chỉ người quản lý mới có thẩm quyền sửa tận gốc. Đến đây một câu hỏi rất thực tế hiện ra: người quản lý sửa cơ chế bằng công cụ gì? Câu trả lời không phải một công cụ mới — mà chính là những gì anh/chị đã học ở Chuyên đề 2a: nhịp điều hành và chất lượng thực thi. Nội dung 3 sẽ nối hai chuyên đề lại: mỗi công cụ điều hành ở 2a tác động lên trải nghiệm khách hàng như thế nào.\n\nNỘI DUNG 3: Vai trò người quản lý cấp Điện lực trong định hình TNKH\n\nQua nhịp điều hành · qua tam giác trách nhiệm · qua chất lượng thực thi · Bộ nguyên tắc & chuẩn ONE EVN CX\n\nNội dung 3 là trọng tâm nối kết của cả chuyên đề: chỉ ra cụ thể người Trưởng/Phó Điện lực tác động đến trải nghiệm khách hàng bằng đường nào. Ta sẽ thấy ba con đường, và đều là những thứ anh/chị đã có trong tay từ Chuyên đề 2a: nhịp điều hành, tam giác trách nhiệm, và chất lượng thực thi. Sau đó ta hệ thống lại bằng một bộ nguyên tắc và một chuẩn phục vụ để anh/chị mang về áp dụng.","hoatdong":"","callouts":["Người quản lý sửa cơ chế đó bằng công cụ gì? Bằng chính nhịp điều hành và chất lượng thực thi ở CĐ2a."],"tables":[]},{"n":17,"title":"CON ĐƯỜNG 1: NHỊP ĐIỀU HÀNH → TNKH","part":"NỘI DUNG 3 · Vai trò người quản lý cấp Điện lực trong định hình TNKH","loai":"Demo","dur":3,"content":["chuỗi nhân–quả","Giao ban có mục TNKH mỗi sáng → phát hiện sớm phiếu tồn/phàn nàn → xử lý trước khi thành khiếu nại","Nhịp tuần rà phối hợp liên tổ → khơi thông việc kẹt → rút thời gian phục vụ khách","Nhịp tháng nhìn lại phàn nàn KH → điều chỉnh cơ chế cho tháng sau"],"loithoai":"Con đường thứ nhất là nhịp điều hành — thứ anh/chị đã thiết kế ở 2a. Nhớ lại: nhịp giao ban ngày có bốn mục cố định, trong đó có một mục về trải nghiệm khách hàng. Chính mục nhỏ ấy là công cụ phòng bệnh mạnh nhất: mỗi sáng hỏi một câu — \"có phiếu nào tồn quá hạn, có phàn nàn nào đang nhen nhóm không\" — là anh/chị phát hiện sớm và xử lý trước khi nó bùng thành khiếu nại chính thức. Nhớ con số ở đầu buổi: bảy mươi đến bảy mươi lăm phần trăm phàn nàn là do khách không được thông báo; chỉ một mục TNKH trong giao ban đã chặn được phần lớn số đó ngay từ gốc. Nhịp tuần — buổi rà soát phối hợp liên tổ — khơi thông những việc kẹt giữa các tổ, mà kẹt giữa các tổ chính là nơi sinh ra chậm trễ khách nhìn thấy. Nhịp tháng nhìn lại toàn cảnh phàn nàn của tháng để điều chỉnh cơ chế cho tháng sau. Ba nhịp này không phải việc thêm vì khách hàng — chúng là chính công cụ điều hành của anh/chị, chỉ cần cài thêm lăng kính khách hàng vào.","hoatdong":"","callouts":["Hầu hết phàn nàn là do \"không được thông báo\" — một mục TNKH trong giao ban chặn phần lớn số đó từ gốc."],"tables":[]},{"n":18,"title":"CON ĐƯỜNG 2: TAM GIÁC TRÁCH NHIỆM → TNKH","part":"NỘI DUNG 3 · Vai trò người quản lý cấp Điện lực trong định hình TNKH","loai":"Demo","dur":3,"content":["sơ đồ + nguyên tắc Zero Repeat","Tam giác 3 vai (từ CĐ2a): Người chủ trì · Người phối hợp · Người phản hồi khách hàng (đầu mối duy nhất)","Tác động TNKH: khách có 1 đầu mối, không phải kể lại nhiều lần → \"không bắt khách làm công việc của EVN\"","Ví dụ: cấp điện mới → tổ KD chủ trì + là đầu mối phản hồi khách; tổ KT phối hợp khảo sát → khách chỉ nhớ 1 số điện thoại"],"loithoai":"Con đường thứ hai là tam giác trách nhiệm — công cụ phối hợp liên tổ anh/chị đã học ở 2a. Nhắc lại: với mỗi việc liên tổ, xác định đủ ba vai — người chủ trì chịu trách nhiệm chạy việc đầu cuối, người phối hợp hỗ trợ chuyên môn, và người phản hồi khách hàng là đầu mối duy nhất giao tiếp với khách. Bây giờ ta nhìn nó từ phía khách. Cái điểm đau lớn nhất trong các hành trình là gì? Là khách phải kể đi kể lại vấn đề của mình cho hết người này đến người kia, mỗi lần một câu trả lời khác nhau — như anh H gọi ba lần gặp ba người. Tam giác trách nhiệm xóa điểm đau đó: khi có một đầu mối phản hồi duy nhất, khách chỉ cần nhớ một số điện thoại, chỉ kể một lần, và luôn có người nắm trọn câu chuyện của họ. Đây đúng tinh thần một nguyên tắc rất hay trong ngành: không bắt khách hàng làm công việc của EVN — không bắt khách tự truyền tin giữa các tổ của ta. Ví dụ cấp điện mới: tổ kinh doanh vừa chủ trì vừa là đầu mối phản hồi khách, tổ kỹ thuật phối hợp khảo sát; ba vai rõ ràng thì việc không rơi vào vùng xám, và khách chỉ cần nhớ một đầu mối.","hoatdong":"","callouts":[],"tables":[]},{"n":19,"title":"CON ĐƯỜNG 3: CHẤT LƯỢNG THỰC THI → TNKH","part":"NỘI DUNG 3 · Vai trò người quản lý cấp Điện lực trong định hình TNKH","loai":"Demo","dur":3,"content":["3 tầng chuẩn phục vụ ONE EVN CX","Mức","Đặc điểm","Ví dụ (sự cố hẹn 2h, sẽ chậm)","Chuẩn","Làm đúng, đủ, đúng hạn","Xử lý xong, không báo gì thêm","Tốt","Chủ động thông tin, đồng cảm","Gọi báo: \"phức tạp hơn dự kiến, thêm 1h\"","Tỏa sáng","Vượt kỳ vọng, để lại ấn tượng","Báo chậm + cập nhật tiến độ giữa chừng + hỏi lại khi xong"],"loithoai":"Con đường thứ ba là chất lượng thực thi — cùng một việc nhưng làm ở mức nào. Ngành ta có một khung ba tầng gọi là ONE EVN CX rất đáng dùng. Mức Chuẩn: làm đúng, làm đủ, đúng hạn — đây là mức tối thiểu, nền của niềm tin. Nhưng đúng hạn không thôi chưa tạo được cảm xúc tích cực. Mức Tốt: chủ động thông tin và thể hiện đồng cảm. Mức Tỏa sáng, cộng một: vượt kỳ vọng, để lại ấn tượng khiến khách muốn kể lại. Lấy đúng tình huống rất quen: một sự cố hẹn khách hai tiếng, nhưng thực tế sẽ chậm. Ở mức Chuẩn, ta cứ xử lý cho xong, không nói gì thêm — khách ngồi chờ, quá hẹn, bắt đầu bực. Ở mức Tốt, ta chủ động gọi: \"việc phức tạp hơn dự kiến, xin thêm khoảng một giờ nữa, em sẽ cập nhật tiếp\" — chỉ một cuộc gọi báo trước như thế đã giảm tới khoảng tám mươi phần trăm bức xúc, vì khách sợ nhất là bị bỏ trong bóng tối, không phải sợ chờ. Ở mức Tỏa sáng, ta báo chậm, rồi còn cập nhật giữa chừng, và khi xong gọi lại hỏi khách đã ổn chưa. Điều đáng nói: khác biệt giữa ba mức gần như không tốn thêm nguồn lực — chỉ tốn một quyết định điều hành: có quy định báo lại khách hay không. Slide tiếp theo sẽ cho anh/chị thấy ba mức này qua các khoảnh khắc thật.","hoatdong":"","callouts":["chỉ một cuộc gọi báo trước → giảm phần lớn bức xúc của khách hàng"],"tables":[]},{"n":20,"title":"ONE EVN CX QUA CÁC KHOẢNH KHẮC THẬT — CHUẨN / TỐT / Tỏa sáng","part":"NỘI DUNG 3 · Vai trò người quản lý cấp Điện lực trong định hình TNKH","loai":"Demo","dur":3,"content":["Khoảnh khắc","Chuẩn (phải làm)","Tốt (nên làm)","Tỏa sáng","KH gọi báo mất điện, chưa rõ nguyên nhân","Xác nhận khu vực, ghi nhận & báo sẽ cập nhật trong 30'","Giải thích tình trạng bằng ngôn ngữ đời thường, hẹn mốc rõ","Chủ động: \"khu vực đang có nhiều KH cùng báo, đội đang được điều động, em theo dõi cập nhật ngay\"","Hóa đơn tăng gấp đôi, KH nghi tính sai","Bắt đầu bằng đồng cảm, đưa dữ liệu so sánh 3 tháng/cùng kỳ","Giải thích nguyên nhân đời thường (nóng, số ngày kỳ ghi); đề xuất kiểm tra công tơ","Hướng dẫn theo dõi điện theo ngày qua App để tự phát hiện bất thường","KH gọi lần 2, yêu cầu trước chưa xử lý","Xin lỗi, KHÔNG bắt kể lại, tự tìm phiếu, nêu trạng thái","Nhận đầu mối cá nhân theo dõi + hẹn giờ gọi lại cụ thể","Sau khi xong, gọi lại hỏi: \"trải nghiệm lần này của anh/chị thế nào để chúng em cải thiện?\"","Hóa đơn tăng >30% (chủ động chặn trước)","— (thuộc mức trên)","Nhắc hạn thanh toán trước 3–5 ngày","Chủ động gọi/nhắn KH TRƯỚC khi KH phát hiện: \"hóa đơn tháng này tăng, em giải thích trước để anh/chị không bất ngờ\""],"loithoai":"Slide phụ này cho anh/chị thấy khung Chuẩn – Tốt – Tỏa sáng sống động qua bốn khoảnh khắc rất quen với đơn vị. Khoảnh khắc thứ nhất, khách gọi báo mất điện: mức Chuẩn là xác nhận khu vực và hứa cập nhật trong ba mươi phút; mức Tốt là giải thích tình trạng bằng ngôn ngữ đời thường và hẹn mốc rõ; mức Tỏa sáng là chủ động nói cho khách biết khu vực đang có nhiều người cùng báo, đội đã được điều động — khách thấy mình không bị bỏ quên. Khoảnh khắc thứ hai, hóa đơn tăng gấp đôi: điều quan trọng nhất ở mức Chuẩn là bắt đầu bằng đồng cảm chứ không bằng câu \"hóa đơn của anh/chị hoàn toàn đúng\", và đưa dữ liệu so sánh khách quan; mức Tốt giải thích nguyên nhân đời thường và mời kiểm tra công tơ; mức Tỏa sáng hướng dẫn khách tự theo dõi điện theo ngày qua ứng dụng. Khoảnh khắc thứ ba, khách gọi lần hai mà yêu cầu trước chưa xử lý: mức Chuẩn tuyệt đối không bắt khách kể lại từ đầu, tự tìm phiếu; mức Tốt là một người nhận làm đầu mối theo dõi và hẹn giờ gọi lại; mức Tỏa sáng là sau khi xong còn hỏi lại trải nghiệm của khách. Khoảnh khắc thứ tư là một cấp độ điều hành cao hơn: chủ động chặn điểm đau trước khi nó xảy ra — khi hệ thống thấy hóa đơn tăng trên ba mươi phần trăm, gọi báo khách trước khi khách phát hiện và bực. Nhìn cả bốn, anh/chị thấy một quy luật: khác biệt giữa các mức gần như luôn nằm ở một quyết định chủ động thông tin — mà quyết định đó là do cơ chế đơn vị có quy định hay không, chứ không phải do nhân viên có khéo hay không. Đó chính là chỗ người quản lý can thiệp được.","hoatdong":"","callouts":["Cùng một khoảnh khắc, ba mức khác nhau gần như chỉ ở một quyết định chủ động thông tin — và đó là quyết định thuộc về cơ chế điều hành, không phải năng khiếu cá nhân."],"tables":[]},{"n":21,"title":"NĂM NGUYÊN TẮC THIẾT KẾ ĐIỂM CHẠM","part":"NỘI DUNG 3 · Vai trò người quản lý cấp Điện lực trong định hình TNKH","loai":"Giảng","dur":4,"content":["5 nguyên tắc (từ Bài 4 e-learning)","1. Chủ động thông tin — khách không phải hỏi mới biết; thông tin đi trước","2. Minh bạch thời gian — cam kết rõ; thay đổi phải báo trước kèm lý do","3. Đầu mối duy nhất — mỗi yêu cầu có một người theo suốt","4. Đồng cảm trong ngôn ngữ — tôn trọng, thấu hiểu, nhất là khi khách đang khó","5. Đóng vòng phản hồi — sau khi xong, kiểm tra khách có thực sự hài lòng & rút bài học"],"loithoai":"Từ ba con đường trên, ta hệ thống lại thành năm nguyên tắc thiết kế điểm chạm — anh/chị đã gặp chúng trong bài e-learning và giờ ta đặt vào tay người điều hành. Nguyên tắc một, chủ động thông tin: khách hàng không nên phải hỏi mới biết tình trạng yêu cầu của mình; thông tin phải đi trước một bước. Nguyên tắc hai, minh bạch thời gian: mọi cam kết về thời gian phải rõ ràng, và nếu có thay đổi thì báo trước kèm lý do — đây đúng là chỗ anh H bị tổn thương. Nguyên tắc ba, đầu mối duy nhất: mỗi yêu cầu có một người phụ trách theo suốt, khách không phải chuyển qua lại giữa các bộ phận — chính là tam giác trách nhiệm. Nguyên tắc bốn, đồng cảm trong ngôn ngữ: cách nói, cách viết, cách lắng nghe phải thể hiện tôn trọng và thấu hiểu, đặc biệt khi khách đang gặp khó. Nguyên tắc năm, đóng vòng phản hồi: sau mỗi việc, có một bước ngắn kiểm tra xem khách có thực sự hài lòng và rút bài học cho lần sau. Năm nguyên tắc này không phải khẩu hiệu — mỗi cái đều biến được thành một dòng quy định cụ thể trong nhịp điều hành của anh/chị.","hoatdong":"","callouts":[],"tables":[]},{"n":22,"title":"\"NGÀY TRẢI NGHIỆM KHÁCH HÀNG\" — CÔNG CỤ CỦA NGƯỜI QUẢN LÝ","part":"NỘI DUNG 3 · Vai trò người quản lý cấp Điện lực trong định hình TNKH","loai":"Demo","dur":4,"content":["Định kỳ (mỗi quý / ≥2 lần/năm): Trưởng-Phó ĐL tự trải nghiệm dịch vụ đơn vị mình","Cách làm: gọi tổng đài với tư cách khách (không báo trước) · hoặc quan sát NV phục vụ tại quầy/hiện trường (không mặc đồng phục lãnh đạo)","Nguyên tắc: \"Tôi không thể yêu cầu cải thiện điều tôi chưa từng trải nghiệm.\"","Sau đó: ghi nhận & chia sẻ trong giao ban — cả điểm tốt lẫn điểm cần sửa"],"loithoai":"Tôi muốn giới thiệu một công cụ cụ thể, đơn giản mà hiệu quả bất ngờ, dành riêng cho người quản lý: \"ngày trải nghiệm khách hàng\". Ý tưởng là định kỳ — mỗi quý, hoặc ít nhất hai lần một năm — anh/chị tự đặt mình vào vị trí khách hàng của chính đơn vị mình. Cách làm: gọi vào tổng đài với tư cách một khách hàng bình thường, không báo trước, và nghe xem mình được phục vụ ra sao; hoặc ra quầy, ra hiện trường quan sát nhân viên phục vụ khách mà không mặc đồng phục lãnh đạo, để thấy thực tế chứ không phải màn trình diễn. Nguyên tắc đằng sau rất giản dị: tôi không thể yêu cầu cải thiện một điều mà chính tôi chưa từng trải nghiệm. Rất nhiều Trưởng Điện lực quản lý dịch vụ khách hàng qua báo cáo, qua con số — mà báo cáo thì đẹp, còn cảm giác chờ máy mười phút thì báo cáo không kể. Sau khi trải nghiệm, anh/chị mang cả điểm tốt lẫn điểm cần sửa ra chia sẻ trong giao ban — vừa để ghi nhận việc làm tốt, vừa để cả đơn vị cùng thấy điểm đau qua con mắt khách hàng. Một buổi sáng làm khách hàng của chính mình dạy nhiều hơn mười bản báo cáo.","hoatdong":"","callouts":[],"tables":[]},{"n":23,"title":"TNKH VỪA LÀ \"QUẢ\" VỪA LÀ \"NHÂN\"","part":"NỘI DUNG 3 · Vai trò người quản lý cấp Điện lực trong định hình TNKH","loai":"Giảng","dur":4,"content":["vòng xoáy","TNKH là QUẢ: kết quả tự nhiên của điều hành nội bộ tốt","TNKH là NHÂN: khi lấy cảm nhận khách làm thước đo hằng ngày → thành động lực giữ nhịp","Vòng xoáy đi lên: Điều hành tốt → khách hài lòng → ít phàn nàn → có thêm thời gian điều hành → tốt hơn nữa"],"loithoai":"Trước khi đúc kết, tôi muốn gói cả Nội dung 3 vào một hình ảnh mà anh/chị đã thoáng gặp ở 2a: trải nghiệm khách hàng vừa là quả vừa là nhân. Là quả, vì nó là kết quả tự nhiên của điều hành nội bộ tốt — anh/chị dựng nhịp đúng, phân vai rõ, thực thi ở mức Tốt trở lên, thì khách hài lòng như một hệ quả. Nhưng nó cũng là nhân, vì khi anh/chị lấy cảm nhận khách làm thước đo mỗi ngày — đưa nó vào giao ban, hỏi nó trong mỗi quyết định — thì chính nó trở thành động lực giữ nhịp, thành la bàn định hướng. Hai vai đó tạo một vòng xoáy đi lên: điều hành tốt thì khách hài lòng, khách hài lòng thì ít phàn nàn, ít phàn nàn thì anh/chị bớt phải chữa cháy nên có thêm thời gian để điều hành tốt hơn nữa. Và đây là câu tôi muốn anh/chị khắc vào trí nhớ như một tiêu chuẩn tự kiểm: nếu cơ chế điều hành trông có vẻ tốt mà khách vẫn phàn nàn, thì nó chưa đủ tốt. Trải nghiệm khách hàng là thước đo cuối cùng — không phải bản báo cáo nội bộ.","hoatdong":"","callouts":["Nếu cơ chế điều hành tốt mà khách vẫn phàn nàn → chưa đủ tốt. TNKH là thước đo cuối cùng."],"tables":[]},{"n":24,"title":"ĐÚC KẾT NỘI DUNG 3","part":"NỘI DUNG 3 · Vai trò người quản lý cấp Điện lực trong định hình TNKH","loai":"Đúc kết","dur":5,"content":["chốt + cầu nối","3 con đường quản lý tác động TNKH: Nhịp điều hành · Tam giác trách nhiệm · Chất lượng thực thi","5 nguyên tắc điểm chạm + công cụ \"Ngày trải nghiệm KH\"","TNKH vừa là quả vừa là nhân — thước đo cuối cùng của điều hành"],"loithoai":"Đúc kết Nội dung 3. Người quản lý cấp Điện lực tác động đến trải nghiệm khách hàng qua ba con đường, và cả ba đều là công cụ anh/chị đã có từ 2a: nhịp điều hành để phát hiện và phòng điểm đau từ sớm; tam giác trách nhiệm để khách luôn có một đầu mối, không phải kể lại nhiều lần; và chất lượng thực thi ở mức Tốt trở lên, mà khác biệt chỉ nằm ở một quyết định — có báo lại khách hay không. Ta có năm nguyên tắc thiết kế điểm chạm và một công cụ tự soi rất mạnh là \"ngày trải nghiệm khách hàng\". Và trên hết, ta nhớ trải nghiệm khách hàng vừa là quả vừa là nhân — là thước đo cuối cùng của chất lượng điều hành. Bây giờ đủ lý thuyết rồi; điều cần là nhìn thấy nó vận hành. Nội dung 4: một video theo chân một yêu cầu của khách đi qua các khâu nội bộ, và một trò chơi mô phỏng nơi anh/chị ra quyết định điều hành và thấy ngay chỉ số trải nghiệm khách hàng thay đổi.\n\nNỘI DUNG 4: Video tình huống + Gamification \"Điều hành & TNKH\"\n\nXem hành trình một yêu cầu · Ra quyết định · Quan sát tác động lên chỉ số TNKH\n\nNội dung 4 là phần trải nghiệm trực quan. Trước hết ta xem một video kể câu chuyện một yêu cầu của khách hàng đi xuyên qua các khâu nội bộ của đơn vị — để thấy trải nghiệm được hình thành và bị bẻ gãy ở đâu. Sau đó anh/chị bước vào một trò chơi mô phỏng: đặt mình vào ghế người điều hành, đối mặt các tình huống, ra quyết định, và quan sát ngay lập tức quyết định đó đẩy chỉ số trải nghiệm khách hàng lên hay xuống. Đây là cách học \"thấm\" nhất — vì ta không nghe về nhân quả nữa, mà tự tay tạo ra nhân quả.","hoatdong":"","callouts":["Lý thuyết đã đủ. Giờ ta xem một video tình huống và chơi một mô phỏng để thấy các quyết định điều hành tác động lên chỉ số TNKH ra sao."],"tables":[]},{"n":25,"title":"HỌC LIỆU VIDEO: HÀNH TRÌNH MỘT YÊU CẦU KHÁCH HÀNG","part":"NỘI DUNG 4 · Video tình huống và gamification Điều hành & TNKH","loai":"Video","dur":8,"content":["mô tả video + câu hỏi dẫn thảo luận","Video: Một yêu cầu của khách đi qua các khâu nội bộ — tiếp nhận → chuyển tổ → khảo sát → xử lý → phản hồi; làm rõ điểm chạm nào tác động TNKH và chỗ nào thông tin bị đứt","4 điểm quan sát: (1) chỗ hồ sơ chuyển giữa 2 tổ (2) chỗ khách phải chủ động hỏi (3) chỗ thiếu đầu mối phản hồi (4) chỗ một quyết định điều hành đã cứu/hỏng trải nghiệm","Câu hỏi sau video: Điểm đứt gãy nằm ở khâu nào? Là điểm đau cơ chế hay thái độ? Cơ chế nào ở CĐ2a sửa được nó?"],"loithoai":"Video này dài khoảng bốn đến năm phút, kể theo chân một yêu cầu của khách hàng từ lúc phát sinh đến lúc kết thúc, đi xuyên qua các khâu nội bộ — tiếp nhận, chuyển tổ, khảo sát, xử lý, phản hồi. Khác với video ở 2a vốn phân tích nhịp giao ban nhìn từ bên trong, video này nhìn từ điểm chạm của khách: mỗi khâu nội bộ hiện ra như một điểm mà trải nghiệm khách được cộng thêm hoặc bị trừ đi. Khi xem, anh/chị chú ý bốn điểm. Một, chỗ hồ sơ chuyển từ tổ này sang tổ kia — vùng xám kinh điển. Hai, chỗ khách phải chủ động gọi hỏi vì không ai báo. Ba, chỗ thiếu một đầu mối phản hồi khiến khách bị đẩy qua lại. Bốn, chỗ một quyết định điều hành đúng lúc đã cứu được trải nghiệm — hoặc một quyết định thiếu đã làm hỏng nó. Xem xong, ta thảo luận nhanh ba câu: điểm đứt gãy nằm ở khâu nào; đó là điểm đau cơ chế hay thái độ; và cơ chế nào trong những gì ta học ở 2a — nhịp điều hành, tam giác trách nhiệm — sẽ sửa được nó. Video không phải để xem cho biết, mà để luyện đúng con mắt chẩn đoán \"điểm đau cơ chế\" mà ta vừa học.","hoatdong":"","callouts":[],"tables":[]},{"n":26,"title":"GAMIFICATION: \"ĐIỀU HÀNH & TNKH\" (30 phút)","part":"NỘI DUNG 4 · Video tình huống và gamification Điều hành & TNKH","loai":"Game","dur":30,"content":["luật chơi + cơ chế","Bối cảnh: mỗi người/nhóm là Trưởng Điện lực trong một ca điều hành mô phỏng; lần lượt gặp các tình huống (sự cố, khiếu nại, việc liên tổ, hồ sơ trễ...)","Cách chơi: mỗi tình huống có 3–4 lựa chọn quyết định điều hành → hệ thống hiển thị tác động real-time lên chỉ số TNKH (và chỉ số phụ: thời gian xử lý, tải đội ngũ)","Điểm học: lựa chọn theo cơ chế (báo trước, chốt đầu mối, giao ban có mục TNKH) → chỉ số TNKH tăng; lựa chọn kiểu \"chữa cháy/ôm việc\" → tăng tải mà TNKH vẫn giảm","Sau game: bảng xếp hạng + giảng viên đúc kết các quyết định \"cơ chế\" thắng \"sự vụ\""],"loithoai":"Bây giờ là ba mươi phút chơi. Mỗi anh/chị — hoặc mỗi nhóm nhỏ — vào vai Trưởng Điện lực trong một ca điều hành mô phỏng. Trò chơi lần lượt ném ra các tình huống rất quen: một sự cố cần xử lý, một khiếu nại đang nóng, một việc liên tổ dễ rơi vùng xám, một hồ sơ sắp trễ hẹn. Với mỗi tình huống, anh/chị có ba đến bốn lựa chọn quyết định điều hành, và điểm hay là: ngay khi anh/chị chọn, hệ thống hiển thị tác động lập tức lên chỉ số trải nghiệm khách hàng, đồng thời hai chỉ số phụ — thời gian xử lý và tải công việc của đội ngũ. Anh/chị sẽ tự khám phá một quy luật: những lựa chọn theo cơ chế — chủ động báo khách trước, chốt một đầu mối phản hồi, đưa việc vào nhịp giao ban — làm chỉ số trải nghiệm tăng mà không làm đội ngũ quá tải. Ngược lại, những lựa chọn kiểu chữa cháy — tự ôm việc cho nhanh, để đó xử lý sau — có thể xong việc trước mắt nhưng đẩy tải lên cao mà trải nghiệm khách vẫn tụt. Trò chơi này biến bài học trừu tượng \"cơ chế thắng sự vụ\" thành thứ anh/chị thấy bằng mắt qua con số. Cuối game có bảng xếp hạng cho vui, và tôi sẽ đúc kết vài quyết định điển hình mà \"cơ chế\" thắng \"sự vụ\".\n\nCách vận hành trong 30 phút trên lớp:\n\nMở đầu (3'): chiếu màn intro, giải thích luật chơi — mỗi lựa chọn đẩy TNKH lên hoặc xuống ngay trước mắt, và các tình huống là điểm đau có thật của EVNSPC. Chia lớp thành các nhóm học viên, mỗi nhóm một máy, đặt tên nhóm.\n\nChơi (18'): các nhóm tự chơi lần lượt 8 tình huống (~2 phút/tình huống gồm cả bàn bạc). Nhắc học viên đọc kỹ phản hồi sau mỗi lựa chọn — đó là nơi con số khảo sát xuất hiện. Nếu chơi lần lượt trên một máy chiếu chung, mỗi nhóm cử một người quyết định, cả lớp cùng thấy chỉ số đổi màu.\n\nĐúc kết (9'): mở màn kết của 1–2 nhóm, dùng ngay bảng \"Những chỗ cơ chế thắng sự vụ\" làm chất liệu. Chốt quy luật lặp lại trong game: chủ động báo trước, chốt một đầu mối, đưa việc vào nhịp giao ban — gần như luôn làm TNKH tăng mà không tăng tải. Kết bằng thông điệp đỏ ở cuối màn: 10/10 điểm đau lớn nhất là hành vi & giao tiếp, nằm trong tầm quyết định điều hành của chính học viên.","hoatdong":"","callouts":[],"tables":[]},{"n":27,"title":"ĐÚC KẾT NỘI DUNG 4","part":"NỘI DUNG 4 · Video tình huống và gamification Điều hành & TNKH","loai":"Đúc kết","dur":5,"content":["chốt + cầu nối","Video: thấy trải nghiệm được hình thành/bẻ gãy ở khoảng giữa các khâu nội bộ","Game: tự tay thấy quyết định điều hành theo cơ chế đẩy chỉ số TNKH lên; theo sự vụ thì không","Quy luật lặp lại: chủ động thông tin + một đầu mối + đưa vào nhịp = TNKH tăng, tải không tăng"],"loithoai":"Đúc kết Nội dung 4. Qua video, anh/chị đã thấy trải nghiệm khách hàng được hình thành hoặc bị bẻ gãy chủ yếu ở khoảng giữa các khâu nội bộ — đúng chỗ ta đã gọi tên là điểm đau cơ chế. Qua trò chơi, anh/chị tự tay chứng kiến: quyết định điều hành theo cơ chế đẩy chỉ số trải nghiệm lên mà không làm đội ngũ quá tải, còn quyết định theo kiểu sự vụ thì làm ngược lại. Một quy luật cứ lặp đi lặp lại trong game, đáng để mang về: chủ động thông tin, giữ một đầu mối, và đưa việc vào nhịp — ba cái đó gần như luôn làm trải nghiệm khách tốt lên mà chi phí thêm gần bằng không. Lý thuyết đủ, video đủ, mô phỏng đủ. Việc còn lại là quan trọng nhất và cũng khó nhất: áp vào chính đơn vị của anh/chị. Nội dung 5 — sáu mươi phút thảo luận nhóm — là nơi ta làm điều đó.\n\nNỘI DUNG 5: Thảo luận nhóm — đề xuất giải pháp\n\nVẽ hành trình thật · Truy điểm đau cơ chế · Thiết kế giải pháp · Trình bày\n\nNội dung 5 là phần thực hành sâu nhất, kéo dài khoảng một giờ theo nhóm. Đây là nơi anh/chị biến toàn bộ chuyên đề thành một sản phẩm cụ thể cho đơn vị mình: chọn một hành trình khách hàng thật, vẽ nó ra, tìm điểm đau, truy đến gốc cơ chế, và thiết kế giải pháp gắn điều hành nội bộ với trải nghiệm khách hàng. Mỗi nhóm sẽ trình bày, cả lớp cùng góp ý, và mỗi cá nhân rời lớp với một cam kết ba mươi ngày.","hoatdong":"","callouts":["Giờ đến lượt đơn vị anh/chị — thảo luận nhóm vẽ hành trình thật và đề xuất giải pháp thật."],"tables":[]},{"n":28,"title":"THẢO LUẬN NHÓM: QUY TRÌNH 4 BƯỚC (60 phút)","part":"NỘI DUNG 5 · Thảo luận nhóm, giải pháp và cam kết 30 ngày","loai":"Thực hành","dur":35,"content":["khung làm việc nhóm","Bước 1 (15'): Chọn 1 hành trình KH thật tại đơn vị → vẽ điểm chạm, khoanh 2–3 điểm đau nổi cộm","Bước 2 (15'): Với mỗi điểm đau, truy: cơ chế hay thái độ? Cơ chế nào đang thiếu (quy định / kênh / phân vai)?","Bước 3 (20'): Thiết kế giải pháp điều hành — dùng công cụ CĐ2a: thêm mục giao ban? áp tam giác trách nhiệm? đặt quy định báo lại khách?","Bước 4 (10'): Mỗi nhóm trình bày 3' — 1 điểm đau + 1 giải pháp cơ chế cụ thể; giảng viên phản hồi"],"loithoai":"Sáu mươi phút thảo luận chia làm bốn bước, mỗi nhóm làm trên chính đơn vị của các thành viên. Bước một, mười lăm phút: chọn một hành trình khách hàng thật — cấp điện mới, hóa đơn, hay xử lý sự cố — vẽ ra các điểm chạm và khoanh hai đến ba điểm đau nổi cộm nhất mà đơn vị hay gặp. Bước hai, mười lăm phút: với mỗi điểm đau, dùng đúng con mắt đã luyện hôm nay để truy — đây là điểm đau cơ chế hay thái độ, và nếu là cơ chế thì đang thiếu cái gì: thiếu một quy định, thiếu một kênh liên lạc, hay thiếu phân vai rõ ràng. Bước ba, hai mươi phút — phần cốt lõi: thiết kế giải pháp điều hành cho từng điểm đau, và tôi yêu cầu dùng chính công cụ của Chuyên đề 2a. Ví dụ: thêm một mục vào giao ban sáng để bắt sớm điểm đau này? Áp tam giác trách nhiệm cho loại việc này để có đầu mối duy nhất? Đặt một quy định buộc báo lại khách trước tại mốc nào? Bước bốn, mười phút: mỗi nhóm trình bày ba phút — chọn một điểm đau tâm đắc nhất và một giải pháp cơ chế cụ thể cho nó — rồi tôi phản hồi. Nguyên tắc chấm: giải pháp phải cụ thể và làm được ngay, không phải khẩu hiệu chung chung.","hoatdong":"","callouts":[],"tables":[]},{"n":29,"title":"MẪU PHIẾU: GẮN ĐIỀU HÀNH NỘI BỘ VỚI TNKH","part":"NỘI DUNG 5 · Thảo luận nhóm, giải pháp và cam kết 30 ngày","loai":"Thực hành","dur":20,"content":[],"loithoai":"Để phần thảo luận cho ra sản phẩm dùng được chứ không tan theo buổi học, mỗi nhóm và sau đó mỗi cá nhân điền vào mẫu phiếu này. Nó gồm sáu ô. Hành trình chọn: ghi rõ đang làm hành trình nào. Điểm đau nổi cộm: mô tả cụ thể khách gặp phải chuyện gì, bằng ngôn ngữ của khách. Chẩn đoán gốc: đây là cơ chế hay thái độ, và nếu cơ chế thì thiếu quy định nào, kênh nào, hay phân vai nào. Giải pháp điều hành: ghi rõ áp công cụ nào của 2a — thêm mục giao ban, áp tam giác trách nhiệm, hay đặt quy định báo lại khách. Đầu mối và thời hạn: ai chịu trách nhiệm triển khai và bao giờ bắt đầu. Và ô cuối, rất quan trọng mà hay bị bỏ qua: cách đo trải nghiệm khách đã cải thiện — dấu hiệu nào cho biết giải pháp có tác dụng, ví dụ giảm số phàn nàn về chậm trễ, giảm số cuộc gọi khách chủ động hỏi tiến độ. Có ô đo lường này thì cam kết mới không trôi, vì ba mươi ngày sau anh/chị có cái để nhìn lại.","hoatdong":"","callouts":[],"tables":[{"title":"Nội dung trình bày trên slide","rows":[["mẫu phiếu điền (nhóm + cá nhân)","Hạng mục"],["Nội dung điền","Hành trình chọn"],["(cấp điện mới / hóa đơn / sự cố...)","Điểm đau nổi cộm"],["(mô tả khách gặp gì)","Chẩn đoán gốc"],["Cơ chế / thái độ — thiếu quy định/kênh/phân vai nào?","Giải pháp điều hành"],["Công cụ CĐ2a áp dụng (giao ban / tam giác TN / quy định báo lại)","Đầu mối & thời hạn"],["Ai làm · khi nào áp dụng","Cách đo TNKH cải thiện"],["Dấu hiệu nào cho biết đã tốt hơn (giảm phàn nàn / giảm gọi lại...)",""]]}]},{"n":30,"title":"ĐÚC KẾT CHUYÊN ĐỀ","part":"NỘI DUNG 5 · Thảo luận nhóm, giải pháp và cam kết 30 ngày","loai":"Đúc kết","dur":5,"content":["Tóm tắt hành trình: TNKH là gì → 3 hành trình & điểm đau cơ chế → 3 con đường quản lý tác động → video + game → giải pháp thật","Nguyên tắc bao trùm (băng đỏ): Điều hành nội bộ tốt là cách phục vụ khách hàng tốt nhất — TNKH vừa là quả vừa là nhân.","Cam kết: mỗi học viên chọn 01 giải pháp gắn điều hành–TNKH triển khai trong 30 ngày","Định hướng: nhìn lại tại hội thảo trực tuyến sau đào tạo","Khép chuỗi CĐ2: 2a xây cơ chế bên trong · 2b đo bằng trải nghiệm bên ngoài → một vòng tròn hoàn chỉnh"],"loithoai":"Chúng ta khép lại Chuyên đề 2b, và cũng là khép trọn cặp Chuyên đề 2. Nhìn lại hành trình hôm nay: ta bắt đầu bằng việc làm rõ trải nghiệm khách hàng là gì và khác dịch vụ khách hàng ra sao; đi qua ba hành trình khách hàng với các điểm đau, và phát hiện then chốt rằng phần lớn là điểm đau cơ chế chứ không phải thái độ; chỉ ra ba con đường người quản lý tác động đến trải nghiệm — nhịp điều hành, tam giác trách nhiệm, chất lượng thực thi; xem video và chơi mô phỏng để thấy nhân quả bằng mắt; và cuối cùng mỗi nhóm thiết kế giải pháp thật cho đơn vị mình. Nguyên tắc bao trùm gói trong một câu: điều hành nội bộ tốt chính là cách phục vụ khách hàng tốt nhất — trải nghiệm khách hàng vừa là quả của điều hành, vừa là nhân định hướng điều hành. Bây giờ, để chuyên đề không dừng ở nhận thức: mỗi anh/chị chọn đúng một giải pháp gắn điều hành nội bộ với trải nghiệm khách hàng — có thể là thêm mục khách hàng vào giao ban, có thể là đặt một đầu mối duy nhất cho một loại yêu cầu, có thể là quy định báo lại khách trước tại một mốc. Ta sẽ cùng nhìn lại tại hội thảo trực tuyến sau đào tạo. Và xin nhớ mạch liền của cặp chuyên đề này: ở 2a anh/chị xây cơ chế điều hành bên trong; ở 2b anh/chị học cách đo chính cơ chế đó bằng trải nghiệm của khách bên ngoài — hai nửa khép lại thành một vòng tròn hoàn chỉnh của điều hành chuyên nghiệp. Xin chân thành cảm ơn anh/chị.","hoatdong":"","callouts":[],"tables":[]}],"prep":["Gắn điều hành nội bộ với nâng cao trải nghiệm khách hàng","Thời lượng: 105 phút giảng + 30 phút gamification + 60 phút thảo luận nhóm","Tài liệu chuẩn: 4. CĐ2b. Gắn điều hành nội bộ với TNKH.docx","Chuẩn bị học liệu video, game mô phỏng Điều hành & TNKH và mẫu phiếu thảo luận nhóm.","Giữ cấu trúc card/bullet/bảng/callout để giảng viên đọc theo từng slide."],"prompts12":[],"checklist":[["Hạng mục","Cách kiểm tra"],["Đúng nguồn Word","Đối chiếu số slide, tiêu đề, nội dung, lời thoại"],["Đúng thiết kế","Giữ card, bullet, bảng, chip, callout"],["Đúng vận hành","Có route, build xanh, không lỗi mã hóa"]],"vung":[["Nhóm","Nội dung","Ghi chú"],["CĐ2b","Điều hành nội bộ gắn với TNKH","Theo file Word chuẩn"]],"andanh":[["Nguồn","Cách xử lý"],["4. CĐ2b. Gắn điều hành nội bộ với TNKH.docx","Trích nội dung vào HTML, giữ file Word làm bản gốc"]],"tomtat":[],"mau4":[],"framework":[["Phần","Số slide","Mục tiêu học tập","Hoạt động chính","Sản phẩm đầu ra","Thời lượng"],["Mở đầu","3","Hiểu mối liên hệ giữa điều hành nội bộ và trải nghiệm khách hàng.","Giảng ngắn, phân tích hành trình, video/game hoặc thảo luận nhóm theo nội dung.","Một giải pháp/cam kết cải thiện TNKH từ góc độ điều hành.","15′"],["NỘI DUNG 1 · TNKH trong ngành điện & khác biệt với dịch vụ khách hàng","6","Hiểu mối liên hệ giữa điều hành nội bộ và trải nghiệm khách hàng.","Giảng ngắn, phân tích hành trình, video/game hoặc thảo luận nhóm theo nội dung.","Một giải pháp/cam kết cải thiện TNKH từ góc độ điều hành.","20′"],["NỘI DUNG 2 · Ba hành trình khách hàng, điểm chạm và điểm đau cơ chế","7","Hiểu mối liên hệ giữa điều hành nội bộ và trải nghiệm khách hàng.","Giảng ngắn, phân tích hành trình, video/game hoặc thảo luận nhóm theo nội dung.","Một giải pháp/cam kết cải thiện TNKH từ góc độ điều hành.","28′"],["NỘI DUNG 3 · Vai trò người quản lý cấp Điện lực trong định hình TNKH","8","Hiểu mối liên hệ giữa điều hành nội bộ và trải nghiệm khách hàng.","Giảng ngắn, phân tích hành trình, video/game hoặc thảo luận nhóm theo nội dung.","Một giải pháp/cam kết cải thiện TNKH từ góc độ điều hành.","29′"],["NỘI DUNG 4 · Video tình huống và gamification Điều hành & TNKH","3","Hiểu mối liên hệ giữa điều hành nội bộ và trải nghiệm khách hàng.","Giảng ngắn, phân tích hành trình, video/game hoặc thảo luận nhóm theo nội dung.","Một giải pháp/cam kết cải thiện TNKH từ góc độ điều hành.","43′"],["NỘI DUNG 5 · Thảo luận nhóm, giải pháp và cam kết 30 ngày","3","Hiểu mối liên hệ giữa điều hành nội bộ và trải nghiệm khách hàng.","Giảng ngắn, phân tích hành trình, video/game hoặc thảo luận nhóm theo nội dung.","Một giải pháp/cam kết cải thiện TNKH từ góc độ điều hành.","60′"]],"quiz":[{"slide":1,"q":"Thông điệp chính của Slide 1 là gì?","opts":["MỤC LỤC CHUYÊN ĐỀ","Một nội dung không thuộc chuyên đề","Một thao tác kỹ thuật ngoài lớp","Một quy định không nêu trong giáo án"],"a":0,"why":"Câu hỏi ôn nhanh gắn với tiêu đề và nội dung chính của Slide 1."},{"slide":2,"q":"Thông điệp chính của Slide 2 là gì?","opts":["KẾT NỐI TỪ CHUYÊN ĐỀ 2a","Một nội dung không thuộc chuyên đề","Một thao tác kỹ thuật ngoài lớp","Một quy định không nêu trong giáo án"],"a":0,"why":"Câu hỏi ôn nhanh gắn với tiêu đề và nội dung chính của Slide 2."},{"slide":3,"q":"Thông điệp chính của Slide 3 là gì?","opts":["VÌ SAO CHUYÊN ĐỀ NÀY QUAN TRỌNG","Một nội dung không thuộc chuyên đề","Một thao tác kỹ thuật ngoài lớp","Một quy định không nêu trong giáo án"],"a":0,"why":"Câu hỏi ôn nhanh gắn với tiêu đề và nội dung chính của Slide 3."},{"slide":4,"q":"Thông điệp chính của Slide 4 là gì?","opts":["HAI CÂU CHUYỆN KHÁCH HÀNG","Một nội dung không thuộc chuyên đề","Một thao tác kỹ thuật ngoài lớp","Một quy định không nêu trong giáo án"],"a":0,"why":"Câu hỏi ôn nhanh gắn với tiêu đề và nội dung chính của Slide 4."},{"slide":5,"q":"Thông điệp chính của Slide 5 là gì?","opts":["TNKH LÀ GÌ: BA YẾU TỐ","Một nội dung không thuộc chuyên đề","Một thao tác kỹ thuật ngoài lớp","Một quy định không nêu trong giáo án"],"a":0,"why":"Câu hỏi ôn nhanh gắn với tiêu đề và nội dung chính của Slide 5."},{"slide":6,"q":"Thông điệp chính của Slide 6 là gì?","opts":["PHÂN BIỆT: DỊCH VỤ KH ≠ TRẢI NGHIỆM KH","Một nội dung không thuộc chuyên đề","Một thao tác kỹ thuật ngoài lớp","Một quy định không nêu trong giáo án"],"a":0,"why":"Câu hỏi ôn nhanh gắn với tiêu đề và nội dung chính của Slide 6."},{"slide":7,"q":"Thông điệp chính của Slide 7 là gì?","opts":["BA ĐẶC TRƯNG CỦA TNKH","Một nội dung không thuộc chuyên đề","Một thao tác kỹ thuật ngoài lớp","Một quy định không nêu trong giáo án"],"a":0,"why":"Câu hỏi ôn nhanh gắn với tiêu đề và nội dung chính của Slide 7."},{"slide":8,"q":"Thông điệp chính của Slide 8 là gì?","opts":["QUẢN TRỊ TNKH KHÁC QUẢN TRỊ DỊCH VỤ KH","Một nội dung không thuộc chuyên đề","Một thao tác kỹ thuật ngoài lớp","Một quy định không nêu trong giáo án"],"a":0,"why":"Câu hỏi ôn nhanh gắn với tiêu đề và nội dung chính của Slide 8."},{"slide":9,"q":"Thông điệp chính của Slide 9 là gì?","opts":["ĐÚC KẾT NỘI DUNG 1","Một nội dung không thuộc chuyên đề","Một thao tác kỹ thuật ngoài lớp","Một quy định không nêu trong giáo án"],"a":0,"why":"Câu hỏi ôn nhanh gắn với tiêu đề và nội dung chính của Slide 9."},{"slide":10,"q":"Thông điệp chính của Slide 10 là gì?","opts":["HÀNH TRÌNH 1: KHÁCH HÀNG MỚI XIN CẤP ĐIỆN","Một nội dung không thuộc chuyên đề","Một thao tác kỹ thuật ngoài lớp","Một quy định không nêu trong giáo án"],"a":0,"why":"Câu hỏi ôn nhanh gắn với tiêu đề và nội dung chính của Slide 10."},{"slide":11,"q":"Thông điệp chính của Slide 11 là gì?","opts":["HÀNH TRÌNH 2: KHÁCH HÀNG ĐANG SỬ DỤNG ĐIỆN","Một nội dung không thuộc chuyên đề","Một thao tác kỹ thuật ngoài lớp","Một quy định không nêu trong giáo án"],"a":0,"why":"Câu hỏi ôn nhanh gắn với tiêu đề và nội dung chính của Slide 11."},{"slide":12,"q":"Thông điệp chính của Slide 12 là gì?","opts":["HÀNH TRÌNH 3: KHÁCH HÀNG GẶP SỰ CỐ / KHIẾU NẠI","Một nội dung không thuộc chuyên đề","Một thao tác kỹ thuật ngoài lớp","Một quy định không nêu trong giáo án"],"a":0,"why":"Câu hỏi ôn nhanh gắn với tiêu đề và nội dung chính của Slide 12."}],"act":{"1":[],"2":[],"3":[],"4":["demo"],"5":[],"6":[],"7":[],"8":[],"9":[],"10":[],"11":["demo"],"12":[],"13":[],"14":[],"15":["thuchanh"],"16":[],"17":["demo"],"18":["demo"],"19":["demo"],"20":["demo"],"21":[],"22":["demo"],"23":[],"24":[],"25":["video"],"26":["game"],"27":[],"28":["thuchanh"],"29":["thuchanh"],"30":[]},"sourceDocx":"4. CĐ2b. Gắn điều hành nội bộ với TNKH.docx","meta":{"docCode":"CĐ02b","brandLabel":"CĐ02b · Điều hành nội bộ & TNKH · QL01A","program":"Chương trình QL01A · Chuyên đề 2b","title":"Gắn điều hành nội bộ với nâng cao trải nghiệm khách hàng","subtitle":"Sổ tay điện tử cho giảng viên theo file Word chuẩn CĐ2b: TNKH ngành điện, hành trình khách hàng, điểm đau cơ chế, video tình huống, gamification và thảo luận nhóm.","duration":"195 phút","durationNote":"105′ giảng + 30′ gamification + 60′ thảo luận nhóm","mode":"Giảng · Video tình huống · Game · Thảo luận nhóm","audience":"Trưởng/Phó Điện lực · GĐ/PGĐ Xí nghiệp","agendaTotal":"195′","agendaTotalNote":"105′ giảng + 30′ gamification + 60′ thảo luận nhóm"}};
+/* ---------- helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const esc=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const loaiClass=l=>'loai '+l.replace(/[^A-Za-zÀ-ỹ]/g,'');
+const chipColor=l=>{l=l.toLowerCase();if(l.includes('thực hành'))return'green';if(l.includes('demo'))return'violet';if(l.includes('đúc'))return'';return'blue';};
+const PARTS=[...new Set(DATA.slides.map(s=>s.part))];
+const ORIENTATION={"title": "CHUYÊN ĐỀ ĐỊNH HƯỚNG", "subtitle": "Nền tảng lãnh đạo và quản trị chuyên nghiệp trong bối cảnh mới", "duration": "Thời lượng: 45 phút", "sourceFile": "1. CĐ Định hướng.docx", "items": [{"type": "heading", "text": "1. Mục tiêu chuyên đề"}, {"type": "p", "text": "Sau chuyên đề, học viên có thể:"}, {"type": "p", "text": "Nhận diện ba chuyển biến lớn (tổ chức – chuyển đổi số – kỳ vọng khách hàng) đang tác động trực tiếp đến công việc điều hành hằng ngày;"}, {"type": "p", "text": "Phân biệt hai cách tiếp cận quản lý sự vụ và quản trị chuyên nghiệp qua các biểu hiện cụ thể;"}, {"type": "p", "text": "Tiếp cận ba trụ cột quản trị chuyên nghiệp — Mục tiêu, Dữ liệu, Con người — và năm định hướng năng lực của giai đoạn mới;"}, {"type": "p", "text": "Tự soi chiếu cách điều hành hiện tại của bản thân so với các định hướng đó;"}, {"type": "p", "text": "Định vị lộ trình toàn khóa, ba chủ đề chủ đạo và yêu cầu đầu ra để chuẩn bị tâm thế học tập."}, {"type": "heading", "text": "2. Khởi động: Một ngày của hai người quản lý (8 phút)"}, {"type": "p", "text": "Tương tác học viên với Mentimeter (Vevents 1)"}, {"type": "p", "text": "Giảng viên hỏi cả lớp (giơ tay hoặc Mentimeter): “Một ngày làm việc điển hình của anh/chị, bao nhiêu phần trăm thời gian dành cho việc phát sinh, chữa cháy?”"}, {"type": "p", "text": "A. Dưới 30%    B. 30–50%    C. 50–70%    D. Trên 70%"}, {"type": "p", "text": "Kết quả dự kiến: Giảng viên không bình luận đúng/sai, chỉ ghi nhận: “Chúng ta cùng giữ con số này trong đầu đến cuối buổi.”"}, {"type": "p", "text": "Kể chuyện đối chiếu: Anh A và Chị B"}, {"type": "p", "text": "Giảng viên phác họa nhanh hai nhân vật cùng quy mô đơn vị (~20 nhân viên), cùng năng lực, nhưng khác nhau ở cách tổ chức công việc:"}, {"type": "table", "rows": [["ANH A — điều hành theo sự vụ", "CHỊ B — điều hành theo hệ thống"], ["7h30: mở điện thoại — 20 tin nhắn, 10 email, trả lời từng cái.9h: có sự cố, tự xuống hiện trường vì không yên tâm giao ai.11h: tự cầm máy xử lý khiếu nại.Chiều họp: phát biểu bằng cảm nhận, chưa kịp chuẩn bị số liệu.19h mới về. Tận tâm, chịu khó — nhưng luôn quá tải.", "7h30: nhìn bảng chỉ số tuần.7h45: giao ban 15 phút — mỗi đầu mối báo 1 phút việc hôm nay, điểm cần chú ý.9h: sự cố — giao đầu mối phụ trách, chốt điểm báo lại 10h. Không phải xuống hiện trường.11h: xem lịch sử khách trên hệ thống, đưa chuyên viên trả lời theo kịch bản chuẩn.17h về đúng giờ. Hôm sau đơn vị vẫn chạy tốt."]]}, {"type": "p", "text": "Thông điệp giảng viên: “Khác biệt giữa Anh A và Chị B không nằm ở năng lực hay sự tận tâm — cả hai đều giỏi. Khác biệt nằm ở cách tổ chức công việc. Anh A giải quyết sự vụ; Chị B thiết kế hệ thống. Buổi học hôm nay trả lời câu hỏi: điều gì tạo nên khác biệt đó, và vì sao bối cảnh mới đòi hỏi cách làm của Chị B.”"}, {"type": "heading", "text": "3. Ba chuyển biến đang định hình lại công việc điều hành (9 phút)"}, {"type": "p", "text": "Giảng viên dẫn dắt: cách làm của Anh A từng rất hiệu quả — nhưng môi trường vận hành đã thay đổi. Có ba chuyển biến diễn ra đồng thời, và người quản lý cấp trung là người chịu tác động trực tiếp nhất."}, {"type": "table", "rows": [["Chuyển biến", "Biểu hiện", "Tác động lên người quản lý"], ["1. Tổ chức", "Mô hình quản lý 2 cấp; sắp xếp lại bộ máy; địa bàn rộng hơn, nhiều đầu mối phối hợp hơn.", "Khối lượng và độ phức tạp tăng — trí nhớ cá nhân không còn theo kịp."], ["2. Chuyển đổi số", "Các nền tảng nội bộ, hệ thống chuyên ngành, ứng dụng hiện trường và AI đi vào vận hành.", "Câu hỏi chuyển từ “có dữ liệu không” sang “có biết khai thác dữ liệu để ra quyết định không”."], ["3. Kỳ vọng khách hàng", "Khách so sánh trải nghiệm điện với ngân hàng, TMĐT, viễn thông; mạng xã hội lan tin nhanh.", "Đòi hỏi minh bạch, phản hồi nhanh, cam kết thời gian — TNKH thành thước đo điều hành."]]}, {"type": "p", "text": "Câu hỏi tương tác (hỏi và mời học viên phát biểu ngay tại lớp): “Trong ba chuyển biến này, chuyển biến nào đang gây áp lực lớn nhất cho đơn vị anh/chị lúc này?”; mời 2–3 học viên chia sẻ nhanh, không phân tích sâu."}, {"type": "p", "text": "Chốt: Ba chuyển biến không xảy ra tuần tự mà đồng thời. Hiểu bức tranh chung giúp anh/chị định vị áp lực hiện tại và chọn cách thích ứng — thay vì chỉ phản ứng với từng việc rời rạc."}, {"type": "heading", "text": "4. Từ quản lý sự vụ sang quản trị chuyên nghiệp (10 phút)"}, {"type": "p", "text": "Năm biểu hiện của quản lý sự vụ"}, {"type": "p", "text": "Giảng viên nêu nhanh năm biểu hiện, mời học viên thầm đối chiếu với bản thân:"}, {"type": "p", "text": "Ôm việc vì “không tin ai làm được”;"}, {"type": "p", "text": "Nhắc việc liên tục vì không có cơ chế tự kiểm tra;"}, {"type": "p", "text": "Chữa cháy liên tục vì không có phòng ngừa;"}, {"type": "p", "text": "Quyết định theo cảm tính vì không có dữ liệu đối chiếu;"}, {"type": "p", "text": "Không có gì để đối thoại với cấp trên ngoài báo cáo định tính."}, {"type": "p", "text": "Ba trụ cột của quản trị chuyên nghiệp"}, {"type": "table", "rows": [["Trụ cột", "Bản chất", "Ví dụ tại Điện lực"], ["MỤC TIÊU", "Mỗi việc trả lời: đạt kết quả gì? đo bằng gì? ai chịu trách nhiệm cuối cùng?", "“Giảm tỷ lệ khiếu nại lặp lại xuống dưới 2% trong quý”, có đầu mối, có thời hạn."], ["DỮ LIỆU", "Bằng chứng khách quan hỗ trợ quyết định hằng ngày, không phải báo cáo cuối tháng.", "Tra hệ thống KH: khiếu nại theo nguyên nhân, khu vực, nhân viên tiếp nhận."], ["CON NGƯỜI", "Con người vừa là nguồn lực vừa là mục đích; quyết định tốt vừa xong việc vừa phát triển người.", "Giao việc khó cho NV tiềm năng kèm hướng dẫn — việc xong, người trưởng thành."]]}, {"type": "p", "text": "Nhấn mạnh: ba trụ cột liên kết chặt. Có mục tiêu mà thiếu dữ liệu thì theo dõi thiếu căn cứ; có dữ liệu mà không đầu tư con người thì đội ngũ không đủ sức dùng dữ liệu; có đội ngũ giỏi mà thiếu mục tiêu thì công sức phân tán. Phải phát triển song song."}, {"type": "p", "text": "Thông điệp: Chuyển dịch tư duy không phủ định kinh nghiệm, quan hệ, sự tận tâm — những giá trị đó cần được giữ. Nó bổ sung thêm một tầng: hệ thống, cấu trúc, dữ liệu và tính bền vững, để những gì đã có phát huy tốt hơn trong bối cảnh mới."}, {"type": "heading", "text": "5. Năm định hướng năng lực & lộ trình toàn khóa (10 phút)"}, {"type": "p", "text": "Năm định hướng năng lực của giai đoạn mới"}, {"type": "p", "text": "Định hướng 1 — Điều hành có cơ chế song song với xử lý sự vụ — nhịp giao ban cố định, quy tắc đầu mối–thời hạn–báo lại, điểm kiểm tra giữa chu kỳ."}, {"type": "p", "text": "Định hướng 2 — Dùng dữ liệu hỗ trợ ra quyết định — đặt câu hỏi vào dữ liệu sẵn có; dữ liệu bổ sung cho trực giác, không thay thế."}, {"type": "p", "text": "Định hướng 3 — Phát triển đội ngũ song song hoàn thành công việc — giao việc gắn phát triển, phản hồi tại chỗ, huấn luyện qua công việc."}, {"type": "p", "text": "Định hướng 4 — Ứng dụng công cụ số và AI đúng vai trò — AI lo tác vụ hành chính lặp lại; thời gian tiết kiệm dành cho hiện trường và con người. AI đề xuất – người quản lý quyết định."}, {"type": "p", "text": "Định hướng 5 — Gắn điều hành nội bộ với trải nghiệm khách hàng (TNKH) — rà soát mỗi quyết định qua câu hỏi “khách hàng sẽ cảm nhận thế nào”."}, {"type": "p", "text": "Liên kết: Cơ chế vận hành trên nền dữ liệu → dữ liệu cần đội ngũ đủ năng lực → đội ngũ hiệu quả hơn khi có công cụ số → đích đến cuối cùng của cả hệ thống là TNKH."}, {"type": "p", "text": "Lộ trình toàn khóa & yêu cầu đầu ra"}, {"type": "p", "text": "Giảng viên trình bày cách năm định hướng được triển khai qua ba chuyên đề chuyên môn:"}, {"type": "table", "rows": [["Chuyên đề", "Nội dung", "Giá trị cốt lõi"], ["CĐ 1", "Ứng dụng AI hiệu quả trong công tác quản lý", "AI giúp có THÊM THỜI GIAN — giảm việc hành chính lặp lại."], ["CĐ 2a", "Nâng cao năng lực quản trị công việc trên nền dữ liệu", "Cơ chế giúp đơn vị TỰ VẬN HÀNH — không phụ thuộc một người."], ["CĐ 2b", "Gắn điều hành nội bộ với nâng cao TNKH", "Nâng cao TNKH trong công việc của tuyến đầu"], ["CĐ 3a & CĐ 3b", "Đào tạo, huấn luyện và kèm cặp nhân viên qua công việc", "Huấn luyện giúp ĐỘI NGŨ TRƯỞNG THÀNH — giảm tải bền vững."]]}, {"type": "p", "text": "Vòng xoáy đi lên: AI giải phóng thời gian → có thời gian huấn luyện → cơ chế tạo nhịp → đội ngũ giỏi hơn → TNKH tốt hơn → ít phàn nàn → có thời gian lãnh đạo → tiếp tục đi lên."}, {"type": "heading", "text": "6. Tự soi chiếu & cam kết tâm thế (8 phút)"}, {"type": "p", "text": "Năm câu hỏi tự soi chiếu cho mỗi học viên"}, {"type": "p", "text": "Giảng viên mời cả lớp tạm dừng, tự trả lời — không cần viết ra, chỉ cần thành thật với chính mình:"}, {"type": "p", "text": "Câu 1: Một ngày điển hình, bao nhiêu % thời gian dành cho việc phát sinh, bao nhiêu % cho việc quan trọng nhưng không gấp?"}, {"type": "p", "text": "Câu 2: Lần gần nhất ra một quyết định quan trọng, anh/chị có tra cứu dữ liệu trước khi quyết định không?"}, {"type": "p", "text": "Câu 3: Trong đội ngũ hiện tại, có ai đủ năng lực thay anh/chị xử lý phần lớn công việc nếu anh/chị vắng một tuần không?"}, {"type": "p", "text": "Câu 4: Anh/chị đã từng thử dùng AI để hỗ trợ một tác vụ công việc nào chưa?"}, {"type": "p", "text": "Câu 5: Lần gần nhất ra một quyết định điều hành, anh/chị có nghĩ đến tác động tới khách hàng không?"}, {"type": "p", "text": "Liên hệ Phần 1: Giảng viên nhắc lại con số poll đầu buổi — “Con số đó chính là câu trả lời cho câu hỏi thứ nhất. Năm câu này không để tự phê bình, mà để định vị bản thân trước khi bước vào các chuyên đề.”"}, {"type": "p", "text": "Thông điệp kết:"}, {"type": "p", "text": "“Chương trình đào tạo này chỉ là một phần của quá trình thay đổi. Phần quan trọng còn lại nằm ở tâm thế học hỏi và mức độ áp dụng vào công việc thực tế của mỗi anh/chị. Anh/chị hoàn toàn có thể bắt đầu vòng xoáy đi lên này ngay từ tuần tới — không cần xin phép ai, không cần chờ hệ thống mới.”"}]};
+let state={view:'overview',slide:1};
+
+/* ---------- NAV ---------- */
+function buildNav(){
+  const nav=$('#nav');nav.innerHTML='';
+  nav.appendChild(el('div','nav-sec','Tổng quan & tài nguyên'));
+  [['overview','📋 Agenda tổng quan'],
+   ['orientation','🧭 Chuyên đề định hướng'],
+   ['prompts','🗂 Bộ 12 prompt sổ tay'],
+   ['mau','⚖ 4 prompt mẫu (tốt / chưa tốt)'],
+   ['check','🔒 Checklist & bảo mật'],
+   ['guide','🎯 Cẩm nang hoạt động'],
+   ['quiz','📝 Trắc nghiệm kiểm tra']].forEach(([v,t])=>{
+    const a=el('a','',`<span class="tt">${t}</span>`);a.dataset.v=v;a.onclick=()=>go(v);nav.appendChild(a);
+  });
+  PARTS.forEach(p=>{
+    nav.appendChild(el('div','nav-sec',esc(p)));
+    DATA.slides.filter(s=>s.part===p).forEach(s=>{
+      const a=el('a','',`<span class="sn">${s.n}</span><span class="tt">${esc(s.title)}</span><span class="dur">${s.dur}′</span>`);
+      a.dataset.slide=s.n;a.onclick=()=>goSlide(s.n);nav.appendChild(a);
+    });
+  });
+}
+function setActive(){
+  document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));
+  let a= state.view==='slide' ? document.querySelector(`.nav a[data-slide="${state.slide}"]`)
+                              : document.querySelector(`.nav a[data-v="${state.view}"]`);
+  if(a)a.classList.add('active');
+}
+function go(v){state.view=v;state.slide=null;render();closeNav();window.scrollTo(0,0);}
+function goSlide(n){state.view='slide';state.slide=n;render();closeNav();window.scrollTo(0,0);}
+
+
+/* ---------- ORIENTATION ---------- */
+function renderOrientation(){
+  const m=$('#main');m.innerHTML='';
+  m.appendChild(el('div','eyebrow','Chương trình QL01A · Chuyên đề định hướng'));
+  m.appendChild(el('h2','page',esc(ORIENTATION.title)));
+  m.appendChild(el('p','sub',esc(ORIENTATION.subtitle)));
+  const mb=el('div','metabar');
+  const durationLabel=String(ORIENTATION.duration || '').replace('Thời lượng:', '').trim();
+  mb.innerHTML=`<span class="chip red">Thời lượng <b>${esc(durationLabel)}</b></span>
+    <span class="chip blue"><b>Nền tảng lãnh đạo</b></span>
+    <span class="chip green">Mở tâm thế trước CĐ01</span>
+    <span class="chip">File: ${esc(ORIENTATION.sourceFile)}</span>`;
+  m.appendChild(mb);
+  let card=null;
+  let list=null;
+  const flush=()=>{if(card){m.appendChild(card);card=null;}};
+  const flushList=()=>{if(list&&card){card.appendChild(list);list=null;}};
+  const isBulletLike=(text)=>{
+    return /^(Nhận diện|Phân biệt|Tiếp cận|Tự soi chiếu|Định vị|Ôm việc|Nhắc việc|Chữa cháy|Quyết định|Không có gì|Định hướng \d|Câu \d|CĐ \d|Vòng xoáy)/.test(text);
+  };
+  const isNote=(text)=>/^(Kết quả dự kiến|Chốt:|Nhấn mạnh:|Liên kết:|Liên hệ Phần 1:)/.test(text);
+  const isQuestion=(text)=>/^(Giảng viên hỏi|Câu hỏi tương tác)/.test(text);
+  const isMiniTitle=(text)=>{
+    return /^(Tương tác học viên|Kể chuyện đối chiếu|Năm biểu hiện|Ba trụ cột|Năm định hướng|Lộ trình toàn khóa|Năm câu hỏi)/.test(text);
+  };
+  const appendBullet=(text)=>{
+    if(!list) list=el('div','bullet-card','<ul></ul>');
+    list.querySelector('ul').appendChild(el('li','',esc(text)));
+  };
+  const appendParagraph=(text)=>{
+    flushList();
+    const p=el('p','lead',esc(text));
+    card.appendChild(p);
+  };
+  const ensureCard=(title)=>{
+    flushList();
+    if(card) m.appendChild(card);
+    card=el('div','card');
+    card.appendChild(el('h3','',`<span class="ic" style="background:var(--red)">i</span>${esc(title)}`));
+  };
+  ORIENTATION.items.forEach((item, index)=>{
+    if(item.type==='heading'){
+      ensureCard(item.text);
+      return;
+    }
+    if(!card) ensureCard('Nội dung định hướng');
+    if(item.type==='table'){
+      flushList();
+      const table=el('table');
+      const rows=item.rows||[];
+      const formatCell=(cell)=>esc(cell)
+        .replace(/\.(?=(?:9h|11h|19h|7h45|17h))/g,'.<br>')
+        .replace(/\.(?=[A-Z])/g,'.<br>')
+        .replace(/(10h\.)(?= Kh)/g,'$1<br>')
+        .replace(/((?:19h|17h)[^<]*)$/g,'<span class="strong-line">$1</span>');
+      table.innerHTML=rows.map((row,idx)=>'<tr>'+row.map((cell)=>idx===0?`<th>${esc(cell)}</th>`:`<td>${formatCell(cell)}</td>`).join('')+'</tr>').join('');
+      card.appendChild(table);
+      return;
+    }
+    if(item.text==='Thông điệp kết:'){
+      flushList();
+      const next=ORIENTATION.items[index+1];
+      const box=el('div','message-box',`<div class="message-title">${esc(item.text.replace(':',''))}</div><p>${esc(next&&next.type==='p'?next.text:'')}</p>`);
+      card.appendChild(box);
+      return;
+    }
+    if(index>0 && ORIENTATION.items[index-1].text==='Thông điệp kết:') return;
+    if(isMiniTitle(item.text)){
+      flushList();
+      card.appendChild(el('div','mini-title',esc(item.text)));
+      return;
+    }
+    if(isQuestion(item.text)){
+      flushList();
+      card.appendChild(el('div','question-box',`<b>Câu hỏi tương tác:</b> ${esc(item.text.replace(/^Giảng viên hỏi cả lớp \(giơ tay hoặc Mentimeter\):\s*/,'').replace(/^Câu hỏi tương tác \(hỏi và mời học viên phát biểu ngay tại lớp\):\s*/,''))}`));
+      return;
+    }
+    if(isNote(item.text)){
+      flushList();
+      const [label,...rest]=item.text.split(':');
+      card.appendChild(el('div','note-box',`<b>${esc(label)}:</b>${rest.length?' '+esc(rest.join(':').trim()):''}`));
+      return;
+    }
+    if(isBulletLike(item.text)){
+      appendBullet(item.text);
+      return;
+    }
+    appendParagraph(item.text);
+  });
+  flushList();
+  flush();
+  m.appendChild(el('div','callout','<b>Cách dùng:</b> Giảng viên mở mục này trước CĐ01 để thống nhất bối cảnh, tâm thế học tập và lộ trình toàn khóa; sau đó chuyển sang Agenda tổng quan hoặc Slide 1 của chuyên đề Ứng dụng AI.'));
+  setActive();
+}
+
+/* ---------- OVERVIEW ---------- */
+function renderOverview(){
+  const meta=DATA.meta||{};
+  const m=$('#main');m.innerHTML='';
+  m.appendChild(el('div','eyebrow',meta.program||'Chương trình QL01A'));
+  m.appendChild(el('h2','page',meta.title||'Sổ tay giảng viên'));
+  m.appendChild(el('p','sub',meta.subtitle||'Sổ tay điện tử giúp giảng viên nắm tổng quan và chi tiết cách giảng dạy chuyên đề.'));
+  const mb=el('div','metabar');
+  mb.innerHTML=`<span class="chip red">Thời lượng <b>${esc(meta.duration||'')}</b>${meta.durationNote?' ('+esc(meta.durationNote)+')':''}</span>
+    <span class="chip blue">Số slide <b>${DATA.slides.length} slide</b> · ${PARTS.length} phần</span>
+    <span class="chip green">Phương pháp ${esc(meta.mode||'Giảng ngắn · Demo · Thực hành')}</span>
+    <span class="chip">Đối tượng ${esc(meta.audience||'Học viên chương trình')}</span>
+    <span class="chip">Nguồn: ${esc(DATA.sourceDocx||'File Word chuẩn')}</span>`;
+  m.appendChild(mb);
+  if(DATA.prep&&DATA.prep.length){
+    const pc=el('div','card guide');
+    pc.appendChild(el('h3','',`<span class="ic">i</span>Chuẩn bị của giảng viên`));
+    pc.appendChild(el('p','lead',esc(DATA.prep[0])));
+    const ul=el('ul');
+    DATA.prep.slice(1).forEach(x=>ul.appendChild(el('li','',esc(x))));
+    pc.appendChild(ul);m.appendChild(pc);
+  }
+  const fw=DATA.framework;
+  const ft=el('table');
+  ft.innerHTML='<tr>'+fw[0].map(h=>`<th>${esc(h)}</th>`).join('')+'</tr>'+
+    fw.slice(1).map(r=>'<tr>'+r.map((c,ci)=>`<td${ci===1?' class="c"':''}>${esc(c)}</td>`).join('')+'</tr>').join('');
+  const fwc=el('div','card');fwc.appendChild(el('h3','',`<span class="ic" style="background:var(--red)">?</span>Khung cấu trúc giáo án`));fwc.appendChild(ft);
+  m.appendChild(fwc);
+
+  const tb=el('table');
+  tb.innerHTML='<tr><th style="width:56px">Slide</th><th style="width:120px">Loại</th><th style="width:56px">Phút</th><th>Nội dung</th></tr>';
+  PARTS.forEach(p=>{
+    const items=DATA.slides.filter(s=>s.part===p);
+    const sum=items.reduce((a,s)=>a+s.dur,0);
+    tb.appendChild(el('tr','part',`<td class="c"></td><td class="c">PHẦN</td><td class="c">${sum}′</td><td>${esc(p)}</td>`));
+    items.forEach(s=>{
+      const tr=el('tr');
+      tr.innerHTML=`<td class="c"><a onclick="goSlide(${s.n})" style="cursor:pointer;font-weight:700;color:var(--red)">${s.n}</a></td>
+        <td><span class="${loaiClass(s.loai)}">${esc(s.loai)}</span></td><td class="c">${s.dur}′</td><td>${esc(s.title)}</td>`;
+      tb.appendChild(tr);
+    });
+    if(meta.breakAfterPrefix&&p.startsWith(meta.breakAfterPrefix))tb.appendChild(el('tr','brk','<td class="c"></td><td class="c">GIẢI LAO</td><td class="c">15′</td><td>Nghỉ giải lao (tính trong tổng thời lượng)</td>'));
+  });
+  tb.appendChild(el('tr','tot',`<td class="c"></td><td class="c">TỔNG</td><td class="c">${esc(meta.agendaTotal||'')}</td><td>${esc(meta.agendaTotalNote||'')}</td>`));
+  const ac=el('div','card');ac.appendChild(el('h3','',`<span class="ic" style="background:var(--red)">☷</span>Agenda chi tiết đến từng slide`));ac.appendChild(tb);
+  m.appendChild(ac);
+  setActive();
+}
+
+/* ---------- SLIDE ---------- */
+function renderSlide(){
+  const m=$('#main');m.innerHTML='';
+  const s=DATA.slides.find(x=>x.n===state.slide);
+  const kinds=DATA.act[s.n]||[];
+  m.appendChild(el('div','eyebrow',esc(s.part)));
+  m.appendChild(el('h2','page',`Slide ${s.n}: ${esc(s.title)}`));
+  const mb=el('div','metabar');
+  let ch=`<span class="chip ${chipColor(s.loai)}">🏷 <b>${esc(s.loai)}</b></span><span class="chip red">⏱ <b>${s.dur} phút</b></span>`;
+  if(kinds.includes('video'))ch+=`<span class="chip blue">🎬 Video học liệu</span>`;
+  if(kinds.includes('game'))ch+=`<span class="chip red">🎮 Gamification</span>`;
+  if(kinds.includes('vdiscussion'))ch+=`<span class="chip violet">💬 V-discussion</span>`;
+  if(kinds.includes('demo'))ch+=`<span class="chip violet">🖥 Demo làm mẫu</span>`;
+  if(kinds.includes('thuchanh'))ch+=`<span class="chip green">✍ Thực hành</span>`;
+  mb.innerHTML=ch;m.appendChild(mb);
+  if(s.content.length){
+    const c=el('div','card content');c.appendChild(el('h3','',`<span class="ic">▤</span>Nội dung trình bày trên slide`));
+    const ul=el('ul');s.content.forEach(x=>ul.appendChild(el('li','',esc(x))));c.appendChild(ul);m.appendChild(c);
+  }
+  if(s.tables&&s.tables.length){
+    s.tables.forEach((tbl,idx)=>{
+      const c=el('div','card');
+      c.appendChild(el('h3','',`<span class="ic" style="background:var(--blue)">≡</span>${esc(tbl.title||('Bảng trong slide '+s.n))}`));
+      const t=el('table');
+      const rows=tbl.rows||[];
+      t.innerHTML=rows.map((r,ri)=>'<tr>'+r.map(cell=>ri===0?`<th>${esc(cell)}</th>`:`<td>${esc(cell)}</td>`).join('')+'</tr>').join('');
+      c.appendChild(t);m.appendChild(c);
+    });
+  }
+  if(s.loithoai){
+    const c=el('div','card speak');c.appendChild(el('h3','',`<span class="ic">🗣</span>Lời thoại giảng viên gợi ý`));
+    c.appendChild(el('p','',esc(s.loithoai)));m.appendChild(c);
+  }
+  if(s.hoatdong){
+    const c=el('div','card act');c.appendChild(el('h3','',`<span class="ic">✔</span>Hoạt động học viên & cách điều hành`));
+    c.appendChild(el('p','',esc(s.hoatdong)));m.appendChild(c);
+  }
+  if(kinds.length){
+    const g=el('div','card guide');g.appendChild(el('h3','',`<span class="ic">🎯</span>Hướng dẫn thao tác hoạt động của slide này`));
+    const ul=el('ul');
+    if(kinds.includes('video'))ul.appendChild(el('li','','<b>Video học liệu:</b> nêu 1–2 câu hỏi dẫn trước khi chiếu · chiếu trọn 4–5′ không chen ngang · mời 2–3 học viên phản hồi rồi chốt thông điệp. Chi tiết ở mục Cẩm nang hoạt động.'));
+    if(kinds.includes('game'))ul.appendChild(el('li','','<b>Gamification:</b> chia nhóm 6–8 người · nêu luật, không tiết lộ quy luật · quan sát khi chơi · đúc kết bằng bảng xếp hạng, kéo bài học về đơn vị.'));
+    if(kinds.includes('vdiscussion'))ul.appendChild(el('li','','<b>V-discussion:</b> tạo phòng, gán nhóm trưởng/thư ký trước · giao rõ sản phẩm + mốc thời gian · trình bày 3′/nhóm · đúc kết và chốt cam kết.'));
+    if(kinds.includes('demo'))ul.appendChild(el('li','','<b>Demo làm mẫu:</b> dùng dữ liệu mẫu đã chuẩn bị · thao tác chậm, đọc rõ từng lớp của prompt · chỉ rõ chỗ AI làm chưa đúng để dạy thói quen kiểm chứng · có ảnh chụp dự phòng khi mạng lỗi.'));
+    if(kinds.includes('thuchanh'))ul.appendChild(el('li','','<b>Thực hành:</b> nhắc chỉ dùng dữ liệu mẫu/ẩn danh · đi quanh hỗ trợ · mời 1–2 học viên chia sẻ sản phẩm · nêu rõ tiêu chí "đạt".'));
+    g.appendChild(ul);m.appendChild(g);
+  }
+  const nav=el('div','slidenav');
+  const maxSlide=DATA.slides.reduce((m,x)=>Math.max(m,x.n),0);
+  const prev=el('button','btn ghost',(s.n>1?'← Slide '+(s.n-1):'← Đầu'));prev.disabled=s.n<=1;prev.onclick=()=>goSlide(s.n-1);
+  const next=el('button','btn primary',(s.n<maxSlide?'Slide '+(s.n+1)+' →':'Hết phần slide →'));next.disabled=s.n>=maxSlide;next.onclick=()=>goSlide(s.n+1);
+  nav.appendChild(prev);nav.appendChild(next);m.appendChild(nav);
+  setActive();
+}
+
+/* ---------- 12 PROMPTS ---------- */
+function renderPrompts(){
+  const m=$('#main');m.innerHTML='';
+  m.appendChild(el('div','eyebrow','Tài nguyên · Sổ tay prompt'));
+  m.appendChild(el('h2','page','Bộ 12 prompt quản lý Điện lực / Xí nghiệp'));
+  m.appendChild(el('p','sub','Đây là sổ tay để giảng viên hướng dẫn học viên copy, chỉnh theo bối cảnh đơn vị — không phải để học thuộc. Mỗi prompt ghi rõ dùng khi nào, prompt mẫu, dữ liệu đầu vào, đầu ra mong muốn, lưu ý kiểm chứng/bảo mật và gợi ý điều chỉnh.'));
+  DATA.prompts12.forEach((p,i)=>{
+    const c=el('div','pcard');
+    c.appendChild(el('div','ph',`<span class="no">${i+1}</span>${esc(p.name.replace(/^\d+\.\s*/,''))}`));
+    const b=el('div','pb');
+    p.rows.forEach(r=>{
+      const isPrompt=/prompt mẫu/i.test(r[0]);
+      const row=el('div','prow');
+      row.innerHTML=`<div class="k">${esc(r[0])}</div>`+
+        (isPrompt?`<div class="v"><div class="promptbox">${esc(r[1])}</div></div>`:`<div class="v">${esc(r[1])}</div>`);
+      b.appendChild(row);
+    });
+    c.appendChild(b);m.appendChild(c);
+  });
+  setActive();
+}
+
+/* ---------- 4 PROMPT MẪU ---------- */
+function renderMau(){
+  const m=$('#main');m.innerHTML='';
+  m.appendChild(el('div','eyebrow','Tài nguyên · Prompt mẫu chi tiết'));
+  m.appendChild(el('h2','page','4 prompt mẫu: bản chưa tốt vs bản tốt'));
+  m.appendChild(el('p','sub','Bốn cặp prompt minh họa theo 4 nhóm việc cốt lõi. Mỗi cặp gồm prompt chưa tốt (kèm lý do vì sao chưa tốt) và prompt tốt đầy đủ để giảng viên phân tích trực tiếp với học viên.'));
+  DATA.mau4.forEach((b,i)=>{
+    const wrap=el('div','pcard');
+    wrap.appendChild(el('div','ph',`<span class="no">${i+1}</span>${esc(b.name.replace(/^\d+\.\s*/,''))}`));
+    const body=el('div','pb');
+    const cmp=el('div','cmp');
+    // bad
+    const bad=el('div','col bad');
+    bad.appendChild(el('div','h','✘ Prompt chưa tốt'));
+    const bb=el('div','b');
+    b.bad.forEach(x=>{
+      if(x.startsWith('Vì sao')){bb.appendChild(el('p','',`<b style="color:var(--red)">Vì sao chưa tốt:</b> ${esc(x.replace(/^Vì sao chưa tốt:\s*/,''))}`));}
+      else bb.appendChild(el('div','promptbox',esc(x)));
+    });
+    bad.appendChild(bb);
+    // good
+    const good=el('div','col good');
+    good.appendChild(el('div','h','✔ Prompt tốt'));
+    const gb=el('div','b');
+    gb.appendChild(el('div','promptbox',esc(b.good.join('\n'))));
+    good.appendChild(gb);
+    cmp.appendChild(bad);cmp.appendChild(good);
+    body.appendChild(cmp);wrap.appendChild(body);m.appendChild(wrap);
+  });
+  // bảng tóm tắt
+  const tt=DATA.tomtat;
+  const t=el('table');
+  t.innerHTML='<tr>'+tt[0].map(h=>`<th>${esc(h)}</th>`).join('')+'</tr>'+
+    tt.slice(1).map(r=>'<tr>'+r.map(c=>`<td>${esc(c)}</td>`).join('')+'</tr>').join('');
+  const c=el('div','card');c.appendChild(el('h3','',`<span class="ic" style="background:var(--green)">≡</span>Bảng tóm tắt nhanh: prompt chưa tốt vs prompt tốt`));c.appendChild(t);
+  m.appendChild(c);
+  setActive();
+}
+
+/* ---------- CHECKLIST & BẢO MẬT ---------- */
+function renderCheck(){
+  const m=$('#main');m.innerHTML='';
+  m.appendChild(el('div','eyebrow','Tài nguyên · Kiểm chứng & bảo mật'));
+  m.appendChild(el('h2','page','Checklist kiểm chứng và bảo mật dữ liệu'));
+  m.appendChild(el('p','sub','Bộ công cụ giảng viên dùng để rèn học viên thói quen dùng AI có trách nhiệm: kiểm chứng đầu ra 4 bước, phân loại 3 vùng dữ liệu, ẩn danh hóa và bài tập soi lỗi.'));
+  // checklist 4 bước
+  mkTable(m,'✔ Checklist 4 bước kiểm chứng đầu ra AI',DATA.checklist,'var(--red)');
+  // 3 vùng
+  mkTable(m,'🚦 Bảng 3 vùng dữ liệu: xanh – vàng – đỏ',DATA.vung,'var(--gold)');
+  // ẩn danh
+  mkTable(m,'🕶 Ví dụ ẩn danh hóa dữ liệu',DATA.andanh,'var(--blue)');
+  // bài tập soi lỗi (from slide 28 in the Word source)
+  const s29=DATA.slides.find(x=>x.n===28);
+  const c=el('div','card');
+  c.appendChild(el('h3','',`<span class="ic" style="background:var(--violet)">🔎</span>Bài tập soi lỗi đầu ra AI (Slide 28)`));
+  if(s29.content.length){const ul=el('ul');s29.content.forEach(x=>ul.appendChild(el('li','',esc(x))));c.appendChild(ul);}
+  c.appendChild(el('p','',`<b>Cách điều hành:</b> ${esc(s29.hoatdong)}`));
+  const b=el('button','btn ghost','Mở Slide 28 để xem lời thoại đầy đủ →');b.style.marginTop='6px';b.onclick=()=>goSlide(28);
+  c.appendChild(b);m.appendChild(c);
+  setActive();
+}
+function mkTable(m,title,rows,color){
+  const t=el('table');
+  t.innerHTML='<tr>'+rows[0].map(h=>`<th>${esc(h)}</th>`).join('')+'</tr>'+
+    rows.slice(1).map(r=>'<tr>'+r.map((c,ci)=>`<td${ci===0?' style="font-weight:700;width:200px"':''}>${esc(c)}</td>`).join('')+'</tr>').join('');
+  const c=el('div','card');c.appendChild(el('h3','',`<span class="ic" style="background:${color}">≡</span>${title}`));c.appendChild(t);m.appendChild(c);
+}
+
+/* ---------- GUIDE (hoạt động) ---------- */
+function renderGuide(){
+  const m=$('#main');m.innerHTML='';
+  m.appendChild(el('div','eyebrow','Cẩm nang vận hành hoạt động'));
+  m.appendChild(el('h2','page','Hướng dẫn từng loại hoạt động trên lớp'));
+  m.appendChild(el('p','sub','Bốn mô-đun quy trình chuẩn để giảng viên vận hành nhất quán. Với CĐ01, hoạt động chủ đạo là làm mẫu (demo) và thực hành cá nhân; các mô-đun video, gamification, thảo luận nhóm áp dụng khi lớp có hoạt động tương ứng.'));
+  const grid=el('div','grid');
+  grid.appendChild(gcard('v','Chiếu video học liệu','Video học liệu',[
+    'Trước khi chiếu: nêu 1–2 câu hỏi dẫn để học viên xem có mục tiêu, ví dụ "hãy chú ý người quản lý đã làm khác đi ở điểm nào".',
+    'Trong khi chiếu: không bình luận chen ngang; để video chạy trọn 4–5 phút.',
+    'Sau khi chiếu: mời 2–3 học viên trả lời câu hỏi dẫn, chốt thông điệp chính rồi nối sang hoạt động kế tiếp.',
+    'Dự phòng: chuẩn bị bản tải về hoặc ảnh chụp các cảnh chính phòng khi đường truyền lỗi.'
+  ],'Thời lượng gợi ý: 4–5′ chiếu + 3–4′ thảo luận nhanh.'));
+  grid.appendChild(gcard('g','Thực hành gamification','Trò chơi mô phỏng',[
+    'Chia nhóm 6–8 học viên; mỗi nhóm một thiết bị, hoặc chơi chung trên máy chiếu và luân phiên nhóm quyết định.',
+    'Nêu luật chơi ngắn gọn, KHÔNG tiết lộ trước "đáp án" hay quy luật — để học viên tự khám phá qua con số phản hồi.',
+    'Trong khi chơi: đi quanh quan sát, ghi nhớ nhóm nào chọn phương án chưa tối ưu để làm chất liệu đúc kết.',
+    'Sau khi chơi: mở bảng xếp hạng và bảng đúc kết, rút quy luật chung, luôn kéo bài học về thực tế đơn vị của học viên.'
+  ],'Điểm số chỉ để tạo không khí và thảo luận, không dùng chấm kết quả đào tạo chính thức.'));
+  grid.appendChild(gcard('d','Thảo luận nhóm qua V-discussion','Phần mềm V-discussion',[
+    'Chuẩn bị: tạo sẵn phòng/nhóm trên V-discussion, gán nhóm trưởng và thư ký cho mỗi nhóm trước giờ học.',
+    'Giao rõ sản phẩm đầu ra và mốc thời gian từng bước; hiển thị khung làm việc (form) trên màn hình V-discussion để nhóm điền trực tiếp.',
+    'Trong khi thảo luận: theo dõi màn hình các nhóm, nhắc mốc thời gian, hỗ trợ nhóm bị lệch hướng.',
+    'Kết thúc: mỗi nhóm cử đại diện trình bày ~3 phút, thư ký trình chiếu sản phẩm; giảng viên đúc kết và chốt cam kết.'
+  ],'Tiêu chí "một sản phẩm tốt": rõ mục tiêu, có bước làm cụ thể, gắn được với công việc thật tại đơn vị.'));
+  grid.appendChild(gcard('t','Tương tác học viên','Kỹ thuật giữ lớp',[
+    'Đặt câu hỏi mở đầu mỗi phần (poll nhanh, giơ tay) để đo mức độ quen thuộc và tạo kết nối thực tế.',
+    'Sau mỗi demo, luôn mời 1–2 học viên đối chiếu kết quả với công việc thật của họ.',
+    'Trong thực hành, đi quanh lớp, hỏi riêng từng người, khen cụ thể chỗ làm tốt và gợi mở chỗ cần chỉnh.',
+    'Chốt mỗi phần bằng một câu hỏi phản tư ngắn ("việc này áp vào đơn vị anh/chị thế nào?") để duy trì sự tham gia.'
+  ],'Nguyên tắc: không để học viên thụ động quá 10 phút liên tục — luôn có một điểm chạm tương tác.'));
+  m.appendChild(grid);
+  m.appendChild(el('div','callout','<b>Cách dùng:</b> Giảng viên mở mục này trước CĐ01 để thống nhất bối cảnh, tâm thế học tập và lộ trình toàn khóa; sau đó chuyển sang Agenda tổng quan hoặc Slide 1 của chuyên đề Ứng dụng AI.'));
+  setActive();
+}
+function gcard(kind,title,tag,steps,foot){
+  const c=el('div','gcard '+kind);
+  c.innerHTML=`<div class="tag">${esc(tag)}</div><h3>${esc(title)}</h3><ol>${steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol><div class="foot">${esc(foot)}</div>`;
+  return c;
+}
+
+/* ---------- QUIZ ---------- */
+let quizState={i:0,answers:[],started:false};
+function renderQuiz(){
+  const m=$('#main');m.innerHTML='';
+  m.appendChild(el('div','eyebrow','Kiểm tra kiến thức giảng viên'));
+  m.appendChild(el('h2','page','Bài trắc nghiệm theo từng slide chính'));
+  if(!quizState.started){
+    m.appendChild(el('p','sub',`Bài gồm ${DATA.quiz.length} câu, mỗi câu gắn một slide cốt lõi. Sau mỗi câu nhận phản hồi ngay; hoàn thành để xem điểm và phần ôn lại có liên kết về slide.`));
+    const c=el('div','card');
+    c.innerHTML=`<h3><span class="ic" style="background:var(--red)">i</span>Trước khi bắt đầu</h3>
+      <ul><li>Không giới hạn thời gian — trả lời thật để tự đánh giá mức nắm bài.</li>
+      <li>Mỗi câu chọn một đáp án; chọn xong hiện giải thích và slide liên quan.</li>
+      <li>Đạt yêu cầu gợi ý: đúng từ 80% trở lên (${Math.ceil(DATA.quiz.length*0.8)}/${DATA.quiz.length} câu).</li></ul>`;
+    m.appendChild(c);
+    const b=el('button','btn primary','Bắt đầu làm bài →');b.style.marginTop='8px';
+    b.onclick=()=>{quizState={i:0,answers:[],started:true};renderQuiz();};m.appendChild(b);setActive();return;
+  }
+  if(quizState.i>=DATA.quiz.length){renderResult(m);setActive();return;}
+  const q=DATA.quiz[quizState.i];
+  m.appendChild(el('div','progress',`<i style="width:${Math.round(quizState.i/DATA.quiz.length*100)}%"></i>`));
+  const card=el('div','q-card');
+  card.appendChild(el('div','q-meta',`Câu ${quizState.i+1} / ${DATA.quiz.length}`));
+  const sref=DATA.slides.find(x=>x.n===q.slide);
+  const rl=el('div','q-ref',`📑 Liên quan Slide ${q.slide}: ${esc(sref?sref.title:'')}`);rl.onclick=()=>goSlide(q.slide);card.appendChild(rl);
+  card.appendChild(el('p','q-text',esc(q.q)));
+  const answered=quizState.answers[quizState.i]!=null;
+  q.opts.forEach((o,idx)=>{
+    const b=el('button','opt',`<span class="l">${String.fromCharCode(65+idx)}</span>${esc(o)}`);
+    if(answered){
+      const ch=quizState.answers[quizState.i];
+      if(idx===q.a)b.classList.add('correct');else if(idx===ch)b.classList.add('wrong');else b.classList.add('dim');
+      b.disabled=true;
+    }else b.onclick=()=>{quizState.answers[quizState.i]=idx;renderQuiz();};
+    card.appendChild(b);
+  });
+  const why=el('div','q-why'+(answered?' show':''));
+  if(answered){const ok=quizState.answers[quizState.i]===q.a;why.innerHTML=`<b>${ok?'✔ Chính xác.':'✘ Chưa đúng.'}</b> ${esc(q.why)}`;}
+  card.appendChild(why);
+  if(answered){
+    const nav=el('div','slidenav');
+    const nx=el('button','btn primary',quizState.i<DATA.quiz.length-1?'Câu tiếp →':'Xem kết quả →');
+    nx.onclick=()=>{quizState.i++;renderQuiz();window.scrollTo(0,0);};
+    nav.appendChild(el('span'));nav.appendChild(nx);card.appendChild(nav);
+  }
+  m.appendChild(card);setActive();
+}
+function renderResult(m){
+  const total=DATA.quiz.length,correct=quizState.answers.filter((a,i)=>a===DATA.quiz[i].a).length,pct=Math.round(correct/total*100),pass=pct>=80;
+  const c=el('div','q-card result');
+  c.innerHTML=`<div class="score">${correct}/${total}</div>
+    <div class="lab" style="color:${pass?'var(--green)':'var(--red)'}">${pass?'Đạt yêu cầu ('+pct+'%)':'Cần ôn lại ('+pct+'%)'}</div>
+    <p style="color:var(--grey);margin-top:8px">${pass?'Bạn đã nắm vững nội dung cốt lõi. Có thể tự tin đứng lớp.':'Hãy xem lại các slide ở phần ôn lại bên dưới rồi làm lại bài.'}</p>`;
+  const rev=el('div','');rev.style.textAlign='left';rev.style.marginTop='20px';
+  DATA.quiz.forEach((q,i)=>{
+    const ok=quizState.answers[i]===q.a;const sref=DATA.slides.find(x=>x.n===q.slide);
+    rev.appendChild(el('div','rev-item',
+      `<div style="font-weight:700">${esc(q.q)}</div>
+       <div style="margin-top:4px">${ok?'<span class="ok">✔ Bạn trả lời đúng</span>':'<span class="no">✘ Đáp án đúng: '+esc(q.opts[q.a])+'</span>'}</div>
+       <div style="margin-top:5px;font-size:12.5px;color:var(--grey)">📑 <a onclick="goSlide(${q.slide})" style="cursor:pointer;color:var(--red)">Ôn Slide ${q.slide}: ${esc(sref?sref.title:'')}</a></div>`));
+  });
+  c.appendChild(rev);m.appendChild(c);
+  const b=el('button','btn primary','↻ Làm lại bài');b.style.marginTop='18px';
+  b.onclick=()=>{quizState={i:0,answers:[],started:true};renderQuiz();window.scrollTo(0,0);};m.appendChild(b);
+}
+
+/* ---------- router ---------- */
+function render(){
+  ({overview:renderOverview,orientation:renderOrientation,slide:renderSlide,prompts:renderPrompts,mau:renderMau,
+    check:renderCheck,guide:renderGuide,quiz:renderQuiz}[state.view]||renderOverview)();
+}
+function toggleNav(){$('#aside').classList.toggle('open');$('#backdrop').classList.toggle('open');}
+function closeNav(){$('#aside').classList.remove('open');$('#backdrop').classList.remove('open');}
+buildNav();render();
+
+</script>
+</body>
+</html>

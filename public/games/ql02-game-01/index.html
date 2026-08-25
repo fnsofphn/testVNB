@@ -1,0 +1,2072 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" href="data:," />
+    <title>QL02 Game 01 v2</title>
+    <style>
+      :root {
+        --navy: #082f69;
+        --blue: #0a4cad;
+        --blue2: #1d69d5;
+        --ink: #10233f;
+        --muted: #64748b;
+        --line: #dbe6f2;
+        --orange: #f2a900;
+        --green: #138a4b;
+        --red: #c53f3f;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        min-height: 100%;
+        overflow-x: hidden;
+      }
+      body {
+        margin: 0;
+        font-family:
+          Inter,
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          sans-serif;
+        color: var(--ink);
+        background: linear-gradient(180deg, #f8fbff, #e8f1fb);
+        min-height: 100vh;
+        min-height: 100dvh;
+        overflow-x: hidden;
+      }
+      button,
+      input {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:focus-visible,
+      input:focus-visible {
+        outline: 3px solid #f2a900;
+        outline-offset: 3px;
+      }
+      .app {
+        width: min(1120px, calc(100% - 28px));
+        margin: auto;
+      }
+      .top {
+        height: 76px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .brand {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .mark {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, var(--navy), var(--blue2));
+        color: #fff;
+        display: grid;
+        place-items: center;
+        font-weight: 900;
+      }
+      .brand b,
+      .brand span {
+        display: block;
+      }
+      .brand span {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .screen {
+        padding: 34px 0 72px;
+      }
+      .hero {
+        min-height: calc(100vh - 150px);
+        display: grid;
+        grid-template-columns: 1.1fr 0.72fr;
+        align-items: center;
+        gap: 60px;
+      }
+      .eyebrow {
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+        color: var(--blue);
+      }
+      h1 {
+        font-size: clamp(44px, 6vw, 72px);
+        line-height: 1;
+        letter-spacing: -0.05em;
+        color: var(--navy);
+        margin: 15px 0;
+      }
+      h1 em {
+        color: var(--blue2);
+        font-style: normal;
+      }
+      .hero-title {
+        font-size: clamp(44px, 5.2vw, 66px);
+        line-height: 0.98;
+        letter-spacing: -0.055em;
+        max-width: 780px;
+      }
+      .hero-title > span {
+        display: block;
+      }
+      .hero-title .nowrap {
+        display: inline;
+        white-space: nowrap;
+      }
+      .lead {
+        font-size: 17px;
+        line-height: 1.7;
+        color: #53677f;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        padding: 27px;
+        box-shadow: 0 20px 55px rgba(25, 62, 105, 0.13);
+      }
+      label {
+        display: block;
+        margin-top: 15px;
+        font-size: 13px;
+        font-weight: 800;
+        color: #41566e;
+      }
+      input {
+        width: 100%;
+        margin-top: 7px;
+        padding: 14px;
+        border: 1px solid #cad9e9;
+        border-radius: 12px;
+      }
+      .btn {
+        border: 0;
+        border-radius: 13px;
+        min-height: 48px;
+        padding: 0 18px;
+        font-weight: 850;
+      }
+      .primary {
+        color: #fff;
+        background: linear-gradient(135deg, var(--navy), var(--blue2));
+        box-shadow: 0 12px 24px rgba(10, 76, 173, 0.22);
+      }
+      .wide {
+        width: 100%;
+        margin-top: 20px;
+      }
+      .secondary {
+        color: var(--blue);
+        background: #eaf3ff;
+      }
+      .flow {
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap;
+        margin-top: 26px;
+      }
+      .rules {
+        display: grid;
+        gap: 9px;
+        margin-top: 22px;
+      }
+      .rule {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 10px;
+        padding: 11px 13px;
+        border: 1px solid var(--line);
+        border-radius: 13px;
+        background: rgba(255, 255, 255, 0.78);
+      }
+      .rule > span {
+        width: 28px;
+        height: 28px;
+        display: grid;
+        place-items: center;
+        border-radius: 9px;
+        background: var(--navy);
+        color: #fff;
+        font-weight: 900;
+      }
+      .rule small {
+        color: var(--muted);
+      }
+      .rule strong {
+        color: var(--blue);
+        white-space: nowrap;
+      }
+      .pill {
+        padding: 8px 11px;
+        border-radius: 999px;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 850;
+      }
+      .brief-head {
+        text-align: center;
+        max-width: 820px;
+        margin: 0 auto 24px;
+      }
+      .brief-head h2,
+      .guide h2,
+      .round-intro h2 {
+        color: var(--navy);
+        font-size: clamp(32px, 4.5vw, 50px);
+        letter-spacing: -0.04em;
+        margin: 10px 0;
+      }
+      .tabshell {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 15px;
+      }
+      .tabs {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .tabs button {
+        min-height: 56px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+        text-align: left;
+        padding: 12px 14px;
+        color: #53677e;
+        font-weight: 850;
+      }
+      .tabs button.active {
+        background: linear-gradient(135deg, var(--navy), var(--blue2));
+        color: #fff;
+      }
+      .tabbody {
+        min-height: 360px;
+      }
+      .tabbody h3 {
+        font-size: 28px;
+        color: var(--navy);
+      }
+      .brief-sections {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      .brief-section {
+        box-shadow: none;
+      }
+      .brief-section h3 {
+        margin-top: 0;
+        color: var(--navy);
+        font-size: 20px;
+      }
+      .brief-section.data-section {
+        grid-column: 1 / -1;
+      }
+      .brief-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 18px;
+      }
+      .callout {
+        background: #fff7e4;
+        border-left: 5px solid var(--orange);
+        padding: 15px;
+        border-radius: 0 12px 12px 0;
+        color: #74520f;
+        font-weight: 700;
+      }
+      .facts {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 9px;
+      }
+      .fact {
+        background: #f3f8fe;
+        border: 1px solid var(--line);
+        border-radius: 13px;
+        padding: 14px;
+      }
+      .fact small,
+      .fact b,
+      .fact span {
+        display: block;
+      }
+      .fact b {
+        color: var(--blue);
+        font-size: 22px;
+        margin: 7px 0;
+      }
+      .center {
+        text-align: center;
+      }
+      .levelgrid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin: 25px 0;
+      }
+      .level {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-top: 5px solid var(--accent);
+        border-radius: 18px;
+        padding: 18px;
+        text-align: left;
+      }
+      .level p {
+        min-height: 42px;
+      }
+      .level.active {
+        outline: 3px solid color-mix(in srgb, var(--accent) 30%, transparent);
+        transform: translateY(-3px);
+      }
+      .round-intro {
+        min-height: calc(100vh - 150px);
+        display: grid;
+        place-content: center;
+        text-align: center;
+      }
+      .roundnum {
+        font-size: 100px;
+        font-weight: 950;
+        color: transparent;
+        -webkit-text-stroke: 2px #b0c8e5;
+        line-height: 0.8;
+      }
+      .meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .meta > div:first-child {
+        display: grid;
+        gap: 4px;
+      }
+      .score {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 13px;
+        padding: 9px 14px;
+        color: var(--blue);
+        font-weight: 900;
+      }
+      .progress {
+        height: 8px;
+        background: #dbe8f5;
+        border-radius: 99px;
+        margin: 15px 0 28px;
+        overflow: hidden;
+      }
+      .progress i {
+        display: block;
+        height: 100%;
+        background: linear-gradient(90deg, var(--blue), var(--orange));
+      }
+      .contextlayout {
+        display: grid;
+        grid-template-columns: 0.78fr 1.22fr;
+        gap: 18px;
+      }
+      .context {
+        align-self: start;
+      }
+      .context h3 {
+        color: var(--blue);
+        font-size: 12px;
+        letter-spacing: 0.08em;
+      }
+      .evidence {
+        list-style: none;
+        padding: 0;
+      }
+      .evidence li {
+        background: #f5f9fe;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 9px;
+        margin: 7px 0;
+        font-size: 12px;
+      }
+      .qcard {
+        background: linear-gradient(145deg, #072d65, #0a4cad);
+        color: #fff;
+        border-radius: 22px;
+        padding: 28px;
+      }
+      .qcard blockquote {
+        font-size: clamp(25px, 3vw, 36px);
+        line-height: 1.25;
+        margin: 26px 0;
+      }
+      .qcard p {
+        color: #d6e6fa;
+      }
+      .tools {
+        display: flex;
+        justify-content: flex-end;
+        gap: 9px;
+        align-items: center;
+      }
+      .tools button {
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border-radius: 9px;
+        padding: 8px 10px;
+      }
+      .tools button.active {
+        background: #fff;
+        color: var(--navy);
+      }
+      .brief-heading {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 18px;
+      }
+      .brief-heading h2 {
+        margin-bottom: 0;
+      }
+      .brief-heading .btn {
+        flex: 0 0 auto;
+      }
+      .answers {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 12px;
+      }
+      .answers button,
+      .options button,
+      .decisions button {
+        border: 1px solid var(--line);
+        border-left: 5px solid var(--accent, #9db2cb);
+        background: #fff;
+        border-radius: 15px;
+        padding: 15px;
+        text-align: left;
+        color: var(--ink);
+      }
+      .answers button b,
+      .answers button small {
+        display: block;
+      }
+      .answers button small {
+        color: var(--muted);
+        margin-top: 4px;
+      }
+      .upgrade {
+        max-width: 950px;
+        margin: auto;
+      }
+      .upgradehead {
+        background: linear-gradient(145deg, #072d65, #0a4cad);
+        color: #fff;
+        border-radius: 22px;
+        padding: 26px;
+      }
+      .upgradehead blockquote {
+        background: rgba(255, 255, 255, 0.1);
+        border-left: 5px solid var(--orange);
+        padding: 14px;
+        font-size: 20px;
+      }
+      .options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin: 14px 0;
+      }
+      .options button {
+        display: flex;
+        gap: 11px;
+        min-height: 92px;
+      }
+      .options button.selected {
+        border-color: var(--blue2);
+        background: #edf6ff;
+      }
+      .box {
+        width: 33px;
+        height: 33px;
+        display: grid;
+        place-items: center;
+        border-radius: 9px;
+        background: #eaf3ff;
+        color: var(--blue);
+        font-weight: 900;
+        flex: none;
+      }
+      .selected .box {
+        background: var(--blue);
+        color: #fff;
+      }
+      .options small {
+        display: block;
+        color: var(--muted);
+        margin-top: 5px;
+      }
+      .pickfoot {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .sequence {
+        max-width: 820px;
+        margin: auto;
+      }
+      .seqcard {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 15px;
+        padding: 13px;
+        margin: 9px 0;
+      }
+      .seqcard .n {
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        background: var(--navy);
+        color: #fff;
+        border-radius: 9px;
+        font-weight: 900;
+      }
+      .seqcard .txt {
+        flex: 1;
+      }
+      .moves button {
+        border: 0;
+        background: #edf4fc;
+        color: var(--blue);
+        border-radius: 8px;
+        width: 33px;
+        height: 33px;
+      }
+      .decisionhead {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 25px;
+      }
+      .decisions {
+        display: grid;
+        gap: 9px;
+        margin-top: 13px;
+      }
+      .decisions button {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        min-height: 78px;
+      }
+      .decisions button span {
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        background: var(--navy);
+        color: #fff;
+        border-radius: 10px;
+        font-weight: 900;
+      }
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(5, 25, 52, 0.62);
+        display: grid;
+        place-items: center;
+        padding: 18px;
+        z-index: 10;
+      }
+      .feedback {
+        width: min(620px, 100%);
+        max-height: 90vh;
+        overflow: auto;
+      }
+      .feedback h3 {
+        text-align: center;
+        color: var(--navy);
+        font-size: 27px;
+      }
+      .fsec {
+        background: #f5f9fe;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 13px;
+        margin-top: 10px;
+      }
+      .fsec b {
+        color: var(--blue);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+      }
+      .fsec p {
+        color: #51657d;
+        line-height: 1.55;
+      }
+      .result {
+        text-align: center;
+      }
+      .ring {
+        width: 170px;
+        height: 170px;
+        border-radius: 50%;
+        margin: 20px auto;
+        display: grid;
+        place-items: center;
+        background: conic-gradient(var(--blue2) var(--angle), #dce8f5 0);
+        position: relative;
+      }
+      .ring:before {
+        content: "";
+        position: absolute;
+        inset: 13px;
+        background: #f8fbff;
+        border-radius: 50%;
+      }
+      .ring div {
+        z-index: 1;
+      }
+      .ring b {
+        display: block;
+        font-size: 42px;
+        color: var(--navy);
+      }
+      .resultgrid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 13px;
+        margin: 24px 0;
+        text-align: left;
+      }
+      .memory {
+        background: linear-gradient(145deg, #072d65, #0a4cad);
+        color: #fff;
+        border-radius: 22px;
+        padding: 24px;
+      }
+      .memgrid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-top: 16px;
+      }
+      .memgrid div {
+        background: rgba(255, 255, 255, 0.1);
+        border-top: 4px solid var(--accent);
+        padding: 12px;
+        border-radius: 11px;
+      }
+      .hide {
+        display: none !important;
+      }
+      @media (min-width: 851px) and (max-height: 760px) {
+        .top {
+          height: 56px;
+        }
+        .screen {
+          padding: 12px 0 36px;
+        }
+        .brief-heading {
+          align-items: center;
+          margin-bottom: 12px;
+        }
+        .brief-head {
+          max-width: 820px;
+          margin: 0;
+          text-align: left;
+        }
+        .brief-head h2,
+        .guide h2,
+        .round-intro h2 {
+          margin: 4px 0;
+          font-size: 36px;
+        }
+        .lead {
+          margin: 6px 0;
+          font-size: 15px;
+          line-height: 1.45;
+        }
+        .tabs button {
+          min-height: 48px;
+          padding: 8px 12px;
+        }
+        .tabbody {
+          min-height: 0;
+          padding: 20px;
+        }
+        .tabbody h3 {
+          margin: 4px 0 14px;
+          font-size: 24px;
+        }
+        .fact {
+          padding: 10px;
+        }
+        .fact b {
+          margin: 4px 0;
+        }
+      }
+      @media (max-width: 850px) {
+        .top {
+          height: 60px;
+        }
+        .screen {
+          padding: 16px 0 44px;
+        }
+        .hero,
+        .tabshell,
+        .contextlayout,
+        .brief-sections {
+          grid-template-columns: 1fr;
+        }
+        .hero {
+          min-height: auto;
+          gap: 24px;
+          padding-bottom: 24px;
+        }
+        .card {
+          padding: clamp(18px, 4vw, 24px);
+          border-radius: 18px;
+        }
+        .brief-head {
+          margin-bottom: 0;
+        }
+        .brief-head h2,
+        .guide h2,
+        .round-intro h2 {
+          font-size: clamp(30px, 7vw, 40px);
+        }
+        .tabbody {
+          min-height: 0;
+        }
+        .tabs {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+        }
+        .levelgrid,
+        .facts,
+        .memgrid {
+          grid-template-columns: 1fr 1fr;
+        }
+        .brief-heading {
+          align-items: stretch;
+          flex-direction: column;
+          gap: 12px;
+        }
+        .brief-heading .btn {
+          width: 100%;
+        }
+        .brief-section.data-section {
+          grid-column: auto;
+        }
+        .brief-actions {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      @media (max-width: 580px) {
+        .app {
+          width: min(100% - 20px, 1120px);
+        }
+        .hero {
+          padding-top: 0;
+        }
+        h1,
+        .hero-title {
+          font-size: 36px;
+          line-height: 1.03;
+        }
+        .brief-head h2,
+        .guide h2,
+        .round-intro h2 {
+          font-size: 30px;
+        }
+        .tabs,
+        .levelgrid,
+        .facts,
+        .answers,
+        .options,
+        .resultgrid,
+        .memgrid {
+          grid-template-columns: 1fr;
+        }
+        .tools,
+        .pickfoot {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .brief-actions,
+        .rule {
+          grid-template-columns: 1fr;
+        }
+        .brief-actions {
+          display: grid;
+        }
+        .rule > span {
+          display: none;
+        }
+        .qcard {
+          padding: 21px;
+        }
+        .qcard blockquote {
+          font-size: 25px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="top">
+        <div class="brand">
+          <div class="mark">QL</div>
+          <div>
+            <b>QL02 · Game 01</b
+            ><span>Từ số liệu đến kiến nghị hành động · v2.1</span>
+          </div>
+        </div>
+        <span id="status" class="eyebrow"></span>
+      </header>
+      <main id="root"></main>
+    </div>
+    <script>
+      const DATA = {
+        LEVELS: [
+          {
+            id: "data",
+            short: "Số liệu",
+            name: "Tầng 1 · Số liệu",
+            question: "Bao nhiêu?",
+            description: "Một giá trị được ghi nhận, chưa có bối cảnh so sánh.",
+            accent: "#3182ce",
+            icon: "01",
+          },
+          {
+            id: "information",
+            short: "Thông tin",
+            name: "Tầng 2 · Thông tin",
+            question: "Thay đổi thế nào?",
+            description:
+              "Số liệu đã được đặt trong bối cảnh, xu hướng hoặc so sánh.",
+            accent: "#6b46c1",
+            icon: "02",
+          },
+          {
+            id: "signal",
+            short: "Tín hiệu quản trị",
+            name: "Tầng 3 · Tín hiệu quản trị",
+            question: "Điều gì đáng ưu tiên?",
+            description:
+              "Chỉ ra điểm nóng, mẫu hình hoặc ngoại lệ có thể làm thay đổi ưu tiên quản lý.",
+            accent: "#d97706",
+            icon: "03",
+          },
+          {
+            id: "action",
+            short: "Kiến nghị hành động",
+            name: "Tầng 4 · Kiến nghị hành động",
+            question: "Ai làm gì, khi nào?",
+            description:
+              "Nêu chủ thể, việc cần làm, phạm vi, thời hạn hoặc cơ chế theo dõi.",
+            accent: "#15803d",
+            icon: "04",
+          },
+        ],
+        CASE_BRIEF: {
+          title: "Sự cố trung áp tăng",
+          role: "Bạn là Trưởng/Phó phòng chuyên môn đang rà soát hồ sơ sự cố trung áp trước khi trình Giám đốc.",
+          what: "Ba tháng gần đây, số sự cố trung áp và SAIDI cùng tăng. Dự thảo hiện có nhiều số liệu nhưng chưa chỉ rõ lãnh đạo cần ưu tiên ở đâu.",
+          why: "Giám đốc cần quyết định có tập trung nguồn lực vào một nhóm tuyến trọng điểm và phê duyệt kế hoạch xử lý 30 ngày hay không.",
+          mission:
+            "Phân loại nội dung vào bốn tầng Số liệu – Thông tin – Tín hiệu quản trị – Kiến nghị hành động; sau mỗi lựa chọn, xem lý do và cách nâng cấp phát biểu.",
+          facts: [
+            {
+              label: "Sự cố",
+              value: "18 → 31",
+              note: "tăng trong 3 tháng liên tiếp",
+            },
+            { label: "Mục tiêu", value: "≤ 20", note: "sự cố/tháng" },
+            {
+              label: "Điểm tập trung",
+              value: "4 tuyến A, B, C, D",
+              note: "chiếm 68% mức tăng SAIDI",
+            },
+            {
+              label: "Thời gian khôi phục TB",
+              value: "103 phút",
+              note: "mục tiêu 60 phút",
+            },
+          ],
+          sourceNotes: [
+            "9/31 sự cố lặp lại; 7/31 sự cố liên quan cùng nhóm thiết bị đóng cắt.",
+            "Bốn tuyến A, B, C, D tạo ra 21/31 sự cố và 68% mức tăng SAIDI.",
+            "46/103 phút là thời gian do chờ vật tư hoặc xác nhận biện pháp.",
+            "Dự thảo cũ đề nghị “tăng cường kiểm tra toàn bộ lưới” nhưng chưa nêu ưu tiên, người chủ trì hoặc thời hạn.",
+          ],
+        },
+        ROUND_1: [
+          {
+            id: "G1-01",
+            source: "Dòng mở đầu của dự thảo",
+            context:
+              "Chuyên viên chỉ chép số tổng hợp tháng 6, chưa đặt cạnh mục tiêu hoặc các tháng trước.",
+            evidence: [
+              "Tháng 6: 31 sự cố trung áp",
+              "Chưa có số liệu so sánh trong chính phát biểu",
+            ],
+            statement: "Tháng 6 có 31 sự cố trung áp.",
+            prompt:
+              "Xét riêng giá trị mà câu này cung cấp, tầng cao nhất đã đạt là gì?",
+            answer: "data",
+            explanation: "Câu chỉ trả lời “bao nhiêu”.",
+            why: "Trong báo cáo quản trị, bối cảnh phải được thể hiện hoặc gắn rõ với phát biểu; người đọc không nên tự suy đoán.",
+            next: "Nâng cấp lên tầng “Thông tin”: Bổ sung mốc so sánh hoặc xu hướng của số liệu.",
+            hint: "Tìm xem câu đã có từ khóa hoặc con số nào để trả lời ‘so với cái gì?’ chưa.",
+          },
+          {
+            id: "G1-02",
+            source: "Bảng xu hướng 3 tháng",
+            context:
+              "Nhóm đã đặt số tháng 6 cạnh hai tháng trước nhưng chưa tách theo tuyến hoặc nhóm nguyên nhân.",
+            evidence: [
+              "Tháng 4: 18 sự cố",
+              "Tháng 5: 24 sự cố",
+              "Tháng 6: 31 sự cố",
+            ],
+            statement:
+              "Số sự cố tăng từ 18 lên 31 trong 3 tháng liên tiếp (T4: 18 sự cố; T5: 24 sự cố; T6: 31 sự cố).",
+            prompt:
+              "Câu đã cho thấy diễn biến nhưng chưa chỉ ra nơi cần ưu tiên. Nó đang ở tầng nào?",
+            answer: "information",
+            explanation:
+              "Phát biểu đã có xu hướng theo thời gian, vì vậy cao hơn số liệu đơn lẻ; tuy nhiên chưa chỉ ra điểm nóng quản trị.",
+            why: "Thông tin giúp thấy vấn đề đang xấu đi, nhưng lãnh đạo vẫn chưa biết nên dồn nguồn lực vào đâu.",
+            next: "Nâng cấp lên tầng “Tín hiệu quản trị”: Phân rã theo tuyến, thiết bị hoặc công đoạn để tìm điểm tập trung.",
+            hint: "Câu trả lời được ‘thay đổi thế nào?’, nhưng chưa trả lời ‘điều gì đáng ưu tiên?’. ",
+          },
+          {
+            id: "G1-03",
+            source: "Phân tích đóng góp theo tuyến",
+            context:
+              "Nguồn lực kiểm tra hiện trường chỉ đủ cho một nhóm tuyến trong tháng tới.",
+            evidence: [
+              "4 tuyến tạo 21/31 sự cố",
+              "4 tuyến chiếm 68% mức tăng SAIDI",
+              "Các tuyến còn lại phân tán",
+            ],
+            statement:
+              "Nếu nguồn lực có hạn, bốn tuyến A, B, C, D – tập trung 21/31 sự cố, chiếm 68% mức tăng SAIDI là nhóm cần được xem xét trước.",
+            prompt: "Phát biểu này đã vượt khỏi việc mô tả con số ở điểm nào?",
+            answer: "signal",
+            explanation:
+              "Phát biểu đã tập trung thành một ưu tiên quản lý.",
+            why: "Tín hiệu quản trị có giá trị khi làm thay đổi thứ tự ưu tiên, không chỉ khi con số lớn.",
+            next: "Nâng cấp lên tầng “Kiến nghị hành động”: Chuyển ưu tiên này thành kế hoạch có chủ trì, thời hạn và chỉ số kết quả.",
+            hint: "Hãy hỏi: câu này có giúp Giám đốc biết nơi cần nhìn trước không?",
+          },
+          {
+            id: "G1-04",
+            source: "Dự thảo kết luận của phòng",
+            context:
+              "Phòng đã có căn cứ về bốn tuyến trọng điểm nhưng chưa giao nhiệm vụ cho ai.",
+            evidence: [
+              "Bốn tuyến chiếm 68% mức tăng SAIDI",
+              "Cần tạo chuyển biến trong 30 ngày",
+            ],
+            statement: "Cần ưu tiên kiểm tra bốn tuyến trọng điểm.",
+            prompt:
+              "Câu nghe giống một đề xuất, nhưng tầng cao nhất thực sự là gì?",
+            answer: "signal",
+            explanation:
+              "Phát biểu đã nêu ưu tiên nhưng chưa đủ để triển khai: chưa rõ ai chủ trì, kiểm tra việc gì, hạn nào và đo kết quả ra sao.",
+            why: "Đây là bẫy thường gặp: một câu dùng động từ “cần” chưa chắc đã là kiến nghị hành động.",
+            next: "Nâng cấp lên tầng “Kiến nghị hành động”: Bổ sung chủ thể, hành động, thời hạn và cơ chế theo dõi.",
+            hint: "Thử hỏi: sau khi Giám đốc đồng ý, có thể giao việc ngay không?",
+          },
+          {
+            id: "G1-05",
+            source: "Bảng so sánh tuyến A-471 và tuyến A-472",
+            context:
+              "Tuyến A-471 có ít sự cố hơn nhưng mỗi sự cố kéo dài hơn đáng kể.",
+            evidence: [
+              "Tuyến 471: 3 sự cố, SAIDI 210 phút",
+              "Tuyến 472: 8 sự cố, SAIDI 95 phút",
+            ],
+            statement:
+              "Tuyến A-471 (3 sự cố, SAIDI = 210 phút) không nhiều sự cố nhưng gây SAIDI cao hơn tuyến A-472 (8 sự cố, SAIDI = 95 phút), đây là ngoại lệ cần kiểm tra sâu.",
+            prompt:
+              "Không có chữ ‘ưu tiên nguồn lực’, nhưng phát biểu đã hàm ý điều gì?",
+            answer: "signal",
+            explanation:
+              "Phát biểu đã nêu 1 nhận diện có ý nghĩa quản trị: số lần thấp nhưng tác động cao. Đây là tín hiệu cần điều tra, không chỉ là so sánh thông thường.",
+            why: "Tín hiệu buộc người quản lý đổi câu hỏi hoặc ưu tiên kiểm tra.",
+            next: "Nâng cấp lên tầng “Kiến nghị hành động”: Tách thời gian khôi phục thành các công đoạn để xác định giả thuyết nguyên nhân.",
+            hint: "Hãy xem câu có làm thay đổi cách chọn tuyến để kiểm tra không.",
+          },
+          {
+            id: "G1-06",
+            source: "Phân tích thời gian khôi phục",
+            context:
+              "Mục tiêu về thời gian khôi phục là 60 phút; thời gian khôi phục bình quân thực tế là 103 phút.",
+            evidence: [
+              "46 phút chờ vật tư/xác nhận biện pháp",
+              "27 phút thao tác hiện trường",
+              "30 phút di chuyển và khoanh vùng",
+            ],
+            statement:
+              "Thời gian kéo dài chủ yếu nằm ở thời gian chờ vật tư và xác nhận biện pháp (trung bình 46/103 phút), không nằm ở thao tác hiện trường (trung bình 27/103 phút).",
+            prompt:
+              "Phát biểu này giúp thay đổi hướng xử lý nhưng vẫn cần kiểm chứng sâu hơn. Nó thuộc tầng nào?",
+            answer: "signal",
+            explanation:
+              "Phát biểu đã chỉ ra công đoạn tạo phần lớn chậm trễ và làm thay đổi nơi cần can thiệp. Nó chưa nêu hành động cụ thể.",
+            why: "Tín hiệu đã thu hẹp vấn đề từ “khôi phục chậm” xuống đúng bước có khả năng gây tắc.",
+            next: "Nâng cấp lên tầng “Kiến nghị hành động”: Kiểm tra nguồn dữ liệu thời gian chờ và thiết kế phương án rút ngắn công đoạn này.",
+            hint: "Câu đã trả lời ‘điểm nào đáng ưu tiên?’ nhưng chưa trả lời ‘ai làm gì, khi nào?’. ",
+          },
+          {
+            id: "G1-07",
+            source: "Đề xuất hoàn chỉnh phiên bản 2",
+            context:
+              "Giám đốc yêu cầu một phương án có thể giao ngay sau cuộc họp.",
+            evidence: [
+              "Phòng Kỹ thuật có chức năng chủ trì",
+              "Mốc đánh giá: 30 ngày",
+              "Theo dõi hàng tuần",
+            ],
+            statement:
+              "Giao Phòng Kỹ thuật chủ trì kiểm tra bốn tuyến A, B, C, D trong 30 ngày, xử lý nhóm thiết bị lặp lỗi và báo cáo chỉ số sự cố lặp hằng tuần.",
+            prompt: "Tầng cao nhất của phát biểu là gì?",
+            answer: "action",
+            explanation:
+              "Phát biểu đã có chủ trì, phạm vi, hành động, thời hạn và chỉ số theo dõi nên có thể chuyển sang tổ chức thực hiện.",
+            why: "Kiến nghị hành động phải giảm số câu hỏi lãnh đạo cần hỏi lại sau khi đồng ý.",
+            next: "Bổ sung điều kiện chuyển cấp nếu sau hai tuần chỉ số không cải thiện.",
+            hint: "Kiểm tra đủ bốn yếu tố: ai – làm gì – khi nào – theo dõi bằng gì.",
+          },
+          {
+            id: "G1-08",
+            source: "Ý KIẾN PHẢN BIỆN CỦA PHÓ GIÁM ĐỐC",
+            context:
+              "Một nhóm đề nghị kiểm tra toàn bộ lưới vì sự cố tăng, nhưng nguồn lực chỉ đủ kiểm tra 20% tuyến.",
+            evidence: [
+              "4 tuyến tạo 68% mức tăng SAIDI",
+              "Nguồn lực kiểm tra hạn chế",
+              "Các tuyến còn lại không có mẫu hình tập trung",
+            ],
+            statement:
+              "Không nên dàn trải kiểm tra toàn bộ các tuyến; dữ liệu hiện tại ủng hộ việc tập trung vào nhóm tuyến A, B, C, D tạo phần lớn tác động – đồng thời, nguồn lực kiểm tra hạn chế.",
+            prompt:
+              "Câu chưa giao nhiệm vụ nhưng đã tạo ra loại giá trị quản trị nào?",
+            answer: "signal",
+            explanation:
+              "Phát biểu đã dùng dữ liệu để bác bỏ một cách hành động dàn trải và định hướng ưu tiên. Nó là tín hiệu quản trị, chưa phải kế hoạch thực hiện.",
+            why: "Tín hiệu quản trị không chỉ nêu “điểm nóng” mà còn có thể loại bỏ một cách hành động không phù hợp.",
+            next: "Sau khi thống nhất ưu tiên, cần viết kiến nghị có người, việc, hạn và mục tiêu.",
+            hint: "Phát biểu đã giúp lựa chọn ‘tập trung hay dàn trải’, nhưng chưa đủ để giao việc.",
+          },
+        ],
+        ROUND_2: [
+          {
+            id: "G1-U01",
+            source: "Biên tập dòng mở đầu",
+            context:
+              "Dự thảo chỉ có câu “Tháng 6 có 31 sự cố trung áp”. Bạn được chọn đúng hai mảnh dữ liệu để nâng câu lên tầng Thông tin.",
+            statement: "Tháng 6 có 31 sự cố trung áp.",
+            target: "Số liệu → Thông tin",
+            instruction:
+              "Chọn 2 mảnh tạo được bối cảnh và xu hướng, không chọn nhận xét cảm tính.",
+            options: [
+              {
+                id: "A",
+                text: "Mục tiêu tháng là không quá 20 sự cố",
+                note: "mốc so sánh",
+              },
+              {
+                id: "B",
+                text: "Ba tháng trước lần lượt là 18, 24 và 31 sự cố",
+                note: "xu hướng",
+              },
+              {
+                id: "C",
+                text: "Tô đỏ con số 31, đưa lên tiêu đề và thêm chú thích đây là mức cao cần lãnh đạo lưu ý",
+                note: "nhấn mạnh hình thức nhưng chưa thêm bằng chứng",
+              },
+              {
+                id: "D",
+                text: "Nhận định tình hình đang rất nghiêm trọng và đề nghị lãnh đạo quan tâm ngay trong cuộc họp",
+                note: "kết luận cảm tính chưa có mốc so sánh",
+              },
+            ],
+            correctOptionIds: ["A", "B"],
+            explanation:
+              "Mốc mục tiêu và chuỗi thời gian biến con số 31 thành thông tin có bối cảnh.",
+            why: "Màu sắc hoặc từ “nghiêm trọng” không tạo thêm bằng chứng.",
+            upgradedStatement:
+              "Số sự cố tăng từ 18 lên 31 trong ba tháng liên tiếp.",
+          },
+          {
+            id: "G1-U02",
+            source: "Tìm điểm nóng",
+            context:
+              "Nhóm đã biết số sự cố tăng nhưng Giám đốc hỏi: ‘Vậy cần nhìn vào đâu trước?’. Chọn đúng hai mảnh để nâng lên Tín hiệu quản trị.",
+            statement:
+              "Số sự cố tăng từ 18 lên 31 trong ba tháng liên tiếp.",
+            target: "Thông tin → Tín hiệu quản trị",
+            instruction:
+              "Chọn 2 mảnh giúp thu hẹp điểm ưu tiên, không chỉ bổ sung thêm tổng số.",
+            options: [
+              {
+                id: "A",
+                text: "Bốn tuyến A, B, C, D tạo 21/31 sự cố",
+                note: "mức tập trung",
+              },
+              {
+                id: "B",
+                text: "Bốn tuyến này chiếm 68% mức tăng SAIDI",
+                note: "tác động",
+              },
+              {
+                id: "C",
+                text: "Báo cáo hiện có 12 cột, gồm thời gian, tuyến, thiết bị, nguyên nhân và trạng thái xử lý",
+                note: "nhiều dữ liệu nhưng chưa chỉ ra điểm ưu tiên",
+              },
+              {
+                id: "D",
+                text: "Tháng 6 có 30 ngày và là giai đoạn nắng nóng nên số sự cố có thể tăng theo điều kiện mùa vụ",
+                note: "giả thuyết bối cảnh chưa chứng minh nơi cần ưu tiên",
+              },
+            ],
+            correctOptionIds: ["A", "B"],
+            explanation:
+              "Mảnh dữ liệu cung cấp phần lớn vấn đề và tác động, đủ để thay đổi ưu tiên quản lý.",
+            why: "Tín hiệu không phải là thêm nhiều con số; đó là tìm mẫu hình có thể làm thay đổi quyết định.",
+            upgradedStatement:
+              "Bốn tuyến A, B, C, D là nhóm cần ưu tiên.",
+          },
+          {
+            id: "G1-U03",
+            source: "Chuyển tín hiệu thành việc",
+            context:
+              "Nhóm đã thống nhất bốn tuyến là điểm ưu tiên. Giám đốc cần một kiến nghị có thể giao ngay sau cuộc họp.",
+            statement: "Bốn tuyến A, B, C, D là nhóm cần ưu tiên.",
+            target: "Tín hiệu → Kiến nghị hành động",
+            instruction:
+              "Chọn 2 mảnh làm rõ trách nhiệm thực hiện và cách đo kết quả.",
+            options: [
+              {
+                id: "A",
+                text: "Phòng Kỹ thuật chủ trì kiểm tra và xử lý nhóm thiết bị lặp lỗi trong 30 ngày",
+                note: "ai – việc – hạn",
+              },
+              {
+                id: "B",
+                text: "Theo dõi sự cố lặp hằng tuần; mục tiêu giảm ít nhất 50% sau 30 ngày",
+                note: "chỉ số kết quả",
+              },
+              {
+                id: "C",
+                text: "Đề nghị các đơn vị tăng cường trách nhiệm, chủ động rà soát toàn bộ lưới và báo cáo về Phòng Kỹ thuật",
+                note: "có vẻ hành động nhưng dàn trải, thiếu hạn và chỉ số",
+              },
+              {
+                id: "D",
+                text: "Bổ sung năm biểu đồ màu thể hiện xu hướng, mức độ rủi ro và giúp lãnh đạo theo dõi trực quan hơn",
+                note: "cải thiện trình bày nhưng chưa tạo nhiệm vụ",
+              },
+            ],
+            correctOptionIds: ["A", "B"],
+            explanation:
+              "Mảnh dữ liệu biến ưu tiên thành nhiệm vụ có chủ trì và thời hạn và cung cấp tiêu chí theo dõi để biết hành động có tạo kết quả hay không.",
+            why: "Một kiến nghị tốt phải có thể được giao việc và kiểm tra sau khi lãnh đạo đồng ý.",
+            upgradedStatement:
+              "Giao phòng Kỹ thuật kiểm tra bốn tuyến A, B, C, D trong 30 ngày.",
+          },
+          {
+            id: "G1-U04",
+            source: "Phản biện kiến nghị",
+            context:
+              "Một đề xuất đã có người và thời hạn nhưng vẫn có nguy cơ không tạo kết quả vì chỉ nói ‘kiểm tra’. Chọn hai mảnh làm kiến nghị có thể quản trị.",
+            statement:
+              "Giao Phòng Kỹ thuật kiểm tra bốn tuyến A, B, C, D trong 30 ngày.",
+            target: "Kiến nghị yếu → Kiến nghị có thể theo dõi",
+            instruction: "Chọn 2 mảnh làm rõ đầu ra và điều kiện điều chỉnh.",
+            options: [
+              {
+                id: "A",
+                text: "Đầu ra: danh sách thiết bị rủi ro, biện pháp xử lý và người chịu trách nhiệm từng tuyến",
+                note: "sản phẩm bàn giao",
+              },
+              {
+                id: "B",
+                text: "Nếu sau 2 tuần sự cố lặp không giảm, báo cáo Trưởng ban để điều chỉnh nguồn lực",
+                note: "cơ chế chuyển cấp",
+              },
+              {
+                id: "C",
+                text: "Yêu cầu Phòng Kỹ thuật triển khai khẩn trương, phối hợp chặt chẽ với các đơn vị để bảo đảm tiến độ",
+                note: "có chỉ đạo nhưng chưa xác định đầu ra quản trị",
+              },
+              {
+                id: "D",
+                text: "Kéo dài báo cáo thêm 10 trang, mô tả diễn biến từng sự cố và tổng hợp đầy đủ ý kiến của các đơn vị",
+                note: "tăng tài liệu nhưng không có điều kiện điều chỉnh",
+              },
+            ],
+            correctOptionIds: ["A", "B"],
+            explanation:
+              "Đầu ra cụ thể giúp biết thế nào là hoàn thành; cơ chế chuyển cấp giúp xử lý khi kế hoạch không tạo chuyển biến.",
+            why: "Kiến nghị hành động không kết thúc ở việc giao nhiệm vụ; nó phải tạo được cơ chế theo dõi và điều chỉnh.",
+            upgradedStatement:
+              "Trong 30 ngày, Phòng Kỹ thuật bàn giao danh sách rủi ro và biện pháp từng tuyến; sau 2 tuần nếu sự cố lặp không giảm thì báo cáo điều chỉnh nguồn lực.",
+          },
+        ],
+        ROUND_3: [
+          { id: "A", level: "data", text: "Tháng 6 có 31 sự cố trung áp" },
+          {
+            id: "B",
+            level: "information",
+            text: "Số vụ sự cố tăng từ 18 lên 31 trong 3 tháng và vượt mục tiêu",
+          },
+          {
+            id: "C",
+            level: "signal",
+            text: "68% mức tăng SAIDI tập trung ở bốn tuyến A, B, C, D",
+          },
+          {
+            id: "D",
+            level: "action",
+            text: "Giao Phòng Kỹ thuật xử lý bốn tuyến A, B, C, D trong 30 ngày, giảm 50% sự cố lặp và báo cáo hằng tuần",
+          },
+        ],
+        ROUND_3_ACTIONS: [
+          {
+            id: "A",
+            text: "Yêu cầu toàn bộ các đơn vị đồng loạt tăng cường kiểm tra toàn lưới, tổng hợp thêm báo cáo chi tiết và gửi kết quả hằng tuần.",
+            correct: false,
+            reason:
+              "Dàn trải nguồn lực và chưa bám vào tín hiệu 80/20 của dữ liệu.",
+          },
+          {
+            id: "B",
+            text: "Tập trung bốn tuyến A, B, C, D, giao Phòng Kỹ thuật xử lý thiết bị lặp lỗi trong 30 ngày, theo dõi sự cố lặp hằng tuần.",
+            correct: true,
+            reason:
+              "Dữ liệu hiện đã đủ để xác định một nhóm ưu tiên và triển khai biện pháp có kiểm soát.",
+          },
+          {
+            id: "C",
+            text: "Tiếp tục theo dõi thêm ba tháng, yêu cầu các đơn vị gửi báo cáo định kỳ rồi mới lựa chọn tuyến và đề xuất phương án xử lý.",
+            correct: false,
+            reason:
+              "Dữ liệu hiện đã đủ để xác định một nhóm ưu tiên và triển khai biện pháp có kiểm soát.",
+          },
+        ],
+        MAX_SCORE: 200,
+      };
+      const S = {
+        screen: "welcome",
+        name: "",
+        round: 1,
+        idx: 0,
+        score: 0,
+        answers: [],
+        selected: [],
+        seq: [],
+        phase: "sequence",
+        resultPublished: false,
+        attemptStartedMs: 0,
+        attemptStartedAt: "",
+        attemptFinishedAt: "",
+        attemptDurationMs: 0,
+        round1Orders: {},
+        round2Orders: {},
+        decisionOrder: [],
+        clockOffsetMs: 0,
+      };
+      const root = document.getElementById("root");
+      const status = document.getElementById("status");
+      function shuf(a) {
+        a = [...a];
+        for (let i = a.length - 1; i; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+      function orderedByIds(items, ids) {
+        const byId = new Map(items.map((item) => [item.id, item]));
+        return (ids || []).map((id) => byId.get(id)).filter(Boolean);
+      }
+      function prepareAnswerOrders() {
+        S.round1Orders = Object.fromEntries(
+          DATA.ROUND_1.map((question) => [
+            question.id,
+            shuf(DATA.LEVELS.map((item) => item.id)),
+          ]),
+        );
+        S.round2Orders = Object.fromEntries(
+          DATA.ROUND_2.map((question) => [
+            question.id,
+            shuf(question.options.map((item) => item.id)),
+          ]),
+        );
+        S.decisionOrder = shuf(DATA.ROUND_3_ACTIONS.map((item) => item.id));
+      }
+      function nowMs() {
+        return Date.now() + S.clockOffsetMs;
+      }
+      function formatDuration(milliseconds) {
+        const totalSeconds = Math.max(
+          0,
+          Math.floor((Number(milliseconds) || 0) / 1000),
+        );
+        const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+        const seconds = String(totalSeconds % 60).padStart(2, "0");
+        return minutes + ":" + seconds;
+      }
+      function currentAttemptDuration() {
+        if (!S.attemptStartedMs) return 0;
+        if (S.attemptFinishedAt) return S.attemptDurationMs;
+        return Math.max(0, nowMs() - S.attemptStartedMs);
+      }
+      function refreshStatus() {
+        if (S.screen === "playing") {
+          status.textContent =
+            "Điểm " + S.score + " · " + formatDuration(currentAttemptDuration());
+          return;
+        }
+        status.textContent =
+          S.screen === "result"
+            ? "Thời gian " + formatDuration(S.attemptDurationMs)
+            : "";
+      }
+      function level(id) {
+        return DATA.LEVELS.find((x) => x.id === id);
+      }
+      function esc(s) {
+        return String(s).replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      }
+      function save() {
+        localStorage.setItem("ql02-g1-v2-standalone", JSON.stringify(S));
+      }
+      function resetQ() {
+        S.selected = [];
+      }
+      function startAttempt() {
+        let now = nowMs();
+        S.attemptStartedMs = now;
+        S.attemptStartedAt = new Date(now).toISOString();
+        S.attemptFinishedAt = "";
+        S.attemptDurationMs = 0;
+        S.resultPublished = false;
+      }
+      function finishAttempt() {
+        let now = nowMs();
+        if (!S.attemptStartedMs) startAttempt();
+        S.attemptFinishedAt = new Date(now).toISOString();
+        S.attemptDurationMs = Math.max(0, Math.round(now - S.attemptStartedMs));
+      }
+      function prog() {
+        let total = DATA.ROUND_1.length + DATA.ROUND_2.length + 2;
+        let d = S.round > 1 ? DATA.ROUND_1.length : S.round === 1 ? S.idx : 0;
+        d += S.round > 2 ? DATA.ROUND_2.length : S.round === 2 ? S.idx : 0;
+        if (S.round === 3 && S.phase === "decision") d += 1;
+        if (S.screen === "result") d += 2;
+        return Math.round((d / total) * 100);
+      }
+      function button(label, fn, cls = "btn primary") {
+        return (
+          '<button class="' +
+          cls +
+          '" onclick="' +
+          fn +
+          '">' +
+          label +
+          "</button>"
+        );
+      }
+      function publishResult() {
+        if (S.resultPublished) return;
+        if (!S.attemptFinishedAt) finishAttempt();
+        let pct = Math.min(100, Math.round((S.score / DATA.MAX_SCORE) * 100)),
+          r1 = S.answers.filter((x) => x.round === 1 && x.ok).length,
+          r2 = S.answers.filter((x) => x.round === 2 && x.ok).length,
+          r3 = S.answers.filter((x) => x.round === 3 && x.ok).length;
+        let payload = {
+          playerName: S.name || "",
+          groupName: "",
+          score: S.score,
+          maxScore: DATA.MAX_SCORE,
+          rankLabel:
+            pct >= 90 ? "Xuất sắc" : pct >= 72 ? "Đạt" : "Cần luyện lại",
+          values: {
+            scorePercent: pct,
+            round1Correct: r1,
+            round2Correct: r2,
+            round3Correct: r3,
+            round1Total: DATA.ROUND_1.length,
+            round2Total: DATA.ROUND_2.length,
+            round3Total: 2,
+            gameTitle: "Từ số liệu đến kiến nghị hành động",
+          },
+          answers: S.answers,
+          meta: {
+            source: "ql02-game-01",
+            version: "v2.1.0",
+            evnspcTnkhTiming: {
+              startedAt: S.attemptStartedAt,
+              finishedAt: S.attemptFinishedAt,
+              durationMs: S.attemptDurationMs,
+              durationSeconds: Math.round(S.attemptDurationMs / 1000),
+              calculation: "game_entry_to_first_completion",
+            },
+          },
+        };
+        S.resultPublished = true;
+        try {
+          window.parent?.postMessage(
+            { type: "game-result-ready", gameId: "ql02-game-01", payload },
+            window.location.origin,
+          );
+          if (typeof BroadcastChannel !== "undefined") {
+            let bc = new BroadcastChannel("ql02-game-01-results");
+            bc.postMessage({
+              type: "game-result-ready",
+              gameId: "ql02-game-01",
+              payload,
+            });
+            bc.close();
+          }
+        } catch (e) {
+          console.warn("Không gửi được kết quả QL02", e);
+        }
+      }
+      function render() {
+        const previousScreen = root.dataset.screen || "";
+        if (S.screen === "welcome") welcome();
+        else if (S.screen === "brief") brief();
+        else if (S.screen === "guide") guide();
+        else if (S.screen === "intro") intro();
+        else if (S.screen === "playing") playing();
+        else result();
+        if (S.screen === "result") publishResult();
+        refreshStatus();
+        root.dataset.screen = S.screen;
+        if (previousScreen !== S.screen) {
+          requestAnimationFrame(() => {
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+          });
+        }
+        save();
+      }
+      function welcome() {
+        root.innerHTML =
+          '<section class="screen hero"><div><span class="eyebrow">Gamification cá nhân</span><h1 class="hero-title"><span>Từ số liệu đến</span><span><em>kiến nghị hành động</em></span></h1><p class="lead">Bạn là Trưởng/Phó phòng chuyên môn đang rà soát hồ sơ sự cố trung áp trước khi trình Giám đốc. Bạn sẽ lần lượt phân loại nội dung vào bốn tầng Số liệu – Thông tin – Tín hiệu quản trị – Kiến nghị hành động. Sau mỗi lựa chọn, game giải thích vì sao và cách dùng cấu trúc bốn tầng.</p><div class="flow">' +
+          DATA.LEVELS.map(
+            (x) =>
+              '<span class="pill" style="background:' +
+              x.accent +
+              '">' +
+              x.short +
+              "</span>",
+          ).join("") +
+          '</div><p class="lead"><b>Cách thức:</b> Tổng cộng 3 vòng, tối đa 200 điểm.</p><div class="rules"><div class="rule"><span>1</span><small>Phân loại 8 tình huống · 10 điểm/câu</small><strong>80 điểm</strong></div><div class="rule"><span>2</span><small>Chọn 2 mảnh dữ liệu đúng · 20 điểm/câu</small><strong>80 điểm</strong></div><div class="rule"><span>3</span><small>Sắp xếp logic và chốt quyết định</small><strong>40 điểm</strong></div></div></div><div class="card"><h3>Thông tin người chơi</h3><label>Tên hiển thị<input id="name" placeholder="Ví dụ: Nguyễn Minh Anh"></label>' +
+          button("Mở hồ sơ", "start()", "btn primary wide") +
+          "</div></section>";
+      }
+      window.start = () => {
+        S.name =
+          document.getElementById("name").value.trim() || "Học viên QL02";
+        S.screen = "brief";
+        S.seq = shuf(DATA.ROUND_3);
+        prepareAnswerOrders();
+        startAttempt();
+        render();
+      };
+      function brief() {
+        const b = DATA.CASE_BRIEF;
+        root.innerHTML =
+          '<section class="screen"><div class="brief-heading"><div class="brief-head"><span class="eyebrow">Hồ sơ</span><h2>' +
+          b.title +
+          '</h2><p class="lead">' +
+          b.role +
+          '</p></div></div><div class="brief-sections"><article class="card brief-section"><h3>WHAT – Bối cảnh: Chuyện gì xảy ra</h3><p class="lead">' +
+          b.what +
+          '</p></article><article class="card brief-section"><h3>WHY – Quyết định cần được đưa ra</h3><p class="lead">' +
+          b.why +
+          '</p></article><article class="card brief-section data-section"><h3>DATA – Dữ liệu đã có</h3><div class="facts">' +
+          b.facts
+            .map(
+              (f) =>
+                '<div class="fact"><small>' +
+                f.label +
+                "</small><b>" +
+                f.value +
+                "</b><span>" +
+                f.note +
+                "</span></div>",
+            )
+            .join("") +
+          "</div><ul>" +
+          b.sourceNotes.map((n) => "<li>" + n + "</li>").join("") +
+          '</ul></article><article class="card brief-section data-section"><h3>TASK – Nhiệm vụ của bạn</h3><p class="lead">' +
+          b.mission +
+          "</p><ol><li>Đọc toàn bộ bối cảnh, không đoán theo từ khóa.</li><li>Xác định tầng cao nhất mà phát biểu thực sự đạt được.</li><li>Chỉ chọn kiến nghị khi có thể giao và theo dõi.</li></ol></article></div><div class=\"brief-actions\">" +
+          button(
+            "Tìm hiểu 4 tầng dữ liệu",
+            "goGuide()",
+            "btn secondary",
+          ) +
+          button("Tiếp tục", "toIntro(1)") +
+          "</div></section>";
+      }
+      window.goGuide = () => {
+        S.screen = "guide";
+        render();
+      };
+      function guide() {
+        root.innerHTML =
+          '<section class="screen guide center"><span class="eyebrow">PHÂN BIỆT 4 TẦNG DỮ LIỆU</span><h2>Từ con số đến hành động có thể giao</h2><div class="levelgrid">' +
+          DATA.LEVELS.map(
+            (x) =>
+              '<article class="level" style="--accent:' +
+              x.accent +
+              '"><b>' +
+              x.short +
+              "</b><p>" +
+              x.question +
+              "</p><small>" +
+              x.description +
+              "</small></article>",
+          ).join("") +
+          "</div>" +
+          button("Bắt đầu vòng 1", "toIntro(1)") +
+          "</section>";
+      }
+      window.toIntro = (r) => {
+        S.round = r;
+        S.idx = 0;
+        S.screen = "intro";
+        render();
+      };
+      function intro() {
+        let title =
+          S.round === 1
+            ? "Xác định tầng dữ liệu"
+            : S.round === 2
+              ? "Chọn đúng dữ liệu cần bổ sung để nâng cấp dữ liệu"
+              : "Sắp xếp logic và đưa ra quyết định theo tầng dữ liệu";
+        let sub =
+          S.round === 1
+            ? DATA.ROUND_1.length + " tình huống"
+            : S.round === 2
+              ? DATA.ROUND_2.length +
+                " câu – Mỗi câu lựa chọn 2 mảnh dữ liệu đúng"
+              : "Sắp xếp thứ tự dữ liệu – Mạch khai thác 4 tầng";
+        root.innerHTML =
+          '<section class="screen round-intro"><div class="roundnum">0' +
+          S.round +
+          '</div><span class="eyebrow">Vòng ' +
+          S.round +
+          "</span><h2>" +
+          title +
+          '</h2><p class="lead">' +
+          sub +
+          "</p>" +
+          button("Bắt đầu vòng " + S.round, "beginRound()") +
+          "</section>";
+      }
+      window.beginRound = () => {
+        S.screen = "playing";
+        resetQ();
+        if (S.round === 3) {
+          S.phase = "sequence";
+          S.seq = shuf(DATA.ROUND_3);
+        }
+        render();
+      };
+      function shell(content) {
+        return (
+          '<section class="screen"><div class="meta"><div><span class="eyebrow">Vòng ' +
+          S.round +
+          "</span><b>" +
+          esc(S.name) +
+          '</b></div><div class="score">Điểm ' +
+          S.score +
+          '</div></div><div class="progress"><i style="width:' +
+          Math.max(3, prog()) +
+          '%"></i></div>' +
+          content +
+          "</section>"
+        );
+      }
+      function playing() {
+        if (S.round === 1) r1();
+        else if (S.round === 2) r2();
+        else r3();
+      }
+      function r1() {
+        let q = DATA.ROUND_1[S.idx];
+        let ans = orderedByIds(DATA.LEVELS, S.round1Orders[q.id])
+          .map(
+            (x) =>
+              '<button style="--accent:' +
+              x.accent +
+              '" onclick="ans1(\'' +
+              x.id +
+              "')\"><b>" +
+              x.short +
+              "</b><small>" +
+              x.question +
+              "</small></button>",
+          )
+          .join("");
+        root.innerHTML = shell(
+          '<div class="contextlayout"><aside class="card context"><span class="eyebrow">Nguồn · ' +
+            q.source +
+            "</span><h3>Bối cảnh nguồn</h3><p>" +
+            q.context +
+            '</p></aside><div><div class="qcard"><span class="eyebrow" style="color:#bcd9ff">Câu ' +
+            (S.idx + 1) +
+            "/" +
+            DATA.ROUND_1.length +
+            "</span><blockquote>“" +
+            q.statement +
+            "”</blockquote><p>" +
+            q.prompt +
+            '</p></div><div class="answers">' +
+            ans +
+            "</div></div></div>",
+        );
+      }
+      window.ans1 = (id) => {
+        let q = DATA.ROUND_1[S.idx],
+          ok = id === q.answer,
+          pts = ok ? 10 : 0;
+        S.score += pts;
+        S.answers.push({
+          round: 1,
+          questionId: q.id,
+          selected: id,
+          correct: q.answer,
+          ok,
+          points: pts,
+        });
+        feedback(
+          ok,
+          ok ? "Phân loại chính xác" : "Chưa đúng tầng dữ liệu",
+          "Tầng " +
+            (DATA.LEVELS.findIndex((item) => item.id === q.answer) + 1) +
+            " – " +
+            level(q.answer).short,
+          q.explanation + " " + q.why,
+          q.next,
+          "next",
+          pts,
+        );
+      };
+      function r2() {
+        let q = DATA.ROUND_2[S.idx];
+        root.innerHTML = shell(
+          '<div class="upgrade"><div class="upgradehead"><span class="eyebrow" style="color:#bcd9ff">' +
+            q.source +
+            "</span><h2>" +
+            q.target +
+            "</h2><p>" +
+            q.context +
+            "</p><blockquote>“" +
+            q.statement +
+            "”</blockquote><b>" +
+            q.instruction +
+            '</b></div><div class="options">' +
+            orderedByIds(q.options, S.round2Orders[q.id])
+              .map(
+                (o, optionIndex) =>
+                  '<button class="' +
+                  (S.selected.includes(o.id) ? "selected" : "") +
+                  '" onclick="pick(\'' +
+                  o.id +
+                  '\')"><span class="box">' +
+                  (S.selected.includes(o.id) ? "✓" : optionIndex + 1) +
+                  "</span><div><b>" +
+                  o.text +
+                  "</b><small>" +
+                  o.note +
+                  "</small></div></button>",
+              )
+              .join("") +
+            '</div><div class="pickfoot"><b>Đã chọn ' +
+            S.selected.length +
+            '/2 mảnh</b><button class="btn primary" ' +
+            (S.selected.length !== 2 ? "disabled" : "") +
+            ' onclick="ans2()">Ghép và kiểm tra</button></div></div>',
+        );
+      }
+      window.pick = (id) => {
+        if (S.selected.includes(id))
+          S.selected = S.selected.filter((x) => x !== id);
+        else if (S.selected.length < 2) S.selected.push(id);
+        else S.selected = [S.selected[1], id];
+        render();
+      };
+      window.ans2 = () => {
+        let q = DATA.ROUND_2[S.idx],
+          a = [...S.selected].sort(),
+          e = [...q.correctOptionIds].sort(),
+          ok = a.join("") === e.join(""),
+          pts = ok ? 20 : 0,
+          correctAnswer = q.options
+            .filter((option) => q.correctOptionIds.includes(option.id))
+            .map((option) => option.text)
+            .join(" + ");
+        S.score += pts;
+        S.answers.push({
+          round: 2,
+          questionId: q.id,
+          selected: a,
+          correct: e,
+          ok,
+          points: pts,
+        });
+        feedback(
+          ok,
+          ok ? "Đã chọn đúng hai mảnh dữ liệu" : "Chưa đủ căn cứ nâng cấp",
+          correctAnswer,
+          q.explanation + " " + q.why,
+          "Phiên bản nâng cấp: “" + q.upgradedStatement + "”",
+          "next",
+          pts,
+        );
+      };
+      function r3() {
+        if (S.phase === "sequence") seq();
+        else decision();
+      }
+      function seq() {
+        root.innerHTML = shell(
+          '<div class="sequence"><div class="qcard"><span class="eyebrow" style="color:#bcd9ff">Phần 1/2</span><h2>Sắp xếp từ bằng chứng đến hành động</h2><p>Thẻ không hiển thị tên tầng. Hãy suy luận vai trò của từng câu.</p></div>' +
+            S.seq
+              .map(
+                (x, i) =>
+                  '<div class="seqcard"><span class="n">' +
+                  (i + 1) +
+                  '</span><b class="txt">' +
+                  x.text +
+                  '</b><div class="moves"><button onclick="mv(' +
+                  i +
+                  ',-1)">↑</button><button onclick="mv(' +
+                  i +
+                  ',1)">↓</button></div></div>',
+              )
+              .join("") +
+            '<div class="center" style="margin-top:15px"><button class="btn primary" onclick="checkSeq()">Kiểm tra logic</button></div></div>',
+        );
+      }
+      window.mv = (i, d) => {
+        let j = i + d;
+        if (j < 0 || j >= S.seq.length) return;
+        [S.seq[i], S.seq[j]] = [S.seq[j], S.seq[i]];
+        render();
+      };
+      window.checkSeq = () => {
+        let selectedOrder = S.seq.map((x) => x.id).join(""),
+          ok = selectedOrder === "ABCD",
+          pts = ok ? 20 : 0;
+        S.score += pts;
+        S.answers.push({
+          round: 3,
+          questionId: "G1-R3-SEQUENCE",
+          selected: selectedOrder,
+          correct: "ABCD",
+          ok,
+          points: pts,
+        });
+        feedback(
+          ok,
+          ok ? "Chuỗi lập luận chính xác" : "Chuỗi chưa đúng logic",
+          "Số liệu → Thông tin → Tín hiệu quản trị → Kiến nghị hành động",
+          "Hãy đặt con số trước bối cảnh, tín hiệu trước hành động.",
+          "",
+          "decision",
+          pts,
+        );
+      };
+      function decision() {
+        let b = DATA.CASE_BRIEF;
+        root.innerHTML = shell(
+          '<div class="sequence"><div class="decisionhead"><span class="eyebrow">Phần 2/2 · Quyết định</span><h2>Giám đốc hỏi: “Vậy Phòng kiến nghị chọn cách nào?”</h2><p>Chọn phương án phù hợp nhất với điểm tập trung, nguồn lực và khả năng theo dõi.</p><div class="facts">' +
+            b.facts
+              .map(
+                (f) =>
+                  '<div class="fact"><small>' +
+                  f.label +
+                  "</small><b>" +
+                  f.value +
+                  "</b></div>",
+              )
+              .join("") +
+            '</div></div><div class="decisions">' +
+            orderedByIds(DATA.ROUND_3_ACTIONS, S.decisionOrder)
+              .map(
+                (a, optionIndex) =>
+                  "<button onclick=\"final('" +
+                  a.id +
+                  "')\"><span>" +
+                  (optionIndex + 1) +
+                  "</span><b>" +
+                  a.text +
+                  "</b></button>",
+              )
+              .join("") +
+            "</div></div>",
+        );
+      }
+      window.final = (id) => {
+        let a = DATA.ROUND_3_ACTIONS.find((x) => x.id === id),
+          correctAction = DATA.ROUND_3_ACTIONS.find((option) => option.correct),
+          pts = a.correct ? 20 : 0;
+        S.score += pts;
+        S.answers.push({
+          round: 3,
+          questionId: "G1-R3-DECISION",
+          selected: id,
+          correct: correctAction.id,
+          ok: a.correct,
+          points: pts,
+        });
+        feedback(
+          a.correct,
+          a.correct
+            ? "Kiến nghị phù hợp với dữ liệu"
+            : "Kiến nghị chưa đi theo tín hiệu",
+          correctAction.text,
+          correctAction.reason,
+          "Kiến nghị phải bám vào điểm tập trung và nguồn lực thực tế.",
+          "finish",
+          pts,
+        );
+      };
+      function feedback(ok, title, answer, explanation, next, action, pts) {
+        root.insertAdjacentHTML(
+          "beforeend",
+          '<div class="modal"><div class="card feedback"><span class="eyebrow">' +
+            (ok ? "+" + pts + " điểm" : "Phản hồi học tập") +
+            "</span><h3>" +
+            title +
+            '</h3><div class="fsec"><b>ĐÁP ÁN</b><p>' +
+            answer +
+            '</p></div><div class="fsec"><b>DIỄN GIẢI</b><p>' +
+            explanation +
+            "</p>" +
+            (next
+              ? "<p>" +
+                next +
+                "</p>"
+              : "") +
+            "</div>" +
+            '<button class="btn primary wide" onclick="after(\'' +
+            action +
+            "')\">" +
+            (action === "decision"
+                ? "Chọn kiến nghị cuối"
+                : action === "finish"
+                  ? "Xem kết quả"
+                  : "Câu tiếp theo") +
+            "</button></div></div>",
+        );
+      }
+      window.after = (a) => {
+        if (a === "decision") {
+          S.phase = "decision";
+          render();
+          return;
+        }
+        if (a === "finish") {
+          S.screen = "result";
+          render();
+          return;
+        }
+        if (S.round === 1) {
+          if (S.idx < DATA.ROUND_1.length - 1) {
+            S.idx++;
+            resetQ();
+            render();
+          } else {
+            S.screen = "intro";
+            S.round = 2;
+            S.idx = 0;
+            render();
+          }
+        } else {
+          if (S.idx < DATA.ROUND_2.length - 1) {
+            S.idx++;
+            resetQ();
+            render();
+          } else {
+            S.screen = "intro";
+            S.round = 3;
+            S.idx = 0;
+            render();
+          }
+        }
+      };
+      function result() {
+        if (!S.attemptFinishedAt) finishAttempt();
+        let pct = Math.min(100, Math.round((S.score / DATA.MAX_SCORE) * 100)),
+          r1 = S.answers.filter((x) => x.round === 1 && x.ok).length,
+          r2 = S.answers.filter((x) => x.round === 2 && x.ok).length,
+          r3 = S.answers.filter((x) => x.round === 3 && x.ok).length;
+        root.innerHTML =
+          '<section class="screen result"><span class="eyebrow">Hoàn thành thử thách</span><div class="ring" style="--angle:' +
+          pct * 3.6 +
+          'deg"><div><b>' +
+          pct +
+          "%</b><small>" +
+          S.score +
+          "/" +
+          DATA.MAX_SCORE +
+          ' điểm</small></div></div><h1 style="font-size:48px">' +
+          (pct >= 90
+            ? "Tư duy tham mưu sắc bén"
+            : pct >= 72
+              ? "Đọc đúng giá trị quản trị"
+              : "Cần luyện lại bốn tầng") +
+          '</h1><div class="resultgrid"><div class="card"><h3>Kết quả theo vòng</h3><p>Xác định tầng dữ liệu: <b>' +
+          r1 +
+          "/" +
+          DATA.ROUND_1.length +
+          "</b></p><p>Nâng cấp dữ liệu: <b>" +
+          r2 +
+          "/" +
+          DATA.ROUND_2.length +
+          "</b></p><p>Sắp xếp và quyết định: <b>" +
+          r3 +
+          "/2</b></p><p>Tổng thời gian chơi: <b>" +
+          formatDuration(S.attemptDurationMs) +
+          '</b></p></div><div class="card"><h3>Gợi ý cải thiện</h3><p class="lead">' +
+          (r1 < 6
+            ? "Hãy chú ý tầng cao nhất câu thực sự đạt được; từ “cần” chưa đủ tạo kiến nghị."
+            : "Bạn đã đọc khá vững bốn tầng. Hãy luôn truy ngược kiến nghị về tín hiệu và dữ liệu nguồn.") +
+          '</p></div></div><div class="memory"><h3>Bốn câu hỏi khi duyệt báo cáo</h3><div class="memgrid">' +
+          DATA.LEVELS.map(
+            (x) =>
+              '<div style="--accent:' +
+              x.accent +
+              '"><b>' +
+              x.question +
+              "</b><br><small>" +
+              x.short +
+              "</small></div>",
+          ).join("") +
+          '</div></div><button class="btn primary" style="margin-top:20px" onclick="restart()">Chơi lại từ đầu</button></section>';
+      }
+      window.restart = () => {
+        localStorage.removeItem("ql02-g1-v2-standalone");
+        Object.assign(S, {
+          screen: "welcome",
+          name: "",
+          round: 1,
+          idx: 0,
+          score: 0,
+          answers: [],
+          selected: [],
+          seq: [],
+          phase: "sequence",
+          resultPublished: false,
+          attemptStartedMs: 0,
+          attemptStartedAt: "",
+          attemptFinishedAt: "",
+          attemptDurationMs: 0,
+          round1Orders: {},
+          round2Orders: {},
+          decisionOrder: [],
+          clockOffsetMs: 0,
+        });
+        render();
+      };
+      function visibleAnswerOptions() {
+        if (S.screen !== "playing") return [];
+        if (S.round === 1) {
+          const question = DATA.ROUND_1[S.idx];
+          return orderedByIds(DATA.LEVELS, S.round1Orders[question.id]).map(
+            (option) => option.short,
+          );
+        }
+        if (S.round === 2) {
+          const question = DATA.ROUND_2[S.idx];
+          return orderedByIds(
+            question.options,
+            S.round2Orders[question.id],
+          ).map((option) => option.text);
+        }
+        if (S.phase === "decision") {
+          return orderedByIds(DATA.ROUND_3_ACTIONS, S.decisionOrder).map(
+            (option) => option.text,
+          );
+        }
+        return S.seq.map((item) => item.text);
+      }
+      window.render_game_to_text = () =>
+        JSON.stringify({
+          screen: S.screen,
+          playerName: S.name,
+          round: S.round,
+          phase: S.phase,
+          questionId:
+            S.round === 1
+              ? DATA.ROUND_1[S.idx]?.id || null
+              : S.round === 2
+                ? DATA.ROUND_2[S.idx]?.id || null
+                : null,
+          visibleOptions: visibleAnswerOptions(),
+          selected: [...S.selected],
+          score: S.score,
+          progress: {
+            current: Math.min(
+              DATA.ROUND_1.length + DATA.ROUND_2.length + 2,
+              S.answers.length,
+            ),
+            total: DATA.ROUND_1.length + DATA.ROUND_2.length + 2,
+          },
+          result: S.screen === "result" ? S.score : null,
+        });
+      window.advanceTime = (milliseconds) => {
+        const delta = Math.max(0, Number(milliseconds) || 0);
+        S.clockOffsetMs += delta;
+        refreshStatus();
+        return S.clockOffsetMs;
+      };
+      window.setInterval(refreshStatus, 1000);
+      render();
+    </script>
+  </body>
+</html>

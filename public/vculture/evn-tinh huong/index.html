@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thu thập Tình huống Ứng xử EVN · Thư viện dùng chung</title>
+<style>
+:root{
+  --evn-navy:#1F3864;--evn-blue:#2563b8;--evn-blue-bright:#3b82f6;--evn-cyan:#5eb6ff;
+  --evn-gold:#F5A623;--evn-gold-soft:#ffc663;--evn-red:#ED1C24;
+  --bg-0:#060c1a;--glass:rgba(18,32,60,.55);--glass-2:rgba(22,40,74,.7);
+  --glass-line:rgba(94,182,255,.18);--ink:#e8eefb;--ink-soft:#9fb2d4;--ink-dim:#6b7fa3;
+  --good:#34d399;--good-dim:rgba(52,211,153,.14);--bad:#ff6b6b;--radius:18px;
+}
+*{box-sizing:border-box}html,body{margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:"Be Vietnam Pro","Segoe UI",system-ui,sans-serif;color:var(--ink);background:var(--bg-0);
+  -webkit-font-smoothing:antialiased;line-height:1.6;overflow-x:hidden}
+.serif{font-family:"Playfair Display","Cormorant Garamond",Georgia,serif}
+#bgcanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+.bg-aura{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(900px 600px at 78% -8%,rgba(37,99,184,.28),transparent 60%),
+  radial-gradient(800px 600px at 8% 12%,rgba(245,166,35,.1),transparent 55%),
+  radial-gradient(1000px 800px at 50% 110%,rgba(31,56,100,.45),transparent 60%)}
+
+.wrap{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:0 28px 120px}
+.glass{background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--glass-line);border-radius:var(--radius);box-shadow:0 8px 40px rgba(0,0,0,.35)}
+
+/* header */
+header{position:sticky;top:0;z-index:30;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  background:linear-gradient(180deg,rgba(8,16,32,.9),rgba(8,16,32,.7));border-bottom:1px solid var(--glass-line)}
+.hbar{max-width:1180px;margin:0 auto;padding:14px 28px;display:flex;align-items:center;gap:16px}
+.logo{width:40px;height:40px;flex:0 0 auto;filter:drop-shadow(0 0 10px rgba(245,166,35,.5))}
+.htitle b{display:block;font-family:"Playfair Display",serif;font-size:16px;color:#fff;line-height:1.15}
+.htitle span{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--evn-cyan)}
+.tabs{margin-left:auto;display:flex;gap:8px}
+.tab{display:inline-flex;align-items:center;gap:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;
+  border:1px solid var(--glass-line);background:rgba(94,182,255,.06);color:var(--ink-soft);padding:9px 16px;border-radius:11px;transition:.18s}
+.tab:hover{color:#fff;border-color:rgba(94,182,255,.4)}
+.tab.active{background:linear-gradient(120deg,rgba(37,99,184,.5),rgba(59,130,246,.3));color:#fff;
+  border-color:rgba(94,182,255,.5);box-shadow:0 0 18px rgba(59,130,246,.28)}
+.tab .badge{font-size:10px;background:var(--evn-gold);color:#3a2400;font-weight:700;padding:1px 7px;border-radius:999px}
+
+.view{display:none}.view.active{display:block;animation:fade .4s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:11px;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--evn-gold);font-weight:700;margin-top:34px}
+.eyebrow::before{content:"";width:30px;height:2px;background:linear-gradient(90deg,var(--evn-gold),transparent)}
+h1.page{font-family:"Playfair Display",serif;font-size:38px;line-height:1.12;font-weight:700;color:#fff;margin:14px 0 0}
+.lede{font-size:15px;color:var(--ink-soft);margin-top:12px;max-width:820px}
+
+/* ===== LIBRARY ===== */
+.lib-top{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin:24px 0 6px}
+.searchbig{flex:1;min-width:240px;position:relative}
+.searchbig svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ink-dim)}
+.searchbig input{width:100%;border:1px solid var(--glass-line);background:rgba(94,182,255,.06);color:#fff;
+  border-radius:12px;padding:13px 14px 13px 40px;font-size:14px;font-family:inherit;transition:.2s}
+.searchbig input::placeholder{color:var(--ink-dim)}
+.searchbig input:focus{outline:none;border-color:var(--evn-blue-bright);box-shadow:0 0 0 3px rgba(59,130,246,.18),0 0 18px rgba(59,130,246,.25)}
+.stat-pills{display:flex;gap:10px;flex-wrap:wrap}
+.spill{padding:10px 16px;border-radius:12px;text-align:center;min-width:84px}
+.spill .n{font-family:"Playfair Display",serif;font-size:24px;font-weight:700;color:#fff;line-height:1}
+.spill .l{font-size:10.5px;color:var(--ink-soft);margin-top:3px;letter-spacing:.02em}
+
+.filters{margin:16px 0 4px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.filters .fg label{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-dim);font-weight:700;margin-bottom:6px}
+select,.sellike{width:100%;border:1px solid var(--glass-line);background:rgba(10,20,40,.6);color:var(--ink);
+  border-radius:10px;padding:10px 12px;font-size:13px;font-family:inherit;cursor:pointer;transition:.18s}
+select:focus{outline:none;border-color:var(--evn-blue-bright);box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+option{background:#0e1b36;color:var(--ink)}
+
+.chip-row{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 2px}
+.fchip{font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--glass-line);background:rgba(94,182,255,.06);
+  color:var(--ink-soft);padding:7px 14px;border-radius:999px;transition:.16s}
+.fchip:hover{color:#fff;border-color:rgba(94,182,255,.4)}
+.fchip.active{background:rgba(59,130,246,.28);color:#fff;border-color:var(--evn-blue-bright);box-shadow:0 0 12px rgba(59,130,246,.3)}
+.reset{color:var(--evn-gold-soft);border-color:rgba(245,166,35,.35);background:rgba(245,166,35,.06)}
+
+.result-meta{font-size:12.5px;color:var(--ink-dim);margin:18px 0 4px}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:10px}
+.card{padding:20px 22px;border-radius:16px;cursor:pointer;transition:.22s;position:relative;overflow:hidden}
+.card:hover{transform:translateY(-3px);border-color:rgba(94,182,255,.5);box-shadow:0 0 26px rgba(59,130,246,.22),0 14px 40px rgba(0,0,0,.45)}
+.card .ctop{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.unit-tag{font-size:10.5px;font-weight:700;letter-spacing:.04em;padding:3px 10px;border-radius:999px;color:#fff}
+.jtag{font-size:10.5px;color:var(--evn-cyan);border:1px solid var(--glass-line);padding:3px 10px;border-radius:999px}
+.card h3{font-family:"Playfair Display",serif;font-size:17px;color:#fff;font-weight:600;margin:0 0 8px;line-height:1.3}
+.card .cmeta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.mini{font-size:10.5px;color:var(--ink-soft);background:rgba(10,20,40,.5);border:1px solid var(--glass-line);padding:3px 9px;border-radius:8px}
+.card .auth{font-size:11.5px;color:var(--ink-dim);margin-top:12px;display:flex;align-items:center;gap:6px}
+.card .auth .adot{width:4px;height:4px;border-radius:50%;background:var(--evn-gold)}
+.empty{color:var(--ink-soft);font-size:14px;padding:40px 0;text-align:center}
+
+/* ===== DETAIL modal ===== */
+.modal-scrim{display:none;position:fixed;inset:0;z-index:80;background:rgba(3,7,16,.72);backdrop-filter:blur(6px);
+  align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto}
+.modal-scrim.open{display:flex;animation:fade .3s ease}
+.modal{max-width:760px;width:100%;padding:30px 34px;position:relative;margin:auto}
+.modal .close{position:absolute;top:18px;right:18px;width:34px;height:34px;border-radius:50%;border:1px solid var(--glass-line);
+  background:rgba(94,182,255,.08);color:var(--ink);cursor:pointer;font-size:16px}
+.modal .close:hover{color:#fff;border-color:var(--evn-red);background:rgba(237,28,36,.15)}
+.modal .mtop{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.modal h2{font-family:"Playfair Display",serif;font-size:24px;color:#fff;margin:0 0 6px;line-height:1.25}
+.bgfield{margin:16px 0;padding:16px 18px;border-radius:12px;border:1px solid var(--glass-line);background:rgba(10,20,40,.45)}
+.bgfield .bl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--evn-cyan);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.bgfield .bl .ic{width:20px;height:20px;border-radius:6px;display:grid;place-items:center;background:rgba(59,130,246,.2);font-size:11px}
+.bgfield.risk .bl{color:var(--bad)}.bgfield.risk{border-color:rgba(255,107,107,.3);background:rgba(237,28,36,.06)}
+.bgfield.expect .bl{color:var(--good)}.bgfield.expect{border-color:rgba(52,211,153,.3);background:var(--good-dim)}
+.bgfield p{margin:0;font-size:14px;color:var(--ink)}
+.mrow{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+
+/* ===== BUILDER FORM ===== */
+.form-grid{display:grid;grid-template-columns:1fr 340px;gap:24px;margin-top:22px;align-items:start}
+@media(max-width:900px){.form-grid{grid-template-columns:1fr}}
+.fsection{padding:22px 26px;border-radius:16px;margin-bottom:18px}
+.fsection .fhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+.fsection .fno{width:30px;height:30px;flex:0 0 auto;border-radius:9px;display:grid;place-items:center;font-weight:700;
+  font-family:"Playfair Display",serif;color:#3a2400;background:linear-gradient(135deg,var(--evn-gold),var(--evn-gold-soft));box-shadow:0 0 12px rgba(245,166,35,.35)}
+.fsection h3{font-family:"Playfair Display",serif;font-size:18px;color:#fff;margin:0;font-weight:600}
+.fsection .fsub{font-size:12.5px;color:var(--ink-dim);margin:2px 0 16px 42px}
+.field-lbl{display:block;font-size:12px;font-weight:600;color:var(--ink);margin:14px 0 6px}
+.field-lbl .req{color:var(--evn-gold)}
+input[type=text],textarea{width:100%;border:1px solid var(--glass-line);background:rgba(10,20,40,.6);color:#fff;
+  border-radius:11px;padding:12px 14px;font-size:14px;font-family:inherit;transition:.18s;resize:vertical}
+input[type=text]::placeholder,textarea::placeholder{color:var(--ink-dim)}
+input:focus,textarea:focus{outline:none;border-color:var(--evn-blue-bright);box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+.hint{font-size:11.5px;color:var(--ink-dim);margin-top:5px;font-style:italic}
+.multi{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.mopt{font-size:12px;cursor:pointer;border:1px solid var(--glass-line);background:rgba(94,182,255,.05);
+  color:var(--ink-soft);padding:7px 13px;border-radius:999px;transition:.15s;user-select:none}
+.mopt:hover{color:#fff;border-color:rgba(94,182,255,.4)}
+.mopt.on{background:rgba(59,130,246,.28);color:#fff;border-color:var(--evn-blue-bright);box-shadow:0 0 12px rgba(59,130,246,.3)}
+.mopt.on::before{content:"✓ ";font-weight:700}
+.bg-builder .field-lbl .ic{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:5px;background:rgba(59,130,246,.2);font-size:10px;margin-right:6px;vertical-align:middle}
+
+/* preview panel */
+.preview{position:sticky;top:88px;padding:22px 24px;border-radius:16px}
+.preview .pt{font-size:10.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--evn-gold);font-weight:700;margin-bottom:12px}
+.preview .pv-title{font-family:"Playfair Display",serif;font-size:17px;color:#fff;margin-bottom:8px;min-height:22px}
+.preview .pv-row{font-size:12px;color:var(--ink-soft);margin:6px 0;display:flex;gap:8px}
+.preview .pv-row b{color:var(--ink-dim);font-weight:600;min-width:78px}
+.preview .pv-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.preview .pv-empty{color:var(--ink-dim);font-size:12.5px;font-style:italic}
+.actions{display:flex;gap:12px;margin-top:20px}
+.btn{font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;border-radius:12px;padding:13px 22px;border:1px solid transparent;transition:.18s}
+.btn-primary{background:linear-gradient(120deg,var(--evn-blue),var(--evn-blue-bright));color:#fff;box-shadow:0 0 20px rgba(59,130,246,.3);flex:1}
+.btn-primary:hover{box-shadow:0 0 28px rgba(59,130,246,.5);transform:translateY(-1px)}
+.btn-ghost{background:rgba(94,182,255,.06);border-color:var(--glass-line);color:var(--ink-soft)}
+.btn-ghost:hover{color:#fff;border-color:rgba(94,182,255,.4)}
+
+/* toast */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(120px);z-index:90;
+  padding:14px 24px;border-radius:14px;background:rgba(15,110,80,.95);color:#fff;font-size:14px;font-weight:600;
+  box-shadow:0 10px 40px rgba(0,0,0,.5);display:flex;align-items:center;gap:10px;transition:transform .4s cubic-bezier(.2,.9,.3,1.3);border:1px solid rgba(52,211,153,.4)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+.foot{margin-top:56px;padding:22px;border-radius:16px;font-size:11.5px;color:var(--ink-dim);line-height:1.8;border:1px solid var(--glass-line);background:rgba(10,20,40,.4)}
+
+@media(max-width:760px){
+  .cards{grid-template-columns:1fr}.filters{grid-template-columns:1fr}.stat-pills{width:100%}
+  .tabs .tlabel{display:none}.hbar{padding:12px 18px}.wrap{padding:0 18px 100px}h1.page{font-size:28px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}#bgcanvas{display:none}}
+</style>
+</head>
+<body>
+<canvas id="bgcanvas"></canvas>
+<div class="bg-aura"></div>
+
+<header>
+  <div class="hbar">
+    <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="46" fill="none" stroke="#5eb6ff" stroke-width="3"/>
+      <path d="M50 8 L57 43 L92 50 L57 57 L50 92 L43 57 L8 50 L43 43 Z" fill="#F5A623"/>
+      <path d="M50 24 L54 46 L76 50 L54 54 L50 76 L46 54 L24 50 L46 46 Z" fill="#ED1C24"/>
+    </svg>
+    <div class="htitle"><b>Thu thập Tình huống Ứng xử EVN</b><span>Thư viện dùng chung giữa các đơn vị</span></div>
+    <div class="tabs">
+      <button class="tab active" data-view="library" onclick="switchView('library')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span class="tlabel">Thư viện</span> <span class="badge" id="libCount">0</span>
+      </button>
+      <button class="tab" data-view="builder" onclick="switchView('builder')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        <span class="tlabel">Soạn tình huống</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- ===== LIBRARY VIEW ===== -->
+  <section class="view active" id="view-library">
+    <div class="eyebrow">Thư viện dùng chung</div>
+    <h1 class="page serif">Kho tình huống ứng xử từ các đơn vị EVN</h1>
+    <p class="lede">Các đơn vị cùng đóng góp và tham khảo lẫn nhau. Lọc theo đơn vị, hành trình khách hàng hoặc nhóm cán bộ để tìm tình huống phù hợp, hoặc mở một tình huống để xem cấu trúc bối cảnh đầy đủ.</p>
+
+    <div class="lib-top">
+      <div class="searchbig">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="libSearch" type="search" placeholder="Tìm theo tên tình huống, từ khóa, bối cảnh…" autocomplete="off">
+      </div>
+      <div class="stat-pills">
+        <div class="spill glass"><div class="n" id="pillTotal">0</div><div class="l">Tình huống</div></div>
+        <div class="spill glass"><div class="n" id="pillUnits">0</div><div class="l">Đơn vị</div></div>
+        <div class="spill glass"><div class="n" id="pillJourneys">0</div><div class="l">Hành trình</div></div>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div class="fg"><label>Đơn vị đóng góp</label><select id="fUnit"></select></div>
+      <div class="fg"><label>Hành trình khách hàng</label><select id="fJourney"></select></div>
+      <div class="fg"><label>Nhóm cán bộ (CBCNV)</label><select id="fCbcnv"></select></div>
+    </div>
+    <div class="chip-row" id="quickChips"></div>
+
+    <div class="result-meta" id="resultMeta"></div>
+    <div class="cards" id="libCards"></div>
+    <div class="foot">
+      Bản mockup phục vụ thu thập và làm phong phú tình huống ứng xử cho Bộ Quy tắc Ứng xử Văn hóa Kinh doanh và Dịch vụ Khách hàng EVN.
+      Dữ liệu trong bản trình diễn này chỉ lưu tạm trong phiên làm việc, không gửi đi đâu.
+    </div>
+  </section>
+
+  <!-- ===== BUILDER VIEW ===== -->
+  <section class="view" id="view-builder">
+    <div class="eyebrow">Soạn tình huống mới</div>
+    <h1 class="page serif">Xây dựng một tình huống ứng xử</h1>
+    <p class="lede">Điền theo năm bước có cấu trúc. Bối cảnh được chia thành các ô nhỏ dễ soạn, giúp mọi đơn vị mô tả tình huống theo cùng một khung thống nhất.</p>
+
+    <div class="form-grid">
+      <div>
+        <!-- 0. Đơn vị -->
+        <div class="fsection glass">
+          <div class="fhead"><div class="fno">0</div><h3 class="serif">Đơn vị & người đóng góp</h3></div>
+          <div class="fsub">Để các đơn vị khác biết nguồn và tiện tham khảo lẫn nhau.</div>
+          <label class="field-lbl">Đơn vị <span class="req">*</span></label>
+          <select id="inUnit"></select>
+          <label class="field-lbl">Đơn vị / phòng cụ thể</label>
+          <input type="text" id="inAuthor" placeholder="Ví dụ: CTĐL Bình Dương, Phòng Kinh doanh">
+        </div>
+
+        <!-- a. Hành trình -->
+        <div class="fsection glass">
+          <div class="fhead"><div class="fno">a</div><h3 class="serif">Về hành trình nào</h3></div>
+          <div class="fsub">Tình huống thuộc hành trình khách hàng nào trong 15 hành trình EVN.</div>
+          <label class="field-lbl">Hành trình khách hàng <span class="req">*</span></label>
+          <select id="inJourney"></select>
+        </div>
+
+        <!-- b. Tên -->
+        <div class="fsection glass">
+          <div class="fhead"><div class="fno">b</div><h3 class="serif">Tình huống tên gọi là gì</h3></div>
+          <div class="fsub">Một câu ngắn gọn nêu đúng tình huống, dễ tra cứu.</div>
+          <label class="field-lbl">Tên tình huống <span class="req">*</span></label>
+          <input type="text" id="inName" placeholder="Ví dụ: Khách hàng khiếu nại hóa đơn tăng đột biến sau khi đổi công tơ">
+          <label class="field-lbl">Từ khóa (phân tách bằng dấu phẩy)</label>
+          <input type="text" id="inTags" placeholder="hóa đơn, công tơ, minh bạch">
+        </div>
+
+        <!-- c. Điểm chạm -->
+        <div class="fsection glass">
+          <div class="fhead"><div class="fno">c</div><h3 class="serif">Liên quan điểm chạm nào</h3></div>
+          <div class="fsub">Chọn một hoặc nhiều điểm chạm mà tình huống diễn ra.</div>
+          <div class="multi" id="inTouchpoints"></div>
+        </div>
+
+        <!-- d. CBCNV -->
+        <div class="fsection glass">
+          <div class="fhead"><div class="fno">d</div><h3 class="serif">Liên quan đối tượng CBCNV nào</h3></div>
+          <div class="fsub">Nhóm cán bộ, công nhân viên chủ yếu xử lý tình huống này.</div>
+          <div class="multi" id="inCbcnv"></div>
+        </div>
+
+        <!-- e. Bối cảnh cấu trúc -->
+        <div class="fsection glass bg-builder">
+          <div class="fhead"><div class="fno">e</div><h3 class="serif">Mô tả bối cảnh</h3></div>
+          <div class="fsub">Điền từng ô nhỏ. Không cần viết văn dài, mỗi ô một ý là đủ.</div>
+
+          <label class="field-lbl"><span class="ic">👤</span>Khách hàng là ai <span class="req">*</span></label>
+          <textarea id="bgWho" rows="2" placeholder="Ví dụ: Khách hàng sinh hoạt lớn tuổi, sống một mình, không quen dùng ứng dụng"></textarea>
+
+          <label class="field-lbl"><span class="ic">⚡</span>Điều gì khởi phát tình huống</label>
+          <textarea id="bgTrigger" rows="2" placeholder="Ví dụ: Hóa đơn tháng tăng gần gấp đôi ngay sau khi vừa thay công tơ điện tử"></textarea>
+
+          <label class="field-lbl"><span class="ic">💢</span>Nỗi lo / điểm đau của khách</label>
+          <textarea id="bgPain" rows="2" placeholder="Ví dụ: Cảm giác bị tính oan, mất niềm tin vào tính minh bạch của ngành điện"></textarea>
+
+          <label class="field-lbl"><span class="ic">🎯</span>Khách mong muốn điều gì</label>
+          <textarea id="bgExpect" rows="2" placeholder="Ví dụ: Được giải thích căn cứ số liệu rõ ràng và mời kiểm định khách quan"></textarea>
+
+          <label class="field-lbl"><span class="ic">⚠️</span>Rủi ro nếu ứng xử sai</label>
+          <textarea id="bgRisk" rows="2" placeholder="Ví dụ: Giải thích qua loa, dùng thuật ngữ khó hiểu làm khách càng bức xúc và khiếu nại vượt cấp"></textarea>
+        </div>
+      </div>
+
+      <!-- preview -->
+      <div class="preview glass">
+        <div class="pt">Xem trước thẻ tình huống</div>
+        <div class="pv-title" id="pvTitle"><span class="pv-empty">Tên tình huống sẽ hiện ở đây…</span></div>
+        <div class="pv-row"><b>Đơn vị</b><span id="pvUnit">—</span></div>
+        <div class="pv-row"><b>Hành trình</b><span id="pvJourney">—</span></div>
+        <div class="pv-row"><b>Điểm chạm</b><span id="pvTps">—</span></div>
+        <div class="pv-row"><b>CBCNV</b><span id="pvCbcnv">—</span></div>
+        <div class="pv-tags" id="pvTags"></div>
+        <div class="actions">
+          <button class="btn btn-primary" onclick="submitSituation()">Gửi vào thư viện</button>
+          <button class="btn btn-ghost" onclick="resetForm()">Xóa</button>
+        </div>
+        <div class="hint" style="margin-top:12px">Sau khi gửi, tình huống vào thẳng thư viện dùng chung và mọi đơn vị đều thấy.</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- detail modal -->
+<div class="modal-scrim" id="modalScrim" onclick="if(event.target===this)closeModal()">
+  <div class="modal glass" id="modalBody"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+window.CATALOG={"journeys":[{"code":"3.1","title":"cấp điện mới"},{"code":"3.2","title":"báo và xử lý mất điện, sự cố"},{"code":"3.3","title":"thanh toán tiền điện"},{"code":"3.4","title":"treo, tháo và kiểm định thiết bị đo đếm"},{"code":"3.5","title":"đôn đốc và xử lý nợ tiền điện"},{"code":"3.6","title":"khắc phục rò điện, bảo đảm an toàn điện"},{"code":"3.7","title":"tìm hiểu thông tin và yêu cầu dịch vụ điện"},{"code":"3.8","title":"thay đổi, gia hạn, chấm dứt hợp đồng mua bán điện (HĐMBĐ)"},{"code":"3.9","title":"thông báo ngừng, giảm cung cấp điện"},{"code":"3.10","title":"hiểu hóa đơn và căn cứ tính tiền điện"},{"code":"3.11","title":"ngừng, cấp điện trở lại theo yêu cầu khách hàng"},{"code":"3.12","title":"thay đổi công suất, vị trí thiết bị đo đếm"},{"code":"3.13","title":"tiếp nhận phản ánh, khiếu nại và giải quyết đến cùng"},{"code":"3.14","title":"điện mặt trời mái nhà và mua bán điện trực tiếp (DPPA)"},{"code":"3.15","title":"tư vấn sử dụng điện tiết kiệm, hiệu quả"}],"cbcnv":[{"code":"I","title":"Điện thoại viên tổng đài chăm sóc khách hàng"},{"code":"II","title":"Nhân viên thi công hiện trường (công nhân điện)"},{"code":"III","title":"Nhân viên thu ngân, đốc nợ"},{"code":"IV","title":"Nhân viên kiểm tra sử dụng điện"},{"code":"V","title":"Nhân viên kinh doanh, chăm sóc khách hàng"},{"code":"VI","title":"Điện mặt trời mái nhà và mua bán điện trực tiếp (DPPA)"},{"code":"VII","title":"Giao dịch viên phòng giao dịch khách hàng"},{"code":"VIII","title":"CBCNV ở văn phòng (cơ quan tập đoàn, cơ quan tổng công ty)"}],"touchpoints":["Tiếp nhận yêu cầu / tổng đài","Tư vấn, hướng dẫn thủ tục","Khảo sát hiện trường","Ký hợp đồng","Thi công, lắp đặt","Nghiệm thu, đóng điện","Ghi chỉ số, lập hóa đơn","Thanh toán","Xử lý sự cố, mất điện","Kiểm tra, kiểm định đo đếm","Đôn đốc, thu nợ","Tiếp nhận phản ánh, khiếu nại","Chăm sóc sau dịch vụ","Kênh số (App, Website, Email/Chat)","Khác"],"units":[{"code":"EVNSPC","name":"Tổng công ty Điện lực miền Nam (EVNSPC)"},{"code":"EVNHCMC","name":"Tổng công ty Điện lực TP.HCM (EVNHCMC)"},{"code":"EVNNPC","name":"Tổng công ty Điện lực miền Bắc (EVNNPC)"},{"code":"EVNCPC","name":"Tổng công ty Điện lực miền Trung (EVNCPC)"},{"code":"EVNHANOI","name":"Tổng công ty Điện lực TP. Hà Nội (EVNHANOI)"}]};
+</script>
+<script>
+window.SEED=[{"id":"s1","unit":"EVNSPC","author":"CTĐL Bình Dương","journey":"3.1","jtitle":"Cấp điện mới","name":"Khách hàng doanh nghiệp cần cấp điện gấp cho nhà xưởng đang chờ vận hành","tps":["Khảo sát hiện trường","Ký hợp đồng","Nghiệm thu, đóng điện"],"cbcnv":["V","II"],"bg":{"who":"Doanh nghiệp sản xuất, lần đầu xin cấp điện 3 pha công suất lớn","trigger":"Nhà xưởng đã lắp máy, chờ điện để chạy thử, áp lực tiến độ giao hàng","pain":"Lo thủ tục kéo dài, không rõ mốc thời gian, sợ phát sinh chi phí","expect":"Được cam kết mốc cụ thể, một đầu mối theo đến cùng","risk":"Nếu trễ hẹn không báo trước, khách mất niềm tin và khiếu nại vượt cấp"},"tags":["gấp","doanh nghiệp","3 pha"],"date":"2026-06-18"},{"id":"s2","unit":"EVNHCMC","author":"CTĐL Gia Định","journey":"3.2","jtitle":"Mất điện, sự cố","name":"Mất điện diện rộng giờ cao điểm, tổng đài quá tải cuộc gọi","tps":["Tiếp nhận yêu cầu / tổng đài","Xử lý sự cố, mất điện","Kênh số (App, Website, Email/Chat)"],"cbcnv":["I","II"],"bg":{"who":"Nhiều khách hàng khu dân cư gọi cùng lúc khi mất điện chiều tối","trigger":"Sự cố lưới trung thế, thời gian khắc phục dự kiến trên 2 giờ","pain":"Khách bức xúc vì gọi không được, không biết bao giờ có điện lại","expect":"Được thông báo chủ động nguyên nhân và thời gian dự kiến qua nhiều kênh","risk":"Im lặng thông tin làm khách hiểu nhầm là bị bỏ mặc"},"tags":["cao điểm","diện rộng","tổng đài"],"date":"2026-06-20"},{"id":"s3","unit":"EVNSPC","author":"CTĐL Cần Thơ","journey":"3.13","jtitle":"Phản ánh, khiếu nại","name":"Khách hàng khiếu nại hóa đơn tăng đột biến sau đổi công tơ","tps":["Tiếp nhận phản ánh, khiếu nại","Kiểm tra, kiểm định đo đếm","Chăm sóc sau dịch vụ"],"cbcnv":["V","IV"],"bg":{"who":"Khách hàng sinh hoạt, hóa đơn tháng tăng gần gấp đôi","trigger":"Vừa thay công tơ điện tử, khách nghi ngờ thiết bị đo sai","pain":"Cảm giác bị tính oan, mất niềm tin vào tính minh bạch","expect":"Được giải thích căn cứ số liệu rõ ràng, mời kiểm định khách quan","risk":"Giải thích qua loa, dùng thuật ngữ khó hiểu làm khách càng bức xúc"},"tags":["hóa đơn","công tơ","minh bạch"],"date":"2026-06-22"},{"id":"s4","unit":"EVNNPC","author":"CTĐL Bắc Ninh","journey":"3.5","jtitle":"Đôn đốc, xử lý nợ","name":"Nhắc nợ khách hàng lớn tuổi, hoàn cảnh khó khăn","tps":["Đôn đốc, thu nợ","Chăm sóc sau dịch vụ"],"cbcnv":["III","V"],"bg":{"who":"Khách hàng cao tuổi sống một mình, chậm thanh toán 2 kỳ","trigger":"Đến hạn xử lý nợ theo quy trình, chuẩn bị ngừng cấp điện","pain":"Khách ngại, tự ái khi bị nhắc nợ; lo bị cắt điện","expect":"Được nhắc nhở tế nhị, hướng dẫn cách thanh toán thuận tiện, gia hạn nếu đủ điều kiện","risk":"Thái độ gay gắt hoặc cắt điện đột ngột gây tổn thương và phản ứng tiêu cực"},"tags":["nhân văn","người cao tuổi"],"date":"2026-06-24"},{"id":"s5","unit":"EVNCPC","author":"CTĐL Đà Nẵng","journey":"3.14","jtitle":"ĐMTMN & DPPA","name":"Hộ gia đình hỏi thủ tục lắp điện mặt trời mái nhà và bán điện dư","tps":["Tư vấn, hướng dẫn thủ tục","Khảo sát hiện trường","Kênh số (App, Website, Email/Chat)"],"cbcnv":["VI","V"],"bg":{"who":"Chủ nhà quan tâm điện mặt trời, chưa rõ chính sách mới","trigger":"Khách chủ động tìm hiểu sau khi nghe về cơ chế mua bán điện","pain":"Thông tin phức tạp, sợ làm sai quy định, không rõ hiệu quả đầu tư","expect":"Được tư vấn trung thực về điều kiện, thủ tục, lợi ích thực tế","risk":"Tư vấn thổi phồng lợi ích hoặc né tránh khiến khách quyết định sai"},"tags":["năng lượng tái tạo","tư vấn"],"date":"2026-06-25"},{"id":"s6","unit":"EVNHANOI","author":"CTĐL Hoàn Kiếm","journey":"3.7","jtitle":"Tra cứu thông tin & dịch vụ","name":"Khách hàng lớn tuổi lúng túng khi dùng App EVN để tra cứu","tps":["Kênh số (App, Website, Email/Chat)","Tư vấn, hướng dẫn thủ tục"],"cbcnv":["I","VII"],"bg":{"who":"Khách hàng cao tuổi, không quen thao tác ứng dụng","trigger":"Muốn tra cứu hóa đơn và lịch ghi chỉ số nhưng không đăng nhập được","pain":"Bối rối, ngại làm phiền, cảm thấy bị bỏ lại phía sau bởi công nghệ","expect":"Được hướng dẫn kiên nhẫn từng bước, có kênh thay thế nếu cần","risk":"Hướng dẫn nhanh, dùng thuật ngữ kỹ thuật khiến khách bỏ cuộc"},"tags":["chuyển đổi số","kiên nhẫn"],"date":"2026-06-26"}];
+</script>
+<script>
+/* ===== EVN Situation Collection Module ===== */
+const C = window.CATALOG;
+let STORE = (window.SEED || []).slice();  // in-session only
+
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const esc=s=>(s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+const $=id=>document.getElementById(id);
+
+/* unit color coding */
+const UNIT_COLOR={EVNSPC:'#2563b8',EVNHCMC:'#c0392b',EVNNPC:'#0f6e50',EVNCPC:'#8e44ad',EVNHANOI:'#a8893f'};
+function unitColor(code){return UNIT_COLOR[code]||'#2563b8';}
+function journeyTitle(code){const j=C.journeys.find(x=>x.code===code);return j?j.title:code;}
+function cbcnvTitle(code){const g=C.cbcnv.find(x=>x.code===code);return g?g.title:code;}
+function unitName(code){const u=C.units.find(x=>x.code===code);return u?u.name:code;}
+
+/* ---------- view switching ---------- */
+function switchView(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  $('view-'+v).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===v));
+  window.scrollTo(0,0);
+}
+
+/* ---------- populate selects & options ---------- */
+function fillCatalog(){
+  // library filter selects
+  const fu=$('fUnit'),fj=$('fJourney'),fc=$('fCbcnv');
+  fu.innerHTML='<option value="">Tất cả đơn vị</option>'+C.units.map(u=>`<option value="${u.code}">${esc(u.name)}</option>`).join('');
+  fj.innerHTML='<option value="">Tất cả hành trình</option>'+C.journeys.map(j=>`<option value="${j.code}">${esc(j.code+'. '+cap(j.title))}</option>`).join('');
+  fc.innerHTML='<option value="">Tất cả nhóm CBCNV</option>'+C.cbcnv.map(g=>`<option value="${g.code}">${esc(g.title)}</option>`).join('');
+  [fu,fj,fc].forEach(s=>s.addEventListener('change',renderLibrary));
+
+  // builder selects
+  $('inUnit').innerHTML='<option value="">— Chọn đơn vị —</option>'+C.units.map(u=>`<option value="${u.code}">${esc(u.name)}</option>`).join('');
+  $('inJourney').innerHTML='<option value="">— Chọn hành trình —</option>'+C.journeys.map(j=>`<option value="${j.code}">${esc(j.code+'. '+cap(j.title))}</option>`).join('');
+
+  // multi touchpoints
+  $('inTouchpoints').innerHTML='';
+  C.touchpoints.forEach(tp=>{const b=el('div','mopt',esc(tp));b.dataset.val=tp;b.onclick=()=>{b.classList.toggle('on');updatePreview();};$('inTouchpoints').appendChild(b);});
+  // multi cbcnv
+  $('inCbcnv').innerHTML='';
+  C.cbcnv.forEach(g=>{const b=el('div','mopt',esc(g.code+'. '+g.title));b.dataset.val=g.code;b.onclick=()=>{b.classList.toggle('on');updatePreview();};$('inCbcnv').appendChild(b);});
+
+  // quick chips = top journeys
+  const qc=$('quickChips');qc.innerHTML='';
+  const all=el('div','fchip active','Tất cả');all.dataset.j='';all.onclick=()=>quickPick('');qc.appendChild(all);
+  ['3.1','3.2','3.3','3.13','3.5'].forEach(code=>{
+    const c=el('div','fchip',esc(cap(journeyTitle(code))));c.dataset.j=code;c.onclick=()=>quickPick(code);qc.appendChild(c);
+  });
+  const rs=el('div','fchip reset','↻ Đặt lại bộ lọc');rs.onclick=resetFilters;qc.appendChild(rs);
+}
+function cap(t){if(!t)return '';return t.charAt(0).toUpperCase()+t.slice(1);}
+
+function quickPick(code){
+  $('fJourney').value=code;
+  document.querySelectorAll('#quickChips .fchip[data-j]').forEach(c=>c.classList.toggle('active',c.dataset.j===code));
+  renderLibrary();
+}
+function resetFilters(){
+  $('fUnit').value='';$('fJourney').value='';$('fCbcnv').value='';$('libSearch').value='';
+  document.querySelectorAll('#quickChips .fchip[data-j]').forEach(c=>c.classList.toggle('active',c.dataset.j===''));
+  renderLibrary();
+}
+
+/* ---------- library render ---------- */
+function renderLibrary(){
+  const q=($('libSearch').value||'').trim().toLowerCase();
+  const fu=$('fUnit').value,fj=$('fJourney').value,fc=$('fCbcnv').value;
+  let list=STORE.filter(s=>{
+    if(fu&&s.unit!==fu)return false;
+    if(fj&&s.journey!==fj)return false;
+    if(fc&&!(s.cbcnv||[]).includes(fc))return false;
+    if(q){
+      const blob=(s.name+' '+(s.tags||[]).join(' ')+' '+Object.values(s.bg||{}).join(' ')+' '+s.author).toLowerCase();
+      if(!blob.includes(q))return false;
+    }
+    return true;
+  });
+  // sort newest first
+  list.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+
+  // stats
+  $('pillTotal').textContent=STORE.length;
+  $('pillUnits').textContent=new Set(STORE.map(s=>s.unit)).size;
+  $('pillJourneys').textContent=new Set(STORE.map(s=>s.journey)).size;
+  $('libCount').textContent=STORE.length;
+
+  $('resultMeta').textContent=`${list.length} tình huống`+((fu||fj||fc||q)?' (đang lọc)':'');
+
+  const box=$('libCards');box.innerHTML='';
+  if(!list.length){box.innerHTML='<div class="empty">Chưa có tình huống phù hợp bộ lọc. Thử đặt lại bộ lọc hoặc thêm tình huống mới.</div>';return;}
+  list.forEach(s=>box.appendChild(card(s)));
+}
+
+function card(s){
+  const c=el('div','card glass');
+  const tps=(s.tps||[]).slice(0,2).map(t=>`<span class="mini">${esc(t)}</span>`).join('');
+  const more=(s.tps||[]).length>2?`<span class="mini">+${s.tps.length-2}</span>`:'';
+  const cbs=(s.cbcnv||[]).map(cd=>`<span class="mini">${esc(cd)}</span>`).join('');
+  c.innerHTML=`
+    <div class="ctop">
+      <span class="unit-tag" style="background:${unitColor(s.unit)}">${esc(s.unit)}</span>
+      <span class="jtag">⇄ ${esc(s.journey)}. ${esc(cap(journeyTitle(s.journey)))}</span>
+    </div>
+    <h3 class="serif">${esc(s.name)}</h3>
+    <div class="cmeta">${tps}${more}${cbs}</div>
+    <div class="auth"><span class="adot"></span>${esc(s.author)}${s.date?' · '+esc(fmtDate(s.date)):''}</div>`;
+  c.onclick=()=>openDetail(s);
+  return c;
+}
+function fmtDate(d){const p=d.split('-');return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:d;}
+
+/* ---------- detail modal ---------- */
+function openDetail(s){
+  const m=$('modalBody');
+  const bgMap=[
+    ['who','👤','Khách hàng là ai',''],
+    ['trigger','⚡','Điều khởi phát',''],
+    ['pain','💢','Nỗi lo / điểm đau','risk'],
+    ['expect','🎯','Khách mong muốn','expect'],
+    ['risk','⚠️','Rủi ro nếu ứng xử sai','risk'],
+  ];
+  const bgHtml=bgMap.filter(([k])=>s.bg&&s.bg[k]).map(([k,ic,lbl,cls])=>`
+    <div class="bgfield ${cls}"><div class="bl"><span class="ic">${ic}</span>${lbl}</div><p>${esc(s.bg[k])}</p></div>`).join('');
+  const tps=(s.tps||[]).map(t=>`<span class="mini">${esc(t)}</span>`).join('');
+  const cbs=(s.cbcnv||[]).map(cd=>`<span class="mini">${esc(cd)}. ${esc(cbcnvTitle(cd))}</span>`).join('');
+  const tags=(s.tags||[]).map(t=>`<span class="jtag">#${esc(t)}</span>`).join('');
+  m.innerHTML=`
+    <button class="close" onclick="closeModal()">✕</button>
+    <div class="mtop">
+      <span class="unit-tag" style="background:${unitColor(s.unit)}">${esc(unitName(s.unit))}</span>
+      <span class="jtag">⇄ ${esc(s.journey)}. ${esc(cap(journeyTitle(s.journey)))}</span>
+    </div>
+    <h2 class="serif">${esc(s.name)}</h2>
+    <div class="auth" style="font-size:12px;color:var(--ink-dim);margin-bottom:6px">Đóng góp bởi ${esc(s.author)}${s.date?' · '+esc(fmtDate(s.date)):''}</div>
+    <div class="mrow">${tags}</div>
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-dim);font-weight:700;margin:18px 0 8px">Điểm chạm liên quan</div>
+    <div class="mrow">${tps||'<span class="pv-empty">—</span>'}</div>
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-dim);font-weight:700;margin:14px 0 8px">Nhóm CBCNV liên quan</div>
+    <div class="mrow">${cbs||'<span class="pv-empty">—</span>'}</div>
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--evn-gold);font-weight:700;margin:22px 0 4px">Bối cảnh có cấu trúc</div>
+    ${bgHtml}`;
+  $('modalScrim').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(){$('modalScrim').classList.remove('open');document.body.style.overflow='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+/* ---------- builder: preview + submit ---------- */
+function selectedMulti(id){return [...document.querySelectorAll('#'+id+' .mopt.on')].map(x=>x.dataset.val);}
+function updatePreview(){
+  const name=$('inName').value.trim();
+  $('pvTitle').innerHTML=name?esc(name):'<span class="pv-empty">Tên tình huống sẽ hiện ở đây…</span>';
+  $('pvUnit').textContent=$('inUnit').value?unitName($('inUnit').value):'—';
+  const jv=$('inJourney').value;
+  $('pvJourney').textContent=jv?(jv+'. '+cap(journeyTitle(jv))):'—';
+  const tps=selectedMulti('inTouchpoints');$('pvTps').textContent=tps.length?tps.join(', '):'—';
+  const cbs=selectedMulti('inCbcnv');$('pvCbcnv').textContent=cbs.length?cbs.join(', '):'—';
+  const tags=($('inTags').value||'').split(',').map(t=>t.trim()).filter(Boolean);
+  $('pvTags').innerHTML=tags.map(t=>`<span class="jtag">#${esc(t)}</span>`).join('');
+}
+['inName','inUnit','inAuthor','inJourney','inTags'].forEach(id=>{
+  document.addEventListener('input',e=>{if(e.target.id===id)updatePreview();});
+});
+['inUnit','inJourney'].forEach(id=>$(id)&&$(id).addEventListener('change',updatePreview));
+
+function submitSituation(){
+  const unit=$('inUnit').value, journey=$('inJourney').value, name=$('inName').value.trim(), who=$('bgWho').value.trim();
+  const miss=[];
+  if(!unit)miss.push('Đơn vị');
+  if(!journey)miss.push('Hành trình');
+  if(!name)miss.push('Tên tình huống');
+  if(!who)miss.push('Khách hàng là ai');
+  if(miss.length){toast('Vui lòng điền: '+miss.join(', '),true);
+    // flash first missing
+    return;}
+  const rec={
+    id:'u'+Date.now(),
+    unit, author:$('inAuthor').value.trim()||unitName(unit),
+    journey, jtitle:cap(journeyTitle(journey)),
+    name,
+    tps:selectedMulti('inTouchpoints'),
+    cbcnv:selectedMulti('inCbcnv'),
+    bg:{who,trigger:$('bgTrigger').value.trim(),pain:$('bgPain').value.trim(),
+        expect:$('bgExpect').value.trim(),risk:$('bgRisk').value.trim()},
+    tags:($('inTags').value||'').split(',').map(t=>t.trim()).filter(Boolean),
+    date:new Date().toISOString().slice(0,10)
+  };
+  STORE.unshift(rec);
+  resetForm();
+  switchView('library');
+  renderLibrary();
+  toast('Đã thêm tình huống vào thư viện dùng chung ✓');
+  setTimeout(()=>{const first=$('libCards').firstChild;if(first){first.style.boxShadow='0 0 0 2px var(--evn-gold),0 0 30px rgba(245,166,35,.4)';setTimeout(()=>first.style.boxShadow='',1600);}},200);
+}
+function resetForm(){
+  ['inAuthor','inName','inTags','bgWho','bgTrigger','bgPain','bgExpect','bgRisk'].forEach(id=>$(id).value='');
+  $('inUnit').value='';$('inJourney').value='';
+  document.querySelectorAll('#inTouchpoints .mopt.on,#inCbcnv .mopt.on').forEach(x=>x.classList.remove('on'));
+  updatePreview();
+}
+
+/* ---------- toast ---------- */
+let toastT=null;
+function toast(msg,err){
+  const t=$('toast');t.textContent=msg;
+  t.style.background=err?'rgba(160,30,30,.95)':'rgba(15,110,80,.95)';
+  t.style.borderColor=err?'rgba(255,107,107,.4)':'rgba(52,211,153,.4)';
+  t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+/* ---------- library search ---------- */
+let searchT=null;
+$('libSearch').addEventListener('input',()=>{clearTimeout(searchT);searchT=setTimeout(renderLibrary,180);});
+
+/* ---------- particles ---------- */
+function initParticles(){
+  const canvas=$('bgcanvas');if(!canvas)return;
+  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const ctx=canvas.getContext('2d');let w,h,pts,raf;
+  const COUNT=Math.min(64,Math.floor(window.innerWidth/24));
+  function resize(){w=canvas.width=window.innerWidth;h=canvas.height=window.innerHeight;}
+  function init(){pts=[];for(let i=0;i<COUNT;i++)pts.push({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*1.5+.6});}
+  function step(){
+    ctx.clearRect(0,0,w,h);
+    for(const p of pts){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>w)p.vx*=-1;if(p.y<0||p.y>h)p.vy*=-1;}
+    for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
+      const a=pts[i],b=pts[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);
+      if(d<140){ctx.strokeStyle='rgba(94,182,255,'+(1-d/140)*.15+')';ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
+    }
+    for(const p of pts){ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fillStyle='rgba(120,190,255,.5)';ctx.fill();}
+    raf=requestAnimationFrame(step);
+  }
+  resize();init();step();
+  let to;window.addEventListener('resize',()=>{clearTimeout(to);to=setTimeout(()=>{cancelAnimationFrame(raf);resize();init();step();},200);});
+}
+
+/* ---------- init ---------- */
+fillCatalog();
+renderLibrary();
+updatePreview();
+initParticles();
+
+</script>
+</body>
+</html>

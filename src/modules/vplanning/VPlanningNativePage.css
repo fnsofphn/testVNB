@@ -1,0 +1,995 @@
+:root{
+  --po-red:#C8102E; --po-red-dark:#9e0c23; --po-red-light:#fdf0f2; --po-red-alpha:rgba(200,16,46,.09);
+  --sidebar:#140208;
+  --pri:#C8102E; --pri-dark:#9e0c23; --pri-soft:#fdf0f2;
+  --bg:#f5f7fa; --card:#fff; --border:#dfe5ec; --text:#16162a; --muted:#72728a;
+  --green:#0fa560; --green-bg:#eafaf1; --amber:#d97706; --amber-bg:#fff8ec;
+  --red:#C8102E; --red-bg:#f6e5e8; --blue:#1a6bcc; --blue-bg:#eef4fc;
+  --purple:#6b21a8; --purple-bg:#f3ebfa; --radius:14px; --radius-sm:9px;
+}
+.vplanning-native *{box-sizing:border-box}
+.vplanning-native{margin:0;font-family:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);font-size:14px;-webkit-font-smoothing:antialiased}
+.vplanning-native button,.vplanning-native input,.vplanning-native select,.vplanning-native textarea{font:inherit}
+.vplanning-native button{cursor:pointer}
+.vplanning-native a{color:inherit;text-decoration:none}
+.vplanning-native.shell{display:flex;min-height:100vh}
+.vplanning-native .sidebar{width:236px;background:var(--sidebar);color:#fff;flex-shrink:0;display:flex;flex-direction:column;min-height:100vh}
+.vplanning-native .brand{display:flex;gap:11px;align-items:center;padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,.1)}
+.vplanning-native .brand,.vplanning-native nav,.vplanning-native .sidebar-user{transform:none;width:100%}
+.vplanning-native .mark{width:38px;height:38px;border-radius:10px;background:var(--po-red);display:grid;place-items:center;font-weight:800;font-family:"Sora",system-ui,sans-serif}
+.vplanning-native .mark-mobile{display:none}
+.vplanning-native .brand strong,.vplanning-native .topbar strong,.vplanning-native .card h3{font-family:"Sora",system-ui,sans-serif}
+.vplanning-native .brand small{display:block;color:#b8a8ac;margin-top:2px}
+.vplanning-native .brand-title{min-width:0;flex:1}
+.vplanning-native .vwork-mobile-brand-actions{display:none}
+.vplanning-native .vwork-mobile-avatar{width:30px;height:30px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);display:grid;place-items:center;font-family:"Sora",system-ui,sans-serif;font-size:11px;font-weight:900;color:#fff}
+.vplanning-native nav{padding:11px 10px 10px;display:grid;gap:6px;width:100%}
+.vplanning-native .sec{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#718092;padding:13px 12px 5px}
+.vplanning-native .nav-btn{width:100%;display:flex;align-items:center;justify-content:space-between;border:0;background:transparent;color:#f0e7ea;padding:12px 14px;border-radius:8px;margin-bottom:0;text-align:left;font-size:13px;font-weight:800}
+.vplanning-native .nav-btn span{display:flex;align-items:center;gap:12px}
+.vplanning-native .nav-btn i{width:18px;font-style:normal;display:inline-grid;place-items:center}
+.vplanning-native .nav-btn:hover{background:rgba(255,255,255,.07);color:#fff}
+.vplanning-native .nav-btn.active{background:var(--po-red);color:#fff;box-shadow:none}
+.vplanning-native .nav-btn b{min-width:20px;height:16px;border-radius:999px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:10px;font-weight:900}
+.vplanning-native .vwork-shell-mobile-tabs{display:none}
+.vplanning-native .sidebar-user{margin-top:auto;border-top:1px solid rgba(255,255,255,.1);padding:18px;display:flex;align-items:center;gap:12px;color:#fff}
+.vplanning-native .sidebar-user>span{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--po-red);font-family:"Sora",system-ui,sans-serif;font-size:12px;font-weight:900}
+.vplanning-native .sidebar-user div{min-width:0;flex:1}.vplanning-native .sidebar-user strong{display:block;font-size:13px;line-height:1.15}.vplanning-native .sidebar-user small{display:block;color:#b8a8ac;font-size:11px;margin-top:2px}.vplanning-native .sidebar-user em{font-style:normal;color:#9d8187;font-size:13px}
+.vplanning-native .vwork-account-logout{width:34px;height:34px;border:1px solid rgba(255,255,255,.18);border-radius:9px;background:rgba(255,255,255,.08);color:#f7eef0;display:grid;place-items:center;flex:0 0 auto}.vplanning-native .vwork-account-logout:hover{background:var(--po-red);border-color:var(--po-red);color:#fff}.vplanning-native .vwork-account-logout:focus-visible{outline:3px solid rgba(255,255,255,.36);outline-offset:2px}
+.vplanning-native .main{flex:1;min-width:0;display:flex;flex-direction:column}
+.vplanning-native .topbar{height:62px;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;gap:16px;position:sticky;top:0;z-index:20}
+.vplanning-native .topbar-spacer{flex:1}
+.vplanning-native .vwork-search{position:relative;display:block;min-width:260px}
+.vplanning-native .vwork-search span{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px;margin:0}
+.vplanning-native .vwork-search input{border:1.5px solid var(--border);border-radius:20px;background:var(--bg);padding:9px 14px 9px 34px;font-size:13px;outline:none}
+.vplanning-native .vwork-search input:focus{background:#fff;border-color:var(--po-red);box-shadow:0 0 0 3px var(--po-red-alpha)}
+.vplanning-native .content{padding:24px;max-width:none;width:100%}
+.vplanning-native .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.vplanning-native .row.end{justify-content:flex-end}
+.vplanning-native .between{justify-content:space-between}
+.vplanning-native .grid{display:grid;gap:14px}
+.vplanning-native .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.vplanning-native .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.vplanning-native .grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:980px){
+  .vplanning-native.shell{display:block;min-height:100vh;background:var(--bg)}
+  .vplanning-native .sidebar{width:100%;position:sticky;top:0;z-index:30;background:var(--sidebar)}
+  .vplanning-native .grid-2,.vplanning-native .grid-3,.vplanning-native .grid-4{grid-template-columns:1fr}
+  .vplanning-native .content{padding:14px 16px 96px}
+  .vplanning-native .topbar{position:static;height:auto;padding:14px 16px;background:#fff;display:grid;gap:12px;text-align:center;justify-items:center;border-bottom:1px solid var(--border)}
+  .vplanning-native .topbar>.row{justify-content:center}
+}
+.vplanning-native .card,.vplanning-native .kpi{background:linear-gradient(180deg,#fff,#fbfdff);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:0 14px 38px rgba(74,88,104,.08),inset 0 1px 0 rgba(255,255,255,.9)}
+.vplanning-native .card h3{margin:0 0 6px;font-size:16px}
+.vplanning-native .muted{color:var(--muted)}
+.vplanning-native .kpi .num{font-size:26px;font-weight:800}.vplanning-native .kpi .lbl{font-size:12px;color:var(--muted);margin-top:4px}
+.vplanning-native table{width:100%;border-collapse:collapse}
+.vplanning-native th,.vplanning-native td{text-align:left;padding:10px 11px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:top}
+.vplanning-native th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700}
+.vplanning-native .table-wrap{overflow:auto}
+.vplanning-native .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap}
+.vplanning-native .b-red{background:var(--red-bg);color:var(--red)}.vplanning-native .b-amber{background:var(--amber-bg);color:var(--amber)}
+.vplanning-native .b-green{background:var(--green-bg);color:var(--green)}.vplanning-native .b-gray{background:#eef0f3;color:var(--muted)}
+.vplanning-native .b-blue{background:var(--blue-bg);color:var(--blue)}.vplanning-native .b-purple{background:var(--purple-bg);color:var(--purple)}
+.vplanning-native .btn{border:1px solid var(--border);background:#fff;border-radius:8px;padding:9px 14px;font-weight:700;font-size:13px}
+.vplanning-native .btn:disabled{opacity:.48;cursor:not-allowed;box-shadow:none;transform:none}
+.vplanning-native .btn:hover{background:#f7f9fa}.vplanning-native .btn-primary{background:var(--pri);border-color:var(--pri);color:#fff}.vplanning-native .btn-primary:hover{background:var(--pri-dark)}
+.vplanning-native .btn-danger{border-color:var(--red);color:var(--red)}.vplanning-native .btn-sm{padding:5px 10px;font-size:12px}
+.vplanning-native input,.vplanning-native select,.vplanning-native textarea{border:1px solid var(--border);border-radius:8px;padding:9px;width:100%;background:#fff;color:var(--text)}
+.vplanning-native label span{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+.vplanning-native .tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--border);margin-bottom:14px}
+.vplanning-native .tabs button{border:0;background:transparent;padding:9px 12px;border-bottom:2px solid transparent;font-weight:700;color:var(--muted)}
+.vplanning-native .tabs button.active{color:var(--pri);border-bottom-color:var(--pri)}
+.vplanning-native .upload{border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;background:#fff;transition:transform .2s ease,border-color .2s ease}
+.vplanning-native .upload:hover{border-color:var(--pri);transform:translateY(-1px)}
+.vplanning-native .progress{height:7px;background:#edf0f3;border-radius:6px;overflow:hidden}.vplanning-native .progress span{display:block;height:100%;background:var(--pri)}
+.vplanning-native .modal-bg{position:fixed;inset:0;background:rgba(8,16,24,.5);display:grid;place-items:center;padding:16px;z-index:80}
+.vplanning-native .modal{position:relative;background:#fff;border-radius:12px;max-width:860px;width:100%;max-height:90vh;overflow:auto;padding:20px}
+.vplanning-native .modal-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;padding-right:42px}
+.vplanning-native .modal-head h3{margin-top:0}
+.vplanning-native .modal-x{position:absolute;right:14px;top:14px;width:38px;height:38px;border:1px solid var(--border);border-radius:50%;background:#fff;color:var(--text);font-size:24px;font-weight:900;line-height:1;display:grid;place-items:center;box-shadow:0 8px 24px rgba(15,23,42,.12);z-index:2}
+.vplanning-native .modal-x:hover{border-color:var(--po-red);color:var(--po-red);background:var(--po-red-light)}
+.vplanning-native .modal-back{white-space:nowrap}
+.vplanning-native .hidden{display:none!important}
+.vplanning-native .error-list{margin:6px 0 0;padding-left:18px;color:var(--red);font-size:12px}
+.vplanning-native .template-card{border:1px solid var(--border);border-radius:10px;padding:14px;background:#fff;display:flex;flex-direction:column;gap:8px}
+.vplanning-native .template-card.active{border-color:var(--pri);box-shadow:0 0 0 3px rgba(14,124,102,.12)}
+.vplanning-native .pill-row{display:flex;gap:6px;flex-wrap:wrap}
+.vplanning-native .save-status{font-size:12px;color:var(--muted);max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vplanning-native .detail-layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,.9fr);gap:14px;margin-top:14px}
+.vplanning-native .detail-tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--border);margin:14px 0}
+.vplanning-native .detail-tabs button{border:0;background:transparent;padding:9px 12px;border-bottom:2px solid transparent;font-weight:700;color:var(--muted)}
+.vplanning-native .detail-tabs button.active{color:var(--pri);border-bottom-color:var(--pri)}
+.vplanning-native .timeline{display:grid;gap:8px}
+.vplanning-native .timeline-item{border-left:3px solid var(--pri);padding:2px 0 2px 10px}
+.vplanning-native .timeline-item small{display:block;color:var(--muted);margin-top:2px}
+.vplanning-native .comment-box{border:1px solid var(--border);border-radius:8px;padding:10px;background:#fbfcfd}
+.vplanning-native .soft-box{border:1px solid var(--border);border-radius:8px;padding:12px;background:var(--pri-soft)}
+.vplanning-native .notice-wrap{position:relative}
+.vplanning-native .notice-btn{position:relative;width:34px;height:34px;border:1px solid var(--border);border-radius:8px;background:#fff;display:grid;place-items:center;font-weight:800}
+.vplanning-native .notice-dot{position:absolute;right:-5px;top:-6px;background:var(--red);color:#fff;border-radius:999px;font-size:10px;line-height:1;padding:3px 5px;min-width:18px;text-align:center}
+.vplanning-native .notice-popover{position:absolute;right:0;top:42px;width:min(380px,calc(100vw - 32px));background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 16px 44px rgba(15,23,42,.16);z-index:60;overflow:hidden}
+.vplanning-native .notice-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border)}
+.vplanning-native .notice-list{max-height:360px;overflow:auto}
+.vplanning-native .notice-item{width:100%;padding:12px 14px;border:0;border-bottom:1px solid var(--border);background:#fff;text-align:left;display:grid;gap:4px;cursor:pointer}
+.vplanning-native .notice-item.unread{background:#f8fbff}
+.vplanning-native .notice-item:hover{background:#f3f8f7}
+.vplanning-native .notice-item strong{font-size:13px}
+.vplanning-native .notice-item small{color:var(--muted)}
+.vplanning-native .unread-mark{font-size:11px;font-weight:800;color:var(--pri)}
+.vplanning-native .notice-empty{padding:16px;color:var(--muted);text-align:center}
+.vplanning-native .vwork-toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:120;max-width:min(520px,calc(100vw - 28px));padding:12px 16px;border-radius:12px;background:#101827;color:#fff;box-shadow:0 18px 44px rgba(15,23,42,.24);font-weight:800;line-height:1.35}
+.vplanning-native .vwork-toast.success{background:#0f766e}
+.vplanning-native .vwork-toast.warning{background:#b45309}
+.vplanning-native .vwork-toast.danger{background:var(--po-red)}
+.vplanning-native .filter-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-bottom:12px}
+.vplanning-native .vwork-form-admin{display:grid;grid-template-columns:minmax(260px,.85fr) minmax(0,1fr);gap:14px;align-items:stretch}
+.vplanning-native .vwork-form-upload{position:relative;border:2px dashed var(--border);border-radius:12px;background:#fff;padding:18px;display:grid;gap:6px;text-align:left;min-height:132px;align-content:center}
+.vplanning-native .vwork-form-upload:hover{border-color:var(--pri);background:var(--pri-soft)}
+.vplanning-native .vwork-form-upload span{font-size:12px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin:0}
+.vplanning-native .vwork-form-upload strong{font-family:"Sora",system-ui,sans-serif;font-size:16px}
+.vplanning-native .vwork-form-upload small{color:var(--muted);font-weight:700}
+.vplanning-native .vwork-form-upload input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.vplanning-native .status-pill{display:inline-flex;align-items:center;gap:5px}
+.vplanning-native .outcome-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.vplanning-native .outcome-card{border:1px solid var(--border);border-radius:8px;padding:11px;background:#fff;display:grid;gap:7px}
+.vplanning-native .outcome-card.danger{border-color:rgba(214,51,76,.28);background:#fff8f9}
+.vplanning-native .outcome-card.warning{border-color:rgba(217,119,6,.3);background:#fffaf0}
+.vplanning-native .milestone-list{display:grid;gap:7px;margin-top:8px}
+.vplanning-native .milestone-item{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:start;border:1px solid var(--border);border-radius:8px;padding:8px;background:#fff}
+.vplanning-native .milestone-check{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:#eef0f3;color:var(--muted);font-size:11px;font-weight:800}
+.vplanning-native .milestone-check.done{background:var(--green-bg);color:var(--green)}
+.vplanning-native .management-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.vplanning-native .process-grid{display:grid;grid-template-columns:repeat(5,minmax(180px,1fr));gap:10px}
+.vplanning-native .process-card{border:1px solid var(--border);border-radius:8px;background:#fff;padding:11px;display:grid;gap:7px}
+.vplanning-native .process-card.danger{border-color:rgba(214,51,76,.28);background:#fff8f9}
+.vplanning-native .process-card.warning{border-color:rgba(217,119,6,.3);background:#fffaf0}
+.vplanning-native .process-step{border:1px solid var(--border);border-radius:8px;padding:10px;background:#fff;display:grid;gap:7px}
+.vplanning-native .checkpoint-list{display:grid;gap:6px;margin-top:7px}
+.vplanning-native .checkpoint-actions{gap:5px;flex-wrap:wrap;margin-top:6px}
+.vplanning-native .checkpoint-status-row{padding:7px 0;border-bottom:1px solid var(--border)}
+.vplanning-native .checkpoint-status-row:last-child{border-bottom:0}
+.vplanning-native .template-admin-list{display:grid;gap:12px}
+.vplanning-native .template-admin-item{border:1px solid var(--border);border-radius:8px;background:#fff;padding:12px;display:grid;gap:10px}
+.vplanning-native .template-admin-item p{margin:0;line-height:1.45}
+.vplanning-native .checkpoint-item{display:grid;grid-template-columns:auto 1fr;gap:7px;align-items:start}
+.vplanning-native .checkpoint-dot{width:16px;height:16px;border-radius:50%;background:#eef0f3;color:var(--muted);display:grid;place-items:center;font-size:10px;font-weight:800}
+.vplanning-native .checkpoint-dot.done{background:var(--green-bg);color:var(--green)}
+.vplanning-native .checkpoint-dot.blocked{background:var(--red-bg);color:var(--red)}
+.vplanning-native .help-page h2{font-size:24px;line-height:1.25;margin:10px 0 8px;max-width:680px}
+.vplanning-native .help-page p{line-height:1.5}
+.vplanning-native .help-hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(280px,.8fr);gap:18px;align-items:center}
+.vplanning-native .help-mini-screen{border:1px solid var(--border);border-radius:10px;background:#f8fafc;padding:12px;box-shadow:0 14px 30px rgba(15,23,42,.08)}
+.vplanning-native .mini-top{display:flex;gap:6px;margin-bottom:10px}.vplanning-native .mini-top span{width:8px;height:8px;border-radius:50%;background:#cbd5e1}
+.vplanning-native .mini-row{display:flex;justify-content:space-between;gap:8px;border:1px solid var(--border);border-radius:8px;background:#fff;padding:10px;margin-top:8px}
+.vplanning-native .mini-row.active{border-color:rgba(14,124,102,.35);background:var(--pri-soft)}
+.vplanning-native .mini-row span{font-size:12px;color:var(--red);font-weight:700}
+.vplanning-native .guide-flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.vplanning-native .guide-step{position:relative;border:1px solid var(--border);border-radius:10px;background:#fff;padding:14px;min-height:150px}
+.vplanning-native .guide-no{width:30px;height:30px;border-radius:8px;background:var(--pri);color:#fff;display:grid;place-items:center;font-weight:800;margin-bottom:10px}
+.vplanning-native .guide-step p{margin:8px 0 0;color:var(--muted)}
+.vplanning-native .guide-arrow{position:absolute;right:-15px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:#fff;border:1px solid var(--border);display:grid;place-items:center;color:var(--pri);font-weight:800;z-index:1}
+.vplanning-native .detail-map{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(180px,.8fr);gap:10px;border:1px solid var(--border);border-radius:10px;background:#f8fafc;padding:12px;margin-bottom:10px}
+.vplanning-native .detail-map-main,.vplanning-native .detail-map-side{display:grid;gap:8px}
+.vplanning-native .map-title{font-weight:800;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px}
+.vplanning-native .map-tabs{display:flex;gap:5px;flex-wrap:wrap}.vplanning-native .map-tabs span{font-size:11px;font-weight:700;border:1px solid var(--border);border-radius:999px;background:#fff;padding:5px 8px}.vplanning-native .map-tabs .active{background:var(--pri);border-color:var(--pri);color:#fff}
+.vplanning-native .map-block{border:1px solid var(--border);border-radius:8px;background:#fff;padding:11px;font-size:12px;font-weight:700}
+.vplanning-native .map-block.green{background:var(--green-bg);border-color:rgba(15,143,88,.25);color:var(--green)}
+.vplanning-native .map-block.blue{background:var(--blue-bg);border-color:rgba(26,107,204,.25);color:var(--blue)}
+.vplanning-native .map-block.amber{background:var(--amber-bg);border-color:rgba(217,119,6,.25);color:var(--amber)}
+.vplanning-native .help-checklist{display:grid;gap:10px}
+.vplanning-native .help-checklist label{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;border:1px solid var(--border);border-radius:8px;padding:10px;background:#fff}
+.vplanning-native .help-checklist input{width:auto;margin-top:3px}
+.vplanning-native .guide-tab-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.vplanning-native .guide-tab-card{border:1px solid var(--border);border-radius:10px;background:#fff;padding:13px}
+.vplanning-native .guide-tab-card p{margin:10px 0 0;color:var(--muted)}
+.vplanning-native .guide-role-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.vplanning-native .guide-role-tab{border:1px solid var(--border);background:#fff;border-radius:8px;padding:8px}
+.vplanning-native .guide-role-tab.active{border-color:var(--pri);box-shadow:0 0 0 3px rgba(14,124,102,.12)}
+.vplanning-native .guide-role-panel{display:grid;grid-template-columns:minmax(220px,.75fr) minmax(0,1.4fr);gap:16px;align-items:start}
+.vplanning-native .guide-role-panel h3{font-size:18px;line-height:1.35;margin:10px 0 0}
+.vplanning-native .guide-action-list{display:grid;gap:10px}
+.vplanning-native .guide-action{display:grid;grid-template-columns:auto 1fr;gap:10px;border:1px solid var(--border);border-radius:10px;background:#fff;padding:11px}
+.vplanning-native .guide-action span{width:24px;height:24px;border-radius:7px;background:var(--pri-soft);color:var(--pri);display:grid;place-items:center;font-weight:800;font-size:12px}
+.vplanning-native .guide-action p,.vplanning-native .guide-field p,.vplanning-native .guide-error p,.vplanning-native .scenario-step p,.vplanning-native .report-example p{margin:5px 0 0;color:var(--muted)}
+.vplanning-native .guide-field-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.vplanning-native .guide-field{border:1px solid var(--border);border-radius:10px;background:#fff;padding:13px}
+.vplanning-native .guide-scenario{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.vplanning-native .scenario-step{border:1px solid var(--border);border-radius:10px;background:#fff;padding:13px;display:grid;gap:10px;align-content:start}
+.vplanning-native .report-example{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.vplanning-native .report-example>div{border:1px solid var(--border);border-radius:10px;background:var(--pri-soft);padding:14px}
+.vplanning-native .guide-error-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.vplanning-native .guide-error{border:1px solid rgba(217,119,6,.25);border-radius:10px;background:#fffaf0;padding:13px}
+.vplanning-native .workload-snapshot,.vplanning-native .project-snapshot{display:grid;gap:10px}
+.vplanning-native .workload-mini,.vplanning-native .project-mini{width:100%;text-align:left;border:1px solid var(--border);background:#fff;border-radius:8px;padding:11px;cursor:pointer}
+.vplanning-native .workload-mini:hover,.vplanning-native .project-mini:hover{border-color:var(--pri);box-shadow:0 0 0 3px rgba(14,124,102,.08)}
+.vplanning-native .work-overview{display:grid;gap:12px}
+.vplanning-native .overview-head,.vplanning-native .project-group-head,.vplanning-native .task-compact-row,.vplanning-native .workload-strip{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.vplanning-native .overview-head h4,.vplanning-native .workload-strip h4{margin:0 0 4px}
+.vplanning-native .overview-head p,.vplanning-native .workload-strip p{margin:0}
+.vplanning-native .project-accordion,.vplanning-native .task-stack{display:grid;gap:8px}
+.vplanning-native .project-group,.vplanning-native .standalone-group{border:1px solid var(--border);border-radius:10px;background:#fbfcfd;overflow:hidden}
+.vplanning-native .project-group-head{width:100%;border:0;background:transparent;text-align:left;padding:12px 14px;cursor:pointer}
+.vplanning-native .project-group-head:hover{background:#f4faf8}
+.vplanning-native .project-group-metrics{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.vplanning-native .chevron{font-size:12px;font-weight:800;color:var(--pri)}
+.vplanning-native .project-progress{padding:0 14px 12px}
+.vplanning-native .task-stack{padding:0 10px 10px}
+.vplanning-native .task-compact-row{width:100%;border:1px solid var(--border);background:#fff;border-radius:8px;padding:10px 12px;text-align:left}
+.vplanning-native .task-compact-row:hover{border-color:var(--pri);box-shadow:0 0 0 3px rgba(14,124,102,.08)}
+.vplanning-native .task-compact-main{display:grid;gap:3px;min-width:0}
+.vplanning-native .task-compact-main strong{font-size:13px;line-height:1.35}
+.vplanning-native .task-compact-main small{color:var(--muted)}
+.vplanning-native .task-compact-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.vplanning-native .check-count{font-size:11px;color:var(--muted);font-weight:700;white-space:nowrap}
+.vplanning-native .empty-panel{border:1px dashed var(--border);border-radius:8px;padding:12px;color:var(--muted);background:#fff}
+.vplanning-native .workload-strip{align-items:flex-start;border-top:1px solid var(--border);padding-top:14px;margin-top:12px}
+.vplanning-native .workload-strip .workload-snapshot{min-width:320px;max-width:520px;flex:1}
+.vplanning-native .vwork-owner-row{cursor:pointer}
+.vplanning-native .vwork-owner-row:hover{background:#f8fafc}
+.vplanning-native .vwork-owner-row td:first-child{display:flex;align-items:center;gap:8px}
+.vplanning-native .vwork-owner-detail-row td{background:#fbfcfd;padding:0 12px 12px}
+.vplanning-native .vwork-owner-task-list{display:grid;gap:8px;padding:10px 0 0}
+.vplanning-native .vwork-owner-task{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;background:#fff;padding:10px 12px}
+.vplanning-native .vwork-owner-task strong{display:block;font-size:13px;line-height:1.35}
+.vplanning-native .vwork-owner-task span{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.vplanning-native .vwork-owner-task-meta{display:flex;gap:8px;align-items:center;justify-content:flex-end;white-space:nowrap}
+.vplanning-native .vwork-owner-task-meta .btn{min-width:82px}
+.vplanning-native .vwork-section-heading{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:10px}
+.vplanning-native .vwork-section-heading .vwork-section-title{margin-bottom:0}
+.vplanning-native .checklist-editor{display:grid;gap:8px}
+.vplanning-native .checklist-edit-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;border:1px solid var(--border);border-radius:8px;background:#fff;padding:8px}
+.vplanning-native .checklist-edit-row label{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:start;margin:0}
+.vplanning-native .checklist-edit-row input[type="checkbox"]{width:auto;margin-top:3px}
+.vplanning-native .checklist-edit-row label span{font-size:13px;color:var(--text);margin:0;line-height:1.4}
+.vplanning-native .checklist-label-input{border:0;background:transparent;padding:0;font-size:13px;font-weight:700;color:var(--text);min-height:22px}
+.vplanning-native .checklist-label-input:focus{outline:2px solid var(--pri-soft);border-radius:6px;background:#fff;padding:4px 6px}
+.vplanning-native .checklist-add-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.vplanning-native .task-quick-status{display:grid;grid-template-columns:auto auto minmax(120px,1fr);gap:10px;align-items:center;margin-bottom:12px}
+.vplanning-native .vwork-mobile-tabs{display:flex;gap:4px;background:#111827;border-radius:8px 8px 0 0;padding:4px;margin-bottom:12px;position:sticky;top:58px;z-index:18}
+.vplanning-native .vwork-mobile-tabs button{flex:1;border:0;border-bottom:2px solid transparent;border-radius:6px;background:transparent;color:#cbd5e1;padding:10px 6px;font-size:12px;font-weight:800;position:relative}
+.vplanning-native .vwork-mobile-tabs button.active{color:#fff;border-bottom-color:var(--red);background:rgba(255,255,255,.08)}
+.vplanning-native .vwork-mobile-tabs b{position:absolute;right:10px;top:5px;background:var(--red);color:#fff;border-radius:999px;min-width:17px;height:17px;line-height:17px;font-size:10px}
+.vplanning-native .vwork-mode-grid,.vplanning-native .vwork-type-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}
+.vplanning-native .vwork-create-mode-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.vplanning-native .vwork-mode,.vplanning-native .vwork-type{text-align:left;border:1px solid var(--border);border-radius:8px;background:#fff;padding:11px;display:grid;gap:5px}
+.vplanning-native .vwork-mode.active,.vplanning-native .vwork-type.active{border-color:var(--red);background:var(--red-bg);box-shadow:0 0 0 3px rgba(214,51,76,.08)}
+.vplanning-native .vwork-mode span,.vplanning-native .vwork-type span{font-size:12px;color:var(--muted)}
+.vplanning-native .vwork-topic-guide{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:12px 0}
+.vplanning-native .vwork-topic-guide button{text-align:left;border:1px solid var(--border);border-radius:8px;background:#fff;padding:11px;display:grid;gap:5px}
+.vplanning-native .vwork-topic-guide button:hover{border-color:var(--po-red);background:var(--po-red-light)}
+.vplanning-native .vwork-topic-guide span{font-size:12px;line-height:1.35;color:var(--muted)}
+.vplanning-native .vwork-assignment-card{border:1px solid var(--border);border-radius:8px;background:#fff;padding:14px}
+.vplanning-native .vwork-form-section-title{font-family:"Sora",system-ui,sans-serif;font-size:15px;font-weight:900;margin:0 0 3px;color:var(--text)}
+.vplanning-native .vwork-form-section-sub{font-size:11.5px;line-height:1.35;color:var(--muted);font-weight:700;margin:0 0 12px}
+.vplanning-native .vwork-title-suggestions{display:grid;gap:7px;margin:8px 0 10px}
+.vplanning-native .vwork-title-suggestions>span{font-size:12px;color:var(--muted);font-weight:800}
+.vplanning-native .vwork-title-suggestions>div{display:flex;gap:7px;flex-wrap:wrap}
+.vplanning-native .vwork-title-suggestions button{border:1px solid var(--border);border-radius:999px;background:#fff;color:var(--text);padding:7px 10px;display:inline-flex;align-items:center;gap:7px;max-width:100%;font-size:12px;font-weight:850}
+.vplanning-native .vwork-title-suggestions button:hover{border-color:var(--po-red);background:var(--po-red-light);color:var(--po-red)}
+.vplanning-native .vwork-title-suggestions strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vplanning-native .vwork-title-suggestions em{font-style:normal;color:var(--po-red);background:#fff2f4;border-radius:999px;padding:2px 6px;font-size:10px;font-weight:900;white-space:nowrap}
+.vplanning-native .vwork-checkpoint-builder{margin-top:10px;display:grid;gap:8px}
+.vplanning-native .vwork-checkpoint-builder>span{font-size:12px;color:var(--muted);font-weight:800}
+.vplanning-native .vwork-checkpoint-add{display:grid;grid-template-columns:minmax(0,1fr) 42px;gap:8px}
+.vplanning-native .vwork-checkpoint-add .btn{padding:8px 0;font-size:18px;line-height:1}
+.vplanning-native .vwork-checkpoint-list{display:flex;gap:7px;flex-wrap:wrap}
+.vplanning-native .vwork-checkpoint-list button{border:1px solid var(--border);border-radius:999px;background:#fff;color:var(--text);padding:5px 8px 5px 5px;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;max-width:100%}
+.vplanning-native .vwork-checkpoint-list b{width:18px;height:18px;border-radius:999px;background:var(--po-red-light);color:var(--po-red);display:grid;place-items:center;font-size:10px}
+.vplanning-native .vwork-checkpoint-list em{font-style:normal;color:var(--muted);font-size:14px}
+.vplanning-native .vwork-reviewer-hint{margin:7px 0 0;color:#7b5260;background:#fff6f7;border:1px solid #f3d5dc;border-radius:8px;padding:8px 10px;font-size:12px;font-weight:800}
+.vplanning-native .vwork-chip-list{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.vplanning-native .vwork-chip-list>span{width:100%;font-size:12px;color:var(--muted)}
+.vplanning-native .vwork-chip-list button{border:1px solid var(--border);border-radius:999px;background:#fff;padding:6px 10px;font-size:12px;font-weight:700}
+.vplanning-native .vwork-chip-list button.active{border-color:var(--pri);background:var(--pri-soft);color:var(--pri)}
+.vplanning-native .vwork-person-chip{display:inline-flex;align-items:center;gap:6px;min-height:30px;border:1px solid var(--border);border-radius:999px;background:#fff;color:var(--text);padding:5px 9px 5px 5px;font-size:11.5px;font-weight:800;box-shadow:0 5px 14px rgba(74,88,104,.04)}
+.vplanning-native .vwork-person-chip b{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:#fff2f4;color:var(--po-red);font-family:"Sora",system-ui,sans-serif;font-size:9px;line-height:1}
+.vplanning-native .vwork-person-chip.active{border-color:var(--po-red);background:var(--po-red-light);color:var(--po-red)}
+.vplanning-native .vwork-person-chip.lead.active{background:var(--po-red);color:#fff;box-shadow:0 8px 18px rgba(200,16,46,.18)}
+.vplanning-native .vwork-person-chip.lead.active b{background:#fff;color:var(--po-red)}
+.vplanning-native .vwork-segmented-wrap{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+.vplanning-native .vwork-segmented-wrap>div>span{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:800}
+.vplanning-native .vwork-segmented{display:flex;border:1.5px solid var(--border);border-radius:9px;overflow:hidden;background:#fff;min-height:38px}
+.vplanning-native .vwork-segmented button{flex:1;border:0;background:#fff;color:#6b7280;padding:9px 8px;font-size:12px;font-weight:900;text-align:center}
+.vplanning-native .vwork-segmented button+button{border-left:1.5px solid var(--border)}
+.vplanning-native .vwork-segmented button.active{color:#fff}
+.vplanning-native .vwork-segmented.priority button.active[data-v="low"]{background:#7b8794}
+.vplanning-native .vwork-segmented.priority button.active[data-v="medium"]{background:var(--blue)}
+.vplanning-native .vwork-segmented.priority button.active[data-v="high"]{background:var(--po-red)}
+.vplanning-native .vwork-segmented.risk button.active[data-v="low"]{background:var(--green)}
+.vplanning-native .vwork-segmented.risk button.active[data-v="medium"]{background:var(--amber)}
+.vplanning-native .vwork-segmented.risk button.active[data-v="high"]{background:var(--po-red)}
+.vplanning-native .vwork-request-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;width:100%}
+.vplanning-native .vwork-request-grid.compact{grid-template-columns:minmax(0,1fr)}
+.vplanning-native .vwork-request-grid.compact>.card{width:100%;max-width:none}
+.vplanning-native .vwork-request-grid.compact .vwork-request-list{grid-template-columns:minmax(0,1fr);align-items:start}
+.vplanning-native .vwork-request-grid.compact .vwork-request-card{padding:12px;gap:6px}
+.vplanning-native .vwork-request-grid.compact .vwork-request-card>p{margin:0;font-size:12px;line-height:1.35}
+@media(min-width:981px){
+  .vplanning-native .vwork-request-grid.compact .vwork-request-card{grid-template-columns:minmax(210px,1.05fr) minmax(240px,1.35fr) minmax(260px,1.15fr);column-gap:16px;align-items:start}
+  .vplanning-native .vwork-request-grid.compact .vwork-request-card>.row,
+  .vplanning-native .vwork-request-grid.compact .vwork-request-card>strong,
+  .vplanning-native .vwork-request-grid.compact .vwork-request-card>p.muted{grid-column:1}
+  .vplanning-native .vwork-request-grid.compact .vwork-request-card>p:not(.muted),
+  .vplanning-native .vwork-request-grid.compact .vwork-request-card>.vwork-request-attachment-links,
+  .vplanning-native .vwork-request-grid.compact .vwork-request-card>.vwork-opinion-reminder,
+  .vplanning-native .vwork-request-grid.compact .vwork-request-card>.vwork-delegation-notice,
+  .vplanning-native .vwork-request-grid.compact .vwork-request-card>.vwork-request-log{grid-column:2}
+  .vplanning-native .vwork-request-grid.compact .vwork-request-card>.vwork-opinion-response,
+  .vplanning-native .vwork-request-grid.compact .vwork-request-card>.vwork-proposal-delegation-control,
+  .vplanning-native .vwork-request-grid.compact .vwork-request-card>.vwork-proposal-decision-fields,
+  .vplanning-native .vwork-request-grid.compact .vwork-request-card>.vwork-request-actions,
+  .vplanning-native .vwork-request-grid.compact .vwork-request-card>.vwork-request-delete-action{grid-column:3}
+  .vplanning-native .vwork-request-grid.compact .vwork-request-card>.vwork-request-log{max-height:180px;overflow:auto}
+}
+.vplanning-native .vwork-request-grid.compact .vwork-request-log{max-height:118px;overflow:auto}
+.vplanning-native .vwork-request-list{display:grid;gap:10px}
+.vplanning-native .vwork-review-stack{display:grid;gap:16px}
+.vplanning-native .vwork-review-hub{overflow:hidden;border:1px solid #e1e5eb;border-radius:15px;background:#fff;box-shadow:0 8px 24px rgba(34,43,58,.06)}
+.vplanning-native .vwork-review-hub-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:22px 24px;border-bottom:1px solid #e8ebf0}
+.vplanning-native .vwork-review-hub-head>div>span,.vplanning-native .vwork-review-layer-head>div>span{display:block;color:#8a909c;font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase}
+.vplanning-native .vwork-review-hub-head h2{margin:4px 0 5px;color:#20242e;font:800 22px/1.25 "Sora",system-ui,sans-serif}
+.vplanning-native .vwork-review-hub-head p{margin:0;color:#747b88;font-size:13px}
+.vplanning-native .vwork-review-category-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:20px 24px 24px;background:#f7f8fb}
+.vplanning-native .vwork-review-category{position:relative;min-width:0;min-height:214px;border:1px solid #dfe4eb;border-top:4px solid #c8102e;border-radius:13px;background:#fff;padding:18px;text-align:left;color:#20242e;display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto 1fr auto;gap:14px 12px;cursor:pointer;box-shadow:0 5px 16px rgba(35,44,60,.05);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.vplanning-native .vwork-review-category.request{border-top-color:#c77f00}.vplanning-native .vwork-review-category.proposal{border-top-color:#6d28d9}
+.vplanning-native .vwork-review-category:hover,.vplanning-native .vwork-review-category:focus-visible{transform:translateY(-2px);border-color:#c9aeb5;box-shadow:0 12px 28px rgba(35,44,60,.11);outline:3px solid rgba(200,16,46,.14);outline-offset:2px}
+.vplanning-native .vwork-review-category-icon{width:42px;height:42px;border-radius:11px;background:#fdebed;color:#c8102e;display:grid;place-items:center}
+.vplanning-native .vwork-review-category.request .vwork-review-category-icon{background:#fff3dd;color:#a96300}.vplanning-native .vwork-review-category.proposal .vwork-review-category-icon{background:#f0e9ff;color:#6d28d9}
+.vplanning-native .vwork-review-category-copy{display:grid;align-content:start;gap:6px;min-width:0}
+.vplanning-native .vwork-review-category-copy strong{font:800 15px/1.35 "Sora",system-ui,sans-serif}
+.vplanning-native .vwork-review-category-copy small{color:#6f7683;font-size:12px;line-height:1.55}
+.vplanning-native .vwork-review-category-count{display:grid;justify-items:end;align-content:start;gap:2px}
+.vplanning-native .vwork-review-category-count b{color:#20242e;font:900 28px/1 "Sora",system-ui,sans-serif}
+.vplanning-native .vwork-review-category-count small{color:#8a909c;font-size:10px;font-weight:700;white-space:nowrap}
+.vplanning-native .vwork-review-category-open{grid-column:1/-1;align-self:end;display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:13px;border-top:1px solid #eceff3;color:#c8102e;font-size:12px;font-weight:850}
+.vplanning-native .vwork-review-layer{z-index:78;background:rgba(13,20,31,.58)}
+.vplanning-native .vwork-review-layer-modal{width:min(1320px,calc(100vw - 32px));max-width:1320px;max-height:94vh;padding:0;overflow:hidden;border-radius:16px;background:#f4f6fa;box-shadow:0 28px 80px rgba(10,18,31,.28)}
+.vplanning-native .vwork-review-layer-head{position:relative;display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:20px 72px 18px 22px;border-bottom:1px solid #e0e4ea;background:#fff}
+.vplanning-native .vwork-review-layer-head h3{margin:4px 0 5px;color:#20242e;font:800 20px/1.3 "Sora",system-ui,sans-serif}.vplanning-native .vwork-review-layer-head p{margin:0;color:#747b88;font-size:12px}
+.vplanning-native .vwork-review-layer-head>div:last-child{display:flex;align-items:center;gap:10px}.vplanning-native .vwork-review-layer-head .modal-x{top:14px;right:16px}
+.vplanning-native .vwork-review-layer-body{max-height:calc(94vh - 89px);overflow:auto;padding:18px}
+.vplanning-native .vwork-review-layer-body>.vwork-v2-list{max-width:980px;margin:0 auto}
+.vplanning-native .vwork-approval-handoff.is-embedded{min-height:0;border:0;border-radius:0;background:transparent}
+.vplanning-native .vwork-approval-handoff.is-embedded .vwork-approval-heading{display:none}
+.vplanning-native .vwork-approval-handoff.is-embedded .vwork-approval-shell{min-height:0}.vplanning-native .vwork-approval-handoff.is-embedded .vwork-approval-main{padding:0}
+.vplanning-native .vwork-approval-handoff{background:#f4f6fa;border:1px solid #e6e9ef;border-radius:16px;overflow:hidden;min-height:640px}
+.vplanning-native .vwork-approval-heading{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;background:#fff;border-bottom:1px solid #eaedf2}
+.vplanning-native .vwork-approval-heading span{font-size:11px;font-weight:700;color:#8a909c;text-transform:uppercase;letter-spacing:.06em}
+.vplanning-native .vwork-approval-heading h2{font-size:21px;line-height:1.2;margin:3px 0 0;color:#20242e}
+.vplanning-native .vwork-approval-shell{display:block;min-height:580px}
+.vplanning-native .vwork-approval-nav{background:#fff;border-bottom:1px solid #e6e9ef;padding:0 14px;display:flex;align-items:center;flex-wrap:nowrap;gap:0;width:100%;overflow-x:auto;scrollbar-width:thin}
+.vplanning-native .vwork-approval-nav button{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:none;border:0;border-bottom:3px solid transparent;background:transparent;color:#5a616d;padding:14px 16px 12px;border-radius:0;font-weight:700;text-align:left;cursor:pointer;white-space:nowrap}
+.vplanning-native .vwork-approval-nav button:hover{color:#20242e}
+.vplanning-native .vwork-approval-nav button.active{border-bottom-color:#d42a32;color:#d42a32}
+.vplanning-native .vwork-approval-nav b{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#d42a32;color:#fff;font-size:11px}
+.vplanning-native .vwork-import-deadline-actions{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap}
+.vplanning-native .vwork-import-deadline-actions label{margin:0;min-width:150px}
+.vplanning-native .vwork-import-deadline-actions label span{display:block;margin-bottom:4px;font-size:11px;color:var(--muted);font-weight:700}
+.vplanning-native .vwork-import-deadline-actions input,.vplanning-native .vwork-import-deadline input{min-width:142px}
+.vplanning-native .vwork-import-deadline{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.vplanning-native .vwork-import-profile{display:grid;grid-template-columns:minmax(0,1fr) 180px 120px;gap:12px;align-items:stretch}
+.vplanning-native .vwork-import-profile>div{display:flex;flex-direction:column;justify-content:center;gap:5px;padding:11px 13px;border:1px solid var(--border);border-radius:9px;background:#fbfcff}
+.vplanning-native .vwork-import-profile>div:first-child{align-items:flex-start}.vplanning-native .vwork-import-profile span{font-size:11px;color:var(--muted)}
+.vplanning-native .vwork-import-mapping-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:13px}
+.vplanning-native .vwork-import-mapping-grid label{display:grid;gap:5px;margin:0;min-width:0}.vplanning-native .vwork-import-mapping-grid label>span{font-size:11px;color:var(--muted);font-weight:800}
+.vplanning-native .vwork-import-mapping-grid select{width:100%;min-width:0}
+.vplanning-native .vwork-import-unmapped{display:grid;gap:7px;margin-top:13px;padding:11px 13px;border:1px solid #f0cf99;border-radius:9px;background:#fff9ed;color:#76562f}
+.vplanning-native .vwork-import-unmapped>div{display:flex;gap:6px;flex-wrap:wrap}.vplanning-native .vwork-import-unmapped>span{font-size:11.5px}
+.vplanning-native .vwork-import-mapping-ok{margin-top:13px}
+.vplanning-native .vwork-import-anchor{display:grid;grid-template-columns:minmax(0,1fr) 180px auto;gap:12px;align-items:end}
+.vplanning-native .vwork-import-anchor>div{display:grid;gap:4px}.vplanning-native .vwork-import-anchor>div span{font-size:11.5px;color:var(--muted)}
+.vplanning-native .vwork-import-anchor label,.vplanning-native .vwork-import-library-setup label{margin:0}
+.vplanning-native .vwork-import-library-setup{display:grid;grid-template-columns:1.1fr 1.2fr 170px 170px auto;gap:10px;align-items:end}
+.vplanning-native .vwork-import-preview-table{min-width:1460px}
+.vplanning-native .vwork-import-preview-table th:first-child,.vplanning-native .vwork-import-preview-table td:first-child{width:52px;text-align:center}
+.vplanning-native .vwork-import-preview-table td{vertical-align:top}.vplanning-native .vwork-import-preview-table tr.is-muted{opacity:.55;background:#f5f6f8}
+.vplanning-native .vwork-import-preview-table select{min-width:145px}.vplanning-native .vwork-import-preview-table input[type="checkbox"]{width:18px;height:18px;accent-color:var(--po-red)}
+.vplanning-native .vwork-import-task-edit{display:grid;gap:6px;min-width:230px}.vplanning-native .vwork-import-task-edit input:first-child{font-weight:800}.vplanning-native .vwork-import-task-edit input:last-child{font-size:11px;color:var(--muted)}
+.vplanning-native .vwork-import-preview-table textarea{width:230px;min-height:58px;resize:vertical}
+.vplanning-native .vwork-import-warnings{margin:7px 0 0;padding-left:17px;color:#986000;font-size:11px;line-height:1.4}
+@media(max-width:980px){.vplanning-native .vwork-import-profile,.vplanning-native .vwork-import-anchor,.vplanning-native .vwork-import-library-setup{grid-template-columns:1fr}.vplanning-native .vwork-import-mapping-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.vplanning-native .vwork-import-anchor .btn,.vplanning-native .vwork-import-library-setup .btn{width:100%}}
+@media(max-width:620px){.vplanning-native .vwork-import-mapping-grid{grid-template-columns:1fr}}
+.vplanning-native .vwork-approval-main{padding:20px;min-width:0}
+.vplanning-native .vwork-approval-main>.tabs{gap:22px;background:transparent;flex-wrap:nowrap;overflow-x:auto}
+.vplanning-native .vwork-approval-main>.tabs button{padding:11px 2px;font-size:14px}
+.vplanning-native .vwork-approval-queue-tabs{display:flex;gap:6px;margin:0 0 12px;padding:4px;background:#f3f5f8;border:1px solid #e4e7ed;border-radius:11px;width:max-content;max-width:100%;overflow-x:auto}
+.vplanning-native .vwork-approval-queue-tabs button{border:0;background:transparent;color:#666e7b;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:750;white-space:nowrap;cursor:pointer}
+.vplanning-native .vwork-approval-queue-tabs button.active{background:#fff;color:#d42a32;box-shadow:0 1px 4px rgba(24,31,43,.12)}
+.vplanning-native .vwork-kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.vplanning-native .vwork-kpi-grid .card strong{display:block;font-size:30px;color:#20242e;margin:4px 0}
+.vplanning-native .vwork-kpi-grid .card small{color:#8a909c}
+.vplanning-native .vwork-stat-bars{height:38px;border-radius:10px;overflow:hidden;display:flex;color:#fff;font-size:11px;font-weight:700}
+.vplanning-native .vwork-stat-bars span{display:flex;align-items:center;justify-content:center;background:#1e9e57}.vplanning-native .vwork-stat-bars span:nth-child(2){background:#c77f00}.vplanning-native .vwork-stat-bars span:nth-child(3){background:#d42a32}
+.vplanning-native .vwork-delegate-scopes{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}.vplanning-native .vwork-delegate-scopes label{border:1px solid #e4e7ed;background:#f7f8fb;border-radius:10px;padding:10px 13px}
+.vplanning-native .vwork-delegation-active{display:flex;align-items:center;gap:12px}.vplanning-native .vwork-delegation-active>b{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#e7ddfa;color:#6d28d9}.vplanning-native .vwork-delegation-active>span{display:grid;flex:1}.vplanning-native .vwork-delegation-active small{color:#8a909c;margin-top:3px}
+.vplanning-native .vwork-delegated-request-list{display:grid;gap:10px}.vplanning-native .vwork-delegated-request-list .vwork-delegation-active{border:1px solid #e6e9ef;background:#fff;border-radius:12px;padding:12px}
+.vplanning-native .vwork-approval-type-pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.vplanning-native .vwork-approval-type-pills button{border:1px solid #e4e7ed;background:#fff;color:#5a616d;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer}.vplanning-native .vwork-approval-type-pills button.active{border-color:#d42a32;background:#fdecec;color:#d42a32;box-shadow:0 0 0 2px rgba(212,42,50,.08)}
+.vplanning-native .vwork-checklist-option{display:flex;align-items:center;gap:9px;margin-top:12px;border:1px solid #e4e7ed;background:#f7f8fb;border-radius:10px;padding:10px 12px;font-weight:650}.vplanning-native .vwork-checklist-option input{width:auto;margin:0}
+.vplanning-native .vwork-request-detail-panel .vwork-approval-decision-panel{grid-column:1/-1;border:1px solid #efc7ca;background:#fffafa;padding:16px;border-radius:14px}
+.vplanning-native .vwork-approval-decision-panel>label{display:grid;gap:6px;margin-top:12px}.vplanning-native .vwork-approval-decision-panel>label>span{font-size:12px;font-weight:800;color:#5a616d}
+.vplanning-native .vwork-approval-primary-actions{display:flex;gap:10px;margin-top:12px}.vplanning-native .vwork-approval-primary-actions .btn{min-width:150px}
+.vplanning-native .vwork-opinion-request-row{display:grid;grid-template-columns:minmax(220px,1fr) auto minmax(190px,.8fr) auto;gap:8px;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid #f0dfe0}
+.vplanning-native .vwork-opinion-reminder{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid #f2d8ab;background:#fff8e9;color:#805600;border-radius:10px;padding:10px 12px}.vplanning-native .vwork-opinion-reminder span{flex:1;min-width:180px}
+.vplanning-native .vwork-opinion-reminder p{flex-basis:100%;margin:0;padding-top:8px;border-top:1px solid rgba(128,86,0,.16);color:#4e3b12;white-space:pre-wrap}
+.vplanning-native .vwork-opinion-response{display:grid;gap:10px;margin-top:10px;padding:12px;border:1px solid #cbdcf7;background:#f5f9ff;border-radius:10px}.vplanning-native .vwork-opinion-response .btn{justify-self:end}
+.vplanning-native .vwork-payment-confirmation{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px;padding:12px;border:1px solid #c9e7d4;background:#f4fbf7;border-radius:10px}.vplanning-native .vwork-payment-confirmation label{display:grid;gap:5px}.vplanning-native .vwork-payment-confirmation span{font-size:12px;font-weight:800;color:#3b6450}
+.vplanning-native .vwork-approval-checklist{display:grid;gap:7px;margin-top:12px;padding:11px;border:1px solid #e6e9ef;background:#fff;border-radius:10px}.vplanning-native .vwork-approval-checklist label{display:flex;align-items:center;gap:8px}.vplanning-native .vwork-approval-checklist input{width:auto;margin:0}
+.vplanning-native .vwork-proposal-decision-fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,.7fr);gap:8px;margin-top:8px}.vplanning-native .vwork-proposal-decision-fields textarea{min-height:68px}
+.vplanning-native .vwork-proposal-delegation-control,.vplanning-native .vwork-inline-delegation{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}.vplanning-native .vwork-proposal-delegation-control select,.vplanning-native .vwork-inline-delegation select{min-width:min(100%,320px);flex:1}.vplanning-native .vwork-delegation-notice{display:grid;gap:3px;margin-top:10px;padding:10px 12px;border:1px solid #cfe8d8;border-radius:10px;background:#f0faf4;color:#166534}.vplanning-native .vwork-delegation-notice span{font-size:12px;color:#4b6b57}
+.vplanning-native .vwork-request-card{border:1px solid var(--border);border-radius:8px;background:#fff;padding:12px;display:grid;gap:7px}
+.vplanning-native .vwork-request-card.pending{border-color:rgba(217,119,6,.28);background:#fffaf0}
+.vplanning-native .vwork-request-card.assigned{border-color:rgba(26,107,204,.25);background:#f7fbff}
+.vplanning-native .vwork-proposal-table-wrap{border:1px solid #e2e6ec;border-radius:13px;overflow:auto;background:#fff}
+.vplanning-native .vwork-proposal-table{width:100%;min-width:860px;border-collapse:separate;border-spacing:0;table-layout:fixed;font-size:13px}
+.vplanning-native .vwork-proposal-table th:nth-child(1){width:30%}.vplanning-native .vwork-proposal-table th:nth-child(2){width:10%}.vplanning-native .vwork-proposal-table th:nth-child(3){width:23%}.vplanning-native .vwork-proposal-table th:nth-child(4){width:11%}.vplanning-native .vwork-proposal-table th:nth-child(5){width:14%}.vplanning-native .vwork-proposal-table th:nth-child(6){width:12%}
+.vplanning-native .vwork-proposal-table th{padding:12px 14px;border-bottom:1px solid #dde2e9;background:#f6f8fb;color:#6c7484;font-size:10px;font-weight:900;letter-spacing:.055em;text-align:left;text-transform:uppercase;white-space:nowrap}
+.vplanning-native .vwork-proposal-table td{padding:14px;border-bottom:1px solid #edf0f4;vertical-align:middle;color:#303642}
+.vplanning-native .vwork-proposal-table tbody tr:last-child td{border-bottom:0}
+.vplanning-native .vwork-proposal-row{cursor:pointer;transition:background .16s ease,box-shadow .16s ease}
+.vplanning-native .vwork-proposal-row:hover,.vplanning-native .vwork-proposal-row:focus-visible{background:#fff8f9;box-shadow:inset 3px 0 var(--po-red);outline:0}
+.vplanning-native .vwork-proposal-table td:first-child{min-width:310px}
+.vplanning-native .vwork-proposal-table td:first-child strong{display:block;color:#171b24;font:800 13px/1.4 "Sora",system-ui,sans-serif}
+.vplanning-native .vwork-proposal-table td:first-child small{display:block;margin-top:4px;color:#7a8291;font-size:11px}
+.vplanning-native .vwork-proposal-table td:last-child{text-align:right}
+.vplanning-native .vwork-proposal-detail-button{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.vplanning-native .vwork-urgency{display:inline-flex;align-items:center;min-height:26px;padding:4px 9px;border-radius:999px;background:#f1f3f6;color:#596273;font-size:11px;font-weight:800;white-space:nowrap}
+.vplanning-native .vwork-urgency.today{background:#fff2d9;color:#a15b00}.vplanning-native .vwork-urgency.urgent{background:#fde7e9;color:#c61732}
+.vplanning-native .vwork-proposal-detail-layer{z-index:96}
+.vplanning-native .vwork-proposal-detail-modal{max-width:940px;padding:0;border-radius:16px;overflow:auto;background:#f5f7fa;box-shadow:0 28px 80px rgba(10,18,31,.26)}
+.vplanning-native .vwork-proposal-detail-modal>.modal-x{top:17px;right:17px;border-color:rgba(255,255,255,.34);background:rgba(255,255,255,.12);color:#fff;box-shadow:none}
+.vplanning-native .vwork-proposal-detail-modal>.modal-x:hover{border-color:#fff;background:#fff;color:var(--po-red)}
+.vplanning-native .vwork-proposal-detail-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding:25px 74px 24px 26px;background:#171b24;color:#fff;border-bottom:4px solid var(--po-red)}
+.vplanning-native .vwork-proposal-detail-head h3{margin:5px 0 6px;color:#fff;font:800 22px/1.35 "Sora",system-ui,sans-serif}
+.vplanning-native .vwork-proposal-detail-head p{margin:0;color:#b8c0cd;font-size:12px}
+.vplanning-native .vwork-proposal-eyebrow{color:#ff9aaa;font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase}
+.vplanning-native .vwork-proposal-detail-body{display:grid;gap:13px;padding:18px}
+.vplanning-native .vwork-proposal-detail-body>section{padding:17px 18px;border:1px solid #e1e5eb;border-radius:13px;background:#fff}
+.vplanning-native .vwork-proposal-detail-body>section h4{margin:0 0 12px;color:#1d2330;font:800 14px/1.3 "Sora",system-ui,sans-serif}
+.vplanning-native .vwork-proposal-summary dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;margin:0;border:1px solid #e6e9ee;border-radius:10px;overflow:hidden}
+.vplanning-native .vwork-proposal-summary dl>div{display:grid;gap:4px;padding:12px 14px;border-bottom:1px solid #e9ecf1}
+.vplanning-native .vwork-proposal-summary dl>div:nth-child(odd){border-right:1px solid #e9ecf1}.vplanning-native .vwork-proposal-summary dl>div:nth-last-child(-n+2){border-bottom:0}
+.vplanning-native .vwork-proposal-summary dt{color:#7a8290;font-size:10px;font-weight:900;letter-spacing:.045em;text-transform:uppercase}.vplanning-native .vwork-proposal-summary dd{margin:0;color:#282e39;font-size:13px;font-weight:700}
+.vplanning-native .vwork-proposal-content{margin:0;color:#3d4553;font-size:13px;line-height:1.65;white-space:pre-wrap}
+.vplanning-native .vwork-proposal-detail-body .vwork-request-log{max-height:260px;overflow:auto}
+.vplanning-native .vwork-proposal-action-panel{border-color:#f2c4cb!important;box-shadow:inset 4px 0 var(--po-red)}
+.vplanning-native .vwork-proposal-action-panel .vwork-request-actions{margin-top:10px}
+.vplanning-native .vwork-payment-request-table{min-width:920px}
+.vplanning-native .vwork-payment-request-table th:nth-child(1){width:29%}.vplanning-native .vwork-payment-request-table th:nth-child(2){width:13%}.vplanning-native .vwork-payment-request-table th:nth-child(3){width:15%}.vplanning-native .vwork-payment-request-table th:nth-child(4){width:29%}.vplanning-native .vwork-payment-request-table th:nth-child(5){width:14%}
+.vplanning-native .vwork-payment-request-table .vwork-request-flow{margin:0}
+.vplanning-native .vwork-payment-request-table .vwork-request-inline-log{margin-top:7px}
+.vplanning-native .vwork-payment-detail-modal{max-width:980px}
+.vplanning-native .vwork-request-edit-form{display:grid;gap:13px}
+.vplanning-native .vwork-request-edit-heading{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.vplanning-native .vwork-request-edit-heading h4{margin-bottom:4px!important}.vplanning-native .vwork-request-edit-heading p{margin:0;color:#737b89;font-size:12px;line-height:1.5}
+.vplanning-native .vwork-request-edit-form label{display:grid;gap:6px;color:#3b4250;font-size:12px;font-weight:800}
+.vplanning-native .vwork-request-edit-form input,.vplanning-native .vwork-request-edit-form textarea{width:100%;border:1px solid #d9dee6;border-radius:9px;background:#fff;color:#202631;padding:10px 11px;font:inherit;outline:0}
+.vplanning-native .vwork-request-edit-form input:focus,.vplanning-native .vwork-request-edit-form textarea:focus{border-color:var(--po-red);box-shadow:0 0 0 3px rgba(211,14,45,.1)}
+.vplanning-native .vwork-request-edit-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(150px,.7fr) minmax(155px,.7fr);gap:10px}
+.vplanning-native .vwork-request-replacement{padding:12px;border:1px dashed #cfd5df;border-radius:10px;background:#fafbfc}
+.vplanning-native .vwork-request-replacement small{color:#737b89;font-weight:600;line-height:1.5}
+.vplanning-native .vwork-payment-detail-actions{display:flex;align-items:center;justify-content:flex-end;gap:9px;flex-wrap:wrap;padding:2px}
+.vplanning-native .vwork-payment-edit-note{margin-right:auto;color:#737b89;font-size:12px;line-height:1.5}
+.vplanning-native .vwork-request-actions{display:flex;gap:8px;flex-wrap:wrap}
+.vplanning-native .vwork-loan-request-form{margin-top:10px}
+.vplanning-native .vwork-file-hint{margin:6px 0 0;font-size:12px}
+.vplanning-native .required-mark{color:var(--red)}
+.vplanning-native .vwork-collaboration-empty{margin:8px 0 0;border:1px solid #f2d8ab;border-radius:8px;background:#fff8e9;color:#805600;padding:9px 10px;font-size:12px;font-weight:700;line-height:1.45}
+.vplanning-native .vwork-request-ops{display:grid;grid-template-columns:minmax(240px,1fr) 190px auto;gap:8px;align-items:center;margin-bottom:12px}
+.vplanning-native .vwork-request-board{border:1px solid var(--border);border-radius:10px;background:#fff;overflow:auto;max-height:calc(100vh - 250px)}
+.vplanning-native .vwork-request-board table{width:100%;border-collapse:collapse;table-layout:fixed;min-width:1040px;font-size:12px}
+.vplanning-native .vwork-request-board th:nth-child(1){width:24%}
+.vplanning-native .vwork-request-board th:nth-child(2){width:11%}
+.vplanning-native .vwork-request-board th:nth-child(3){width:17%}
+.vplanning-native .vwork-request-board th:nth-child(4){width:24%}
+.vplanning-native .vwork-request-board th:nth-child(5){width:24%}
+.vplanning-native .vwork-request-board th{position:sticky;top:0;z-index:2;background:var(--bg);color:var(--muted);font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;text-align:left;padding:10px;border-bottom:1px solid var(--border)}
+.vplanning-native .vwork-request-board td{padding:10px;border-bottom:1px solid #eef0f5;vertical-align:top;min-width:0;overflow-wrap:anywhere}
+.vplanning-native .vwork-request-board td:nth-child(3) .badge{max-width:100%;white-space:normal;line-height:1.25;text-align:left}
+.vplanning-native .vwork-missing-attachment{color:var(--red);font-weight:800}
+.vplanning-native .vwork-attachment-upload{display:inline-flex;margin-top:10px;cursor:pointer}
+.vplanning-native .vwork-request-board td>strong{display:block;font-size:12.5px;line-height:1.35}
+.vplanning-native .vwork-request-board td small{display:block;color:var(--muted);font-size:10.5px;line-height:1.35;margin-top:2px}
+.vplanning-native .vwork-request-board input,.vplanning-native .vwork-request-board select{min-height:32px;font-size:12px}
+.vplanning-native .vwork-request-board tr.is-expanded>td{background:#fffdfb}
+.vplanning-native .vwork-request-detail-toggle{margin-top:7px;padding:5px 9px;font-size:11px}
+.vplanning-native .vwork-request-row-actions{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+.vplanning-native .vwork-request-action-row>td{padding:0 10px 12px;background:#fffdfb}
+.vplanning-native .vwork-request-action-editor{display:grid;grid-template-columns:minmax(190px,.65fr) minmax(280px,1.4fr) auto;gap:12px;align-items:center;border:1px solid #efc7ca;background:#fffafa;border-radius:12px;padding:14px}
+.vplanning-native .vwork-request-action-editor>div:first-child{display:grid;gap:4px}.vplanning-native .vwork-request-action-editor>div:first-child small{color:var(--muted);margin:0}
+.vplanning-native .vwork-request-action-editor textarea{resize:vertical;min-height:72px}.vplanning-native .vwork-request-action-editor .vwork-payment-confirmation,.vplanning-native .vwork-request-action-editor .vwork-approval-checklist{grid-column:1/-1}
+.vplanning-native .vwork-request-action-confirm{display:flex;gap:8px;justify-content:flex-end;align-items:center}
+.vplanning-native .vwork-mobile-approval-screen{display:none}
+.vplanning-native .vwork-request-detail-row>td{padding:0 10px 12px;background:#fffdfb}
+.vplanning-native .vwork-request-detail-row>td::before{display:none}
+.vplanning-native .vwork-request-clickable{cursor:pointer}
+.vplanning-native .vwork-request-clickable:focus-visible{outline:2px solid var(--po-red);outline-offset:-2px}
+.vplanning-native .vwork-request-detail-panel{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;padding:14px;border:1px solid #f3d5ca;border-radius:10px;background:#fff;box-shadow:0 12px 30px rgba(141,49,28,.06)}
+.vplanning-native .vwork-request-detail-panel section{display:grid;gap:7px;align-content:start;min-width:0}
+.vplanning-native .vwork-request-delete-panel{border:1px solid #efc7ca;border-radius:10px;background:#fff7f7;padding:12px}
+.vplanning-native .vwork-request-delete-panel .btn{justify-self:start;margin-top:3px}
+.vplanning-native .vwork-request-delete-action{display:flex;justify-content:flex-end;padding-top:9px;border-top:1px solid #eef0f4}
+.vplanning-native .vwork-request-detail-panel h4{margin:0;color:var(--text);font-size:12px;font-weight:900}
+.vplanning-native .vwork-request-detail-panel p{margin:0;color:var(--text);font-size:12px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.vplanning-native .vwork-request-detail-panel dl{display:grid;gap:6px;margin:0}
+.vplanning-native .vwork-request-detail-panel dl>div{display:grid;grid-template-columns:92px minmax(0,1fr);gap:8px}
+.vplanning-native .vwork-request-detail-panel dt{color:var(--muted);font-size:10.5px;font-weight:900;text-transform:uppercase}
+.vplanning-native .vwork-request-detail-panel dd{margin:0;color:var(--text);font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+.vplanning-native .vwork-request-attachment-links{display:grid;gap:5px}
+.vplanning-native .vwork-request-attachment-links a,.vplanning-native .vwork-request-attachment-links span{color:#0f766e;font-size:12px;font-weight:800;line-height:1.35;overflow-wrap:anywhere}
+.vplanning-native .vwork-return-note{color:var(--red)!important;font-weight:900;margin-top:6px!important}
+.vplanning-native .vwork-delegate-inline{display:grid;grid-template-columns:minmax(120px,1fr) auto;gap:6px;align-items:center;min-width:210px}
+.vplanning-native .vwork-request-inline-log{margin-top:5px}
+.vplanning-native .vwork-request-inline-log summary{cursor:pointer;color:var(--muted);font-size:11px;font-weight:800}
+.vplanning-native .vwork-request-inline-log div{display:grid;gap:5px;margin-top:6px;max-height:180px;overflow:auto}
+.vplanning-native .vwork-request-inline-log p{margin:0;border-left:3px solid var(--po-red);padding-left:7px}
+.vplanning-native .vwork-request-inline-log strong,.vplanning-native .vwork-request-inline-log span,.vplanning-native .vwork-request-inline-log em{display:block;font-style:normal;font-size:11px;line-height:1.35}
+.vplanning-native .vwork-request-inline-log span{color:var(--muted);font-size:10.5px}
+.vplanning-native .vwork-footbar{position:sticky;bottom:0;margin:14px -16px -16px;padding:11px 16px;background:#fff;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:10px}
+.vplanning-native .vwork-footbar span{margin-right:auto;color:var(--muted);font-size:12px;font-weight:700}
+.vplanning-native .vwork-v2-tabs{display:flex;gap:6px;overflow:auto;margin:12px 0;padding-bottom:2px}
+.vplanning-native .vwork-v2-tabs button{border:1px solid var(--border);background:#fff;border-radius:999px;padding:8px 12px;font-weight:800;color:var(--muted);display:flex;gap:7px;align-items:center;white-space:nowrap}
+.vplanning-native .vwork-v2-tabs button.active{border-color:var(--red);background:var(--red-bg);color:var(--red)}
+.vplanning-native .vwork-v2-tabs b{min-width:18px;height:18px;border-radius:999px;background:#eef0f3;color:var(--muted);display:grid;place-items:center;font-size:10px}
+.vplanning-native .vwork-v2-tabs button.active b{background:var(--red);color:#fff}
+.vplanning-native .vwork-v2-list{display:grid;gap:10px}
+.vplanning-native .vwork-v2-card{border:1px solid var(--border);border-radius:8px;background:#fff;padding:12px;display:grid;gap:9px}
+.vplanning-native .vwork-v2-card:hover{border-color:var(--pri);box-shadow:0 0 0 3px rgba(14,124,102,.08)}
+.vplanning-native .vwork-desktop-shell{display:block;min-height:auto;background:transparent;border:0;border-radius:0;overflow:visible}
+.vplanning-native .vwork-desktop-rail{background:var(--sidebar);color:#fff;padding:14px 12px;display:flex;flex-direction:column;gap:4px}
+.vplanning-native .vwork-rail-brand{display:flex;align-items:center;gap:11px;padding:6px 8px 14px;margin-bottom:6px;border-bottom:1px solid rgba(255,255,255,.1)}
+.vplanning-native .vwork-rail-brand span{width:38px;height:38px;border-radius:10px;background:var(--po-red);display:grid;place-items:center;font-family:"Sora",system-ui,sans-serif;font-weight:900}
+.vplanning-native .vwork-rail-brand strong{display:block;font-family:"Sora",system-ui,sans-serif;font-size:17px;line-height:1.15}
+.vplanning-native .vwork-rail-brand small{display:block;color:#b8a8ac;font-size:11px;margin-top:2px}
+.vplanning-native .vwork-rail-group{padding:12px 10px 6px;color:#9d8187;text-transform:uppercase;letter-spacing:.08em;font-size:10.5px;font-weight:900}
+.vplanning-native .vwork-desktop-rail button{width:100%;border:0;background:transparent;color:#d8c8cc;border-radius:9px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;font-size:13.5px;font-weight:800}
+.vplanning-native .vwork-desktop-rail button:hover{background:#2a1116;color:#fff}
+.vplanning-native .vwork-desktop-rail button.active{background:var(--po-red);color:#fff;box-shadow:0 4px 14px rgba(200,16,46,.32)}
+.vplanning-native .vwork-desktop-rail button b{min-width:20px;border-radius:999px;background:rgba(255,255,255,.16);padding:1px 7px;font-size:10.5px;text-align:center}
+.vplanning-native .vwork-desktop-main{min-width:0;display:flex;flex-direction:column}
+.vplanning-native .vwork-desktop-appbar{height:62px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 22px}
+.vplanning-native .vwork-desktop-appbar strong{display:block;font-family:"Sora",system-ui,sans-serif;font-size:19px;line-height:1.15}
+.vplanning-native .vwork-desktop-appbar small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.vplanning-native .vwork-desktop-main>.vwork-page-head,.vplanning-native .vwork-desktop-main>.vwork-stat-grid,.vplanning-native .vwork-desktop-main>.vwork-toolbar,.vplanning-native .vwork-desktop-main>.vwork-split{margin-left:22px;margin-right:22px}
+.vplanning-native .vwork-desktop-main>.vwork-page-head{margin-top:20px}
+.vplanning-native .vwork-mobile-shell{display:none}
+.vplanning-native .vwork-mobile-appbar{display:flex;align-items:center;gap:11px;background:var(--sidebar);color:#fff;padding:14px 16px;position:sticky;top:0;z-index:22;margin:-14px -16px 0}
+.vplanning-native .vwork-mobile-appbar>span{width:30px;height:30px;border-radius:8px;background:var(--po-red);display:grid;place-items:center;font-family:"Sora",system-ui,sans-serif;font-weight:900;font-size:13px;flex:none}
+.vplanning-native .vwork-mobile-appbar div{flex:1;min-width:0}.vplanning-native .vwork-mobile-appbar strong{display:block;font-family:"Sora",system-ui,sans-serif;font-size:15px}.vplanning-native .vwork-mobile-appbar small{display:block;color:#b8a8ac;font-size:10.5px}
+.vplanning-native .vwork-mobile-topnav{position:sticky;top:58px;z-index:21;background:var(--sidebar);display:flex;gap:2px;overflow-x:auto;margin:0 -16px 12px;padding:0 8px;scrollbar-width:none}
+.vplanning-native .vwork-mobile-topnav::-webkit-scrollbar{display:none}
+.vplanning-native .vwork-mobile-topnav button{flex:none;border:0;border-bottom:2.5px solid transparent;background:transparent;color:#b8a8ac;padding:11px 12px 10px;font-family:"Sora",system-ui,sans-serif;font-weight:800;font-size:12.5px;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.vplanning-native .vwork-mobile-topnav button.active{color:#fff;border-bottom-color:var(--po-red)}
+.vplanning-native .vwork-mobile-topnav b{min-width:16px;height:16px;border-radius:999px;background:var(--po-red);color:#fff;display:grid;place-items:center;font-size:9px}
+.vplanning-native .vwork-card-meta{font-size:11.5px;line-height:1.45;margin-top:3px}
+.vplanning-native .vwork-action-icon{min-width:32px;min-height:32px;justify-content:center;white-space:nowrap}
+.vplanning-native .vwork-page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:18px}
+.vplanning-native .vwork-page-head h2{font-family:"Sora",system-ui,sans-serif;font-size:22px;line-height:1.2;margin:0 0 4px}
+.vplanning-native .vwork-page-head p{margin:0;color:var(--muted);max-width:660px;line-height:1.5}
+.vplanning-native .vwork-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:20px}
+.vplanning-native .vwork-stat{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 18px;min-height:112px;display:flex;flex-direction:column;justify-content:center}
+.vplanning-native .vwork-stat span{display:block;color:var(--muted);font-size:12px;font-weight:700}
+.vplanning-native .vwork-stat strong{display:block;font-family:"Sora",system-ui,sans-serif;font-size:28px;line-height:1.15;margin-top:6px}
+.vplanning-native .vwork-stat small{display:block;color:var(--muted);font-size:11.5px;font-weight:700;margin-top:2px}
+.vplanning-native .vwork-stat.blue strong{color:var(--blue)}.vplanning-native .vwork-stat.red strong{color:var(--red)}.vplanning-native .vwork-stat.amber strong{color:var(--amber)}.vplanning-native .vwork-stat.green strong{color:var(--green)}
+.vplanning-native .vwork-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.vplanning-native .vwork-seg-tabs{display:inline-flex;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:3px;gap:2px}
+.vplanning-native .vwork-seg-tabs button{border:0;background:transparent;border-radius:7px;padding:8px 14px;color:var(--muted);font-size:12.5px;font-weight:800;display:flex;align-items:center;gap:7px}
+.vplanning-native .vwork-seg-tabs button.active{background:var(--po-red);color:#fff}
+.vplanning-native .vwork-seg-tabs span{background:rgba(0,0,0,.08);border-radius:999px;min-width:18px;padding:0 6px;font-size:10.5px}
+.vplanning-native .vwork-seg-tabs button.active span{background:rgba(255,255,255,.25)}
+.vplanning-native .vwork-split{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:16px;align-items:start}
+.vplanning-native .vwork-split.wide{grid-template-columns:minmax(0,1fr) 440px}
+.vplanning-native .vwork-risk-panel .vwork-request-card{text-align:left}
+.vplanning-native .vwork-table-wrap{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:auto}
+.vplanning-native .vwork-table{width:100%;border-collapse:collapse;font-size:13px}
+.vplanning-native .vwork-table th{position:sticky;top:0;background:var(--bg);z-index:1;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:12px 14px;border-bottom:1.5px solid var(--border);white-space:nowrap}
+.vplanning-native .vwork-table td{padding:12px 14px;border-bottom:1px solid #eef0f5;vertical-align:middle}
+.vplanning-native .vwork-table tr{cursor:pointer;transition:background .12s ease}
+.vplanning-native .vwork-table tbody tr:hover{background:var(--po-red-light)}
+.vplanning-native .vwork-table tr.selected{background:var(--po-red-light);box-shadow:inset 3px 0 0 var(--po-red)}
+.vplanning-native .vwork-table tr.danger{background:#fff8f9}
+.vplanning-native .vwork-home .vwork-table th:not(:first-child),.vplanning-native .vwork-home .vwork-table td:not(:first-child){text-align:center}
+.vplanning-native .vwork-home .vwork-owner-detail-row td{text-align:left}
+.vplanning-native .vwork-task-title{font-weight:800;font-size:13.5px;line-height:1.35}
+.vplanning-native .vwork-task-sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.vplanning-native .vwork-progress-cell{min-width:120px}
+.vplanning-native .vwork-due{font-size:12px;font-weight:800;color:var(--muted);white-space:nowrap}
+.vplanning-native .vwork-due.overdue{color:var(--red)}.vplanning-native .vwork-due.soon{color:var(--amber)}.vplanning-native .vwork-due.ok{color:var(--green)}
+.vplanning-native .vwork-check-count{font-size:12px;color:var(--muted);font-weight:800;white-space:nowrap}
+.vplanning-native .vwork-row-actions{display:flex;gap:6px;align-items:center;justify-content:flex-end}
+.vplanning-native .vwork-detail-panel{background:#fff;border:1px solid var(--border);border-radius:12px;position:sticky;top:78px;max-height:calc(100vh - 112px);overflow:auto}
+.vplanning-native .vwork-detail-empty{display:grid;align-content:center;justify-items:center;min-height:340px;text-align:center;padding:30px}
+.vplanning-native .vwork-detail-big{width:54px;height:54px;border-radius:14px;background:var(--po-red-light);color:var(--po-red);display:grid;place-items:center;font-family:"Sora",system-ui,sans-serif;font-weight:900;margin-bottom:12px}
+.vplanning-native .vwork-detail-head{padding:18px;border-bottom:1px solid #eef0f5}
+.vplanning-native .vwork-detail-head h3{font-family:"Sora",system-ui,sans-serif;margin:10px 0 0;font-size:16px;line-height:1.35}
+.vplanning-native .vwork-detail-head p{margin:6px 0 0}
+.vplanning-native .vwork-detail-body{padding:16px 18px}
+.vplanning-native .vwork-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.vplanning-native .vwork-detail-grid div{border-bottom:1px solid #eef0f5;padding:7px 0}
+.vplanning-native .vwork-detail-grid span{display:block;color:var(--muted);font-size:11.5px;margin-bottom:2px}
+.vplanning-native .vwork-detail-grid strong{font-size:12.5px}
+.vplanning-native .vwork-detail-section{margin-top:15px}
+.vplanning-native .vwork-section-title{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px}
+.vplanning-native .vwork-check-list{display:grid;gap:7px}
+.vplanning-native .vwork-check-item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;border:1px solid var(--border);border-radius:8px;background:#fff;padding:9px;text-align:left}
+.vplanning-native .vwork-check-toggle{width:18px;height:18px;border-radius:5px;border:1.5px solid #b6c4bd;background:#fff;display:grid;place-items:center;color:#fff;font-size:11px;font-weight:900;padding:0}
+.vplanning-native .vwork-check-item.done .vwork-check-toggle{background:var(--green);border-color:var(--green)}
+.vplanning-native .vwork-check-item input{border:0;background:transparent;padding:2px 0;font-size:12.5px;font-weight:800;color:var(--text);min-width:0}
+.vplanning-native .vwork-check-item input:focus{outline:2px solid var(--pri-soft);border-radius:6px;background:#fff;padding:5px 7px}
+.vplanning-native .vwork-check-item.done input{text-decoration:line-through;color:var(--muted)}
+.vplanning-native .vwork-check-remove{width:24px;height:24px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--muted);font-weight:900;padding:0}
+.vplanning-native .vwork-thread{display:grid;gap:8px}
+.vplanning-native .vwork-thread-item{border-left:3px solid var(--po-red);padding-left:10px}
+.vplanning-native .vwork-thread-item p{margin:3px 0;color:#333344;font-size:12px;line-height:1.45}
+.vplanning-native .vwork-thread-item small{color:var(--muted);font-size:10.5px}
+.vplanning-native .vwork-detail-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.vplanning-native .vwork-readonly-banner{display:grid;gap:3px;margin-top:14px;border:1px solid #c9dcf5;border-radius:10px;background:#f1f6fd;color:#214d80;padding:11px 13px}
+.vplanning-native .vwork-readonly-banner strong{font-size:13px}
+.vplanning-native .vwork-readonly-banner span{font-size:12px;line-height:1.45}
+.vplanning-native .vwork-workbox-clean{display:grid;gap:12px}
+.vplanning-native .vwork-workbox-toolbar{margin:0}
+.vplanning-native .vwork-workbox-hero{min-height:188px;border:1px solid #3e111f;border-radius:18px;background:#270711;color:#fff;padding:28px 30px 56px;overflow:hidden}
+.vplanning-native .vwork-workbox-hero>div{max-width:900px}.vplanning-native .vwork-workbox-hero h1{margin:15px 0 8px;color:#fff;font:800 28px/1.18 "Sora",system-ui,sans-serif;letter-spacing:-.035em}.vplanning-native .vwork-workbox-hero p{margin:0;max-width:760px;color:#decbd0;font-size:13.5px;line-height:1.55}
+.vplanning-native .vwork-workbox-meta{display:flex;gap:0;margin-top:22px}.vplanning-native .vwork-workbox-meta>div{display:grid;gap:3px;min-width:170px;padding:0 22px;border-left:1px solid rgba(255,255,255,.18)}.vplanning-native .vwork-workbox-meta>div:first-child{padding-left:0;border-left:0}.vplanning-native .vwork-workbox-meta span{color:#bca5ab;font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}.vplanning-native .vwork-workbox-meta strong{font-size:12px;color:#fff}
+.vplanning-native .vwork-workbox-state-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:-44px 18px 0;position:relative;z-index:2}
+.vplanning-native .vwork-workbox-state-grid>button{display:grid;grid-template-columns:auto 1fr;align-items:center;column-gap:10px;min-height:112px;padding:14px 16px;border:1px solid var(--border);border-top:4px solid #9aa4b2;border-radius:14px;background:#fff;color:var(--text);text-align:left;box-shadow:0 12px 28px rgba(43,16,24,.09);cursor:pointer}
+.vplanning-native .vwork-workbox-state-grid>button>span{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:#f2f4f7;color:#667085}.vplanning-native .vwork-workbox-state-grid>button>strong{justify-self:end;font:800 27px/1 "Sora",system-ui,sans-serif}.vplanning-native .vwork-workbox-state-grid>button>b{grid-column:1/-1;margin-top:7px;font:800 12.5px/1.3 "Sora",system-ui,sans-serif}.vplanning-native .vwork-workbox-state-grid>button>small{grid-column:1/-1;margin-top:6px;padding-top:7px;border-top:1px dashed var(--border);color:var(--muted);font-size:10.5px}
+.vplanning-native .vwork-workbox-state-grid>button.blue{border-top-color:var(--blue)}.vplanning-native .vwork-workbox-state-grid>button.blue>span{background:var(--blue-bg);color:var(--blue)}.vplanning-native .vwork-workbox-state-grid>button.amber{border-top-color:var(--amber)}.vplanning-native .vwork-workbox-state-grid>button.amber>span{background:var(--amber-bg);color:var(--amber)}.vplanning-native .vwork-workbox-state-grid>button.purple{border-top-color:var(--purple)}.vplanning-native .vwork-workbox-state-grid>button.purple>span{background:var(--purple-bg);color:var(--purple)}.vplanning-native .vwork-workbox-state-grid>button.green{border-top-color:var(--green)}.vplanning-native .vwork-workbox-state-grid>button.green>span{background:var(--green-bg);color:var(--green)}
+.vplanning-native .vwork-workbox-state-grid>button.active{border-color:#e3788e;box-shadow:0 13px 30px rgba(190,18,60,.16)}.vplanning-native .vwork-workbox-state-grid>button.active b{color:var(--po-red)}
+.vplanning-native .vwork-workbox-priority{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:12px;align-items:center;margin-top:4px;padding:13px 15px;border:1px solid #f1d899;border-radius:12px;background:#fff9ea;color:#674c12}.vplanning-native .vwork-workbox-priority>span{width:36px;height:36px;border-radius:10px;background:#fff1bd;color:#a66107;display:grid;place-items:center}.vplanning-native .vwork-workbox-priority>div{display:grid;gap:2px}.vplanning-native .vwork-workbox-priority small{font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.vplanning-native .vwork-workbox-priority strong{font:800 12.5px/1.35 "Sora",system-ui,sans-serif;color:#3c2c0d}.vplanning-native .vwork-workbox-priority p{margin:0;color:#806622;font-size:11px}
+.vplanning-native .vwork-workbox-agenda{overflow:hidden;border:1px solid var(--border);border-radius:16px;background:#fff;box-shadow:0 4px 16px rgba(24,24,42,.04)}.vplanning-native .vwork-workbox-agenda>header{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;padding:18px 20px;border-bottom:1px solid var(--border)}.vplanning-native .vwork-workbox-agenda>header>div:first-child>span{display:block;margin-bottom:5px;color:var(--po-red);font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}.vplanning-native .vwork-workbox-agenda h2{margin:0;font:800 18px/1.25 "Sora",system-ui,sans-serif}.vplanning-native .vwork-workbox-agenda header p{margin:4px 0 0;color:var(--muted);font-size:11px}.vplanning-native .vwork-workbox-agenda .vwork-table-wrap{border:0;border-radius:0;box-shadow:none}
+.vplanning-native .vwork-workbox-table{min-height:280px}
+.vplanning-native .vwork-workbox-table .vwork-select-col{width:46px;text-align:center;padding-left:14px;padding-right:6px}
+.vplanning-native .vwork-workbox-table input[type="checkbox"]{width:18px;height:18px;accent-color:var(--po-red);cursor:pointer}
+.vplanning-native .vwork-workbox-table td:last-child,.vplanning-native .vwork-workbox-table th:last-child{text-align:right;width:96px}
+.vplanning-native .vwork-bulk-toolbar{display:flex;align-items:center;gap:12px;border:1px solid #f2bdc8;border-radius:12px;background:#fff6f8;padding:10px 12px;box-shadow:0 8px 22px rgba(200,16,46,.08)}
+.vplanning-native .vwork-bulk-toolbar strong{font-size:13px}.vplanning-native .vwork-bulk-toolbar span{flex:1;color:var(--muted);font-size:12px}
+.vplanning-native .vwork-task-detail-modal{max-width:980px;padding:0;background:#f6f8fb;border-radius:18px}
+.vplanning-native .vwork-task-detail-head{position:sticky;top:0;z-index:4;background:#fff;border-bottom:1px solid var(--border);padding:20px 64px 18px 22px;border-radius:18px 18px 0 0}
+.vplanning-native .vwork-task-detail-head h3{font-family:"Sora",system-ui,sans-serif;font-size:21px;line-height:1.35;margin:10px 0 5px;max-width:760px}
+.vplanning-native .vwork-task-detail-modal>.modal-x{position:absolute;z-index:7}
+.vplanning-native .vwork-task-detail-flow{display:grid;gap:14px;padding:18px 22px 26px;max-width:860px;margin:0 auto}
+.vplanning-native .vwork-task-detail-flow.is-intake{max-width:720px;padding-top:24px}
+.vplanning-native .vwork-detail-nav{display:flex;align-items:center;gap:7px;overflow-x:auto;padding:5px;border:1px solid var(--border);border-radius:13px;background:#f6f8fb;scrollbar-width:thin}
+.vplanning-native .vwork-detail-nav button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:8px 12px;border:0;border-radius:9px;background:transparent;color:#667085;font:800 12px/1.2 "Sora",system-ui,sans-serif;white-space:nowrap;cursor:pointer}
+.vplanning-native .vwork-detail-nav button:hover{background:#fff;color:#202939}.vplanning-native .vwork-detail-nav button.active{background:#fff;color:var(--po-red);box-shadow:0 3px 12px rgba(31,41,55,.1)}
+.vplanning-native .vwork-detail-nav button b{display:inline-grid;place-items:center;min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:#eef1f5;color:#667085;font-size:10px}.vplanning-native .vwork-detail-nav button.active b{background:#fff0f3;color:var(--po-red)}
+.vplanning-native .vwork-flow-card{border:1px solid var(--border);border-radius:14px;background:#fff;padding:18px;box-shadow:0 10px 28px rgba(38,50,67,.06)}
+.vplanning-native .vwork-flow-card>span,.vplanning-native .vwork-flow-heading span{display:block;color:var(--po-red);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.vplanning-native .vwork-flow-card h4{font-family:"Sora",system-ui,sans-serif;font-size:16px;line-height:1.35;margin:0}
+.vplanning-native .vwork-flow-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}
+.vplanning-native .vwork-flow-heading>strong{font-family:"Sora",system-ui,sans-serif;font-size:20px;color:var(--po-red)}
+.vplanning-native .vwork-intake-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;border-color:#c8dcf5;background:linear-gradient(135deg,#f4f8ff,#fff)}
+.vplanning-native .vwork-intake-card p{margin:5px 0 0;color:var(--muted);font-size:12.5px}.vplanning-native .vwork-inline-response{grid-column:1/-1;display:grid;gap:8px}
+.vplanning-native .vwork-returned-card{border-color:#f4c4ce;background:#fff6f8}.vplanning-native .vwork-returned-card h4{margin:5px 0}.vplanning-native .vwork-returned-card small{color:var(--muted)}
+.vplanning-native .vwork-intake-time .vwork-flow-heading p,.vplanning-native .vwork-detail-page .vwork-flow-heading p{margin:5px 0 0;color:var(--muted);font-size:12.5px}
+.vplanning-native .vwork-detail-page{min-height:360px}.vplanning-native .vwork-detail-shortcuts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.vplanning-native .vwork-detail-shortcuts>button{display:grid;grid-template-columns:36px minmax(0,1fr) 20px;align-items:center;gap:10px;text-align:left;border:1px solid var(--border);border-radius:12px;background:#fff;padding:15px;color:#344054;cursor:pointer;box-shadow:0 8px 24px rgba(38,50,67,.05)}
+.vplanning-native .vwork-detail-shortcuts>button:hover{border-color:#ef9bad;box-shadow:0 9px 26px rgba(213,0,50,.1)}.vplanning-native .vwork-detail-shortcuts>button>svg:first-child{color:var(--po-red)}.vplanning-native .vwork-detail-shortcuts>button>svg:last-child{color:#98a2b3}
+.vplanning-native .vwork-detail-shortcuts span{display:grid;gap:4px}.vplanning-native .vwork-detail-shortcuts strong{font:800 13px/1.3 "Sora",system-ui,sans-serif}.vplanning-native .vwork-detail-shortcuts small{color:var(--muted);font-size:11.5px}
+.vplanning-native .vwork-report-compose{display:grid;gap:12px;margin-top:14px}.vplanning-native .vwork-task-file-upload{display:flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:10px 13px;border:1px dashed #c7ced9;border-radius:10px;background:#fafbfc;color:#475467;font-size:12px;font-weight:800;cursor:pointer}.vplanning-native .vwork-task-file-upload:hover{border-color:var(--po-red);color:var(--po-red);background:#fff7f8}
+.vplanning-native .vwork-selected-files,.vplanning-native .vwork-task-file-list{display:flex;flex-wrap:wrap;gap:7px}.vplanning-native .vwork-selected-files span,.vplanning-native .vwork-task-file-list a{display:inline-flex;align-items:center;gap:5px;max-width:100%;padding:6px 9px;border-radius:8px;background:#f0f5ff;color:#175cd3;font-size:11px;font-weight:800;overflow-wrap:anywhere;text-decoration:none}.vplanning-native .vwork-task-file-list a:hover{text-decoration:underline}
+.vplanning-native .vwork-comment-actions{display:flex;align-items:center;justify-content:space-between;gap:10px}.vplanning-native .vwork-comment-actions .vwork-task-file-upload{min-width:170px}.vplanning-native .vwork-unified-activity .vwork-task-file-list{margin:8px 0}
+.vplanning-native .vwork-schedule-grid{margin-top:14px}.vplanning-native .vwork-schedule-grid label,.vplanning-native .vwork-evidence-field,.vplanning-native .vwork-delegate-review label{display:grid;gap:5px}.vplanning-native .vwork-schedule-grid span,.vplanning-native .vwork-evidence-field span,.vplanning-native .vwork-delegate-review label span{font-size:11px;color:var(--muted);font-weight:800}
+.vplanning-native .vwork-checklist-deadlines{display:grid;gap:9px}
+.vplanning-native .vwork-checklist-deadline-row{display:grid;grid-template-columns:32px minmax(180px,1fr) minmax(210px,.65fr) 28px;gap:9px;align-items:center;border:1px solid var(--border);border-radius:10px;padding:9px;background:#fbfcfe}
+.vplanning-native .vwork-checklist-deadline-row>button:first-child{width:26px;height:26px;border:1.5px solid #aeb8c5;border-radius:7px;background:#fff;color:#fff;display:grid;place-items:center;padding:0}
+.vplanning-native .vwork-checklist-deadline-row.done>button:first-child{background:var(--green);border-color:var(--green)}
+.vplanning-native .vwork-checklist-deadline-row>input{font-weight:800}.vplanning-native .vwork-checklist-deadline-row.done>input{text-decoration:line-through;color:var(--muted)}
+.vplanning-native .vwork-checklist-deadline-row label{display:grid;gap:3px}.vplanning-native .vwork-checklist-deadline-row label span{font-size:9px;font-weight:900;text-transform:uppercase;color:var(--muted)}
+.vplanning-native .vwork-checklist-deadline-row>small{grid-column:2/-1;color:var(--muted);font-size:10px;margin-top:-4px}
+.vplanning-native .vwork-report-history{display:grid;gap:8px;margin-bottom:12px}.vplanning-native .vwork-report-history article{border-left:3px solid var(--po-red);background:#fafbfe;padding:9px 11px}.vplanning-native .vwork-report-history p{margin:3px 0;white-space:pre-wrap}.vplanning-native .vwork-report-history small{color:var(--muted)}
+.vplanning-native .vwork-comment-compose,.vplanning-native .vwork-task-proposal-compose{display:grid;gap:8px;margin-bottom:14px}
+.vplanning-native .vwork-unified-activity{display:grid;gap:0;border-top:1px solid #eef0f4}.vplanning-native .vwork-unified-activity article{display:grid;grid-template-columns:30px 1fr;gap:9px;padding:12px 0;border-bottom:1px solid #eef0f4}.vplanning-native .vwork-unified-activity i{width:28px;height:28px;border-radius:8px;background:var(--po-red-light);color:var(--po-red);display:grid;place-items:center}.vplanning-native .vwork-unified-activity p{margin:3px 0;font-size:12.5px}.vplanning-native .vwork-unified-activity small{color:var(--muted);font-size:10.5px}
+.vplanning-native .vwork-task-proposals{display:grid;gap:10px}.vplanning-native .vwork-task-proposals>article{border:1px solid var(--border);border-radius:10px;padding:12px;background:#fafbfe}.vplanning-native .vwork-task-proposals article>div>strong{display:block;margin-top:7px}.vplanning-native .vwork-task-proposals p{margin:5px 0}.vplanning-native .vwork-task-proposals small{color:var(--muted)}.vplanning-native .vwork-task-proposals blockquote{margin:9px 0 0;border-left:3px solid var(--blue);background:#fff;padding:8px 10px;font-size:12px}.vplanning-native .vwork-task-proposals blockquote strong{margin-right:7px}.vplanning-native .vwork-proposal-response{display:grid;gap:8px;margin-top:10px}
+.vplanning-native .vwork-review-card{border-color:#efb7c3;background:linear-gradient(180deg,#fff,#fff8fa)}
+.vplanning-native .vwork-review-identity{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-bottom:12px}.vplanning-native .vwork-review-identity div{border:1px solid #eadde1;border-radius:9px;background:#fff;padding:10px}.vplanning-native .vwork-review-identity span{display:block;color:var(--muted);font-size:10px;margin-bottom:3px}.vplanning-native .vwork-review-blockers{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.vplanning-native .vwork-review-blockers span{border-radius:999px;background:#fff0f3;color:var(--red);padding:5px 9px;font-size:10.5px;font-weight:800}.vplanning-native .vwork-delegate-review{margin-top:14px;padding-top:14px;border-top:1px solid #eadde1}.vplanning-native .vwork-completed-note{display:flex;gap:10px;align-items:center;border-radius:10px;background:#edfbf3;color:var(--green);padding:11px}.vplanning-native .vwork-completed-note span{display:block;color:#4d6a59;font-size:11px;margin-top:2px}
+.vplanning-native .vwork-assignment-core{align-items:end}
+.vplanning-native .vwork-report-summary{display:grid;gap:10px}
+.vplanning-native .vwork-report-box{background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px;box-shadow:0 8px 24px rgba(32,38,55,.06)}
+.vplanning-native .vwork-report-box p{white-space:pre-wrap;font-size:15px;line-height:1.55;margin:10px 0 0;color:var(--text);font-weight:700}
+.vplanning-native .vwork-report-box a{color:#005fcc;text-decoration:underline;font-weight:900;word-break:break-word}
+.vplanning-native .vwork-report-links{display:flex;gap:8px;flex-wrap:wrap}
+.vplanning-native .vwork-request-flow{display:flex;gap:6px;flex-wrap:wrap;margin:9px 0}
+.vplanning-native .vwork-request-flow span{border:1px solid var(--border);border-radius:999px;background:#fff;color:var(--muted);padding:4px 8px;font-size:10.5px;font-weight:900}
+.vplanning-native .vwork-request-flow span.done{border-color:#b8dec8;background:#ecfdf3;color:var(--green)}
+.vplanning-native .vwork-request-log{display:grid;gap:7px;margin:10px 0;padding:9px;border:1px solid #eef0f5;border-radius:8px;background:#fbfcff}
+.vplanning-native .vwork-request-log div{border-left:3px solid var(--po-red);padding-left:8px}
+.vplanning-native .vwork-request-log strong{display:block;font-size:12px}
+.vplanning-native .vwork-request-log small{display:block;color:var(--muted);font-size:10.5px;margin-top:1px}
+.vplanning-native .vwork-request-log p{margin:3px 0 0;font-size:11.5px;line-height:1.4}
+.vplanning-native .vwork-delegate-box{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end;margin:10px 0;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--po-red-light)}
+.vplanning-native .vwork-delegate-box label{margin:0}
+.vplanning-native .vwork-criteria-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.vplanning-native .vwork-criterion{border:1px solid var(--border);border-radius:8px;background:#fff;padding:12px}
+.vplanning-native .vwork-criterion-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:9px}
+.vplanning-native .vwork-criterion-actions button{border:1px solid var(--border);background:#fff;border-radius:8px;padding:8px 6px;font-size:12px;font-weight:800;color:var(--muted)}
+.vplanning-native .vwork-criterion-actions button.active{border-color:var(--pri);background:var(--pri-soft);color:var(--pri)}
+.vplanning-native .grade-box{border:1px solid var(--border);border-radius:8px;background:var(--pri-soft);padding:12px;margin-top:12px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.vplanning-native .grade-box strong{font-size:20px}
+.vplanning-native .grade-box span{color:var(--muted);font-weight:700}
+.vplanning-native .vwork-brief-page{display:grid;gap:22px;padding-bottom:32px}
+.vplanning-native .vwork-brief-hero{position:relative;min-height:220px;border-radius:18px;background:#270711;color:#fff;padding:30px 32px 58px;display:flex;justify-content:space-between;gap:28px;align-items:flex-start;overflow:hidden;border:1px solid #3e111f}
+.vplanning-native .vwork-brief-hero-copy{max-width:850px}
+.vplanning-native .vwork-brief-eyebrow{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:7px 11px;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#f8dfe5}
+.vplanning-native .vwork-brief-hero h1{margin:18px 0 8px;font-family:"Sora",system-ui,sans-serif;font-size:30px;line-height:1.15;letter-spacing:-.035em;color:#fff}
+.vplanning-native .vwork-brief-hero p{margin:0;max-width:760px;color:#decbd0;line-height:1.55;font-size:14px}
+.vplanning-native .vwork-brief-meta{display:flex;align-items:flex-start;gap:28px;margin-top:22px;flex-wrap:wrap}
+.vplanning-native .vwork-brief-meta div{display:grid;gap:4px}.vplanning-native .vwork-brief-meta span{font-size:10px;color:#a98a92;text-transform:uppercase;letter-spacing:.08em;font-weight:900}.vplanning-native .vwork-brief-meta strong{font-family:"Sora",system-ui,sans-serif;font-size:12px;color:#fff}
+.vplanning-native .vwork-brief-copy{display:inline-flex;align-items:center;justify-content:center;gap:8px;flex:none;border:1px solid rgba(255,255,255,.28);border-radius:10px;background:#fff;color:#3a0b18;padding:11px 14px;font-weight:900;box-shadow:0 10px 24px rgba(0,0,0,.18)}
+.vplanning-native .vwork-brief-copy:hover{background:#fdf3f5;color:var(--po-red)}
+.vplanning-native .vwork-brief-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:-54px 18px 0;position:relative;z-index:2}
+.vplanning-native .vwork-brief-kpis article{min-height:142px;border:1px solid var(--border);border-top:4px solid var(--po-red);border-radius:14px;background:#fff;padding:17px 18px;box-shadow:0 12px 28px rgba(43,16,24,.09);display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:center}
+.vplanning-native .vwork-brief-kpis article>span{width:34px;height:34px;border-radius:10px;display:grid;place-items:center}.vplanning-native .vwork-brief-kpis article>span.blue{background:var(--blue-bg);color:var(--blue)}.vplanning-native .vwork-brief-kpis article>span.red{background:var(--red-bg);color:var(--red)}.vplanning-native .vwork-brief-kpis article>span.amber{background:var(--amber-bg);color:var(--amber)}.vplanning-native .vwork-brief-kpis article>span.purple{background:var(--purple-bg);color:var(--purple)}
+.vplanning-native .vwork-brief-kpis article>strong{font-family:"Sora",system-ui,sans-serif;font-size:30px;line-height:1;color:var(--text);justify-self:end}.vplanning-native .vwork-brief-kpis article>b{grid-column:1/-1;font-family:"Sora",system-ui,sans-serif;font-size:13px;margin-top:8px}.vplanning-native .vwork-brief-kpis article>small{grid-column:1/-1;color:var(--muted);border-top:1px dashed var(--border);padding-top:8px;margin-top:8px;font-size:11px}
+.vplanning-native .vwork-brief-method{display:flex;align-items:flex-start;gap:10px;background:#fff9ea;border:1px solid #f1d899;border-radius:11px;padding:12px 14px;color:#755312}.vplanning-native .vwork-brief-method svg{flex:none;margin-top:1px}.vplanning-native .vwork-brief-method p{margin:0;font-size:12px;line-height:1.55}
+.vplanning-native .vwork-brief-insight-grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(320px,.75fr);gap:16px}
+.vplanning-native .vwork-brief-card,.vplanning-native .vwork-brief-decisions,.vplanning-native .vwork-brief-agenda{background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 16px rgba(24,24,42,.04)}
+.vplanning-native .vwork-brief-card{padding:22px}.vplanning-native .vwork-brief-card>header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;padding-bottom:15px;border-bottom:1px solid var(--border)}.vplanning-native .vwork-brief-card>header>svg{color:var(--po-red)}.vplanning-native .vwork-brief-card header span,.vplanning-native .vwork-brief-section-head span,.vplanning-native .vwork-brief-agenda-head>div>span{display:block;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--po-red);margin-bottom:5px}.vplanning-native .vwork-brief-card h2,.vplanning-native .vwork-brief-section-head h2,.vplanning-native .vwork-brief-agenda-head h2{margin:0;font-family:"Sora",system-ui,sans-serif;font-size:18px;letter-spacing:-.02em}
+.vplanning-native .vwork-brief-lead{font-size:14px;line-height:1.6;margin:16px 0;color:#3e4150;font-weight:700}
+.vplanning-native .vwork-brief-owner-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.vplanning-native .vwork-brief-owner-list>div{display:flex;align-items:center;gap:12px;border:1px solid var(--border);border-left:4px solid var(--po-red);border-radius:11px;padding:12px;background:#fff}.vplanning-native .vwork-brief-owner-list>div>b{font-family:"Sora",system-ui,sans-serif;font-size:19px;color:#c9aeb5}.vplanning-native .vwork-brief-owner-list>div>span{display:grid;gap:3px;min-width:0}.vplanning-native .vwork-brief-owner-list strong{font-size:13px}.vplanning-native .vwork-brief-owner-list small{font-size:11px;color:var(--muted)}
+.vplanning-native .vwork-brief-coverage{display:grid;align-content:start;gap:15px}.vplanning-native .vwork-brief-coverage>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center}.vplanning-native .vwork-brief-coverage>div>span{font-size:12px;font-weight:800}.vplanning-native .vwork-brief-coverage>div>strong{font-family:"Sora",system-ui,sans-serif;color:var(--po-red)}.vplanning-native .vwork-brief-coverage>div>.progress{grid-column:1/-1}.vplanning-native .vwork-brief-coverage>p{margin:0;padding-top:12px;border-top:1px dashed var(--border);font-size:11px;line-height:1.5;color:var(--muted)}
+.vplanning-native .vwork-brief-decisions,.vplanning-native .vwork-brief-agenda{overflow:hidden}.vplanning-native .vwork-brief-section-head,.vplanning-native .vwork-brief-agenda-head{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:18px 20px;border-bottom:1px solid var(--border)}.vplanning-native .vwork-brief-section-head>b{min-width:38px;height:38px;border-radius:12px;background:var(--po-red);color:#fff;display:grid;place-items:center;font-family:"Sora",system-ui,sans-serif;font-size:16px}
+.vplanning-native .vwork-brief-decision-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:16px}.vplanning-native .vwork-brief-decision-grid>button{text-align:left;border:1px solid var(--border);border-radius:12px;background:#fff;padding:14px;display:grid;gap:7px;color:var(--text)}.vplanning-native .vwork-brief-decision-grid>button:hover{border-color:#d4a7b2;background:var(--po-red-light)}.vplanning-native .vwork-brief-decision-grid>button>span{justify-self:start;border-radius:999px;background:var(--purple-bg);color:var(--purple);padding:4px 8px;font-size:10px;font-weight:900;text-transform:uppercase}.vplanning-native .vwork-brief-decision-grid>button>strong{font-family:"Sora",system-ui,sans-serif;font-size:13px;line-height:1.35}.vplanning-native .vwork-brief-decision-grid>button>small{color:var(--muted);font-size:11px}.vplanning-native .vwork-brief-decision-grid>button>em{display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:1px dashed var(--border);padding-top:8px;font-style:normal;font-size:11px;font-weight:800;color:var(--po-red)}
+.vplanning-native .vwork-brief-agenda-head{align-items:flex-end}.vplanning-native .vwork-brief-agenda-head p{margin:4px 0 0;color:var(--muted);font-size:11px}.vplanning-native .vwork-brief-filters{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.vplanning-native .vwork-brief-filters button{border:1px solid var(--border);border-radius:999px;background:#fff;color:#62667a;padding:7px 9px 7px 11px;font-size:11px;font-weight:900;display:flex;align-items:center;gap:7px}.vplanning-native .vwork-brief-filters button b{min-width:20px;height:20px;border-radius:999px;background:#edf0f4;display:grid;place-items:center;font-size:10px}.vplanning-native .vwork-brief-filters button.active{background:var(--po-red);border-color:var(--po-red);color:#fff}.vplanning-native .vwork-brief-filters button.active b{background:rgba(255,255,255,.2)}
+.vplanning-native .vwork-brief-attention-list{display:grid}.vplanning-native .vwork-brief-attention-row{width:100%;border:0;border-bottom:1px solid var(--border);background:#fff;text-align:left;color:var(--text);display:grid;grid-template-columns:46px minmax(0,1fr) 140px 92px;gap:14px;align-items:center;padding:14px 18px}.vplanning-native .vwork-brief-attention-row:last-child{border-bottom:0}.vplanning-native .vwork-brief-attention-row:hover{background:#fbfcfe}.vplanning-native .vwork-brief-attention-row.critical{box-shadow:inset 4px 0 0 var(--po-red)}.vplanning-native .vwork-brief-attention-row.review{box-shadow:inset 4px 0 0 var(--amber)}.vplanning-native .vwork-brief-attention-row.watch{box-shadow:inset 4px 0 0 var(--blue)}
+.vplanning-native .vwork-brief-rank{font-family:"Sora",system-ui,sans-serif;font-size:20px;font-weight:900;color:#c0a8ae}.vplanning-native .vwork-brief-task{display:grid;gap:8px;min-width:0}.vplanning-native .vwork-brief-task>div:first-child{display:grid;gap:3px}.vplanning-native .vwork-brief-task strong{font-family:"Sora",system-ui,sans-serif;font-size:13px;line-height:1.35}.vplanning-native .vwork-brief-task small{color:var(--muted);font-size:11px}.vplanning-native .vwork-brief-reasons{display:flex;gap:5px;flex-wrap:wrap}.vplanning-native .vwork-brief-reasons span{border-radius:6px;background:#f5f1f2;color:#714452;padding:4px 7px;font-size:10px;font-weight:800}.vplanning-native .vwork-brief-progress{display:grid;gap:6px}.vplanning-native .vwork-brief-progress>strong{font-family:"Sora",system-ui,sans-serif;font-size:12px}.vplanning-native .vwork-brief-score{text-align:right;display:grid;justify-items:end;gap:1px}.vplanning-native .vwork-brief-score>strong{font-family:"Sora",system-ui,sans-serif;font-size:19px;color:var(--po-red)}.vplanning-native .vwork-brief-score>span{font-size:9px;color:var(--muted);text-transform:uppercase;font-weight:900}.vplanning-native .vwork-brief-score>svg{margin-top:3px;color:#9b9dac}
+.vplanning-native .vwork-brief-empty{border:1px dashed var(--border);border-radius:10px;padding:15px;color:var(--muted);font-size:12px}.vplanning-native .vwork-brief-empty.wide{grid-column:1/-1;margin:16px;display:flex;align-items:center;justify-content:center;gap:8px}
+@media(max-width:980px){.vplanning-native .detail-layout{grid-template-columns:1fr}}
+@media(max-width:1180px){.vplanning-native .vwork-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.vplanning-native .vwork-split,.vplanning-native .vwork-split.wide{grid-template-columns:minmax(0,1fr)}.vplanning-native .vwork-detail-panel{position:static;max-height:none}}
+@media(max-width:980px){.vplanning-native .outcome-grid,.management-strip,.vplanning-native .process-grid,.vplanning-native .help-hero,.vplanning-native .guide-flow,.vplanning-native .detail-map,.vplanning-native .guide-tab-grid,.vplanning-native .guide-role-panel,.vplanning-native .guide-field-grid,.vplanning-native .guide-scenario,.vplanning-native .report-example,.vplanning-native .guide-error-list,.vplanning-native .vwork-brief-grid,.vplanning-native .vwork-form-admin{grid-template-columns:1fr}.vplanning-native .guide-arrow{display:none}}
+@media(max-width:1180px){
+  .vplanning-native .vwork-brief-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .vplanning-native .vwork-brief-insight-grid{grid-template-columns:1fr}
+  .vplanning-native .vwork-brief-decision-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .vplanning-native .vwork-workbox-state-grid{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:-40px}
+}
+@media(max-width:720px){
+  .vplanning-native .vwork-brief-page{gap:14px}
+  .vplanning-native .vwork-brief-hero{min-height:0;padding:22px 18px 64px;border-radius:14px;display:grid}
+  .vplanning-native .vwork-brief-hero h1{font-size:24px}
+  .vplanning-native .vwork-brief-copy{justify-self:start}
+  .vplanning-native .vwork-brief-meta{gap:14px}.vplanning-native .vwork-brief-meta div{min-width:calc(50% - 8px)}
+  .vplanning-native .vwork-brief-kpis{grid-template-columns:repeat(2,minmax(0,1fr));margin:-48px 10px 0;gap:8px}
+  .vplanning-native .vwork-brief-kpis article{min-height:132px;padding:13px}.vplanning-native .vwork-brief-kpis article>strong{font-size:25px}.vplanning-native .vwork-brief-kpis article>small{font-size:10px}
+  .vplanning-native .vwork-brief-card{padding:16px}.vplanning-native .vwork-brief-owner-list{grid-template-columns:1fr}
+  .vplanning-native .vwork-brief-section-head,.vplanning-native .vwork-brief-agenda-head{align-items:flex-start;padding:16px;display:grid}
+  .vplanning-native .vwork-brief-filters{justify-content:flex-start}
+  .vplanning-native .vwork-brief-decision-grid{grid-template-columns:1fr;padding:12px}
+  .vplanning-native .vwork-brief-attention-row{grid-template-columns:34px minmax(0,1fr);gap:10px;padding:14px 12px}
+  .vplanning-native .vwork-brief-progress{grid-column:2}.vplanning-native .vwork-brief-score{grid-column:2;display:flex;align-items:center;justify-content:flex-start;gap:6px;text-align:left}.vplanning-native .vwork-brief-score>svg{margin:0}
+}
+@media(max-width:720px){
+  .vplanning-native.page-review{max-width:440px;min-height:100dvh;background:#f4f6fa}
+  .vplanning-native.page-review .sidebar{display:none}
+  .vplanning-native.page-review .content{padding:0 0 max(0px,env(safe-area-inset-bottom))}
+  .vplanning-native.page-review .vwork-review-stack{margin:0}
+  .vplanning-native.page-review .vwork-review-stack>.card{display:none}
+  .vplanning-native .vwork-review-hub{border:0;border-radius:0;box-shadow:none;min-height:calc(100dvh - 64px)}
+  .vplanning-native .vwork-review-hub-head{padding:20px 16px 17px}.vplanning-native .vwork-review-hub-head h2{font-size:21px}.vplanning-native .vwork-review-hub-head>span{align-self:center}
+  .vplanning-native .vwork-review-category-grid{grid-template-columns:1fr;gap:11px;padding:14px 14px 24px}
+  .vplanning-native .vwork-review-category{min-height:164px;padding:15px;grid-template-columns:40px minmax(0,1fr) auto;gap:11px}
+  .vplanning-native .vwork-review-category-icon{width:40px;height:40px}.vplanning-native .vwork-review-category-count b{font-size:24px}
+  .vplanning-native .vwork-review-layer{padding:0;place-items:stretch}
+  .vplanning-native .vwork-review-layer-modal{width:100vw;height:100dvh;max-height:100dvh;border-radius:0}
+  .vplanning-native .vwork-review-layer-head{padding:16px 58px 14px 15px}.vplanning-native .vwork-review-layer-head h3{font-size:17px}.vplanning-native .vwork-review-layer-head p{display:none}.vplanning-native .vwork-review-layer-head>div:last-child>.badge{display:none}
+  .vplanning-native .vwork-review-layer-head .modal-x{top:10px;right:10px;width:40px;height:40px}
+  .vplanning-native .vwork-review-layer-body{max-height:calc(100dvh - 75px);padding:12px}
+  .vplanning-native .vwork-review-layer .vwork-approval-handoff.is-embedded .vwork-mobile-approval-header{display:none}
+  .vplanning-native .vwork-review-layer .vwork-approval-handoff.is-embedded .vwork-mobile-approval-screen{min-height:0;background:transparent}
+  .vplanning-native .vwork-review-layer .vwork-approval-handoff.is-embedded .vwork-mobile-approval-body{min-height:0;margin:0;padding:0;background:transparent}
+  .vplanning-native .vwork-review-layer .vwork-approval-category-proposal .vwork-approval-desktop-screen{display:block}
+  .vplanning-native .vwork-review-layer .vwork-approval-category-proposal .vwork-approval-primary-filters{margin-bottom:10px}
+  .vplanning-native .vwork-review-layer .vwork-approval-category-proposal .vwork-proposal-table{display:block;min-width:0}
+  .vplanning-native .vwork-review-layer .vwork-approval-category-proposal .vwork-proposal-table thead{display:none}
+  .vplanning-native .vwork-review-layer .vwork-approval-category-proposal .vwork-proposal-table tbody{display:grid;gap:10px;padding:10px;background:#f4f6fa}
+  .vplanning-native .vwork-review-layer .vwork-approval-category-proposal .vwork-proposal-row{display:block;padding:13px;border:1px solid #e1e5eb;border-radius:12px;background:#fff}
+  .vplanning-native .vwork-review-layer .vwork-approval-category-proposal .vwork-proposal-row td{display:grid;grid-template-columns:112px minmax(0,1fr);gap:8px;padding:6px 0;border:0;text-align:left}
+  .vplanning-native .vwork-review-layer .vwork-approval-category-proposal .vwork-proposal-row td:first-child{display:block;min-width:0;padding-top:0;padding-bottom:10px;border-bottom:1px solid #eceff3}
+  .vplanning-native .vwork-review-layer .vwork-approval-category-proposal .vwork-proposal-row td[data-label]:not(:first-child)::before{content:attr(data-label);color:#7a8291;font-size:10px;font-weight:900;text-transform:uppercase}
+  .vplanning-native .vwork-review-layer .vwork-approval-category-proposal .vwork-proposal-row td:last-child{display:block;padding-top:10px}.vplanning-native .vwork-review-layer .vwork-approval-category-proposal .vwork-proposal-row td:last-child .btn{width:100%;justify-content:center}
+  .vplanning-native .vwork-approval-desktop-screen{display:none}
+  .vplanning-native .vwork-mobile-approval-screen{display:block;min-height:100dvh;background:#f4f6fa;color:#20242e;font-family:"Be Vietnam Pro","Sora",system-ui,sans-serif}
+  .vplanning-native .vwork-mobile-approval-result{position:fixed;z-index:80;inset:0;margin:0 auto;width:min(440px,100%);min-height:100dvh;background:#f4f6fa;padding:72px 24px calc(28px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;text-align:center;color:#20242e}
+  .vplanning-native .vwork-mobile-result-icon{width:78px;height:78px;border-radius:50%;background:#1e9e57;color:#fff;display:grid;place-items:center;margin-bottom:22px;box-shadow:0 16px 34px rgba(30,158,87,.25)}
+  .vplanning-native .vwork-mobile-approval-result>small{color:#1e9e57;font-size:11px;font-weight:900;letter-spacing:.08em}
+  .vplanning-native .vwork-mobile-approval-result>h1{font-size:25px;line-height:1.3;margin:8px 0 7px}
+  .vplanning-native .vwork-mobile-approval-result>p{color:#6f7682;font-size:14px;line-height:1.55;margin:0 0 24px}
+  .vplanning-native .vwork-mobile-approval-result>div:not(.vwork-mobile-result-icon){width:100%;background:#fff;border:1px solid #dce9e1;border-radius:15px;padding:15px;margin-bottom:auto;display:grid;gap:5px;box-shadow:0 8px 24px rgba(49,63,79,.07)}
+  .vplanning-native .vwork-mobile-approval-result>div span{color:#8a909c;font-size:11px;font-weight:700}.vplanning-native .vwork-mobile-approval-result>div strong{color:#1e9e57;font-size:16px}
+  .vplanning-native .vwork-mobile-approval-result>button{width:100%;min-height:50px;border:1px solid #dfe3e9;border-radius:13px;background:#fff;color:#20242e;font-size:14px;font-weight:850;margin-top:10px}
+  .vplanning-native .vwork-mobile-approval-result>button.primary{border-color:#1e9e57;background:#1e9e57;color:#fff;box-shadow:0 10px 24px rgba(30,158,87,.2)}
+  .vplanning-native .vwork-mobile-approval-header{min-height:112px;background:#d42a32;color:#fff;padding:20px 20px 28px;display:flex;align-items:flex-start;justify-content:space-between}
+  .vplanning-native .vwork-mobile-approval-header small{display:block;color:rgba(255,255,255,.82);font-size:12.5px;font-weight:500;margin-bottom:3px}
+  .vplanning-native .vwork-mobile-approval-header h1{margin:0;font-size:22px;line-height:1.25;font-weight:800}
+  .vplanning-native .vwork-mobile-pending-count{min-width:34px;height:34px;border-radius:12px;background:#fff;color:#d42a32;display:grid;place-items:center;font-size:14px;font-weight:800;box-shadow:0 8px 20px rgba(119,15,23,.2)}
+  .vplanning-native .vwork-mobile-approval-body{position:relative;margin-top:-14px;border-radius:18px 18px 0 0;background:#f4f6fa;padding:16px 15px 28px;min-height:calc(100dvh - 98px)}
+  .vplanning-native .vwork-mobile-approval-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+  .vplanning-native .vwork-mobile-approval-tabs button{min-height:42px;border:1px solid #e6e9ef;border-radius:11px;background:#fff;color:#8a909c;font-size:12.5px;font-weight:700;padding:9px 8px;white-space:nowrap}
+  .vplanning-native .vwork-mobile-approval-tabs button.active{border-color:#20242e;background:#20242e;color:#fff;box-shadow:0 8px 18px rgba(32,36,46,.16)}
+  .vplanning-native .vwork-mobile-approval-list{display:grid;gap:12px}
+  .vplanning-native .vwork-mobile-approval-card{position:relative;width:100%;min-height:166px;border:1px solid #e9ecf1;border-radius:16px;background:#fff;padding:15px 16px;text-align:left;display:grid;grid-template-columns:1fr auto;align-content:start;gap:7px 10px;color:#20242e;box-shadow:0 8px 24px rgba(49,63,79,.08)}
+  .vplanning-native .vwork-mobile-approval-card .badge{justify-self:start}
+  .vplanning-native .vwork-mobile-approval-card time{justify-self:end;color:#9aa1ac;font-size:10.5px;padding-top:3px}
+  .vplanning-native .vwork-mobile-approval-card>strong{grid-column:1/-1;font-size:15px;line-height:1.4;margin-top:2px}
+  .vplanning-native .vwork-mobile-approval-card>small{grid-column:1/-1;color:#8a909c;font-size:11.5px;line-height:1.45}
+  .vplanning-native .vwork-mobile-approval-card>b{grid-column:1;font-size:17px;color:#d42a32;align-self:end;margin-top:5px}
+  .vplanning-native .vwork-mobile-approval-card>em{grid-column:2;font-style:normal;color:#d42a32;font-size:12px;font-weight:800;align-self:end;justify-self:end;margin-top:5px;display:flex;align-items:center;gap:4px}
+  .vplanning-native .vwork-mobile-approval-empty{border:1px dashed #d9dde5;border-radius:16px;background:#fff;min-height:190px;display:grid;place-content:center;text-align:center;padding:24px}
+  .vplanning-native .vwork-mobile-approval-empty strong{font-size:15px}.vplanning-native .vwork-mobile-approval-empty small{color:#8a909c;margin-top:5px}
+  .vplanning-native .vwork-mobile-approval-detail{min-height:100dvh;background:#f4f6fa;padding-bottom:132px}
+  .vplanning-native .vwork-mobile-approval-detail>header{position:sticky;top:0;z-index:12;height:54px;background:#fff;border-bottom:1px solid #eef0f4;display:grid;grid-template-columns:42px 1fr 42px;align-items:center;padding:0 10px;text-align:center}
+  .vplanning-native .vwork-mobile-approval-detail>header button{width:38px;height:38px;border:0;border-radius:11px;background:#f4f6fa;color:#20242e;display:grid;place-items:center}
+  .vplanning-native .vwork-mobile-approval-detail>header strong{font-size:14px}
+  .vplanning-native .vwork-mobile-approval-detail>main{padding:16px 15px 24px}
+  .vplanning-native .vwork-mobile-approval-detail>main>h1{font-size:20px;line-height:1.38;margin:10px 0 6px}
+  .vplanning-native .vwork-mobile-request-meta{font-size:11.5px;color:#8a909c;margin:0 0 14px;line-height:1.5}
+  .vplanning-native .vwork-mobile-opinion-banner{border:1px solid #f2d8ab;border-radius:12px;background:#fff8e9;color:#805600;padding:11px 12px;margin-bottom:12px;font-size:12px;font-weight:600}
+  .vplanning-native .vwork-mobile-request-summary,.vplanning-native .vwork-mobile-checklist,.vplanning-native .vwork-mobile-request-log{background:#fff;border:1px solid #e6e9ef;border-radius:15px;padding:15px;margin:0 0 12px;box-shadow:0 6px 20px rgba(49,63,79,.05)}
+  .vplanning-native .vwork-mobile-request-summary>div+div{border-top:1px solid #eef0f4;margin-top:12px;padding-top:12px}
+  .vplanning-native .vwork-mobile-request-summary small{display:block;color:#8a909c;font-size:11px;font-weight:700;margin-bottom:5px}
+  .vplanning-native .vwork-mobile-request-summary strong{display:block;color:#d42a32;font-size:18px}.vplanning-native .vwork-mobile-request-summary p{font-size:12.5px;line-height:1.55;margin:4px 0}.vplanning-native .vwork-mobile-request-summary a{display:block;font-size:12px;font-weight:700;overflow-wrap:anywhere;margin-top:5px}
+  .vplanning-native .vwork-mobile-checklist h2,.vplanning-native .vwork-mobile-request-log h2{font-size:15px;margin:0 0 12px}
+  .vplanning-native .vwork-mobile-checklist label{display:flex;align-items:flex-start;gap:10px;padding:8px 0}.vplanning-native .vwork-mobile-checklist input{width:24px;height:24px;margin:0;flex:none;accent-color:#1e9e57}.vplanning-native .vwork-mobile-checklist label span{font-size:12.5px;line-height:1.45;color:#5a616d;margin:2px 0 0}
+  .vplanning-native .vwork-mobile-request-log>div{border-left:3px solid #d42a32;padding:1px 0 10px 11px;margin-left:3px;display:grid;gap:2px}.vplanning-native .vwork-mobile-request-log>div+div{margin-top:7px}.vplanning-native .vwork-mobile-request-log strong{font-size:12.5px}.vplanning-native .vwork-mobile-request-log small{font-size:10.5px;color:#9aa1ac}.vplanning-native .vwork-mobile-request-log p{font-size:11.5px;line-height:1.45;margin:5px 0 0;background:#f7f8fb;border-radius:8px;padding:7px 8px}
+  .vplanning-native .vwork-mobile-approval-actions{position:fixed;z-index:18;left:50%;bottom:0;transform:translateX(-50%);width:min(440px,100%);background:#fff;border-top:1px solid #e6e9ef;padding:10px 15px calc(12px + env(safe-area-inset-bottom));display:grid;gap:8px;box-shadow:0 -12px 32px rgba(49,63,79,.1)}
+  .vplanning-native .vwork-mobile-approval-actions button{min-height:46px;border:1.5px solid #e2e6ec;border-radius:12px;background:#fff;color:#20242e;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:7px}
+  .vplanning-native .vwork-mobile-approval-actions button.approve{border-color:#d42a32;background:#d42a32;color:#fff;box-shadow:0 8px 18px -8px rgba(212,42,50,.72)}
+  .vplanning-native .vwork-mobile-approval-actions button.reject{border-color:#efc7ca;color:#d42a32}.vplanning-native .vwork-mobile-approval-actions>div{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .vplanning-native .vwork-mobile-sheet-backdrop{position:fixed;z-index:60;inset:0;background:rgba(20,22,28,.46);display:flex;align-items:flex-end;justify-content:center}
+  .vplanning-native .vwork-mobile-action-sheet{width:min(440px,100%);background:#fff;border-radius:22px 22px 0 0;padding:10px 18px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -20px 60px rgba(20,22,28,.24);animation:vworkMobileSheet .24s ease-out}
+  .vplanning-native .vwork-mobile-action-sheet>i{display:block;width:42px;height:5px;border-radius:999px;background:#d9dde5;margin:0 auto 17px}.vplanning-native .vwork-mobile-action-sheet h2{font-size:18px;margin:0 0 5px}.vplanning-native .vwork-mobile-action-sheet>p{font-size:12px;color:#8a909c;line-height:1.5;margin:0 0 14px}.vplanning-native .vwork-mobile-action-sheet select,.vplanning-native .vwork-mobile-action-sheet textarea{margin-bottom:10px}.vplanning-native .vwork-mobile-action-sheet>div:last-child{display:grid;grid-template-columns:1fr 1.4fr;gap:9px;margin-top:4px}.vplanning-native .vwork-mobile-action-sheet button{min-height:46px;border:1px solid #e2e6ec;border-radius:12px;background:#fff;font-weight:800}.vplanning-native .vwork-mobile-action-sheet button.confirm{border-color:#1e9e57;background:#1e9e57;color:#fff}.vplanning-native .vwork-mobile-action-sheet button.danger{border-color:#d42a32;background:#d42a32;color:#fff}.vplanning-native .vwork-mobile-action-sheet button.opinion{border-color:#2563c9;background:#2563c9;color:#fff}
+  @keyframes vworkMobileSheet{from{transform:translateY(100%);opacity:.65}to{transform:translateY(0);opacity:1}}
+  .vplanning-native{background:#eef2f6}
+  .vplanning-native.shell{max-width:440px;margin:0 auto;box-shadow:0 0 60px rgba(56,72,90,.14);overflow-x:hidden}
+  .vplanning-native .sidebar{height:auto;min-height:0;max-height:154px;overflow:visible}
+  .vplanning-native .brand{height:59px;padding:14px 16px 10px;border-bottom:0;background:var(--sidebar)}
+  .vplanning-native .brand,.vplanning-native nav,.vplanning-native .sidebar-user{transform:none;width:auto}
+  .vplanning-native .mark-desktop{display:none}
+  .vplanning-native .mark-mobile{display:inline}
+  .vplanning-native .mark{width:32px;height:32px;font-size:13px}
+  .vplanning-native .brand strong{font-size:15px}
+  .vplanning-native .brand small{font-size:10.5px}
+  .vplanning-native .brand-title{flex:1;min-width:0}
+  .vplanning-native .vwork-mobile-brand-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
+  .vplanning-native .brand .notice-wrap{display:block}
+  .vplanning-native .brand .notice-btn{width:30px;height:30px;border-radius:10px;border-color:rgba(255,255,255,.16);background:rgba(255,255,255,.08);color:#fff}
+  .vplanning-native .sidebar-user{display:none}
+  .vplanning-native nav{display:flex;gap:2px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:0 8px 2px;background:var(--sidebar);max-height:50px}
+  .vplanning-native nav::-webkit-scrollbar{display:none}
+  .vplanning-native .sec{display:none}
+  .vplanning-native .nav-btn{flex:none;width:auto;min-height:46px;margin:0;border-radius:0;padding:11px 12px 9px;color:#b8a8ac;font-family:"Sora",system-ui,sans-serif;font-size:12.5px;font-weight:700;border-bottom:2.5px solid transparent}
+  .vplanning-native .nav-btn:hover,.vplanning-native .nav-btn.active{background:transparent;color:#fff;border-bottom-color:var(--po-red)}
+  .vplanning-native .nav-btn b{min-width:17px;height:17px;border-radius:999px;background:var(--po-red);color:#fff;display:grid;place-items:center;font-size:9px;margin-left:6px}
+  .vplanning-native .vwork-shell-mobile-tabs{display:flex;gap:4px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:5px 8px 8px;background:var(--sidebar);border-top:1px solid rgba(255,255,255,.08)}
+  .vplanning-native .vwork-shell-mobile-tabs::-webkit-scrollbar{display:none}
+  .vplanning-native .vwork-shell-mobile-tabs button{flex:none;min-height:38px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(255,255,255,.06);color:#f0e7ea;padding:8px 10px;font-family:"Sora",system-ui,sans-serif;font-size:11.5px;font-weight:800;display:flex;align-items:center;gap:6px;white-space:nowrap}
+  .vplanning-native .vwork-shell-mobile-tabs button.active{background:var(--po-red);border-color:var(--po-red);color:#fff}
+  .vplanning-native .vwork-shell-mobile-tabs b{min-width:17px;height:17px;border-radius:999px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:9px}
+  .vplanning-native .topbar{display:none}
+  .vplanning-native .topbar-spacer,.vplanning-native .vwork-search,.vplanning-native .save-status{display:none}
+  .vplanning-native .notice-btn{width:36px;height:36px;border-radius:10px}
+  .vplanning-native .notice-dot{background:var(--po-red);border:2px solid var(--sidebar);right:-7px;top:-7px}
+  .vplanning-native .notice-popover{position:fixed;left:12px;right:12px;top:116px;width:auto;max-height:calc(100dvh - 138px);border-radius:14px;box-shadow:0 24px 70px rgba(49,63,79,.24)}
+  .vplanning-native .notice-list{max-height:calc(100dvh - 214px)}
+  .vplanning-native .badge{border-radius:20px;padding:4px 10px;font-family:"Sora",system-ui,sans-serif}
+  .vplanning-native .card,.vplanning-native .kpi{border-radius:12px;padding:12px;margin-bottom:10px;box-shadow:0 12px 30px rgba(62,77,94,.08),inset 0 1px 0 rgba(255,255,255,.94)}
+  .vplanning-native .grid-2,.vplanning-native .grid-3,.vplanning-native .grid-4,.vplanning-native .vwork-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .vplanning-native .kpi{min-height:82px;display:grid;align-content:center}
+  .vplanning-native .kpi .num{font-size:28px;color:#65717e}
+  .vplanning-native .kpi .lbl{font-size:12px;line-height:1.25}
+  .vplanning-native .vwork-stat{padding:12px;border-radius:11px}
+  .vplanning-native .vwork-stat strong{font-size:24px}
+  .vplanning-native .vwork-stat span,.vplanning-native .vwork-stat small{font-size:11px}
+  .vplanning-native .btn{border-radius:9px;padding:11px 14px}
+  .vplanning-native .modal{width:calc(100vw - 36px);max-height:86vh;padding:22px 18px 18px;border-radius:18px}
+  .vplanning-native .modal-head{display:grid;gap:12px;padding-right:44px}
+  .vplanning-native .modal-x{right:12px;top:12px;width:42px;height:42px;font-size:28px}
+  .vplanning-native .modal-back{width:max-content}
+  .vplanning-native input,.vplanning-native select,.vplanning-native textarea{border-width:1.5px;border-radius:9px;padding:12px 13px}
+  .vplanning-native input:focus,.vplanning-native select:focus,.vplanning-native textarea:focus{border-color:var(--po-red);box-shadow:0 0 0 3px var(--po-red-alpha);outline:none}
+  .vplanning-native .task-quick-status,.vplanning-native .checklist-add-row,.vplanning-native .vwork-request-grid,.vplanning-native .vwork-mode-grid,.vplanning-native .vwork-type-grid,.vplanning-native .vwork-topic-guide,.vplanning-native .vwork-criteria-grid{grid-template-columns:1fr}
+  .vplanning-native .vwork-request-ops{grid-template-columns:1fr;gap:8px}
+  .vplanning-native .vwork-request-board{max-height:none;overflow:visible;border:0;background:transparent}
+  .vplanning-native .vwork-request-board table{min-width:0;font-size:12px;border-collapse:separate;border-spacing:0 10px}
+  .vplanning-native .vwork-request-board thead{display:none}
+  .vplanning-native .vwork-request-board tbody,.vplanning-native .vwork-request-board tr,.vplanning-native .vwork-request-board td{display:block;width:100%}
+  .vplanning-native .vwork-request-board tr{border:1px solid var(--border);border-radius:12px;background:#fff;padding:10px;box-shadow:0 12px 30px rgba(62,77,94,.08)}
+  .vplanning-native .vwork-request-board tr.vwork-request-detail-row{margin-top:-14px;border-top:0;border-radius:0 0 12px 12px;padding:0 10px 10px}
+  .vplanning-native .vwork-request-board tr.vwork-request-action-row{margin-top:-14px;border-top:0;border-radius:0 0 12px 12px;padding:0 10px 10px}
+  .vplanning-native .vwork-request-board td{border:0;padding:7px 0}
+  .vplanning-native .vwork-request-board td::before{content:attr(data-label);display:block;margin-bottom:4px;color:var(--muted);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+  .vplanning-native .vwork-request-board td[data-label="Phiếu"]::before{display:none}
+  .vplanning-native .vwork-request-detail-row>td{padding:0;background:transparent}
+  .vplanning-native .vwork-request-detail-panel{grid-template-columns:1fr;padding:10px;box-shadow:none}
+  .vplanning-native .vwork-request-action-editor{grid-template-columns:1fr;padding:12px}
+  .vplanning-native .vwork-request-action-editor .vwork-payment-confirmation,.vplanning-native .vwork-request-action-editor .vwork-approval-checklist{grid-column:auto}
+  .vplanning-native .vwork-delegate-inline{grid-template-columns:1fr;min-width:0}
+  .vplanning-native .vwork-request-actions .btn{flex:1;min-width:0}
+  .vplanning-native .vwork-mode-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}
+  .vplanning-native .vwork-create-mode-grid{grid-template-columns:1fr}
+  .vplanning-native .vwork-mode{min-height:56px;padding:10px 11px;border-radius:9px}
+  .vplanning-native .vwork-mode.active{background:var(--po-red);border-color:var(--po-red);color:#fff}
+  .vplanning-native .vwork-mode.active span{color:#ffe7ec}
+  .vplanning-native .vwork-assignment-card{border-radius:14px;padding:14px;background:linear-gradient(180deg,#fff,#fbfdff);box-shadow:0 18px 44px rgba(64,78,96,.08)}
+  .vplanning-native .vwork-owner-select{display:none}
+  .vplanning-native .vwork-assignment-core .vwork-owner-select{display:grid}
+  .vplanning-native .vwork-chip-list{gap:7px;margin-top:10px}
+  .vplanning-native .vwork-chip-list>span{font-weight:900}
+  .vplanning-native .vwork-person-chip{font-size:11px;padding-right:8px;max-width:100%}
+  .vplanning-native .vwork-segmented-wrap{grid-template-columns:1fr;gap:8px;margin-top:10px}
+  .vplanning-native .vwork-segmented{min-height:40px;border-radius:9px}
+  .vplanning-native .vwork-table-wrap{max-width:100%;overflow-x:auto}
+  .vplanning-native .vwork-table{min-width:520px}
+  .vplanning-native .vwork-proposal-table-wrap{border-radius:11px}
+  .vplanning-native .vwork-proposal-table{min-width:860px}
+  .vplanning-native .vwork-proposal-detail-modal{width:calc(100vw - 18px);max-height:94dvh;padding:0;border-radius:14px}
+  .vplanning-native .vwork-proposal-detail-head{padding:20px 58px 18px 16px}.vplanning-native .vwork-proposal-detail-head h3{font-size:17px}
+  .vplanning-native .vwork-proposal-detail-body{padding:10px;gap:10px}.vplanning-native .vwork-proposal-detail-body>section{padding:14px}
+  .vplanning-native .vwork-proposal-summary dl{grid-template-columns:1fr}.vplanning-native .vwork-proposal-summary dl>div,.vplanning-native .vwork-proposal-summary dl>div:nth-child(odd){border-right:0;border-bottom:1px solid #e9ecf1}.vplanning-native .vwork-proposal-summary dl>div:last-child{border-bottom:0}
+  .vplanning-native .vwork-request-edit-grid{grid-template-columns:1fr}
+  .vplanning-native .vwork-payment-detail-actions{justify-content:stretch}.vplanning-native .vwork-payment-detail-actions .btn{flex:1}
+  .vplanning-native .overview-head,.vplanning-native .project-group-head,.vplanning-native .task-compact-row,.vplanning-native .workload-strip,.vplanning-native .vwork-v2-card .between{align-items:stretch;flex-direction:column}
+  .vplanning-native .project-group-metrics,.vplanning-native .task-compact-meta{justify-content:flex-start}
+  .vplanning-native .workload-strip .workload-snapshot{min-width:0;max-width:none;width:100%}
+  .vplanning-native .vwork-mobile-tabs{top:0;border-radius:0;margin-left:-16px;margin-right:-16px;background:var(--sidebar)}
+  .vplanning-native .vwork-mobile-tabs button.active{border-bottom-color:var(--po-red)}
+  .vplanning-native .vwork-footbar{margin-left:-16px;margin-right:-16px;flex-wrap:wrap}
+  .vplanning-native .vwork-footbar .btn{flex:1}
+  .vplanning-native .vwork-toast{bottom:18px;padding:11px 14px;border-radius:14px;font-size:13px;text-align:left}
+  .vplanning-native .vwork-v2-tabs button.active,.vplanning-native .vwork-mode.active,.vplanning-native .vwork-type.active{border-color:var(--po-red);background:var(--po-red-light);color:var(--po-red)}
+  .vplanning-native .vwork-v2-tabs button.active b{background:var(--po-red)}
+  .vplanning-native .vwork-mode.active{background:var(--po-red);border-color:var(--po-red);color:#fff}
+  .vplanning-native .vwork-mode.active span{color:#ffe8ed}
+  .vplanning-native .vwork-lead-chips{max-height:108px;overflow:auto;align-content:start;padding-right:2px}
+  .vplanning-native .vwork-team-chips{max-height:92px;overflow:auto;align-content:start;padding-right:2px}
+  .vplanning-native .vwork-lead-chips::-webkit-scrollbar,.vplanning-native .vwork-team-chips::-webkit-scrollbar{width:4px}
+  .vplanning-native .vwork-lead-chips::-webkit-scrollbar-thumb,.vplanning-native .vwork-team-chips::-webkit-scrollbar-thumb{background:#d8dfe7;border-radius:999px}
+  .vplanning-native .brand .notice-popover{z-index:240}
+  .vplanning-native .vwork-desktop-shell{display:none}
+  .vplanning-native .vwork-mobile-shell{display:block}
+  .vplanning-native .vwork-workbox-table{display:none}
+  .vplanning-native .vwork-workbox-hero{min-height:0;padding:20px 16px 26px;border-radius:14px}.vplanning-native .vwork-workbox-hero h1{font-size:22px}.vplanning-native .vwork-workbox-meta{display:grid;grid-template-columns:1fr 1fr;gap:10px}.vplanning-native .vwork-workbox-meta>div{min-width:0;padding:0;border-left:0}.vplanning-native .vwork-workbox-meta>div:first-child{grid-column:1/-1}
+  .vplanning-native .vwork-workbox-state-grid,.vplanning-native .vwork-workbox-agenda{display:none}.vplanning-native .vwork-workbox-priority{grid-template-columns:34px minmax(0,1fr)}.vplanning-native .vwork-workbox-priority>button{grid-column:1/-1}
+  .vplanning-native .vwork-workbox-toolbar{overflow-x:auto;flex-wrap:nowrap}
+  .vplanning-native .vwork-workbox-toolbar .vwork-seg-tabs{min-width:max-content}
+  .vplanning-native .vwork-bulk-toolbar{align-items:flex-start;flex-direction:column}.vplanning-native .vwork-bulk-toolbar span{flex:none}
+  .vplanning-native .vwork-task-detail-modal{width:calc(100vw - 18px);padding:0;max-height:94dvh;border-radius:14px}
+  .vplanning-native .vwork-task-detail-head{padding:18px 52px 14px 14px;border-radius:14px 14px 0 0}.vplanning-native .vwork-task-detail-head h3{font-size:17px}.vplanning-native .vwork-task-detail-head .modal-back{display:none}
+  .vplanning-native .vwork-task-detail-flow{padding:12px;gap:10px}.vplanning-native .vwork-flow-card{padding:13px;border-radius:11px}
+  .vplanning-native .vwork-detail-nav{justify-content:flex-start}.vplanning-native .vwork-detail-nav button{min-height:36px;padding:7px 10px}
+  .vplanning-native .vwork-intake-card{grid-template-columns:1fr}.vplanning-native .vwork-inline-response{grid-column:auto}
+  .vplanning-native .vwork-detail-shortcuts{grid-template-columns:1fr}.vplanning-native .vwork-comment-actions{align-items:stretch;flex-direction:column}.vplanning-native .vwork-comment-actions .vwork-task-file-upload{min-width:0}
+  .vplanning-native .vwork-checklist-deadline-row{grid-template-columns:30px minmax(0,1fr) 28px}.vplanning-native .vwork-checklist-deadline-row label{grid-column:2/3}.vplanning-native .vwork-checklist-deadline-row>small{grid-column:2/-1}
+  .vplanning-native .vwork-review-identity{grid-template-columns:1fr}
+}
+/* V-Work training schedule */
+.vplanning-native .vwork-training-page{display:grid;gap:16px;min-width:0}
+.vplanning-native .vwork-training-hero{min-height:156px;border-radius:18px;padding:24px 26px;display:flex;align-items:flex-end;justify-content:space-between;gap:22px;background:linear-gradient(135deg,#210711 0%,#3b0a18 60%,#72142a 100%);color:#fff;box-shadow:0 18px 42px rgba(64,10,26,.18)}
+.vplanning-native .vwork-training-hero>div:first-child{max-width:780px}.vplanning-native .vwork-training-hero span{display:block;font-size:11px;letter-spacing:.12em;font-weight:900;color:#f3b6c2}.vplanning-native .vwork-training-hero h1{font-family:"Sora",system-ui,sans-serif;font-size:28px;margin:8px 0 7px}.vplanning-native .vwork-training-hero p{margin:0;color:#eadde1;line-height:1.55}
+.vplanning-native .vwork-training-hero-actions{display:flex;gap:10px;flex:0 0 auto}.vplanning-native .vwork-training-hero-actions .btn{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}.vplanning-native .vwork-training-hero-actions label.btn{cursor:pointer}
+.vplanning-native .vwork-training-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.vplanning-native .vwork-training-kpis article{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:13px;padding:15px;box-shadow:0 8px 24px rgba(35,48,64,.05)}.vplanning-native .vwork-training-kpis article>svg{width:36px;height:36px;padding:9px;border-radius:10px;background:var(--po-red-light);color:var(--po-red)}.vplanning-native .vwork-training-kpis strong{font-family:"Sora",system-ui,sans-serif;font-size:22px;display:block}.vplanning-native .vwork-training-kpis span{font-size:11px;color:var(--muted);margin-top:3px}
+.vplanning-native .vwork-training-toolbar{display:flex;align-items:end;gap:10px;flex-wrap:wrap;background:#fff;border:1px solid var(--border);border-radius:13px;padding:12px}.vplanning-native .vwork-training-toolbar>label{display:grid;gap:5px}.vplanning-native .vwork-training-toolbar>label>span,.vplanning-native .vwork-training-form-grid label>span{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:900}.vplanning-native .vwork-training-toolbar select,.vplanning-native .vwork-training-toolbar input,.vplanning-native .vwork-training-form-grid input,.vplanning-native .vwork-training-form-grid select,.vplanning-native .vwork-training-form-grid textarea{min-height:39px;border:1px solid var(--border);border-radius:8px;background:#fff;padding:8px 10px;color:var(--text);outline:none}.vplanning-native .vwork-training-toolbar select:focus,.vplanning-native .vwork-training-toolbar input:focus,.vplanning-native .vwork-training-form-grid input:focus,.vplanning-native .vwork-training-form-grid select:focus,.vplanning-native .vwork-training-form-grid textarea:focus{border-color:var(--po-red);box-shadow:0 0 0 3px var(--po-red-alpha)}
+.vplanning-native .vwork-training-search{flex:1;min-width:240px}.vplanning-native .vwork-training-search>div{position:relative}.vplanning-native .vwork-training-search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted)}.vplanning-native .vwork-training-search input{width:100%;padding-left:32px}
+.vplanning-native .vwork-training-view-tabs{display:flex;margin-left:auto;background:#f1f4f7;border-radius:9px;padding:3px}.vplanning-native .vwork-training-view-tabs button{border:0;background:transparent;color:var(--muted);padding:8px 11px;border-radius:7px;font-size:12px;font-weight:800}.vplanning-native .vwork-training-view-tabs button.active{background:#fff;color:var(--po-red);box-shadow:0 2px 8px rgba(32,43,55,.1)}
+.vplanning-native .vwork-training-notice{border:1px solid #f0c3cc;border-left:4px solid var(--po-red);border-radius:9px;background:var(--po-red-light);padding:11px 13px;color:#72142a;font-weight:700}
+.vplanning-native .vwork-training-import-preview{display:flex;align-items:center;justify-content:space-between;gap:16px;background:#fff8ec;border:1px solid #f2d3a8;border-radius:12px;padding:14px}.vplanning-native .vwork-training-import-preview>div:first-child{display:grid;gap:3px}.vplanning-native .vwork-training-import-preview span,.vplanning-native .vwork-training-import-preview small{color:#76562f}.vplanning-native .vwork-training-import-preview>div:last-child{display:flex;gap:8px}
+.vplanning-native .vwork-training-editor{background:#fff;border:1px solid #e3aab6;border-radius:14px;padding:17px;box-shadow:0 14px 34px rgba(88,17,35,.09)}.vplanning-native .vwork-training-editor-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:14px}.vplanning-native .vwork-training-editor-head span{font-size:10px;letter-spacing:.1em;color:var(--po-red);font-weight:900}.vplanning-native .vwork-training-editor-head h3{font-family:"Sora",system-ui,sans-serif;margin:4px 0 0;font-size:17px}.vplanning-native .vwork-training-form-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}.vplanning-native .vwork-training-form-grid label{display:grid;gap:5px;min-width:0}.vplanning-native .vwork-training-form-grid label.is-wide{grid-column:span 2}.vplanning-native .vwork-training-form-grid textarea{resize:vertical}.vplanning-native .vwork-training-editor-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}.vplanning-native .vwork-training-editor-actions .btn{display:inline-flex;align-items:center;gap:6px}.vplanning-native .btn-danger{color:#a01730;border-color:#e6b3bd}.vplanning-native .btn-danger:hover{background:#fff0f3}
+.vplanning-native .vwork-training-table-wrap{overflow:auto;background:#fff;border:1px solid var(--border);border-radius:13px;max-width:100%;max-height:calc(100vh - 300px)}.vplanning-native .vwork-training-table-wrap table{min-width:1080px}.vplanning-native .vwork-training-table-wrap thead{position:sticky;top:0;z-index:4;background:#f6f8fa}.vplanning-native .vwork-training-table-wrap th{white-space:nowrap;background:#f6f8fa}.vplanning-native .vwork-training-table-wrap td{background:#fff}.vplanning-native .vwork-training-table-wrap tbody tr:hover td{background:#fffafb}
+.vplanning-native .vwork-training-year-table th:first-child,.vplanning-native .vwork-training-year-table td:first-child{position:sticky;left:0;z-index:3;min-width:320px;max-width:320px}.vplanning-native .vwork-training-year-table th:nth-child(2),.vplanning-native .vwork-training-year-table td:nth-child(2){position:sticky;left:320px;z-index:3;min-width:90px}.vplanning-native .vwork-training-year-table td:first-child strong,.vplanning-native .vwork-training-month-table td:first-child strong{display:block;color:var(--po-red);font-size:11px}.vplanning-native .vwork-training-year-table td:first-child span,.vplanning-native .vwork-training-month-table td:first-child span{display:block;margin-top:3px;line-height:1.35}.vplanning-native .vwork-training-year-table th:not(:first-child):not(:nth-child(2)):not(:nth-child(3)):last-child,.vplanning-native .vwork-training-year-table td:not(:first-child):not(:nth-child(2)):not(:nth-child(3)):last-child{text-align:center}
+.vplanning-native .vwork-training-month-cell{position:relative;min-width:42px;height:45px;padding:4px!important}.vplanning-native .vwork-training-month-cell i{position:absolute;left:6px;right:6px;height:6px;border-radius:999px}.vplanning-native .vwork-training-month-cell i.is-elearning{top:8px}.vplanning-native .vwork-training-month-cell i.is-delivery{top:19px}.vplanning-native .vwork-training-month-cell i.is-workshop{top:30px}
+.vplanning-native .vwork-training-month-cell.is-clickable,.vplanning-native .vwork-training-list-table tbody tr{cursor:pointer}.vplanning-native .vwork-training-month-cell.is-clickable:hover{background:#fff3f5!important;outline:1px solid #e3aab6;outline-offset:-1px}.vplanning-native .vwork-training-row-info{width:100%;border:0;background:transparent;color:inherit;text-align:left;display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:8px;align-items:center;padding:0;cursor:pointer}.vplanning-native .vwork-training-row-info strong,.vplanning-native .vwork-training-row-info span{grid-column:1}.vplanning-native .vwork-training-row-info svg{grid-column:2;grid-row:1/3;color:var(--muted);opacity:.76}.vplanning-native .vwork-training-row-info:hover svg{color:var(--po-red);opacity:1}
+.vplanning-native .vwork-training-detail-backdrop{position:fixed;inset:0;z-index:70;background:rgba(15,23,42,.34);display:grid;place-items:center;padding:22px}.vplanning-native .vwork-training-detail-card{width:min(760px,100%);max-height:calc(100vh - 44px);overflow:auto;border:1px solid #e4e8ef;border-radius:14px;background:#fff;box-shadow:0 24px 70px rgba(15,23,42,.22)}.vplanning-native .vwork-training-detail-card header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;padding:18px 20px;border-bottom:1px solid var(--border)}.vplanning-native .vwork-training-detail-card header span,.vplanning-native .vwork-training-detail-grid span,.vplanning-native .vwork-training-detail-note span,.vplanning-native .vwork-training-detail-source>span,.vplanning-native .vwork-training-linked-data span{display:block;color:var(--muted);font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.vplanning-native .vwork-training-detail-card h3{margin:5px 0 4px;font-family:"Sora",system-ui,sans-serif;font-size:20px}.vplanning-native .vwork-training-detail-card p{margin:0;color:var(--muted);line-height:1.5}.vplanning-native .vwork-training-detail-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:16px 20px}.vplanning-native .vwork-training-detail-grid div{border:1px solid var(--border);border-radius:10px;background:#f8fafc;padding:11px}.vplanning-native .vwork-training-detail-grid strong{display:block;margin-top:5px;font-size:14px;color:var(--text)}.vplanning-native .vwork-training-detail-focus{display:flex;align-items:center;gap:8px;margin:0 20px 14px!important;padding:10px 12px;border:1px solid #f2d3a8;border-radius:10px;background:#fff8ec;color:#76562f!important;font-weight:700}.vplanning-native .vwork-training-detail-note,.vplanning-native .vwork-training-detail-source{margin:0 20px 14px;padding:12px;border:1px solid var(--border);border-radius:10px;background:#fff}.vplanning-native .vwork-training-detail-note p{margin-top:6px;color:var(--text)}.vplanning-native .vwork-training-detail-source strong{display:block;margin:6px 0;color:var(--text)}.vplanning-native .vwork-training-detail-source>div:not(.vwork-training-linked-data){display:flex;gap:8px;flex-wrap:wrap;align-items:center}.vplanning-native .vwork-training-detail-source a{display:inline-flex;align-items:center;gap:6px;border:1px solid #cbd5e1;border-radius:8px;padding:7px 10px;color:var(--po-red);font-weight:800;text-decoration:none}.vplanning-native .vwork-training-detail-source a:hover{background:var(--po-red-light);border-color:#e3aab6}.vplanning-native .vwork-training-detail-source small{color:var(--muted)}.vplanning-native .vwork-training-linked-data{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:10px}.vplanning-native .vwork-training-linked-data div{display:grid;gap:3px;min-height:76px;padding:10px;border:1px solid #eef2f6;border-radius:10px;background:#f8fafc}.vplanning-native .vwork-training-linked-data strong{overflow:hidden;margin:0;color:var(--text);font-size:16px;text-overflow:ellipsis;white-space:nowrap}.vplanning-native .vwork-training-linked-data small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.vplanning-native .vwork-training-detail-card footer{display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--border)}.vplanning-native .vwork-training-detail-card footer .btn{display:inline-flex;align-items:center;gap:6px}
+.vplanning-native .is-elearning{background:#2f80ed}.vplanning-native .is-delivery{background:var(--po-red)}.vplanning-native .is-workshop{background:#e7a600}
+.vplanning-native .vwork-training-status{display:inline-flex;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:900;white-space:nowrap}.vplanning-native .vwork-training-status.is-confirmed{background:#eaf8f0;color:#087b43}.vplanning-native .vwork-training-status.is-progress{background:#edf4ff;color:#135eae}.vplanning-native .vwork-training-status.is-delayed{background:#ffedef;color:#a01730}.vplanning-native .vwork-training-status.is-planned{background:#fff5df;color:#956000}
+.vplanning-native .vwork-training-icon-btn{width:32px;height:32px;border:1px solid var(--border);background:#fff;border-radius:8px;display:grid;place-items:center;color:var(--po-red)}.vplanning-native .vwork-training-icon-btn:hover{background:var(--po-red-light);border-color:#e4a5b2}
+.vplanning-native .vwork-training-month-table{table-layout:fixed;width:max-content!important;min-width:max-content!important}.vplanning-native .vwork-training-month-table th:first-child,.vplanning-native .vwork-training-month-table td:first-child{position:sticky;left:0;z-index:3;width:310px;min-width:310px;max-width:310px}.vplanning-native .vwork-training-month-table th:not(:first-child),.vplanning-native .vwork-training-month-table td:not(:first-child){width:34px;min-width:34px;text-align:center;padding:8px 2px}.vplanning-native .vwork-training-month-table .is-weekend{background:#fff8d8}.vplanning-native .vwork-training-month-table td.has-elearning{box-shadow:inset 0 -5px 0 #2f80ed}.vplanning-native .vwork-training-month-table td.has-delivery{background:#fde8ed}.vplanning-native .vwork-training-month-table td.has-workshop{box-shadow:inset 0 5px 0 #e7a600}
+.vplanning-native .vwork-training-list-table td{min-width:110px}.vplanning-native .vwork-training-list-table td:nth-child(2){min-width:300px;line-height:1.4}
+.vplanning-native .vwork-training-trainer-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.vplanning-native .vwork-training-trainer-grid>section{background:#fff;border:1px solid var(--border);border-radius:13px;overflow:hidden}.vplanning-native .vwork-training-trainer-grid header{display:flex;align-items:center;gap:10px;padding:13px;border-bottom:1px solid var(--border)}.vplanning-native .vwork-training-trainer-grid header>span{width:36px;height:36px;border-radius:10px;background:var(--po-red);color:#fff;display:grid;place-items:center;font-weight:900;font-size:11px}.vplanning-native .vwork-training-trainer-grid header strong,.vplanning-native .vwork-training-trainer-grid header small{display:block}.vplanning-native .vwork-training-trainer-grid header small{color:var(--muted);margin-top:2px}.vplanning-native .vwork-training-trainer-grid section>div{padding:8px;display:grid;gap:6px;max-height:360px;overflow:auto}.vplanning-native .vwork-training-trainer-grid section>div button{border:1px solid var(--border);background:#fafbfc;border-radius:9px;text-align:left;padding:10px}.vplanning-native .vwork-training-trainer-grid section>div button:hover{border-color:#e1a6b2;background:#fff7f9}.vplanning-native .vwork-training-trainer-grid section>div button strong,.vplanning-native .vwork-training-trainer-grid section>div button span,.vplanning-native .vwork-training-trainer-grid section>div button small{display:block}.vplanning-native .vwork-training-trainer-grid section>div button span{margin:3px 0;line-height:1.35}.vplanning-native .vwork-training-trainer-grid section>div button small{color:var(--muted)}
+.vplanning-native .vwork-training-empty{padding:34px;text-align:center;color:var(--muted)}.vplanning-native .vwork-training-legend{display:flex;align-items:center;gap:18px;flex-wrap:wrap;color:var(--muted);font-size:11px}.vplanning-native .vwork-training-legend span{display:flex;align-items:center;gap:6px}.vplanning-native .vwork-training-legend i{width:18px;height:6px;border-radius:999px}.vplanning-native .vwork-training-legend small{margin-left:auto}
+@media(max-width:1100px){.vplanning-native .vwork-training-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.vplanning-native .vwork-training-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.vplanning-native .vwork-training-trainer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.vplanning-native .vwork-training-hero{align-items:stretch;flex-direction:column;padding:19px}.vplanning-native .vwork-training-hero h1{font-size:23px}.vplanning-native .vwork-training-hero-actions{display:grid;grid-template-columns:1fr 1fr}.vplanning-native .vwork-training-hero-actions .btn{justify-content:center}.vplanning-native .vwork-training-kpis,.vplanning-native .vwork-training-form-grid,.vplanning-native .vwork-training-trainer-grid,.vplanning-native .vwork-training-detail-grid,.vplanning-native .vwork-training-linked-data{grid-template-columns:1fr}.vplanning-native .vwork-training-form-grid label.is-wide{grid-column:auto}.vplanning-native .vwork-training-toolbar{align-items:stretch}.vplanning-native .vwork-training-toolbar>label,.vplanning-native .vwork-training-search{min-width:calc(50% - 5px);flex:1}.vplanning-native .vwork-training-view-tabs{order:10;width:100%;margin-left:0;overflow:auto}.vplanning-native .vwork-training-view-tabs button{flex:1;white-space:nowrap}.vplanning-native .vwork-training-import-preview{align-items:stretch;flex-direction:column}.vplanning-native .vwork-training-import-preview>div:last-child{justify-content:flex-end}.vplanning-native .vwork-training-editor-actions{display:grid;grid-template-columns:1fr 1fr}.vplanning-native .vwork-training-editor-actions .btn:last-child{grid-column:1/-1;justify-content:center}.vplanning-native .vwork-training-detail-backdrop{align-items:end;padding:10px}.vplanning-native .vwork-training-detail-card{max-height:92vh}.vplanning-native .vwork-training-detail-card header,.vplanning-native .vwork-training-detail-card footer{padding:14px}.vplanning-native .vwork-training-detail-grid{padding:14px}.vplanning-native .vwork-training-detail-focus,.vplanning-native .vwork-training-detail-note,.vplanning-native .vwork-training-detail-source{margin-left:14px!important;margin-right:14px!important}.vplanning-native .vwork-training-legend small{width:100%;margin-left:0}}
+@media (prefers-reduced-motion: reduce){.vplanning-native *{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+@media(max-width:980px){.vplanning-native .vwork-approval-nav{gap:16px;padding:0 14px}.vplanning-native .vwork-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.vplanning-native .vwork-delegation-active{align-items:flex-start;flex-wrap:wrap}}
+@media(max-width:720px){.vplanning-native .vwork-opinion-request-row,.vplanning-native .vwork-proposal-decision-fields,.vplanning-native .vwork-payment-confirmation{grid-template-columns:1fr}.vplanning-native .vwork-approval-primary-actions{display:grid;grid-template-columns:1fr 1fr}.vplanning-native .vwork-approval-primary-actions .btn{min-width:0}.vplanning-native .vwork-approval-queue-tabs{width:100%}}

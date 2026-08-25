@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/suni/vdiscussion/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart University</title>
+  <script>
+    (function seedEmbeddedShellSession() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get('suni_embed') !== '1' && sessionStorage.getItem('suni_embedded_shell') !== '1') return;
+
+        var token = sessionStorage.getItem('auth_token')
+          || sessionStorage.getItem('access_token')
+          || localStorage.getItem('auth_token')
+          || 'vinabrain-embedded-manager';
+        var user = {
+          id: 'vinabrain-embedded-manager',
+          fullName: 'Pham Hoai Nam',
+          email: 'manager@vinabrain.local',
+          role: 'manager',
+          roles: [{ id: 'manager', name: 'manager' }]
+        };
+
+        sessionStorage.setItem('suni_embedded_shell', '1');
+        sessionStorage.setItem('auth_token', token);
+        sessionStorage.setItem('user_data', JSON.stringify({
+          state: { user: user, token: token, isAuthenticated: true },
+          version: 0
+        }));
+        sessionStorage.setItem('user-storage', JSON.stringify({
+          state: { user: user },
+          version: 0
+        }));
+        localStorage.removeItem('auth_token');
+      } catch (error) {
+        console.warn('Unable to seed embedded shell session', error);
+      }
+    })();
+  </script>
+  <script type="module" crossorigin src="/suni/vdiscussion/assets/index-BMFjJY4E.js"></script>
+  <link rel="stylesheet" crossorigin href="/suni/vdiscussion/assets/index-KiYqYzgt.css">
+</head>
+
+<body>
+  <div id="root"></div>
+</body>
+
+</html>

@@ -1,0 +1,6 @@
+.public-game-page--iframe-play .public-game-shell--full,
+.public-game-page--iframe-play .public-game-iframe--full {
+  min-height: 0;
+  height: 100vh;
+  height: 100dvh;
+}

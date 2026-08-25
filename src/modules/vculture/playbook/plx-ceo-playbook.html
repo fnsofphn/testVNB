@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>PLX CEO PLAYBOOK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Archivo:wght@400;500;600;700;800&family=Archivo+Narrow:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0b0f1a;--ink2:#11182b;--panel:#161f36;--panel2:#1d2845;
+  --line:rgba(216,196,150,.18);
+  --gold:#d8c496;--gold2:#f0e2b8;--amber:#e9a23b;
+  --green:#5fcf8e;--teal:#4bbfc7;--red:#e9685f;--violet:#a98cf0;
+  --txt:#e9ecf5;--mut:#9aa3bd;--mut2:#6b748f;
+  --serif:'Fraunces',serif;--sans:'Archivo',sans-serif;
+  --narrow:'Archivo Narrow',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:var(--ink);color:var(--txt);font-family:var(--sans);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(900px 600px at 80% -10%,rgba(233,162,59,.10),transparent 60%),radial-gradient(800px 700px at -10% 30%,rgba(75,191,199,.07),transparent 55%),radial-gradient(700px 600px at 50% 120%,rgba(95,207,142,.06),transparent 60%)}
+body::after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.wrap{position:relative;z-index:1}
+::selection{background:var(--gold);color:var(--ink)}
+
+/* TOP BAR */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:80;display:flex;align-items:center;justify-content:space-between;
+  padding:12px 20px;padding-top:max(12px,env(safe-area-inset-top));background:rgba(11,15,26,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:11px;cursor:pointer;min-width:0}
+.brand .logo{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--amber),var(--gold));display:grid;place-items:center;color:var(--ink);font-family:var(--serif);font-weight:900;font-size:18px;box-shadow:0 6px 18px rgba(233,162,59,.3);flex-shrink:0}
+.brand .t1{font-family:var(--narrow);font-weight:700;letter-spacing:.5px;font-size:14px;white-space:nowrap}
+.brand .t2{font-family:var(--mono);font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;white-space:nowrap}
+.topnav{display:flex;gap:2px;flex-wrap:wrap}
+.topnav button{background:none;border:none;color:var(--mut);font-family:var(--narrow);font-weight:600;font-size:11.5px;letter-spacing:.3px;padding:6px 10px;border-radius:7px;cursor:pointer;transition:.2s;text-transform:uppercase;white-space:nowrap}
+.topnav button:hover{color:var(--txt);background:rgba(255,255,255,.04)}
+.topnav button.active{color:var(--gold);background:rgba(216,196,150,.1)}
+.burger{display:none;background:none;border:1px solid var(--line);border-radius:9px;width:42px;height:38px;cursor:pointer;flex-direction:column;gap:4px;align-items:center;justify-content:center;flex-shrink:0}
+.burger span{width:18px;height:2px;background:var(--gold);border-radius:2px;transition:.3s}
+.burger.open span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+.burger.open span:nth-child(2){opacity:0}
+.burger.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+
+@media(max-width:1080px){
+  .topnav{position:fixed;top:0;right:0;bottom:0;width:78%;max-width:320px;flex-direction:column;flex-wrap:nowrap;gap:4px;
+    background:linear-gradient(180deg,var(--ink2),var(--ink));padding:78px 18px 30px;border-left:1px solid var(--line);
+    transform:translateX(105%);transition:transform .35s cubic-bezier(.2,.8,.2,1);overflow-y:auto;box-shadow:-20px 0 50px rgba(0,0,0,.5)}
+  .topnav.show{transform:translateX(0)}
+  .topnav button{font-size:14px;padding:13px 14px;text-align:left;width:100%;border-radius:10px}
+  .burger{display:flex}
+}
+.navmask{display:none;position:fixed;inset:0;z-index:70;background:rgba(5,8,15,.6);backdrop-filter:blur(3px)}
+.navmask.show{display:block}
+
+.scrollbar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--amber),var(--gold2));z-index:90;width:0%;box-shadow:0 0 12px rgba(233,162,59,.6)}
+
+section{display:none;min-height:100vh;padding:96px 22px 80px;max-width:1180px;margin:0 auto;animation:fade .5s ease}
+section.show{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* HERO */
+#home{padding-top:108px}
+.hero{text-align:center;margin-bottom:54px}
+.kicker{font-family:var(--mono);font-size:10.5px;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:20px}
+.hero h1{font-family:var(--serif);font-weight:900;font-size:clamp(38px,11vw,90px);line-height:.97;letter-spacing:-2px;margin-bottom:8px;background:linear-gradient(180deg,#fff,var(--gold2) 60%,var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero .sub{font-family:var(--serif);font-style:italic;font-size:clamp(17px,4.5vw,27px);color:var(--mut);font-weight:400;margin-bottom:24px;line-height:1.3}
+.hero .lead{max-width:660px;margin:0 auto 34px;color:var(--mut);font-size:15px}
+.hero .stats{display:flex;justify-content:center;gap:clamp(20px,5vw,38px);flex-wrap:wrap}
+.hero .stat .n{font-family:var(--serif);font-weight:700;font-size:clamp(24px,6vw,30px);color:var(--gold2)}
+.hero .stat .l{font-family:var(--mono);font-size:9px;letter-spacing:1.2px;color:var(--mut2);text-transform:uppercase}
+
+.sectitle{display:flex;align-items:flex-start;gap:14px;margin:6px 0 24px}
+.sectitle .micon{width:48px;height:48px;border-radius:13px;display:grid;place-items:center;font-size:24px;flex-shrink:0;background:rgba(233,162,59,.12);border:1px solid var(--line)}
+.sectitle .stx{flex:1;min-width:0}
+.sectitle .idx{font-family:var(--mono);font-size:11px;color:var(--gold);letter-spacing:2px;display:block;margin-bottom:3px}
+.sectitle h2{font-family:var(--serif);font-weight:700;font-size:clamp(23px,5.5vw,38px);letter-spacing:-.5px;line-height:1.08}
+.lede{color:var(--mut);max-width:780px;margin-bottom:30px;font-size:15px}
+
+/* MODULE GRID */
+.modgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px;margin-top:26px}
+.modcard{position:relative;border:1px solid var(--line);border-radius:18px;padding:24px 22px 22px;background:linear-gradient(160deg,var(--panel),var(--ink2));overflow:hidden;cursor:pointer;transition:.35s cubic-bezier(.2,.8,.2,1)}
+.modcard::before{content:"";position:absolute;inset:0;opacity:0;transition:.35s;background:radial-gradient(400px 300px at 80% 0%,rgba(233,162,59,.14),transparent 60%)}
+.modcard:active,.modcard:hover{transform:translateY(-5px);border-color:rgba(216,196,150,.45);box-shadow:0 22px 44px rgba(0,0,0,.45)}
+.modcard:hover::before{opacity:1}
+.modcard .ribbon{display:flex;align-items:center;gap:11px;margin-bottom:14px}
+.modcard .mic{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font-size:23px;background:rgba(0,0,0,.22);border:1px solid var(--line);flex-shrink:0}
+.modcard .mnum{font-family:var(--serif);font-weight:900;font-size:34px;line-height:1;color:rgba(216,196,150,.3)}
+.modcard .mtag{font-family:var(--mono);font-size:8.5px;letter-spacing:1.8px;text-transform:uppercase;padding:3px 8px;border:1px solid var(--line);border-radius:20px;color:var(--gold);display:inline-block;margin-bottom:11px}
+.modcard h3{font-family:var(--serif);font-weight:600;font-size:20px;line-height:1.15;margin-bottom:8px}
+.modcard p{color:var(--mut);font-size:13px;margin-bottom:14px}
+.modcard .go{font-family:var(--narrow);font-weight:700;font-size:11.5px;letter-spacing:1px;color:var(--gold2);text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.modcard .go .arr{transition:.3s}
+.modcard:hover .go .arr{transform:translateX(5px)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:860px){.grid2,.grid3{grid-template-columns:1fr}}
+
+.card{border:1px solid var(--line);border-radius:16px;padding:22px;background:linear-gradient(160deg,var(--panel),var(--ink2))}
+.card .ico{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;font-size:20px;margin-bottom:13px;background:rgba(233,162,59,.12);border:1px solid var(--line)}
+.card h4{font-family:var(--serif);font-weight:600;font-size:18px;line-height:1.2;margin-bottom:9px}
+.card p{color:var(--mut);font-size:13.5px}
+.card .lab{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:9px;display:block}
+
+/* ACCORDION (concern/situ/layer share .acc) */
+.acc{border:1px solid var(--line);border-radius:14px;margin-bottom:12px;overflow:hidden;background:linear-gradient(160deg,var(--panel),var(--ink2));transition:.3s}
+.acc .head{padding:16px 18px;display:flex;align-items:center;gap:13px;cursor:pointer}
+.acc .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;background:var(--amber);box-shadow:0 0 12px var(--amber)}
+.acc .num{font-family:var(--serif);font-weight:900;font-size:26px;color:rgba(216,196,150,.3);min-width:34px;line-height:.9;flex-shrink:0}
+.acc .head .ttl{font-family:var(--serif);font-weight:600;font-size:16px;flex:1;line-height:1.25}
+.acc .head .sub{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--teal);text-transform:uppercase;margin-top:5px;display:block}
+.acc .plus{font-family:var(--mono);font-size:19px;color:var(--gold);transition:.3s;flex-shrink:0}
+.acc.open{border-color:rgba(216,196,150,.4)}
+.acc.open .plus{transform:rotate(45deg)}
+.acc .body{max-height:0;overflow:hidden;transition:max-height .5s ease;padding:0 18px}
+.acc.open .body{max-height:3000px;padding-bottom:18px}
+.acc .body p{color:var(--mut);font-size:13.5px;margin-bottom:9px}
+.acc .role{font-family:var(--mono);font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:var(--green);margin:4px 0 7px;display:block}
+.acc .plx{padding:12px 15px;border-left:3px solid var(--gold);background:rgba(216,196,150,.06);border-radius:0 10px 10px 0;font-size:13px;color:var(--txt)}
+.acc .plx b{color:var(--gold2);font-weight:600}
+.acc .avoid{padding:11px 14px;border-radius:10px;background:rgba(233,104,95,.07);border-left:3px solid var(--red);margin-bottom:12px}
+.acc .avoid .l{font-family:var(--mono);font-size:8.5px;letter-spacing:1.4px;color:var(--red);text-transform:uppercase;margin-bottom:4px;display:block}
+.acc .avoid p{font-size:12.5px;margin:0}
+.acc .speech{padding:14px 16px;border-radius:10px;background:rgba(216,196,150,.06);border-left:3px solid var(--gold)}
+.acc .speech .l{font-family:var(--mono);font-size:8.5px;letter-spacing:1.4px;color:var(--gold);text-transform:uppercase;margin-bottom:7px;display:block}
+.acc .speech p{font-size:13px;color:var(--txt);font-style:italic;margin-bottom:8px}
+.acc .speech p:last-child{margin:0}
+
+/* METRICS */
+.metricrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0 30px}
+.metric{border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:linear-gradient(160deg,var(--panel),var(--ink2))}
+.metric .n{font-family:var(--serif);font-weight:700;font-size:25px;color:var(--gold2);line-height:1}
+.metric .u{font-family:var(--mono);font-size:9.5px;color:var(--gold);margin:5px 0 3px}
+.metric .l{color:var(--mut);font-size:11.5px}
+
+/* LAYERS */
+.layers{display:flex;flex-direction:column;gap:9px}
+.layer{border:1px solid var(--line);border-radius:14px;cursor:pointer;overflow:hidden;background:linear-gradient(110deg,var(--panel),var(--ink2));transition:.3s}
+.layer .lh{padding:15px 18px;display:flex;align-items:center;gap:14px}
+.layer .ln{font-family:var(--serif);font-weight:900;font-size:30px;color:rgba(216,196,150,.32);min-width:40px;line-height:1;flex-shrink:0}
+.layer .lt{flex:1;min-width:0}
+.layer .lt .nm{font-family:var(--serif);font-weight:600;font-size:16.5px}
+.layer .lt .tag{font-family:var(--mono);font-size:9px;letter-spacing:1.3px;color:var(--gold);text-transform:uppercase}
+.layer .plus{font-family:var(--mono);font-size:17px;color:var(--gold);transition:.3s;flex-shrink:0}
+.layer.open .plus{transform:rotate(45deg)}
+.layer .lbody{max-height:0;overflow:hidden;transition:max-height .5s ease;padding:0 18px}
+.layer.open .lbody{max-height:420px;padding:0 18px 16px 72px}
+.layer .lbody p{color:var(--mut);font-size:13.5px}
+.layer .lbody .prob{margin-top:9px;font-size:12.5px;color:var(--amber)}
+.layer .lbody .prob b{color:var(--gold2)}
+@media(max-width:560px){.layer.open .lbody{padding-left:18px}}
+
+/* SCENARIO */
+.toggle{display:inline-flex;border:1px solid var(--line);border-radius:30px;padding:5px;margin:6px 0 20px;background:var(--ink2);max-width:100%}
+.toggle button{background:none;border:none;color:var(--mut);font-family:var(--narrow);font-weight:700;font-size:12.5px;letter-spacing:.4px;padding:9px 18px;border-radius:24px;cursor:pointer;transition:.25s}
+.toggle button.on.bad{background:linear-gradient(135deg,var(--red),#c94a44);color:var(--ink)}
+.toggle button.on.good{background:linear-gradient(135deg,var(--green),#3da86a);color:var(--ink)}
+.scenebox{border:1px solid var(--line);border-radius:16px;padding:22px;background:linear-gradient(160deg,var(--panel),var(--ink2))}
+.scenebox.bad{border-color:rgba(233,104,95,.35)}.scenebox.good{border-color:rgba(95,207,142,.35)}
+.scenebox h4{font-family:var(--serif);font-size:20px;font-weight:600;margin-bottom:5px}
+.scenebox .tr{font-family:var(--mono);font-size:9.5px;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px}
+.scenebox.bad .tr{color:var(--red)}.scenebox.good .tr{color:var(--green)}
+.scenebox ul{list-style:none}
+.scenebox li{padding:8px 0 8px 24px;position:relative;color:var(--mut);font-size:13.5px;border-bottom:1px solid rgba(255,255,255,.04)}
+.scenebox li::before{position:absolute;left:0;top:7px;font-family:var(--mono);font-weight:700}
+.scenebox.bad li::before{content:"✕";color:var(--red)}.scenebox.good li::before{content:"✓";color:var(--green)}
+.scenebox .feat{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+.scenebox .feat span{font-family:var(--narrow);font-weight:700;font-size:11.5px;padding:5px 13px;border-radius:20px;border:1px solid}
+.scenebox.bad .feat span{color:var(--red);border-color:rgba(233,104,95,.4)}.scenebox.good .feat span{color:var(--green);border-color:rgba(95,207,142,.4)}
+
+/* GROUPS */
+.grouprow{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:13px}
+.gcard{border:1px solid var(--line);border-radius:14px;padding:18px;background:linear-gradient(160deg,var(--panel),var(--ink2));position:relative}
+.gcard .gn{font-family:var(--serif);font-weight:900;font-size:21px;color:var(--gold2)}
+.gcard .gn span{font-size:10.5px;color:var(--mut);font-family:var(--mono);display:block;font-weight:400;letter-spacing:.8px;margin-top:2px}
+.gcard .gtag{font-family:var(--mono);font-size:8.5px;letter-spacing:1.3px;text-transform:uppercase;margin:11px 0 7px;display:inline-block;padding:3px 8px;border-radius:20px;border:1px solid var(--line)}
+.gcard p{color:var(--mut);font-size:12.5px}
+.gcard.plx{border-color:rgba(216,196,150,.45);box-shadow:0 0 0 1px rgba(216,196,150,.15)}
+.gcard.plx::after{content:"ĐIỂM HỢP LƯU";position:absolute;top:12px;right:14px;font-family:var(--mono);font-size:7.5px;letter-spacing:1.3px;color:var(--gold);border:1px solid var(--line);padding:3px 6px;border-radius:14px}
+
+/* THINKING FRAMEWORK */
+.tflayer{border:1px solid var(--line);border-radius:18px;margin-bottom:15px;overflow:hidden;background:linear-gradient(160deg,var(--panel),var(--ink2))}
+.tflayer .tfh{padding:20px 20px;display:flex;align-items:center;gap:15px}
+.tflayer .tfbadge{font-family:var(--serif);font-weight:900;font-size:26px;width:54px;height:54px;border-radius:14px;display:grid;place-items:center;flex-shrink:0}
+.tflayer.L3 .tfbadge{background:linear-gradient(135deg,var(--amber),var(--gold));color:var(--ink)}
+.tflayer.L2 .tfbadge{background:linear-gradient(135deg,var(--teal),#2e8a92);color:var(--ink)}
+.tflayer.L1 .tfbadge{background:linear-gradient(135deg,var(--green),#2f8a57);color:var(--ink)}
+.tflayer .tfttl{flex:1;min-width:0}
+.tflayer .tfttl .nm{font-family:var(--serif);font-weight:700;font-size:19px;line-height:1.1}
+.tflayer .tfttl .en{font-family:var(--mono);font-size:9.5px;letter-spacing:1.3px;color:var(--gold);text-transform:uppercase}
+.tflayer .tfttl .goal{color:var(--mut);font-size:12.5px;margin-top:6px}
+.tfmind{display:grid;grid-template-columns:1fr 1fr;gap:11px;padding:0 20px 20px}
+@media(max-width:680px){.tfmind{grid-template-columns:1fr}}
+.mind{border:1px solid var(--line);border-radius:12px;padding:14px;background:rgba(0,0,0,.18);transition:.3s}
+.mind:active,.mind:hover{border-color:rgba(216,196,150,.4)}
+.mind .mh{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+.mind .mh .nn{font-family:var(--mono);font-size:12px;color:var(--gold);font-weight:700}
+.mind .mh .mt{font-family:var(--serif);font-weight:600;font-size:15px;line-height:1.15}
+.mind .en{font-family:var(--mono);font-size:8.5px;letter-spacing:.8px;color:var(--mut2);text-transform:uppercase;margin-bottom:7px}
+.mind p{color:var(--mut);font-size:12.3px}
+
+/* RULES */
+.rules{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:680px){.rules{grid-template-columns:1fr}}
+.rulebox{border:1px solid var(--line);border-radius:16px;padding:22px;background:linear-gradient(160deg,var(--panel),var(--ink2))}
+.rulebox.no{border-color:rgba(233,104,95,.3)}.rulebox.yes{border-color:rgba(95,207,142,.3)}
+.rulebox .rt{font-family:var(--serif);font-weight:700;font-size:22px;margin-bottom:16px;display:flex;align-items:center;gap:9px}
+.rulebox.no .rt{color:var(--red)}.rulebox.yes .rt{color:var(--green)}
+.rulebox .ri{padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.rulebox .ri:last-child{border:none}
+.rulebox .ri .rk{font-family:var(--narrow);font-weight:700;font-size:14px;color:var(--txt);margin-bottom:3px}
+.rulebox .ri p{color:var(--mut);font-size:12.5px}
+.rulebox .ri b{color:var(--gold2)}
+
+/* TABS */
+.tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:22px}
+.tabs button{background:var(--ink2);border:1px solid var(--line);color:var(--mut);font-family:var(--narrow);font-weight:700;font-size:12.5px;letter-spacing:.4px;padding:10px 16px;border-radius:11px;cursor:pointer;transition:.25s}
+.tabs button:hover{color:var(--txt);border-color:rgba(216,196,150,.4)}
+.tabs button.on{background:linear-gradient(135deg,var(--amber),var(--gold));color:var(--ink);border-color:transparent}
+.tabpane{display:none;animation:fade .4s ease}.tabpane.show{display:block}
+
+.phases{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:13px}
+@media(max-width:680px){.phases{grid-template-columns:1fr}}
+.phase{border:1px solid var(--line);border-radius:14px;padding:18px;background:linear-gradient(160deg,var(--panel),var(--ink2))}
+.phase .pn{font-family:var(--mono);font-size:9.5px;letter-spacing:1.8px;color:var(--gold);text-transform:uppercase;margin-bottom:7px}
+.phase h5{font-family:var(--serif);font-weight:600;font-size:16px;margin-bottom:7px}
+.phase p{color:var(--mut);font-size:12.5px}
+
+.callout{border:1px solid var(--line);border-radius:16px;padding:20px 22px;background:linear-gradient(135deg,rgba(233,162,59,.08),rgba(75,191,199,.05));margin:6px 0 24px}
+.callout .lb{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:9px;display:block}
+.callout p{font-size:14.5px;color:var(--txt)}
+.callout p b{color:var(--gold2)}
+
+/* QUOTE / ORIGINAL vs ANALYSIS */
+.quote{border-left:3px solid var(--gold);padding:14px 18px;background:rgba(216,196,150,.05);border-radius:0 12px 12px 0;margin-bottom:14px}
+.quote .src{font-family:var(--mono);font-size:9px;letter-spacing:1.4px;color:var(--gold);text-transform:uppercase;margin-bottom:7px;display:block}
+.quote p{font-size:14px;color:var(--txt);font-style:italic;margin-bottom:8px}
+.quote p:last-child{margin:0}
+.analysis{border:1px solid rgba(75,191,199,.3);border-left:3px solid var(--teal);border-radius:0 12px 12px 0;padding:14px 18px;background:rgba(75,191,199,.05);margin-bottom:14px}
+.analysis .l{font-family:var(--mono);font-size:9px;letter-spacing:1.4px;color:var(--teal);text-transform:uppercase;margin-bottom:7px;display:block}
+.analysis p{font-size:13.5px;color:var(--mut)}
+.analysis p b{color:var(--gold2)}
+
+/* WASTE 6 LAYERS bars */
+.wbar{border:1px solid var(--line);border-radius:13px;margin-bottom:10px;overflow:hidden;background:linear-gradient(160deg,var(--panel),var(--ink2));cursor:pointer;transition:.3s}
+.wbar .wh{padding:15px 18px;display:flex;align-items:center;gap:13px}
+.wbar .wn{font-family:var(--serif);font-weight:900;font-size:24px;color:rgba(233,162,59,.4);min-width:34px;flex-shrink:0}
+.wbar .wt{flex:1;min-width:0}
+.wbar .wt .nm{font-family:var(--serif);font-weight:600;font-size:15.5px;line-height:1.2}
+.wbar .wt .sc{font-family:var(--mono);font-size:9.5px;letter-spacing:.6px;color:var(--amber);margin-top:4px}
+.wbar .plus{font-family:var(--mono);font-size:17px;color:var(--gold);transition:.3s;flex-shrink:0}
+.wbar.open .plus{transform:rotate(45deg)}
+.wbar.open{border-color:rgba(233,162,59,.4)}
+.wbar .wb{max-height:0;overflow:hidden;transition:max-height .5s ease;padding:0 18px}
+.wbar.open .wb{max-height:600px;padding-bottom:16px}
+.wbar .wb p{color:var(--mut);font-size:13px;margin-bottom:8px}
+.wbar .wb ul{list-style:none;margin-top:4px}
+.wbar .wb li{padding:5px 0 5px 18px;position:relative;color:var(--mut);font-size:12.8px}
+.wbar .wb li::before{content:"▸";position:absolute;left:0;color:var(--gold)}
+
+/* PROFILE / TIMELINE */
+.profile{border:1px solid var(--line);border-radius:18px;padding:24px;background:linear-gradient(160deg,var(--panel),var(--ink2));margin-bottom:24px;display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
+.profile .av{width:74px;height:74px;border-radius:18px;background:linear-gradient(135deg,var(--amber),var(--gold));display:grid;place-items:center;font-family:var(--serif);font-weight:900;font-size:32px;color:var(--ink);flex-shrink:0;box-shadow:0 10px 26px rgba(233,162,59,.3)}
+.profile .pi{flex:1;min-width:200px}
+.profile .pi .nm{font-family:var(--serif);font-weight:700;font-size:24px}
+.profile .pi .rl{color:var(--gold);font-family:var(--narrow);font-weight:600;font-size:14px;margin:4px 0 10px;letter-spacing:.3px}
+.profile .pi p{color:var(--mut);font-size:13px;margin-bottom:6px}
+.profile .pi .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.profile .pi .badges span{font-family:var(--mono);font-size:9px;letter-spacing:.8px;color:var(--gold2);border:1px solid var(--line);padding:4px 9px;border-radius:14px}
+.tl{border-left:2px solid var(--line);margin-left:8px;padding-left:20px}
+.tl .ev{position:relative;padding-bottom:16px}
+.tl .ev::before{content:"";position:absolute;left:-26px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold)}
+.tl .ev .yr{font-family:var(--mono);font-size:10px;color:var(--gold);letter-spacing:1px}
+.tl .ev p{font-size:13px;color:var(--mut);margin-top:2px}
+
+/* ACTION PROGRAM cards */
+.aprog{border:1px solid var(--line);border-radius:14px;padding:18px 20px;background:linear-gradient(160deg,var(--panel),var(--ink2));margin-bottom:12px;display:flex;gap:15px;align-items:flex-start}
+.aprog .an{font-family:var(--serif);font-weight:900;font-size:28px;color:var(--gold2);line-height:.9;flex-shrink:0;min-width:36px}
+.aprog .ac h4{font-family:var(--serif);font-weight:600;font-size:16.5px;margin-bottom:7px;line-height:1.25}
+.aprog .ac p{color:var(--mut);font-size:13px}
+
+footer{text-align:center;padding:46px 20px 40px;padding-bottom:max(40px,env(safe-area-inset-bottom));color:var(--mut2);font-family:var(--mono);font-size:10px;letter-spacing:1.3px;line-height:1.9}
+.backtop{display:inline-flex;align-items:center;gap:7px;margin-top:16px;font-family:var(--narrow);font-weight:700;font-size:11.5px;letter-spacing:1px;color:var(--gold);cursor:pointer;text-transform:uppercase;border:1px solid var(--line);padding:9px 17px;border-radius:24px;transition:.25s}
+.backtop:hover{border-color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="scrollbar" id="scrollbar"></div>
+<div class="topbar">
+  <div class="brand" onclick="go('home')">
+    <div class="logo">P</div>
+    <div><div class="t1">PLX CEO PLAYBOOK</div><div class="t2">Sổ tay tham mưu chiến lược</div></div>
+  </div>
+  <button class="burger" id="burger" onclick="toggleNav()"><span></span><span></span><span></span></button>
+  <nav class="topnav" id="topnav">
+    <button data-s="home" class="active">⌂ Tổng quan</button>
+    <button data-s="party">★ Chỉ đạo Đảng &amp; NN</button>
+    <button data-s="growth">01 · Tăng trưởng 2 con số</button>
+    <button data-s="energy">02 · An ninh năng lượng</button>
+    <button data-s="speak">03 · Tham mưu &amp; phát biểu</button>
+    <button data-s="gov">04 · Quản trị quốc gia</button>
+    <button data-s="deep">05 · Chuyên đề chuyên sâu</button>
+    <button data-s="mp">⚖ Đại biểu Quốc hội</button>
+  </nav>
+</div>
+<div class="navmask" id="navmask" onclick="toggleNav()"></div>
+
+<div class="wrap">
+
+<!-- ===== HOME ===== -->
+<section id="home" class="show">
+  <div class="hero">
+    <div class="kicker">Tài liệu định hướng nội bộ · Lãnh đạo cấp cao</div>
+    <h1>CEO PLAYBOOK</h1>
+    <div class="sub">Khung tư duy &amp; cẩm nang tham mưu chiến lược cho Chủ tịch Tập đoàn</div>
+    <p class="lead">Hệ thống hoá chỉ đạo của Lãnh đạo Đảng &amp; Nhà nước, các mục tiêu quốc gia và bộ khung tư duy để Chủ tịch nắm bắt nhanh, lập luận sắc bén — chuyển vị thế từ <i>người đi xin cơ chế</i> sang <i>nhà tham mưu chiến lược vĩ mô</i>.</p>
+    <div class="stats">
+      <div class="stat"><div class="n">10%</div><div class="l">GDP / năm 2026–2030</div></div>
+      <div class="stat"><div class="n">6 tầng</div><div class="l">Năng lượng · Lãng phí</div></div>
+      <div class="stat"><div class="n">12</div><div class="l">Tư duy · 3 lớp</div></div>
+      <div class="stat"><div class="n">2.700+</div><div class="l">Cửa hàng xăng dầu</div></div>
+    </div>
+  </div>
+  <div class="sectitle">
+    <div class="micon">🗂️</div>
+    <div class="stx"><span class="idx">MODULES</span><h2>7 Module hệ thống</h2></div>
+  </div>
+  <div class="modgrid" id="modGrid"></div>
+</section>
+
+<!-- ===== PARTY DIRECTION ===== -->
+<section id="party">
+  <div class="sectitle"><div class="micon">★</div><div class="stx"><span class="idx">MODULE ĐỊNH HƯỚNG</span><h2>Chỉ đạo của Lãnh đạo Đảng &amp; Nhà nước</h2></div></div>
+  <p class="lede">Phát biểu kết luận của <b style="color:var(--gold2)">Tổng Bí thư – Chủ tịch nước</b> về khơi thông nguồn lực phục vụ mục tiêu tăng trưởng hai con số. Phần <span style="color:var(--teal)">phân tích bổ sung</span> được tách bạch để soi chiếu vai trò Tập đoàn.</p>
+
+  <div class="callout">
+    <span class="lb">Nhận định nền tảng</span>
+    <p>Việt Nam <b>không thiếu tiềm năng, không thiếu nguồn lực</b> theo nghĩa tuyệt đối; vấn đề căn bản là cơ chế quản lý, khai thác, huy động, phân bổ, sử dụng và phát huy nguồn lực còn chưa theo kịp yêu cầu phát triển mới.</p>
+  </div>
+
+  <h3 style="font-family:var(--serif);font-weight:700;font-size:22px;margin:8px 0 14px">A · Đổi mới tư duy về nguồn lực</h3>
+  <div class="quote"><span class="src">▸ Trích kết luận TBT – CTN</span>
+    <p>"Không thể coi nguồn lực là cái có sẵn, hữu hạn, tĩnh, chỉ để phân chia. Nguồn lực phải được kiến tạo, làm giàu, kết nối và nhân lên."</p>
+    <p>Nhà nước không chỉ phân bổ nguồn lực mà phải kiến tạo môi trường, giảm rủi ro ban đầu, dẫn dắt và kích hoạt nguồn lực xã hội, tư nhân, trí tuệ, dữ liệu và văn hoá.</p>
+  </div>
+  <div class="analysis"><span class="l">⊕ Phân tích bổ sung — Vai trò PLX</span>
+    <p>Tăng trưởng 2 con số không thể là mô hình cũ kéo dài: không thể chỉ dựa vào tăng vốn, mở rộng tín dụng, khai thác đất đai, lao động giá rẻ, gia công, FDI ưu đãi. <b>PLX là nơi nguồn lực "đang ngủ" có thể được kiến tạo lại</b> — hạ tầng kho cảng, đường ống, hệ thống phân phối quốc gia chuyển nhanh sang danh mục năng lượng xanh, sạch (E10, Euro 5).</p>
+  </div>
+
+  <h3 style="font-family:var(--serif);font-weight:700;font-size:22px;margin:28px 0 14px">B · Sáu nhóm nguồn lực cần đánh giá đúng</h3>
+  <p style="color:var(--mut);font-size:14px;margin-bottom:16px">Đánh giá nguồn lực phải trả lời 3 câu hỏi: <b style="color:var(--gold2)">lợi thế nổi trội</b> · <b style="color:var(--gold2)">huy động ngay được</b> · <b style="color:var(--gold2)">mới là tiềm năng chưa chuyển hoá</b>. Nhấp từng nhóm.</p>
+  <div id="resList"></div>
+
+  <h3 style="font-family:var(--serif);font-weight:700;font-size:22px;margin:30px 0 14px">C · Sáu nhóm nhiệm vụ, giải pháp trọng tâm</h3>
+  <div class="grid2" id="taskList"></div>
+
+  <div class="analysis" style="margin-top:24px"><span class="l">⊕ Phân tích — Cú mở đường (theo khung khơi thông)</span>
+    <p>Việc cần làm trước tiên để tạo xung: chọn một <b>"gói thể chế đột phá"</b> về đất đai – đầu tư – tài sản công, sửa đồng bộ trong một lần để tháo nút thắt lớn nhất. Khi ba lĩnh vực này thông, vốn – dự án – không gian phát triển đồng loạt được giải phóng. Hướng tới một <b>Nghị quyết mới thay thế Nghị quyết 39</b>.</p>
+  </div>
+</section>
+
+<!-- ===== 01 GROWTH ===== -->
+<section id="growth">
+  <div class="sectitle"><div class="micon">📈</div><div class="stx"><span class="idx">MODULE 01</span><h2>Phát triển kinh tế đất nước 2 con số</h2></div></div>
+  <p class="lede">Mục tiêu GDP ~10%/năm 2026–2030 đòi hỏi đổi căn bản động cơ tăng trưởng. Mối quan tâm cốt lõi của Lãnh đạo và <b style="color:var(--gold2)">vấn đề Tập đoàn cần tham gia</b> — nhấp để mở rộng.</p>
+  <div class="callout"><span class="lb">Nghịch lý trung tâm</span>
+    <p><b>"Giàu lao động nhưng nghèo năng suất"</b> — tiếp tục dựa vào mô hình thâm dụng vốn, lao động giá rẻ, tài nguyên sẽ sớm chạm trần năng suất. Bài toán lớn nhất: chuyển dịch sang tăng trưởng dựa trên hiệu suất (TFP) và chất xám.</p>
+  </div>
+  <div id="growthList"></div>
+</section>
+
+<!-- ===== 02 ENERGY ===== -->
+<section id="energy">
+  <div class="sectitle"><div class="micon">⚡</div><div class="stx"><span class="idx">MODULE 02</span><h2>Phát triển an ninh năng lượng đất nước</h2></div></div>
+  <p class="lede">Năng lượng phải <b style="color:var(--gold2)">"chạy trước"</b> tăng trưởng. Chỉ một tầng trục trặc, cả mục tiêu hai con số có thể sụp đổ vì thiếu điện.</p>
+  <div class="metricrow">
+    <div class="metric"><div class="n">560–625</div><div class="u">TỶ kWh / 2030</div><div class="l">Điện sản xuất &amp; nhập khẩu</div></div>
+    <div class="metric"><div class="n">90–100k</div><div class="u">MW công suất</div><div class="l">Gần gấp đôi trong 5 năm</div></div>
+    <div class="metric"><div class="n">~50%</div><div class="u">Tỷ trọng 2030</div><div class="l">Tái tạo &amp; nguồn mới</div></div>
+    <div class="metric"><div class="n">~13.000</div><div class="u">KM 500kV</div><div class="l">Đường dây xây mới 2025–30</div></div>
+  </div>
+  <h3 style="font-family:var(--serif);font-weight:700;font-size:21px;margin:12px 0 5px">Mô hình 6 tầng năng lượng</h3>
+  <p style="color:var(--mut);font-size:13.5px;margin-bottom:14px">Bản đồ nhân quả: nguồn lực → mô hình → điều phối → mũi nhọn → kết quả → tác động. Nhấp từng tầng.</p>
+  <div class="layers" id="layerList"></div>
+
+  <h3 style="font-family:var(--serif);font-weight:700;font-size:21px;margin:36px 0 5px">Vai trò 4 tập đoàn chủ đạo</h3>
+  <p style="color:var(--mut);font-size:13.5px;margin-bottom:14px">Bổ trợ theo chuỗi giá trị — sức mạnh chỉ phát huy khi khớp pha ở tầng 3.</p>
+  <div class="grouprow" id="groupList"></div>
+
+  <h3 style="font-family:var(--serif);font-weight:700;font-size:21px;margin:36px 0 5px">Có khung &amp; không có khung</h3>
+  <div class="toggle">
+    <button id="tgBad" class="on bad" onclick="setScene('bad')">Không có khung</button>
+    <button id="tgGood" onclick="setScene('good')">Có khung quản trị</button>
+  </div>
+  <div id="sceneBox"></div>
+  <div class="callout" style="margin-top:22px"><span class="lb">Phép so sánh để ghi nhớ</span>
+    <p>Bốn tập đoàn như <b>bốn người khiêng một cỗ máy nặng</b>. Không khung: mỗi người một nhịp — lắc lư, ai cũng mệt. Có khung: một người hô nhịp (tầng 3), bốn người bước cùng nhịp — đi nhanh, vững, nhẹ sức.</p>
+  </div>
+</section>
+
+<!-- ===== 03 SPEAK ===== -->
+<section id="speak">
+  <div class="sectitle"><div class="micon">🎙️</div><div class="stx"><span class="idx">MODULE 03</span><h2>Khung tư duy tham mưu &amp; phát biểu</h2></div></div>
+  <p class="lede">Nâng tầm từ "người đi xin cơ chế" thành "nhà tham mưu chiến lược". Bộ quy tắc, rồi kho lập luận ứng biến theo 6 tình huống.</p>
+  <h3 style="font-family:var(--serif);font-weight:700;font-size:21px;margin:6px 0 14px">Bộ quy tắc "3 Không – 3 Nên"</h3>
+  <div class="rules">
+    <div class="rulebox no"><div class="rt">✕ 3 KHÔNG</div>
+      <div class="ri"><div class="rk">Không than vãn cơ chế</div><p>Thay vì "vướng cơ chế", hãy nói <b>"đã thiết kế sẵn khung Sandbox thí điểm trình Chính phủ"</b>.</p></div>
+      <div class="ri"><div class="rk">Không báo cáo liệt kê số liệu thô</div><p>Tránh thống kê lịch sử — dữ liệu sau 3 tháng chỉ còn quá khứ. Nói về <b>xu hướng dữ liệu thời gian thực và năng suất</b>.</p></div>
+      <div class="ri"><div class="rk">Không tư duy cục bộ ngành</div><p>Đặt lợi ích Tập đoàn làm <b>"vốn mồi"</b> thúc đẩy kinh tế tư nhân và hạ tầng quốc gia.</p></div>
+    </div>
+    <div class="rulebox yes"><div class="rt">✓ 3 NÊN</div>
+      <div class="ri"><div class="rk">Nâng tầm bằng Nghị quyết</div><p>Gắn đề xuất vào "bộ tứ chiến lược" và <b>Nghị quyết 57, 68, 70, 79</b>.</p></div>
+      <div class="ri"><div class="rk">Nhận vai trò điểm kiểm chứng</div><p>Kết thúc bằng việc xung phong làm <b>"mô hình điểm", "phòng thí nghiệm"</b> cho cơ chế đột phá.</p></div>
+      <div class="ri"><div class="rk">Khẳng định chất lượng tăng trưởng</div><p>Nhấn mạnh chuyển từ <b>"chiều rộng" sang "chiều sâu"</b> — năng suất &amp; tốc độ thực thi là thước đo cốt lõi.</p></div>
+    </div>
+  </div>
+  <h3 style="font-family:var(--serif);font-weight:700;font-size:21px;margin:36px 0 5px">Kho lập luận theo tình huống</h3>
+  <p style="color:var(--mut);font-size:13.5px;margin-bottom:14px">6 tình huống đối thoại cấp cao. Nhấp để xem cách cần tránh &amp; lập luận sắc bén.</p>
+  <div id="situList"></div>
+</section>
+
+<!-- ===== 04 GOV ===== -->
+<section id="gov">
+  <div class="sectitle"><div class="micon">🧭</div><div class="stx"><span class="idx">MODULE 04</span><h2>Khung tư duy quản trị quốc gia</h2></div></div>
+  <p class="lede"><b style="color:var(--gold2)">Khung tư duy 3 lớp · 12 tư duy</b> cho Chủ tịch Tập đoàn năng lượng nhà nước. Đọc từ trên xuống: đột phá → vận hành cộng hưởng → thể chế nền tảng.</p>
+  <div class="callout"><span class="lb">Tư duy hệ thống</span>
+    <p>Mỗi tập đoàn tối ưu phần của mình vẫn có thể dẫn đến tổng thể thất bại — <b>"nghịch lý hợp thành"</b> mà chỉ quản trị cấp quốc gia mới hoá giải. Quản trị bằng dữ liệu &amp; tư duy hệ thống, không bằng mệnh lệnh rời rạc.</p>
+  </div>
+  <div id="tfList"></div>
+</section>
+
+<!-- ===== 05 DEEP ===== -->
+<section id="deep">
+  <div class="sectitle"><div class="micon">🔬</div><div class="stx"><span class="idx">MODULE 05</span><h2>Các nội dung chuyên đề chuyên sâu</h2></div></div>
+  <p class="lede">Bốn chuyên đề trục: Chuyển đổi số · Chuyển đổi xanh · Quản trị 3 chuyển đổi · Tổ chức bộ máy – Con người &amp; Văn hoá. Chọn tab.</p>
+  <div class="tabs" id="deepTabs">
+    <button class="on" data-t="cds">💾 Chuyển đổi số</button>
+    <button data-t="cdx">🌿 Chuyển đổi xanh</button>
+    <button data-t="q3">🔁 Quản trị 3 chuyển đổi</button>
+    <button data-t="org">👥 Bộ máy – Con người</button>
+  </div>
+  <div id="deepPanes"></div>
+</section>
+
+<!-- ===== 06 MP / ĐBQH ===== -->
+<section id="mp">
+  <div class="sectitle"><div class="micon">⚖️</div><div class="stx"><span class="idx">MODULE ĐẠI BIỂU</span><h2>Đại biểu Quốc hội — Phát biểu &amp; Chương trình hành động</h2></div></div>
+  <p class="lede">Ứng cử viên ĐBQH khoá XVI — chương trình hành động, các bài phát biểu nghị trường và chủ đề trọng tâm (lãng phí ở tầm quốc gia, kinh tế số).</p>
+
+  <div class="profile">
+    <div class="av">PT</div>
+    <div class="pi">
+      <div class="nm">Ông Phạm Văn Thanh</div>
+      <div class="rl">Bí thư Đảng uỷ · Chủ tịch HĐQT Tập đoàn Xăng dầu Việt Nam</div>
+      <p>Sinh 08/12/1972 · quê Hưng Yên. Ủy viên BCH Đảng bộ Chính phủ; Ủy viên Ban Thường vụ Đảng uỷ Khối DN Trung ương; phụ trách Đại diện phần vốn Nhà nước tại Petrolimex.</p>
+      <div class="badges"><span>Ứng cử viên ĐBQH khoá XVI</span><span>Nhiệm kỳ 2026–2031</span><span>Huân chương Lao động Hạng 3</span></div>
+    </div>
+  </div>
+
+  <h3 style="font-family:var(--serif);font-weight:700;font-size:21px;margin:8px 0 14px">Quá trình công tác</h3>
+  <div class="tl" id="tlList" style="margin-bottom:28px"></div>
+
+  <h3 style="font-family:var(--serif);font-weight:700;font-size:21px;margin:8px 0 6px">Chương trình hành động — 5 ưu tiên</h3>
+  <p style="color:var(--mut);font-size:13.5px;margin-bottom:14px">Cam kết trọng tâm nếu được cử tri tín nhiệm.</p>
+  <div id="actList"></div>
+
+  <h3 style="font-family:var(--serif);font-weight:700;font-size:21px;margin:32px 0 6px">Các bài phát biểu &amp; chủ đề</h3>
+  <p style="color:var(--mut);font-size:13.5px;margin-bottom:14px">Nhấp từng bài để xem luận điểm chính.</p>
+  <div id="speechList"></div>
+</section>
+
+<footer>
+  PLX CEO PLAYBOOK · TAI LIEU DINH HUONG NOI BO · LANH DAO CAP CAO<br>
+  <span style="opacity:.6">Cùng một nguồn lực, cùng những con người ấy — khung quản trị tạo ra tốc độ và sức mạnh từ sự khớp pha.</span><br>
+  <span class="backtop" onclick="go('home')">↑ Về tổng quan</span>
+</footer>
+</div>
+
+<script>
+/* ---------- NAV ---------- */
+function toggleNav(){
+  const n=document.getElementById('topnav'),m=document.getElementById('navmask'),b=document.getElementById('burger');
+  n.classList.toggle('show');m.classList.toggle('show');b.classList.toggle('open');
+}
+function go(s){
+  document.querySelectorAll('section').forEach(x=>x.classList.remove('show'));
+  document.getElementById(s).classList.add('show');
+  document.querySelectorAll('#topnav button').forEach(b=>b.classList.toggle('active',b.dataset.s===s));
+  if(document.getElementById('topnav').classList.contains('show'))toggleNav();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('#topnav button').forEach(b=>b.onclick=()=>go(b.dataset.s));
+window.addEventListener('scroll',()=>{const h=document.documentElement;document.getElementById('scrollbar').style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%'});
+
+/* ---------- MODULE GRID ---------- */
+const modules=[
+ {s:'party',ic:'★',num:'',tag:'Định hướng',h:'Chỉ đạo Đảng & Nhà nước',p:'Phát biểu kết luận của Tổng Bí thư – Chủ tịch nước về khơi thông nguồn lực, kèm phân tích vai trò Tập đoàn.',col:'var(--violet)'},
+ {s:'growth',ic:'📈',num:'01',tag:'Mục tiêu quốc gia',h:'Phát triển kinh tế 2 con số',p:'Đổi động cơ tăng trưởng sang TFP & chất xám, hoá giải nghịch lý xanh – tăng trưởng, vấn đề PLX cần tham gia.'},
+ {s:'energy',ic:'⚡',num:'02',tag:'An ninh quốc gia',h:'An ninh năng lượng đất nước',p:'Mô hình 6 tầng đưa năng lượng "chạy trước"; vai trò 4 tập đoàn và kịch bản có/không khung quản trị.'},
+ {s:'speak',ic:'🎙️',num:'03',tag:'Cẩm nang ứng biến',h:'Khung tư duy tham mưu, phát biểu',p:'Bộ quy tắc "3 Không – 3 Nên" và kho lập luận theo 6 tình huống đối thoại cấp cao.'},
+ {s:'gov',ic:'🧭',num:'04',tag:'Tư duy hệ thống',h:'Khung tư duy quản trị quốc gia',p:'Khung 3 lớp · 12 tư duy: thể chế nền tảng → vận hành cộng hưởng → đột phá kiến tạo cuộc chơi.'},
+ {s:'deep',ic:'🔬',num:'05',tag:'Chuyên đề',h:'Các nội dung chuyên sâu',p:'Chuyển đổi số · Chuyển đổi xanh · Quản trị 3 chuyển đổi · Tổ chức bộ máy – Con người & Văn hoá.'},
+ {s:'mp',ic:'⚖️',num:'',tag:'Đại biểu QH',h:'Phát biểu & Chương trình hành động',p:'Tiểu sử, chương trình hành động ĐBQH khoá XVI, các bài phát biểu nghị trường và chủ đề trọng tâm.',col:'var(--teal)'}
+];
+document.getElementById('modGrid').innerHTML=modules.map(m=>`
+ <div class="modcard" onclick="go('${m.s}')">
+   <div class="ribbon"><div class="mic" ${m.col?`style="border-color:${m.col}"`:''}>${m.ic}</div>${m.num?`<div class="mnum">${m.num}</div>`:''}</div>
+   <span class="mtag" ${m.col?`style="color:${m.col}"`:''}>${m.tag}</span>
+   <h3>${m.h}</h3><p>${m.p}</p>
+   <div class="go" ${m.col?`style="color:${m.col}"`:''}>Khám phá <span class="arr">→</span></div>
+ </div>`).join('');
+
+/* ---------- PARTY: 6 RESOURCES ---------- */
+const res=[
+ {nm:"Kinh tế – Tài chính",adv:"Quy mô nền KT >514 tỷ USD, ngân sách củng cố, nợ công kiểm soát, FDI tích cực.",gap:"Hiệu quả vốn chưa cao (ICOR còn cao, cần kéo về 4,5–4,8); thiếu vốn dài hạn; tư nhân lớn nhưng yếu công nghệ & quản trị; TFP còn khiêm tốn (mục tiêu >55%)."},
+ {nm:"Đất đai · Tài sản công · Hạ tầng",adv:"Nguồn lực rất lớn về đất đai, tài sản công, không gian phát triển.",gap:"Nhiều nguồn lực còn nằm trong quy hoạch treo, thủ tục, dự án chậm tiến độ, đất chưa định giá đúng, hạ tầng chưa kết nối đồng bộ — tiềm năng chưa thành động lực."},
+ {nm:"Con người",adv:"Dân số >100 triệu, lực lượng lao động lớn, truyền thống hiếu học, thích ứng nhanh.",gap:"Nhân lực chất lượng cao thiếu (lao động có bằng/chứng chỉ ~29,2% năm 2025); nhân lực cho AI, bán dẫn, dữ liệu, năng lượng mới chưa theo kịp tốc độ chuyển đổi."},
+ {nm:"KHCN · Đổi mới sáng tạo · Dữ liệu",adv:"Được xác định là nguồn lực tạo đột phá.",gap:"Kinh tế số mới ~14% GDP (mục tiêu 30% năm 2030); dữ liệu phân tán, chưa liên thông, chưa định giá, chưa thành tài sản phát triển; KHCN cần chuyển từ đề tài trên giấy sang sản phẩm, năng suất."},
+ {nm:"Văn hoá · Thương hiệu · Niềm tin",adv:"Nguồn lực nội sinh rất quan trọng — sức mạnh mềm, năng lực sáng tạo, hấp dẫn đầu tư & nhân tài.",gap:"Chưa được phát huy tương xứng trong mô hình tăng trưởng mới."},
+ {nm:"Thể chế & Quản trị",adv:"Là \"nguồn lực của mọi nguồn lực\" — thể chế thông thì nguồn lực xã hội được giải phóng.",gap:"Khi thể chế nghẽn, vốn – đất đai – dữ liệu – doanh nghiệp – nhân lực – cơ hội đều bị chậm. Cải cách thể chế = giải phóng lực lượng sản xuất, mở không gian phát triển."}
+];
+document.getElementById('resList').innerHTML=res.map((r,i)=>`
+ <div class="acc" onclick="this.classList.toggle('open')">
+   <div class="head"><span class="num">${i+1}</span><div style="flex:1"><div class="ttl">${r.nm}</div></div><span class="plus">+</span></div>
+   <div class="body">
+     <span class="role">▸ Lợi thế</span><p>${r.adv}</p>
+     <span class="role" style="color:var(--amber)">▸ Khoảng trống / điểm nghẽn</span><p style="margin:0">${r.gap}</p>
+   </div>
+ </div>`).join('');
+
+/* PARTY: 6 TASKS */
+const tasks=[
+ {ic:"🏛️",h:"Gói thể chế khơi thông nguồn lực",p:"Đất đai, đầu tư, quy hoạch, tài sản công, thị trường vốn, PPP, dữ liệu, SHTT, cơ chế thử nghiệm có kiểm soát. Bỏ tư duy \"không quản được thì cấm\"; chuyển từ tiền kiểm sang hậu kiểm."},
+ {ic:"🔓",h:"Kiểm kê, số hoá & giải phóng nguồn lực mắc kẹt",p:"Kiểm kê toàn diện, số hoá, lập danh mục nguồn lực đang mắc kẹt; phân loại ưu tiên và giao trách nhiệm xử lý dứt điểm."},
+ {ic:"🎯",h:"Tập trung cho cực tăng trưởng có sức lan toả",p:"Không dàn trải. Ưu tiên hạ tầng chiến lược, logistics, năng lượng, dữ liệu, trung tâm tài chính, khu công nghệ cao. Nguồn lực công đi trước, kích hoạt tư nhân, FDI, PPP."},
+ {ic:"🏢",h:"Phát triển DN, thị trường vốn & nguồn lực trong dân",p:"Kinh tế tư nhân là một động lực quan trọng nhất; DNNN tập trung lĩnh vực then chốt, hạ tầng chiến lược; FDI chuyển từ số lượng sang chất lượng & liên kết nội địa."},
+ {ic:"⚙️",h:"Lấy năng suất – KHCN – dữ liệu – nhân lực làm động lực chính",p:"Chương trình năng suất quốc gia gắn TFP; chuyển đổi số DN; chuẩn bị nhân lực cho AI, bán dẫn, dữ liệu, năng lượng mới, hydrogen xanh, điện hạt nhân."},
+ {ic:"🌐",h:"Thương hiệu quốc gia & cơ chế giám sát",p:"Chiến lược thương hiệu quốc gia thế hệ mới: chuyển định vị VN từ điểm đến chi phí cạnh tranh sang quốc gia đổi mới sáng tạo, xanh, tin cậy, có năng lực công nghệ và bản sắc văn hoá."}
+];
+document.getElementById('taskList').innerHTML=tasks.map(t=>`
+ <div class="card"><div class="ico">${t.ic}</div><h4>${t.h}</h4><p>${t.p}</p></div>`).join('');
+
+/* ---------- GROWTH ---------- */
+const growth=[
+ {t:"Đổi động cơ tăng trưởng sang TFP & chất xám",p:"Lo ngại mô hình cũ (thâm dụng vốn, lao động giá rẻ, tài nguyên) khiến nền kinh tế sớm chạm trần năng suất.",role:"PLX cần tham gia",plx:"Tái thiết kế quy trình theo logic dữ liệu trước, loại bỏ giấy tờ thủ công — hoá đơn điện tử sau mỗi tiếng bơm, tự động hoá kho cảng — <b>nâng trực tiếp năng suất nhân tố tổng hợp (TFP)</b>."},
+ {t:"Hoá giải nghịch lý Xanh – Tăng trưởng",p:"Làm sao để Net Zero và rào cản xanh (CBAM) không thành gánh nặng chi phí ngắn hạn, mà biến thành \"giấy thông hành\" giữ thị trường và tạo động cơ tăng trưởng mới.",role:"PLX cần tham gia",plx:"Dùng dòng tiền xăng dầu truyền thống phủ <b>mạng lưới trạm sạc xe điện thông minh trên 2.700+ cây xăng</b> — biến hạ tầng truyền thống thành bệ đỡ logistics xanh."},
+ {t:"Lộ trình chuyển dịch năng lượng hợp lý",p:"Cân bằng giảm phát thải với duy trì nguồn điện nền ổn định, giá hợp lý phục vụ tăng trưởng tốc độ cao.",role:"PLX cần tham gia",plx:"Đa dạng hoá danh mục năng lượng (xăng dầu cao cấp, LNG, hydro, điện sạch); giữ vai trò lớp đệm chịu sốc qua dự trữ nhiên liệu quốc gia và <b>điều độ thông minh bằng dữ liệu</b>."},
+ {t:"Đầu tư công & tái cấu trúc DNNN — \"tiền có nhưng không tiêu được\"",p:"Điểm nghẽn giải ngân chậm do thủ tục, GPMB và tâm lý sợ trách nhiệm.",role:"PLX cần tham gia",plx:"Đề xuất <b>Sandbox chấp nhận rủi ro có kiểm soát</b> + số hoá 100% quy trình đầu tư để giám sát trực tuyến — tách bạch rủi ro khách quan và sai phạm cố ý."},
+ {t:"Chấm dứt cạnh tranh nội bộ lãng phí",p:"Tái cấu trúc, phân vai rõ theo lớp giá trị giữa các DNNN, phát huy vai trò \"vô địch quốc gia\".",role:"PLX cần tham gia",plx:"Tham chiếu mô hình <b>Sinopec/CNPC</b>: PLX và PVOIL hợp lực dùng chung tổng kho, cảng biển thay vì cạnh tranh ở hạ tầng thô — tối ưu hoá nguồn lực quốc gia."}
+];
+document.getElementById('growthList').innerHTML=growth.map(g=>`
+ <div class="acc" onclick="this.classList.toggle('open')">
+   <div class="head"><span class="dot"></span><div style="flex:1"><div class="ttl">${g.t}</div></div><span class="plus">+</span></div>
+   <div class="body"><p>${g.p}</p><span class="role">▸ ${g.role}</span><div class="plx">${g.plx}</div></div>
+ </div>`).join('');
+
+/* ---------- ENERGY LAYERS ---------- */
+const layers=[
+ {n:6,tag:"Tác động bền vững",nm:"Tầng 6 · Impact",d:"Nền năng lượng tự chủ, sạch, thông minh — nền tảng cho tăng trưởng 2 con số dài hạn, an ninh quốc gia và cam kết Net Zero.",prob:""},
+ {n:5,tag:"Kết quả then chốt",nm:"Tầng 5 · Key Results",d:"Đủ điện cho tăng trưởng 10%/năm; tỷ trọng sạch đạt mục tiêu; giảm phụ thuộc nhập khẩu; vận hành ổn định khi có cú sốc; giá điện cạnh tranh.",prob:"3 tiêu chí then chốt: <b>quyết định</b> · <b>đo được</b> · <b>lan toả</b>."},
+ {n:4,tag:"Lĩnh vực mũi nhọn",nm:"Tầng 4 · Spearheads",d:"Năng lượng gắn hạ tầng số – AI thành cặp mũi nhọn cộng hưởng: điện sạch nuôi data center; AI tối ưu vận hành điện.",prob:"Data center thành <b>\"phụ tải linh hoạt\"</b>; AI tối ưu toàn chuỗi 4 tập đoàn; tự chủ công nghệ điều độ."},
+ {n:3,tag:"Quản trị · vận hành · điều phối",nm:"Tầng 3 · Orchestration",d:"Tầng quyết định thành bại. Bảo đảm nguồn – lưới – phụ tải khớp pha; trung tâm điều hành tích hợp dữ liệu sống từ 4 tập đoàn.",prob:"Nguyên tắc <b>\"biến điều kiện đi trước\"</b>: mỗi MW nguồn mới chỉ phê duyệt khi lưới & tích trữ đã có kế hoạch khớp."},
+ {n:2,tag:"Mô hình chuyển đổi & tăng trưởng",nm:"Tầng 2 · Model",d:"Từ mô hình cũ (điện than, mở rộng quy mô) sang đa dạng nguồn, tăng tái tạo, LNG cầu nối, vận hành AI-first, data-driven.",prob:"3 bài học: <b>California</b> (tái tạo thiếu \"bộ não\") · <b>Đức</b> (chuyển dịch quên nguồn nền) · <b>Hàn Quốc</b> (số hoá điều độ)."},
+ {n:1,tag:"Nguồn lực nền móng",nm:"Tầng 1 · Resources",d:"Nguồn sơ cấp, hạ tầng, dữ liệu vận hành, đội ngũ kỹ sư, thể chế. Bốn tập đoàn nhà nước nắm phần lớn nguồn lực nền.",prob:"Cốt lõi: tái tạo phân tán & gián đoạn; vốn cần huy động khổng lồ; <b>dữ liệu chưa liên thông</b>; giá chưa hấp dẫn đầu tư tư nhân."}
+];
+document.getElementById('layerList').innerHTML=layers.map(l=>`
+ <div class="layer" onclick="this.classList.toggle('open')">
+   <div class="lh"><div class="ln">${l.n}</div><div class="lt"><div class="tag">${l.tag}</div><div class="nm">${l.nm}</div></div><span class="plus">+</span></div>
+   <div class="lbody"><p>${l.d}</p>${l.prob?`<p class="prob">${l.prob}</p>`:''}</div>
+ </div>`).join('');
+
+/* GROUPS */
+const groups=[
+ {n:"EVN",sub:"Tập đoàn Điện lực",tag:"Trục xương sống",col:"var(--teal)",d:"Vận hành hệ thống, đầu tư lưới truyền tải — mắt xích dễ thành nút thắt. Chủ thể số hoá điều độ, AI dự báo phụ tải.",plx:false},
+ {n:"PVN",sub:"Petrovietnam",tag:"Cầu nối chuyển dịch",col:"var(--amber)",d:"Nguồn khí & điện khí LNG — nguồn nền linh hoạt bù gián đoạn tái tạo. Tiềm năng điện gió ngoài khơi.",plx:false},
+ {n:"PLX",sub:"Petrolimex",tag:"Phân phối đầu cuối",col:"var(--gold)",d:"Mạng lưới toàn quốc → xương sống hạ tầng xanh (trạm sạc), nguồn dữ liệu tiêu thụ thời gian thực, lớp đệm chịu sốc.",plx:true},
+ {n:"TKV",sub:"Than – Khoáng sản",tag:"Nguồn nền truyền thống",col:"var(--green)",d:"Nguồn điện nền than giai đoạn quá độ; khoáng sản chiến lược cho năng lượng mới & pin tích trữ.",plx:false}
+];
+document.getElementById('groupList').innerHTML=groups.map(g=>`
+ <div class="gcard ${g.plx?'plx':''}">
+   <div class="gn">${g.n}<span>${g.sub}</span></div>
+   <span class="gtag" style="color:${g.col}">${g.tag}</span><p>${g.d}</p>
+ </div>`).join('');
+
+/* SCENE */
+const scenes={
+ bad:{cls:"bad",t:"Không có khung — mỗi tập đoàn tự chạy",tr:"Chậm · Yếu · Rủi ro cao",
+  items:["Tầng 3 đổ vỡ rõ nhất: nguồn xây xong nhưng lưới chậm → điện mặt trời/gió phải cắt giảm","Điện khí LNG chờ kho cảng; than tồn kho không khớp nhu cầu phát điện","Data center mọc lên nhưng vướng thiếu điện ổn định","Thiếu điện cục bộ, đầu tư lãng phí, giá điện cao — tăng trưởng bị \"nghẹt thở\"","An ninh năng lượng bấp bênh, mất niềm tin nhà đầu tư"],
+  feat:["Lệch pha","Trùng lặp","Không ai chịu trách nhiệm tổng thể"]},
+ good:{cls:"good",t:"Có khung quản trị quốc gia",tr:"Nhanh · Mạnh · An toàn",
+  items:["Tầng 3 đóng vai nhạc trưởng — nhìn nguồn–lưới–phụ tải như một hệ","Áp dụng \"biến điều kiện đi trước\": lưới & điều độ phê duyệt trước/cùng nhịp với nguồn","Bộ chỉ số đồng bộ; 4 tập đoàn phân vai rõ theo bản đồ chung","Trung tâm điều hành dữ liệu phát hiện sớm điểm nghẽn trước khủng hoảng","Nguồn điện hấp thụ hết, data center ổn định, giá cạnh tranh, tự chủ tăng"],
+  feat:["Khớp pha","Cộng hưởng","Rủi ro quản trị chủ động"]}
+};
+let scene='bad';
+function renderScene(){const s=scenes[scene];document.getElementById('sceneBox').innerHTML=`<div class="scenebox ${s.cls}"><div class="tr">${s.tr}</div><h4>${s.t}</h4><ul>${s.items.map(i=>`<li>${i}</li>`).join('')}</ul><div class="feat">${s.feat.map(f=>`<span>${f}</span>`).join('')}</div></div>`}
+function setScene(x){scene=x;document.getElementById('tgBad').className=x==='bad'?'on bad':'';document.getElementById('tgGood').className=x==='good'?'on good':'';renderScene()}
+renderScene();
+
+/* ---------- SITUATIONS ---------- */
+const situ=[
+ {q:"An ninh năng lượng trước biến động địa chính trị",applied:"Tư duy 10 + 2",avoid:"Báo cáo dung lượng kho dự trữ, xin hỗ trợ tài chính tăng tồn kho.",sp:["\"Nếu chỉ xây thêm kho trữ dầu, đó mới là tăng 'đệm chịu sốc' ở thế bị động. An ninh năng lượng kỷ nguyên mới phải dựa trên dữ liệu và chủ động toàn diện.\"","\"PLX kiến nghị: chuyển từ 'trữ dầu' sang 'trữ nguồn thông minh' qua đa dạng hoá; số hoá toàn bộ chuỗi logistics năng lượng thời gian thực. Năng lượng chỉ tự chủ khi vận hành bằng dữ liệu.\""]},
+ {q:"Nghịch lý chuyển đổi xanh làm tăng chi phí",applied:"Tư duy 9 + 11",avoid:"Giải trình chi phí xanh quá lớn, xin lùi lộ trình hoặc giảm chỉ tiêu nộp ngân sách.",sp:["\"Nếu nhìn xanh như chi phí tuân thủ, ta luôn thấy thiệt. Theo tư duy kiến tạo, đây là 'giấy thông hành' giữ thị trường và mở động cơ tăng trưởng mới.\"","\"Bài học vùng Vịnh: dùng chính dòng tiền dầu khí đầu tư nhanh vào hạ tầng tương lai. PLX phủ trạm sạc thông minh trên 2.700+ cây xăng — biến hạ tầng truyền thống thành bệ đỡ logistics xanh.\""]},
+ {q:"Tái cấu trúc DNNN & gỡ nghẽn đầu tư công",applied:"Tư duy 1 + 6 + 8",avoid:"Kêu ca thủ tục chồng chéo, xin sửa các Luật hiện hành.",sp:["\"Giải 'vốn có nhưng không tiêu được': áp dụng phân vai theo lớp giá trị (tham chiếu Sinopec/CNPC) — PLX và PVOIL hợp lực dùng chung tổng kho, cảng biển thay vì cạnh tranh hạ tầng thô.\"","\"Thí điểm Sandbox chấp nhận rủi ro có kiểm soát + số hoá 100% quy trình đầu tư để giám sát trực tuyến — tách bạch rủi ro khách quan và sai phạm cố ý, giải toả tâm lý sợ sai.\""]},
+ {q:"Chuyển đổi số hiệu quả, tránh hình thức lãng phí",applied:"Tư duy 2 + 3 + 4",avoid:"Báo cáo số phần mềm đã mua, tỷ lệ máy tính đã phát, xin ngân sách thuê tư vấn nước ngoài.",sp:["\"Nghịch lý: đầu tư công nghệ nhưng giữ quy trình cũ, hoặc phân tán vào hạ tầng thô (IaaS). Kinh tế số không sống bằng 'có dữ liệu trong kho' mà bằng 'dữ liệu chảy đúng lúc'.\"","\"Ba nguyên tắc: tái thiết kế quy trình theo logic dữ liệu trước; gộp cầu tạo quy mô cho nền tảng nội địa (PLX làm khách hàng mỏ neo 2.700+ cửa hàng). Mua hệ thống nước ngoài đè lên bộ máy cũ → giá trị chảy ra nước ngoài.\""]},
+ {q:"Chuyển đổi số quản trị cán bộ — nhân lực kỷ nguyên mới",applied:"Tư duy 1 + 8 + 5",avoid:"Kêu thiếu nhân tài, xin tăng biên chế hoặc cơ chế tăng lương đặc thù.",sp:["\"Tăng trưởng 2 con số cần lao động giỏi hơn, không phải nhiều hơn. Nghịch lý: khát nhân lực số nhưng chảy máu chất xám vì lương cứng khu vực công không cạnh tranh.\"","\"Hai trụ cột: 'khai thác trí tuệ' thay 'sở hữu nhân tài' (chuyên gia bán thời gian, mạng lưới toàn cầu); dùng DNNN làm 'phòng thí nghiệm' đào tạo lại — tốc độ chính quyền chính là tốc độ kinh tế.\""]},
+ {q:"Gắn kết Chuyển đổi xanh & Tăng trưởng 2 con số",applied:"Tư duy 9 + 10 + 12",avoid:"Kiến nghị giảm chỉ tiêu giảm phát thải để ưu tiên GDP trước, xanh hoá sau.",sp:["\"'Tăng trưởng nhanh và Net Zero mâu thuẫn' là tư duy tuyến tính cần bước qua. Đúng tinh thần Shangri-La: 'Phát triển chính là nền tảng của an ninh bền vững'.\"","\"Chiến lược 3 tầng: xanh hoá hạ tầng giữ thị trường xuất khẩu (vượt CBAM); đổi động cơ năng lượng sang chủ động toàn diện; biến năng lượng xanh thành ngành xuất khẩu giá trị cao sang Singapore, Nhật Bản.\""]}
+];
+document.getElementById('situList').innerHTML=situ.map((s,i)=>`
+ <div class="acc" onclick="this.classList.toggle('open')">
+   <div class="head"><span class="num">${i+1}</span><div style="flex:1"><div class="ttl">${s.q}</div><span class="sub">▸ ${s.applied}</span></div><span class="plus">+</span></div>
+   <div class="body">
+     <div class="avoid"><span class="l">✕ Cách đặt vấn đề cần tránh</span><p>${s.avoid}</p></div>
+     <div class="speech"><span class="l">✓ Lập luận tham mưu sắc bén</span>${s.sp.map(p=>`<p>${p}</p>`).join('')}</div>
+   </div>
+ </div>`).join('');
+
+/* ---------- THINKING 12 ---------- */
+const tf=[
+ {lvl:"L3",nm:"Lớp 3 · Đột phá & Định hình",en:"Strategic Game-Changer",goal:"Đổi động cơ tăng trưởng, làm chủ nút thắt để quốc gia chủ động toàn diện trước biến động toàn cầu.",minds:[
+   {n:"01",t:"Kiến tạo cuộc chơi",en:"Proactive Game-Changer",d:"Chuyển từ \"thích ứng bị động\" trước rào cản xanh thành nhà kiến tạo hệ sinh thái năng lượng xanh mới."},
+   {n:"02",t:"Đa dạng hoá cơ cấu nguồn",en:"Smart Diversification",d:"Dự trữ thông minh = làm chủ cơ cấu nguồn đa dạng (xăng dầu cao cấp, LNG, hydro, điện sạch), không phải xây kho trữ dầu thô."},
+   {n:"03",t:"Chuyển dịch vị thế hạ tầng",en:"Infrastructure Pivot",d:"Dùng dòng tiền xăng dầu nâng cấp hạ tầng phân phối thành mạng trạm sạc thông minh & logistics xanh."},
+   {n:"04",t:"Thương mại năng lượng xanh quốc tế",en:"Green Energy Trading",d:"Định vị PLX thành đầu mối trung chuyển & giao dịch năng lượng mới khu vực, kết nối nguồn xanh VN với Singapore, Nhật Bản."}]},
+ {lvl:"L2",nm:"Lớp 2 · Vận hành & Nội cộng hưởng",en:"Efficient System Engine",goal:"Xoá bỏ rời rạc, tối ưu hoá toàn bộ tài sản hữu hình và vô hình hiện có.",minds:[
+   {n:"05",t:"Nội cộng hưởng hệ sinh thái",en:"Resonance Thinking",d:"Gắn dòng vốn đầu tư công với năng lực đổi mới của DN phụ trợ tư nhân. Mạng lưới PLX thành \"phòng thí nghiệm\" công nghệ số."},
+   {n:"06",t:"Phân vai chuỗi giá trị",en:"Value-Chain Separation",d:"Phối hợp PVN/PVOIL, EVN phân chia phân khúc giá trị rõ, chấm dứt đầu tư trùng lặp & cạnh tranh nội bộ lãng phí."},
+   {n:"07",t:"Giải phóng nguồn lực \"đang ngủ\"",en:"Asset Optimization",d:"Bộ chỉ số đo hiệu suất tài sản; chuyển tổng kho, cảng biển, hàng nghìn cây xăng sang hạ tầng đa nhiệm."},
+   {n:"08",t:"Quản trị rủi ro & thực thi linh hoạt",en:"Agile Execution",d:"Hành lang quản trị rủi ro linh hoạt, bảo vệ cán bộ dám đột phá, thử nghiệm nhanh & nhân rộng mô hình thành công."}]},
+ {lvl:"L1",nm:"Lớp 1 · Thể chế & Công nghệ nền tảng",en:"The Core Foundation",goal:"Đập tan trần năng suất cũ, xây hệ điều hành mới dựa trên chất xám và hạ tầng số.",minds:[
+   {n:"09",t:"Thể chế vượt trước",en:"Anticipatory Governance",d:"Không chờ văn bản hướng dẫn; chủ động thiết kế cơ chế thí điểm (Sandbox) gửi Chính phủ giải phóng điểm nghẽn pháp lý."},
+   {n:"10",t:"Tự cường bằng dữ liệu & thuật toán",en:"Data-Driven Autonomy",d:"Chuyển từ cảm tính sang tự động hoá dựa trên dữ liệu thời gian thực. Dữ liệu là tài sản chiến lược sinh lời cao nhất."},
+   {n:"11",t:"Gộp cầu tạo quy mô",en:"Demand-Aggregation",d:"Dùng mạng lưới bán lẻ lớn nhất VN cam kết tạo quy mô thị trường, hấp thụ vốn công nghệ số nội địa đến hoà vốn."},
+   {n:"12",t:"Kaizen trong thực thi số hoá",en:"Disciplined Digital Kaizen",d:"Tái thiết kế quy trình theo logic dữ liệu trước, loại bỏ giấy tờ thủ công, cải tiến từng nút thắt nhỏ mỗi ngày để nâng TFP."}]}
+];
+document.getElementById('tfList').innerHTML=tf.map(L=>`
+ <div class="tflayer ${L.lvl}">
+   <div class="tfh"><div class="tfbadge">${L.lvl}</div><div class="tfttl"><div class="en">${L.en}</div><div class="nm">${L.nm}</div><div class="goal">${L.goal}</div></div></div>
+   <div class="tfmind">${L.minds.map(m=>`<div class="mind"><div class="mh"><span class="nn">${m.n}</span><span class="mt">${m.t}</span></div><div class="en">${m.en}</div><p>${m.d}</p></div>`).join('')}</div>
+ </div>`).join('');
+
+/* ---------- DEEP ---------- */
+const deep={
+ cds:{title:"Chuyển đổi số",sub:"Dữ liệu chảy đúng lúc, không phải dữ liệu trong kho",cards:[
+   {ico:"⚠️",lab:"Nghịch lý cần tránh",h:"Chuyển đổi số hình thức",p:"Mua công nghệ đè lên quy trình giấy tờ cũ; phân tán vào hạ tầng thô (IaaS) gây lãng phí, tạo \"ốc đảo dữ liệu\"."},
+   {ico:"⚡",lab:"Giá trị thực chất",h:"Dữ liệu chảy đúng lúc",p:"Phục vụ điều hành thời gian thực, nâng năng suất — thay vì chỉ số hoá giấy tờ hay lưu kho dữ liệu lịch sử."},
+   {ico:"🇻🇳",lab:"Làm chủ chuỗi",h:"Làm chủ chuỗi giá trị số",p:"Tránh phụ thuộc nền tảng xuyên quốc gia; dồn lực xây nền tảng (PaaS) và mô hình AI nền tảng Việt Nam."}],
+  phases:[{pn:"Nguyên tắc 1",h:"Tái thiết kế quy trình trước",p:"Logic dữ liệu trước khi đưa công nghệ — hoá đơn điện tử sau mỗi tiếng bơm, tự động hoá kho cảng nâng TFP."},
+   {pn:"Nguyên tắc 2",h:"Gộp cầu tạo quy mô",p:"PLX làm khách hàng mỏ neo 2.700+ cửa hàng, tạo quy mô cho nền tảng thuần Việt đạt điểm hoà vốn."},
+   {pn:"Nguyên tắc 3",h:"Kaizen số hoá kỷ luật",p:"Cải tiến từng nút thắt nhỏ mỗi ngày, dữ liệu thời gian thực thay báo cáo định kỳ trễ."}]},
+ cdx:{title:"Chuyển đổi xanh",sub:"Biến áp lực Net Zero thành động cơ tăng trưởng mới",cards:[
+   {ico:"🎫",lab:"Tư duy kiến tạo",h:"Xanh là 'giấy thông hành'",p:"Không phải gánh nặng tuân thủ mà là điều kiện giữ thị trường xuất khẩu (vượt CBAM) và mở động cơ tăng trưởng mới."},
+   {ico:"🔋",lab:"Đa dạng nguồn",h:"Trữ nguồn thông minh",p:"Làm chủ cơ cấu năng lượng đa dạng (xăng dầu cao cấp, LNG, hydro, điện sạch) thay vì xây kho trữ dầu thô."},
+   {ico:"🔌",lab:"Chuyển dịch hạ tầng",h:"2.700+ cây xăng → trạm sạc",p:"Dùng dòng tiền xăng dầu phủ mạng trạm sạc thông minh & logistics xanh — bệ đỡ hạ tầng số."}],
+  phases:[{pn:"Tầng 1",h:"Xanh hoá hạ tầng giữ thị trường",p:"Không có năng lượng & logistics xanh, hàng VN sớm bị loại khỏi thị trường lớn bởi CBAM — điều kiện sống còn bảo vệ GDP."},
+   {pn:"Tầng 2",h:"Đổi động cơ năng lượng",p:"Từ 'thâm dụng cung' sang 'chủ động toàn diện': lưới thông minh, pin lưu trữ, tái tạo + điều độ AI."},
+   {pn:"Tầng 3",h:"Ngành xuất khẩu giá trị cao",p:"Lợi thế điện gió ngoài khơi + vị trí hàng hải: Sandbox xây tổng kho hydro/amoniac xanh, xuất khẩu Singapore, Nhật Bản."}]},
+ q3:{title:"Quản trị 3 chuyển đổi",sub:"Tư duy hệ thống — hoá giải nghịch lý hợp thành",cards:[
+   {ico:"🧭",lab:"Tư duy hệ thống",h:"Bản đồ nhân quả 6 tầng",p:"Nhìn cả hệ như chuỗi nhân quả: nguồn lực → mô hình → điều phối → mũi nhọn → kết quả → tác động."},
+   {ico:"🎼",lab:"Vai nhạc trưởng",h:"Điều phối khớp pha tầng 3",p:"Hoá giải 'nghịch lý hợp thành' bằng điều phối cấp quốc gia, 'biến điều kiện đi trước'."},
+   {ico:"📊",lab:"Quản trị bằng dữ liệu",h:"Đo được, quy trách nhiệm",p:"Chuyển từ báo cáo định kỳ sang dữ liệu thời gian thực; cảnh báo sớm điểm nghẽn bằng con số."}],
+  phases:[{pn:"Chuyển đổi số",h:"Hệ điều hành mới",p:"Hạ tầng vận hành bằng dữ liệu & AI — nền móng cho hai chuyển đổi còn lại."},
+   {pn:"Chuyển đổi xanh",h:"Động cơ tăng trưởng mới",p:"Dùng năng lực số điều độ thông minh, tối ưu hiệu suất — xanh hoá có lộ trình giữ nguồn nền ổn định."},
+   {pn:"3 chuyển đổi như một hệ",h:"Cộng hưởng, không song song",p:"Số hoá làm nền, xanh hoá làm động cơ, văn hoá – con người làm chủ thể — khớp pha tạo sức mạnh tổng thể."}]},
+ org:{title:"Tổ chức bộ máy – Con người & Văn hoá",sub:"Lao động giỏi hơn, không phải nhiều hơn",cards:[
+   {ico:"⚖️",lab:"Nghịch lý nhân lực",h:"Giàu lao động, nghèo năng suất",p:"Cửa sổ dân số vàng hẹp dần, lao động kỹ năng cao còn thấp — cần chuyển sang lao động giỏi hơn."},
+   {ico:"💧",lab:"Chảy máu chất xám",h:"Khu vực công khó giữ nhân tài",p:"Lương cứng không cạnh tranh với tư nhân, nước ngoài — lối thoát là chuyển đổi số toàn diện quản trị cán bộ."},
+   {ico:"🔄",lab:"Đổi tư duy quản trị",h:"Từ hành chính cứng → Agile",p:"Cơ chế bảo vệ cán bộ dám nghĩ, dám bứt phá; giải toả tâm lý sợ sai, đùn đẩy trách nhiệm."}],
+  phases:[{pn:"Trụ cột 1",h:"'Khai thác trí tuệ' thay 'sở hữu nhân tài'",p:"Cơ chế đặt hàng, chuyên gia bán thời gian, mạng lưới trí thức toàn cầu giải bài toán công nghệ lõi theo dự án."},
+   {pn:"Trụ cột 2",h:"DNNN làm 'phòng thí nghiệm'",p:"'Nhúng' cán bộ quy hoạch chiến lược vào môi trường điều hành số thời gian thực để hình thành tư duy Agile."},
+   {pn:"Văn hoá nền tảng",h:"Tốc độ chính quyền = tốc độ kinh tế",p:"Văn hoá dám đột phá là chủ thể của cả 3 chuyển đổi — con người làm chủ công nghệ, không bị dẫn dắt."}]}
+};
+const order=['cds','cdx','q3','org'];
+document.getElementById('deepPanes').innerHTML=order.map((k,i)=>{const d=deep[k];return `
+ <div class="tabpane ${i===0?'show':''}" data-pane="${k}">
+   <div class="callout"><span class="lb">${d.title}</span><p style="font-family:var(--serif);font-style:italic;font-size:17px;color:var(--gold2)">${d.sub}</p></div>
+   <div class="grid3" style="margin-bottom:22px">${d.cards.map(c=>`<div class="card"><div class="ico">${c.ico}</div><span class="lab">${c.lab}</span><h4>${c.h}</h4><p>${c.p}</p></div>`).join('')}</div>
+   <h4 style="font-family:var(--serif);font-weight:600;font-size:18px;margin-bottom:6px">Lộ trình / nguyên tắc triển khai</h4>
+   <div class="phases">${d.phases.map(p=>`<div class="phase"><div class="pn">${p.pn}</div><h5>${p.h}</h5><p>${p.p}</p></div>`).join('')}</div>
+ </div>`}).join('');
+document.querySelectorAll('#deepTabs button').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('#deepTabs button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+ document.querySelectorAll('.tabpane').forEach(p=>p.classList.toggle('show',p.dataset.pane===b.dataset.t));
+});
+
+/* ---------- MP: timeline ---------- */
+const tl=[
+ {yr:"1993–1994",t:"Cán bộ Tổ chức phi chính phủ CARE International"},
+ {yr:"1994–2002",t:"Chuyên viên Tổng Công ty Xăng dầu Việt Nam"},
+ {yr:"2002–2013",t:"Kinh tế viên Bảo Việt; Trưởng ban Marketing PIACOM; lãnh đạo PJICO Hải Phòng"},
+ {yr:"2013–2018",t:"Bí thư Đảng uỷ, TGĐ Công ty CP Nhiên liệu bay Petrolimex"},
+ {yr:"2018 – nay",t:"Bí thư Đảng uỷ, Chủ tịch HĐQT Tập đoàn Xăng dầu Việt Nam"}
+];
+document.getElementById('tlList').innerHTML=tl.map(e=>`<div class="ev"><div class="yr">${e.yr}</div><p>${e.t}</p></div>`).join('');
+
+/* MP: action program */
+const act=[
+ {h:"Ba chuyển đổi, ba bước tiến phục vụ người dân tốt hơn",p:"Chuyển hệ thống Cửa hàng xăng dầu Petrolimex từ điểm cung ứng thành điểm dịch vụ năng lượng & tiện ích hiện đại — đồng bộ Chuyển đổi xanh, Chuyển đổi số thông minh, Chuyển đổi văn hoá phục vụ."},
+ {h:"Giữ ổn định giá, bảo vệ thu nhập thực tế của người dân",p:"Điều hành thị trường dựa trên quản trị chuỗi cung ứng hiệu quả, số hoá liên kết từ kho vận đến bán lẻ, tăng minh bạch, dự báo sớm biến động, xử lý nghiêm đầu cơ, hỗ trợ kịp thời người thu nhập thấp."},
+ {h:"Chuyển đổi khu công nghiệp gắn với chuyển đổi việc làm",p:"Lộ trình rõ cho KCN xanh & công nghệ cao; thu hút ngành giá trị gia tăng cao gắn đào tạo lại lao động tại chỗ; hình thành quỹ hỗ trợ DN chuyển đổi và quỹ đào tạo kỹ năng số."},
+ {h:"Giảm chi phí cho doanh nghiệp để giữ việc làm",p:"Giảm chi phí logistics, cải thiện kết nối liên vùng, tổ chức lại kho vận; số hoá hành chính, minh bạch quy hoạch – đất đai – cấp phép; hỗ trợ chuyển đổi số & tín dụng cho DN nhỏ."},
+ {h:"Tham gia giải quyết các vấn đề dân sinh thiết thực",p:"Giám sát, thúc đẩy dự án giao thông trọng điểm phía Tây; đầu tư thoát nước, môi trường; nhà ở xã hội, trường mầm non tại KCN; nâng cao y tế cơ sở cho nhóm yếu thế."}
+];
+document.getElementById('actList').innerHTML=act.map((a,i)=>`
+ <div class="aprog"><div class="an">${i+1}</div><div class="ac"><h4>${a.h}</h4><p>${a.p}</p></div></div>`).join('');
+
+/* MP: speeches */
+const speeches=[
+ {tag:"PHÁT BIỂU NGHỊ TRƯỜNG",t:"Mục tiêu phát triển kinh tế số đạt 30% GDP vào 2030",pts:[
+   "Năm 2025 kinh tế số ~14,02% GDP (>72 tỷ USD); để đạt 30% GDP cần tăng lên ~270 tỷ USD — không chỉ tăng lượng mà nâng mạnh chất, năng suất, giá trị gia tăng nội địa.",
+   "Nhìn đúng cấu trúc 2 thành phần: khu vực ICT (~60%, ~8,4% GDP) còn nặng lắp ráp/gia công; khu vực kinh tế số các ngành (~40%) mới là nơi có dư địa lớn nhất.",
+   "AI làm thay đổi mô hình tăng trưởng: chuyển từ gia công sang sáng tạo sản phẩm số gốc; đưa lao động CNTT lên tầng giá trị cao (kiến trúc hệ thống, quản trị dữ liệu, AI ứng dụng, an toàn số).",
+   "Cân đối giữa phát triển năng lực cung ứng số và thúc đẩy nhu cầu ứng dụng số: đồng hành tài chính cho DN nhỏ chuyển đổi; lộ trình tiêu chuẩn công nghệ từng ngành; chương trình quốc gia đào tạo lại lao động quy mô lớn."]},
+ {tag:"GÓP Ý KẾ HOẠCH 5 NĂM 2026–2030",t:"Kinh tế số đi đôi với tăng cường tự chủ số",pts:[
+   "Mục tiêu 30% GDP phải có hệ chỉ tiêu thành phần đủ rõ để đo lường, giám sát, điều hành — tách bạch ICT và kinh tế số các ngành.",
+   "Dư địa chiến lược nằm ở kinh tế số các ngành (>50 triệu lao động). Đặt câu hỏi: giá trị số hoá chảy về nền tảng nội địa hay nước ngoài? Tránh \"số hoá nhưng phụ thuộc\".",
+   "Ba hướng tự chủ: ưu tiên nền tảng \"Make in Vietnam\" ở lĩnh vực có lợi thế dữ liệu bản địa; dùng sức mua sắm công làm đòn bẩy; bảo đảm quyền kiểm soát dữ liệu quốc gia.",
+   "Hệ sinh thái số trên 3 trụ cột: hạ tầng số mạnh · doanh nghiệp số mạnh · nhân lực số mạnh. Lấy đầu tư công dẫn dắt, kích hoạt đầu tư xã hội.",
+   "Đột phá thực sự khi AI không chỉ làm nhanh việc cũ mà tạo sản phẩm, dịch vụ, mô hình kinh doanh hoàn toàn mới — chính sách phải đi trước một bước (cơ chế thử nghiệm có kiểm soát)."]},
+ {tag:"CHỦ ĐỀ TRỌNG TÂM",t:"Lãng phí ở tầm quốc gia — 6 tầng lãng phí",pts:["__WASTE__"]}
+];
+let html='';
+speeches.forEach((s,i)=>{
+ const isWaste=s.pts[0]==='__WASTE__';
+ html+=`<div class="acc" onclick="this.classList.toggle('open')">
+   <div class="head"><span class="dot" style="background:var(--teal);box-shadow:0 0 12px var(--teal)"></span>
+   <div style="flex:1"><div class="ttl">${s.t}</div><span class="sub">▸ ${s.tag}</span></div><span class="plus">+</span></div>
+   <div class="body">${isWaste?'<div id="wasteSlot"></div>':`<ul style="list-style:none">${s.pts.map(p=>`<li style="padding:7px 0 7px 20px;position:relative;color:var(--mut);font-size:13.5px"><span style="position:absolute;left:0;color:var(--gold)">▸</span>${p}</li>`).join('')}</ul>`}</div>
+ </div>`;
+});
+document.getElementById('speechList').innerHTML=html;
+
+/* 6 waste layers */
+const waste=[
+ {n:1,nm:"Lãng phí ngân sách trực tiếp",sc:"~3–5% chi thường xuyên (50.000–80.000 tỷ/năm)",d:"Dễ thấy nhất nhưng không lớn nhất.",items:["Hội nghị, hội thảo, công tác nước ngoài không cần thiết","Xe công, trụ sở vượt tiêu chuẩn","Mua sắm công phô trương","Chi phí quản lý hành chính cồng kềnh"]},
+ {n:2,nm:"Lãng phí đầu tư công",sc:"Mỗi 10% chậm tiến độ ~60.000–80.000 tỷ/năm \"đóng băng\"",d:"Thiệt hại lớn hơn nhiều Tầng 1.",items:["Dự án chậm tiến độ, đội vốn 30–200%","Công trình hoàn thành nhưng không sử dụng được","Giải ngân chỉ đạt 75–85% (2022–2024)","Nghiên cứu KH \"xếp ngăn kéo\""]},
+ {n:3,nm:"Lãng phí tài sản công & nguồn lực NN",sc:"Có thể 5–7% GDP (450.000–650.000 tỷ)",d:"Nhạy cảm và quy mô rất lớn.",items:["Đất đai bỏ hoang, dự án treo hàng trăm nghìn ha","Tài sản công sau sáp nhập chưa xử lý","Vốn NN \"bất động\" trong DNNN kém hiệu quả","Tài nguyên khai thác không tối ưu (xuất thô giá rẻ)"]},
+ {n:4,nm:"Lãng phí thể chế & cơ chế",sc:"Chi phí tuân thủ ~4–5% GDP/năm (World Bank)",d:"Khó đo nhưng gây hại nhất dài hạn.",items:["Quy định chồng chéo → \"sợ sai hơn sợ đói\"","Thủ tục hành chính phức tạp","Cơ chế \"xin–cho\" méo mó thị trường","Tư duy \"không quản được thì cấm\""]},
+ {n:5,nm:"Lãng phí thời gian & nhân lực",sc:"Mỗi 1% tăng NSLĐ = ~100.000 tỷ GDP",d:"Ít được thảo luận nhưng rất lớn.",items:["Họp hành triền miên, ra quyết định chậm","Văn hoá \"chờ họp\" xử lý công việc","Nhân tài rời khu vực công","NSLĐ VN chỉ bằng ~1/10 Singapore"]},
+ {n:6,nm:"Lãng phí cơ hội phát triển",sc:"\"Lãng phí cơ hội lịch sử của dân tộc\"",d:"Lớn nhất, nghiêm trọng nhất nhưng khó nhìn thấy.",items:["Bẫy thu nhập trung bình","Chậm chân AI, bán dẫn, năng lượng sạch → tụt hậu 20–30 năm","Dân số vàng trôi qua (2035 già hoá)","Chưa tận dụng 15+ FTA đã ký"]}
+];
+const wasteHtml='<p style="color:var(--mut);font-size:13px;margin-bottom:12px">TBT Tô Lâm: lãng phí là \"kẻ thù không kém tham nhũng\". 6 tầng phân tích chiến lược — nhấp từng tầng.</p>'+
+ waste.map(w=>`<div class="wbar" onclick="event.stopPropagation();this.classList.toggle('open')">
+   <div class="wh"><div class="wn">${w.n}</div><div class="wt"><div class="nm">${w.nm}</div><div class="sc">${w.sc}</div></div><span class="plus">+</span></div>
+   <div class="wb"><p>${w.d}</p><ul>${w.items.map(it=>`<li>${it}</li>`).join('')}</ul></div>
+ </div>`).join('');
+const wasteSlot=document.getElementById('wasteSlot');
+if(wasteSlot)wasteSlot.innerHTML=wasteHtml;
+</script>
+</body>
+</html>

@@ -1,0 +1,2136 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xây dựng CHXD chuẩn thương hiệu Petrolimex · PLX GAMIFICATION</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=JetBrains+Mono:wght@500;700&family=Public+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --plx-red:#E30613;
+    --plx-red-deep:#B30510;
+    --plx-navy:#002D74;
+    --plx-navy-ink:#001A4A;
+    --plx-gold:#F0A500;
+    --plx-gold-deep:#C08500;
+    --plx-green:#2D9B4E;
+    --plx-green-deep:#1E7738;
+    --plx-purple:#7A1FA0;
+    --cream:#FBF7F0;
+    --cream-deep:#F3ECDD;
+    --paper:#FFFFFF;
+    --ink:#161413;
+    --muted:#6B655D;
+    --faint:#D9D3C7;
+    --line:rgba(22,20,19,0.10);
+    --line-strong:rgba(22,20,19,0.18);
+    --sans:'Be Vietnam Pro',-apple-system,sans-serif;
+    --serif:'Fraunces',Georgia,serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  html,body{height:100%}
+  body{
+    font-family:var(--sans);
+    background:var(--cream);
+    color:var(--ink);
+    font-feature-settings:"ss01","ss02","cv11";
+    letter-spacing:-0.005em;
+    overflow-x:hidden;
+  }
+
+  /* ═══════ TOPBAR (multi-color brand) ═══════ */
+  .topbar{
+    height:56px;
+    background:var(--plx-red);
+    background-image:linear-gradient(100deg,var(--plx-red) 0%,var(--plx-red-deep) 45%,var(--plx-navy) 100%);
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 20px;
+    border-bottom:3px solid var(--plx-gold);
+    position:sticky;top:0;z-index:50;
+  }
+  .topbar .brand{display:flex;align-items:center;gap:12px}
+  .plx-mark{
+    display:none;
+  }
+  .brand-stack{color:#fff;line-height:1.1}
+  .brand-stack .b1{font-size:11px;letter-spacing:0.18em;font-weight:600;opacity:0.85;text-transform:uppercase}
+  .brand-stack .b2{font-family:var(--serif);font-size:17px;font-weight:600;letter-spacing:-0.01em}
+
+  .top-right{display:flex;align-items:center;gap:10px}
+  .chip{
+    background:rgba(255,255,255,0.14);color:#fff;
+    font-size:11px;font-weight:600;
+    padding:5px 11px;border-radius:20px;
+    display:flex;align-items:center;gap:6px;
+    border:1px solid rgba(255,255,255,0.2);
+  }
+  .chip .dot{width:6px;height:6px;border-radius:50%;background:var(--plx-gold);box-shadow:0 0 8px var(--plx-gold)}
+  .chip.mono{font-family:var(--mono);font-weight:700}
+
+  /* ═══════ BUTTONS ═══════ */
+  .btn{
+    font-family:var(--sans);font-weight:600;font-size:14px;
+    border:none;cursor:pointer;padding:12px 22px;
+    border-radius:10px;display:inline-flex;align-items:center;gap:8px;justify-content:center;
+    transition:all 0.18s ease;letter-spacing:-0.005em;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{
+    background:var(--plx-red);color:#fff;
+    box-shadow:0 4px 0 var(--plx-red-deep),0 8px 20px rgba(227,6,19,0.3);
+  }
+  .btn-primary:hover{transform:translateY(-1px)}
+  .btn-gold{
+    background:var(--plx-gold);color:var(--plx-navy-ink);
+    box-shadow:0 4px 0 var(--plx-gold-deep),0 8px 20px rgba(240,165,0,0.3);
+  }
+  .btn-gold:hover{transform:translateY(-1px)}
+  .btn-ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line-strong)}
+  .btn-ghost:hover{border-color:var(--ink);background:rgba(0,0,0,0.03)}
+  .btn-lg{padding:16px 30px;font-size:15px;border-radius:12px}
+  .btn:disabled{opacity:0.4;cursor:not-allowed;transform:none !important}
+
+  /* ═══════ SCREEN ═══════ */
+  .screen{display:none;animation:fadeIn 0.4s ease}
+  .screen.active{display:block}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .wrap{max-width:none;width:100%;margin:0 auto;padding:24px 22px 60px}
+  #screen-lobby .wrap{padding-left:8px;padding-right:8px}
+
+  /* ═══════ LOBBY ═══════ */
+  .lobby-hero{
+    background:var(--paper);
+    border-radius:20px;padding:36px 28px 36px;
+    position:relative;overflow:hidden;
+    border:1px solid var(--line);
+    box-shadow:0 2px 0 rgba(0,0,0,0.03),0 30px 60px -20px rgba(227,6,19,0.1);
+  }
+  .lobby-hero::before{
+    content:"";position:absolute;top:-100px;right:-80px;
+    width:380px;height:380px;border-radius:50%;
+    background:radial-gradient(circle,rgba(227,6,19,0.1) 0%,transparent 60%);
+    pointer-events:none;
+  }
+  .lobby-hero::after{
+    content:"";position:absolute;bottom:-120px;left:-60px;
+    width:340px;height:340px;border-radius:50%;
+    background:radial-gradient(circle,rgba(240,165,0,0.12) 0%,transparent 60%);
+    pointer-events:none;
+  }
+  .hero-content{position:relative;z-index:1;width:100%}
+  .kicker{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--plx-red);background:rgba(227,6,19,0.08);
+    padding:6px 12px;border-radius:30px;margin-bottom:20px;
+  }
+  .kicker .k-dot{width:6px;height:6px;border-radius:50%;background:var(--plx-red)}
+
+  .hero-title{
+    font-family:var(--serif);font-weight:700;
+    font-size:clamp(38px,5.8vw,76px);
+    line-height:1.02;letter-spacing:-0.025em;
+    color:var(--plx-navy);max-width:none;
+  }
+  .hero-title em{color:var(--plx-red);font-style:normal;position:relative;display:inline}
+  .hero-title em::after{
+    content:"";position:absolute;left:-2px;right:-2px;bottom:4px;height:10px;
+    background:var(--plx-gold);opacity:0.35;z-index:-1;border-radius:2px;
+  }
+  .hero-sub{
+    font-size:17px;line-height:1.55;color:var(--muted);
+    margin-top:18px;max-width:none;width:100%;
+  }
+  #screen-lobby .hero-sub{
+    width:min(1480px,calc(100vw - 96px));
+    max-width:min(1480px,calc(100vw - 96px));
+  }
+  .hero-sub strong{color:var(--ink);font-weight:600}
+
+  /* CHXD preview */
+  .blueprint-showcase{
+    margin-top:32px;
+    display:grid;grid-template-columns:1.2fr 1fr;gap:24px;
+    align-items:stretch;
+  }
+  @media(max-width:820px){.blueprint-showcase{grid-template-columns:1fr}}
+
+  .blueprint-panel{
+    background:linear-gradient(135deg,#0C2856 0%,#001A4A 100%);
+    border-radius:16px;
+    padding:24px;position:relative;overflow:hidden;
+    min-height:280px;
+  }
+  .blueprint-panel::before{
+    content:"";position:absolute;inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.05) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,0.05) 1px,transparent 1px);
+    background-size:20px 20px;
+    opacity:0.4;
+  }
+  .blueprint-label{
+    font-family:var(--mono);font-size:10px;letter-spacing:0.2em;
+    text-transform:uppercase;color:var(--plx-gold);font-weight:700;
+    margin-bottom:10px;position:relative;z-index:1;
+  }
+  .blueprint-title{
+    color:#fff;font-family:var(--serif);font-size:20px;font-weight:600;
+    line-height:1.2;position:relative;z-index:1;
+    margin-bottom:18px;
+  }
+  .blueprint-grid{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+    position:relative;z-index:1;
+  }
+  .bp-cell{
+    background:rgba(255,255,255,0.06);
+    border:1px dashed rgba(255,255,255,0.2);
+    border-radius:8px;padding:10px 8px;
+    text-align:center;
+    transition:all 0.3s;
+  }
+  .bp-cell:hover{background:rgba(240,165,0,0.1);border-color:var(--plx-gold)}
+  .bp-icon{
+    font-family:var(--serif);font-size:20px;font-weight:700;
+    color:var(--plx-gold);
+    margin-bottom:4px;
+  }
+  .bp-name{
+    font-size:10px;font-weight:600;color:#fff;opacity:0.8;line-height:1.2;
+  }
+
+  .rules-panel{
+    background:var(--cream-deep);
+    border-radius:16px;padding:24px;
+    border:1px solid var(--line);
+  }
+  .rules-panel h4{
+    font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--muted);font-weight:700;margin-bottom:16px;
+  }
+  .rule-item{
+    display:flex;gap:12px;margin-bottom:14px;padding-bottom:14px;
+    border-bottom:1px dashed var(--line);
+  }
+  .rule-item:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+  .rule-badge{
+    font-family:var(--serif);font-weight:700;font-size:14px;
+    color:#fff;background:var(--plx-red);
+    width:28px;height:28px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .rule-item:nth-child(2) .rule-badge{background:var(--plx-gold-deep)}
+  .rule-item:nth-child(3) .rule-badge{background:var(--plx-green-deep)}
+  .rule-item:nth-child(4) .rule-badge{background:var(--plx-navy)}
+  .rule-body{flex:1}
+  .rule-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:2px}
+  .rule-desc{font-size:12px;color:var(--muted);line-height:1.4}
+
+  .cta-row{margin-top:30px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .cta-row .meta{font-size:12px;color:var(--muted)}
+
+  /* ═══════ GAME SCREEN ═══════ */
+  .game-layout{
+    display:grid;grid-template-columns:1fr 360px;gap:20px;
+  }
+  @media(max-width:1000px){.game-layout{grid-template-columns:1fr}}
+
+  /* Canvas panel */
+  .canvas-panel{
+    background:var(--paper);
+    border-radius:16px;
+    border:1px solid var(--line);
+    overflow:hidden;
+    position:relative;
+  }
+  .canvas-hdr{
+    padding:16px 20px;background:var(--cream-deep);
+    border-bottom:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .canvas-hdr-title{
+    font-size:11px;letter-spacing:0.14em;text-transform:uppercase;font-weight:700;
+    color:var(--muted);
+  }
+  .canvas-hdr-progress{
+    font-family:var(--serif);font-size:14px;font-weight:600;color:var(--plx-navy);
+  }
+  .canvas-hdr-progress strong{color:var(--plx-red);font-size:18px}
+
+  .canvas-stage{
+    position:relative;
+    background:linear-gradient(180deg,#6FA7E8 0%,#9BCAE5 50%,#E8D8B0 75%,#C9A974 100%);
+    aspect-ratio:16/9;
+    overflow:hidden;
+  }
+
+  /* Station canvas SVG container */
+  .station-svg{
+    position:absolute;inset:0;width:100%;height:100%;
+  }
+
+  /* Element overlay for unlock animation */
+  .element-overlay{
+    position:absolute;top:14px;right:14px;
+    background:rgba(255,255,255,0.92);
+    backdrop-filter:blur(10px);
+    border-radius:12px;padding:12px 14px;
+    font-size:12px;color:var(--ink);
+    max-width:240px;
+    border:1px solid var(--line);
+    box-shadow:0 10px 30px rgba(0,45,116,0.15);
+    z-index:10;
+    transition:all 0.3s;
+  }
+  .element-overlay.hidden-overlay{opacity:0;transform:translateY(-8px);pointer-events:none}
+  .element-overlay strong{display:block;color:var(--plx-red);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:3px}
+
+  /* Elements legend under canvas */
+  .elements-legend{
+    padding:16px 18px;background:var(--paper);
+    border-top:1px solid var(--line);
+    display:grid;grid-template-columns:repeat(7,1fr);gap:8px;
+  }
+  @media(max-width:820px){.elements-legend{grid-template-columns:repeat(4,1fr)}}
+  .legend-item{
+    text-align:center;padding:10px 6px;
+    border-radius:10px;border:1.5px solid var(--line);
+    background:var(--paper);transition:all 0.3s;position:relative;
+  }
+  .legend-item.locked{opacity:0.4}
+  .legend-item.partial{
+    background:linear-gradient(180deg,var(--cream) 0%,#FEF5E4 100%);
+    border-color:var(--plx-gold);
+  }
+  .legend-item.unlocked{
+    background:linear-gradient(180deg,#EAF6EE 0%,#F7FBF8 100%);
+    border-color:var(--plx-green);
+  }
+  .legend-icon{
+    width:34px;height:34px;border-radius:50%;margin:0 auto 6px;
+    background:var(--cream-deep);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-size:14px;font-weight:700;
+    color:var(--muted);
+    position:relative;
+  }
+  .legend-item.unlocked .legend-icon{
+    background:var(--plx-green);color:#fff;
+    box-shadow:0 0 0 4px rgba(45,155,78,0.2);
+  }
+  .legend-item.partial .legend-icon{
+    background:var(--plx-gold);color:#fff;
+  }
+  .legend-item.unlocked .legend-icon::after{
+    content:"✓";position:absolute;top:-4px;right:-4px;
+    width:16px;height:16px;border-radius:50%;
+    background:#fff;color:var(--plx-green);
+    font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;
+    border:2px solid var(--plx-green);
+  }
+  .legend-name{
+    font-size:10px;font-weight:600;color:var(--ink);line-height:1.2;
+  }
+  .legend-item.locked .legend-name{color:var(--muted)}
+  .legend-progress{
+    margin-top:5px;height:3px;background:var(--faint);border-radius:2px;overflow:hidden;
+  }
+  .legend-progress .fill{height:100%;background:var(--plx-gold);transition:width 0.5s;border-radius:2px}
+  .legend-item.unlocked .legend-progress .fill{background:var(--plx-green);width:100% !important}
+
+  .game-rank-card{
+    margin:14px 0 0;
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:8px;
+  }
+  .game-rank-stat{
+    background:var(--cream);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:10px 8px;
+    text-align:center;
+    min-width:0;
+  }
+  .game-rank-stat .v{
+    font-family:var(--serif);
+    font-size:22px;
+    font-weight:800;
+    line-height:1;
+    color:var(--ink);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .game-rank-stat.rank .v{color:var(--plx-navy)}
+  .game-rank-stat .l{
+    margin-top:6px;
+    font-size:9px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    font-weight:700;
+    color:var(--muted);
+  }
+
+  /* Question panel */
+  .q-panel{
+    background:var(--paper);
+    border-radius:16px;
+    border:1px solid var(--line);
+    overflow:hidden;
+    display:flex;flex-direction:column;
+  }
+  .q-hdr{
+    padding:16px 20px;background:var(--plx-navy);color:#fff;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .q-step{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:0.05em}
+  .q-step strong{color:var(--plx-gold);font-size:16px}
+
+  /* Timer ring */
+  .timer-ring{
+    position:relative;width:44px;height:44px;flex-shrink:0;
+  }
+  .timer-ring svg{transform:rotate(-90deg);width:100%;height:100%}
+  .timer-ring-bg{stroke:rgba(255,255,255,0.15);stroke-width:4;fill:none}
+  .timer-ring-fg{stroke:var(--plx-gold);stroke-width:4;fill:none;stroke-linecap:round;transition:stroke-dashoffset 1s linear, stroke 0.3s}
+  .timer-ring.warn .timer-ring-fg{stroke:var(--plx-gold)}
+  .timer-ring.danger .timer-ring-fg{stroke:var(--plx-red);animation:ringPulse 0.5s ease-in-out infinite alternate}
+  @keyframes ringPulse{to{stroke-width:6}}
+  .timer-num{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:14px;font-weight:700;color:#fff;
+  }
+
+  .q-body{padding:22px 24px;flex:1;display:flex;flex-direction:column}
+
+  .q-element-tag{
+    display:inline-flex;align-items:center;gap:7px;
+    font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+    padding:4px 10px;border-radius:20px;
+    background:var(--cream-deep);color:var(--plx-navy);
+    align-self:flex-start;margin-bottom:10px;
+  }
+  .q-element-tag .dot{width:6px;height:6px;border-radius:50%}
+
+  .q-text{
+    font-family:var(--serif);font-size:20px;font-weight:600;
+    color:var(--plx-navy);line-height:1.35;letter-spacing:-0.01em;
+    margin-bottom:18px;
+  }
+
+  .q-options{display:grid;gap:9px}
+  .q-opt{
+    display:flex;align-items:flex-start;gap:12px;
+    padding:12px 15px;border-radius:10px;
+    background:var(--paper);
+    border:1.5px solid var(--line-strong);
+    cursor:pointer;transition:all 0.15s;text-align:left;
+    font-family:var(--sans);width:100%;
+  }
+  .q-opt:hover:not(:disabled){
+    border-color:var(--plx-navy);
+    background:var(--cream);
+    transform:translateX(2px);
+  }
+  @media(hover:none){
+    .q-opt:hover:not(:disabled){
+      border-color:var(--line-strong);
+      background:var(--paper);
+      transform:none;
+    }
+    .q-opt:hover:not(:disabled) .q-opt-letter{
+      background:var(--cream-deep);
+      color:var(--plx-navy);
+    }
+  }
+  .q-opt:disabled{cursor:default}
+  .q-opt-letter{
+    flex-shrink:0;width:28px;height:28px;border-radius:7px;
+    background:var(--cream-deep);
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:800;color:var(--plx-navy);
+    transition:all 0.15s;
+  }
+  .q-opt:hover:not(:disabled) .q-opt-letter{background:var(--plx-navy);color:#fff}
+  .q-opt-text{font-size:13.5px;line-height:1.5;color:var(--ink);flex:1}
+
+  .q-opt.correct{background:#EAF6EE;border-color:var(--plx-green);animation:correctGlow 0.6s ease}
+  .q-opt.correct .q-opt-letter{background:var(--plx-green);color:#fff}
+  @keyframes correctGlow{0%{box-shadow:0 0 0 0 rgba(45,155,78,0.6)}100%{box-shadow:0 0 0 12px rgba(45,155,78,0)}}
+  .q-opt.incorrect{background:#FDEEEC;border-color:var(--plx-red);opacity:0.85}
+  .q-opt.incorrect .q-opt-letter{background:var(--plx-red);color:#fff}
+  .q-opt.shown-correct{background:#EAF6EE;border-color:var(--plx-green)}
+  .q-opt.shown-correct .q-opt-letter{background:var(--plx-green);color:#fff}
+  .q-opt.muted{opacity:0.5}
+
+  /* Feedback after answer */
+  .q-feedback{
+    margin-top:16px;padding:14px 16px;border-radius:10px;
+    border:1.5px solid;font-size:13px;line-height:1.55;
+    animation:slideUp 0.3s ease;
+  }
+  @keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .q-feedback.good{background:#EAF6EE;border-color:var(--plx-green);color:var(--plx-green-deep)}
+  .q-feedback.bad{background:#FDEEEC;border-color:var(--plx-red);color:var(--plx-red-deep)}
+  .q-feedback-lbl{
+    font-size:10px;letter-spacing:0.14em;text-transform:uppercase;
+    font-weight:800;margin-bottom:4px;
+  }
+  .q-feedback-body{color:var(--ink);font-size:13px}
+
+  .q-cta{
+    margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;
+  }
+  .q-score-live{font-size:12px;color:var(--muted)}
+  .q-score-live strong{font-family:var(--serif);font-size:16px;color:var(--plx-red);margin:0 2px}
+
+  /* Knowledge library toggle */
+  .knowledge-btn{
+    background:transparent;border:1px dashed var(--line-strong);
+    font-family:var(--sans);font-size:12px;color:var(--muted);
+    padding:6px 12px;border-radius:20px;cursor:pointer;font-weight:600;
+    transition:all 0.15s;
+  }
+  .knowledge-btn:hover{border-color:var(--plx-navy);color:var(--plx-navy)}
+
+  /* ═══════ RESULTS ═══════ */
+  .results-hero{
+    background:var(--paper);
+    border-radius:18px;border:1px solid var(--line);
+    padding:40px 44px 34px;
+    position:relative;overflow:hidden;text-align:center;
+  }
+  .results-hero::before{
+    content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse at top,rgba(227,6,19,0.08) 0%,transparent 60%);
+    pointer-events:none;
+  }
+  .rh-inner{position:relative;z-index:1;max-width:740px;margin:0 auto}
+
+  .trophy{
+    width:120px;height:120px;margin:0 auto 20px;position:relative;
+  }
+  .trophy-ring{
+    position:absolute;inset:0;border-radius:50%;
+    background:conic-gradient(from 0deg,var(--plx-gold),var(--plx-red),var(--plx-navy),var(--plx-green),var(--plx-gold));
+    padding:4px;
+  }
+  .trophy-inner{
+    width:100%;height:100%;border-radius:50%;
+    background:var(--paper);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-size:44px;font-weight:800;
+    color:var(--plx-navy);
+    box-shadow:inset 0 -4px 12px rgba(0,0,0,0.08);
+  }
+  .trophy::after{
+    content:"";position:absolute;inset:-10px;border-radius:50%;
+    border:2px dashed var(--plx-gold);opacity:0.4;
+    animation:spin 25s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .rh-title{font-family:var(--serif);font-size:38px;font-weight:700;color:var(--plx-navy);letter-spacing:-0.02em;line-height:1.12}
+  .rh-sub{font-size:16px;color:var(--muted);margin-top:10px;line-height:1.5}
+
+  .rh-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px;margin-top:30px}
+  @media(max-width:720px){.rh-stats{grid-template-columns:repeat(2,1fr)}}
+  .rh-stat{background:var(--cream);border-radius:12px;padding:18px 14px;border:1px solid var(--line)}
+  .rh-stat .v{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--plx-navy);line-height:1}
+  .rh-stat .l{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-top:6px}
+  .honor-banner{
+    display:none;position:relative;overflow:hidden;margin-top:20px;padding:18px 20px 18px 96px;border-radius:14px;
+    background:linear-gradient(135deg,#FFF2BF 0%,#FFFFFF 72%);
+    border:1.5px solid var(--plx-gold);
+    box-shadow:0 16px 36px rgba(240,165,0,0.18);
+    color:var(--plx-navy);text-align:left;
+  }
+  .honor-banner.active{display:block;animation:honorPop .55s ease both}
+  .honor-banner.rank-2{background:linear-gradient(135deg,#EEF2F8 0%,#FFFFFF 72%);border-color:#AAB4C4}
+  .honor-banner.rank-3{background:linear-gradient(135deg,#F8E2C8 0%,#FFFFFF 72%);border-color:#C9863A}
+  .honor-cup{
+    position:absolute;left:18px;top:50%;transform:translateY(-50%);
+    width:58px;height:58px;border-radius:16px;display:grid;place-items:center;
+    background:var(--plx-gold);color:var(--plx-navy);font-family:var(--serif);
+    font-size:26px;font-weight:900;box-shadow:0 10px 22px rgba(240,165,0,0.28);
+  }
+  .honor-banner.rank-2 .honor-cup{background:#DDE4EE;color:#22324A}
+  .honor-banner.rank-3 .honor-cup{background:#D59A54;color:#2E1908}
+  .honor-title{font-family:var(--serif);font-size:24px;font-weight:800;line-height:1.15}
+  .honor-sub{font-size:13px;line-height:1.5;color:var(--ink);margin-top:6px}
+  .honor-podium{display:flex;align-items:flex-end;gap:6px;margin-top:12px;height:36px}
+  .podium-step{width:42px;border-radius:7px 7px 3px 3px;background:rgba(0,45,116,0.15);display:grid;place-items:center;font-family:var(--mono);font-size:11px;font-weight:800;color:var(--plx-navy)}
+  .podium-step.s1{height:36px;background:rgba(240,165,0,0.72)}
+  .podium-step.s2{height:29px;background:rgba(170,180,196,0.78)}
+  .podium-step.s3{height:23px;background:rgba(201,134,58,0.72)}
+  .podium-step.active{outline:3px solid rgba(227,6,19,0.22);transform:translateY(-3px)}
+  .honor-confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .honor-confetti span{position:absolute;top:-12px;width:7px;height:12px;border-radius:2px;background:var(--plx-gold);animation:confettiFall 1.4s ease-in-out infinite}
+  .honor-confetti span:nth-child(2){left:18%;background:var(--plx-red);animation-delay:.12s}
+  .honor-confetti span:nth-child(3){left:38%;background:var(--plx-green);animation-delay:.24s}
+  .honor-confetti span:nth-child(4){left:61%;background:var(--plx-navy);animation-delay:.36s}
+  .honor-confetti span:nth-child(5){left:82%;background:var(--plx-gold-deep);animation-delay:.48s}
+  .honor-confetti span:nth-child(6){left:50%;background:#fff;animation-delay:.6s}
+  @keyframes honorPop{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+  @keyframes confettiFall{0%{transform:translateY(-16px) rotate(0deg);opacity:0}20%{opacity:1}100%{transform:translateY(132px) rotate(220deg);opacity:0}}
+
+  .results-grid{margin-top:24px;display:grid;grid-template-columns:1.2fr 1fr;gap:20px}
+  @media(max-width:820px){.results-grid{grid-template-columns:1fr}}
+  .panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:24px 26px}
+  .panel h3{font-family:var(--serif);font-size:22px;font-weight:600;color:var(--plx-navy);margin-bottom:4px;letter-spacing:-0.01em}
+  .panel .sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+
+  /* Element mastery grid on results */
+  .elements-result{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .er-card{
+    background:var(--cream);border-radius:10px;padding:12px 14px;
+    border-left:3px solid var(--plx-gold);
+  }
+  .er-card.done{border-left-color:var(--plx-green);background:#EAF6EE}
+  .er-card.partial{border-left-color:var(--plx-gold);background:#FEF5E4}
+  .er-card.empty{border-left-color:var(--plx-red);background:#FDEEEC}
+
+  .er-head{
+    display:flex;align-items:center;gap:10px;margin-bottom:8px;
+  }
+  .er-badge{
+    width:28px;height:28px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-weight:700;font-size:12px;color:#fff;flex-shrink:0;
+  }
+  .er-title{font-size:13px;font-weight:700;color:var(--ink);line-height:1.2}
+  .er-meta{
+    font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:600;
+  }
+
+  .commit-box{
+    background:linear-gradient(135deg,#F3ECDD 0%,#FBF7F0 100%);
+    border:1.5px solid var(--plx-gold);border-radius:14px;padding:20px 22px;margin-top:20px;
+  }
+  .commit-lbl{font-family:var(--serif);font-size:13px;font-weight:600;color:var(--plx-gold-deep);margin-bottom:8px}
+  .commit-box blockquote{font-family:var(--serif);font-size:17px;font-style:italic;font-weight:500;line-height:1.45;color:var(--plx-navy)}
+  .commit-box blockquote::before{content:"\201C";font-size:36px;color:var(--plx-gold);opacity:0.5;line-height:0;vertical-align:-12px;margin-right:4px}
+  .commit-box blockquote::after{content:"\201D";font-size:36px;color:var(--plx-gold);opacity:0.5;line-height:0;vertical-align:-20px;margin-left:4px}
+  .end-cta{display:flex;justify-content:center;gap:12px;margin-top:28px}
+
+  .hidden{display:none !important}
+
+  /* Unlock animation */
+  @keyframes unlockPulse{
+    0%{transform:scale(1);filter:brightness(1)}
+    50%{transform:scale(1.08);filter:brightness(1.3)}
+    100%{transform:scale(1);filter:brightness(1)}
+  }
+  .unlocking{animation:unlockPulse 0.8s ease}
+  /* Mobile polish patch: layout only, no game logic changes */
+  @media(max-width:640px){
+    .topbar{
+      height:auto;
+      min-height:0;
+      align-items:stretch;
+      flex-direction:column;
+      gap:10px;
+      padding:10px 14px;
+      border-radius:0 0 18px 18px;
+    }
+    .topbar .brand{
+      width:100%;
+      min-width:0;
+    }
+    .brand-stack{
+      min-width:0;
+      flex:1 1 auto;
+    }
+    .brand-stack .b1{
+      font-size:10px;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .brand-stack .b2{
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+      font-size:15px;
+      line-height:1.15;
+      letter-spacing:0;
+    }
+    .top-right{
+      width:100%;
+      justify-content:flex-start;
+      gap:8px;
+      overflow-x:auto;
+      padding-bottom:2px;
+      scrollbar-width:none;
+    }
+    .top-right::-webkit-scrollbar{display:none}
+    .chip{
+      flex:0 0 auto;
+      white-space:nowrap;
+      font-size:12px;
+      padding:7px 10px;
+    }
+    .wrap{
+      padding:16px 14px 84px;
+    }
+    .lobby-hero{
+      padding:24px 18px 26px;
+      border-radius:18px;
+    }
+    .kicker{
+      max-width:100%;
+      white-space:normal;
+      line-height:1.25;
+      letter-spacing:0.1em;
+    }
+    .hero-title{
+      font-size:clamp(36px,10vw,46px);
+      line-height:1.04;
+      letter-spacing:0;
+      max-width:100%;
+    }
+    .hero-title em{
+      display:inline;
+    }
+    .hero-sub{
+      font-size:16px;
+      line-height:1.58;
+      max-width:100%;
+    }
+    .blueprint-showcase{
+      grid-template-columns:1fr;
+      gap:16px;
+    }
+    .game-layout{
+      grid-template-columns:1fr;
+      gap:14px;
+    }
+    .canvas-panel,
+    .q-panel{
+      border-radius:18px;
+      overflow:hidden;
+    }
+    .canvas-stage{
+      min-height:260px;
+      aspect-ratio:4 / 3;
+    }
+    .station-svg{
+      width:100%;
+      height:100%;
+    }
+    .elements-legend{
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      overflow-x:hidden;
+      gap:8px;
+      padding:14px 12px;
+    }
+    .legend-item{
+      min-width:0;
+      padding:9px 6px;
+    }
+    .legend-name{
+      font-size:11px;
+      min-height:26px;
+    }
+    .q-hdr{
+      padding:15px 16px;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .q-hdr > div:first-child{
+      min-width:0;
+      flex:1 1 190px;
+    }
+    .timer-ring{
+      flex:0 0 auto;
+    }
+    .q-body{
+      padding:22px 18px 24px;
+    }
+    .q-text{
+      font-size:clamp(25px,7vw,32px);
+      line-height:1.18;
+      letter-spacing:0;
+    }
+    .q-opt{
+      padding:14px 13px;
+      gap:12px;
+    }
+    .q-opt .letter{
+      width:34px;
+      height:34px;
+      border-radius:10px;
+    }
+    .q-opt .text{
+      font-size:15px;
+      line-height:1.5;
+      min-width:0;
+    }
+    .q-score-live{
+      width:100%;
+      margin-bottom:10px;
+    }
+    .q-footer{
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .q-footer .btn{
+      flex:1 1 180px;
+    }
+    #screen-game .wrap{
+      padding:10px 10px 56px;
+    }
+    #screen-game .game-layout{
+      gap:8px;
+    }
+    #screen-game .canvas-panel,
+    #screen-game .q-panel{
+      border-radius:12px;
+    }
+    #screen-game .canvas-hdr{
+      padding:7px 10px;
+      gap:8px;
+    }
+    #screen-game .canvas-hdr-title{
+      font-size:9px;
+      letter-spacing:0.08em;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    #screen-game .canvas-hdr-progress{
+      font-size:11px;
+      white-space:nowrap;
+    }
+    #screen-game .canvas-hdr-progress strong{
+      font-size:14px;
+    }
+    #screen-game .canvas-stage{
+      min-height:0;
+      height:112px;
+      aspect-ratio:auto;
+    }
+    #screen-game .station-svg{
+      height:112px;
+    }
+    #screen-game .element-overlay{
+      top:6px;
+      right:6px;
+      max-width:170px;
+      padding:7px 9px;
+      border-radius:8px;
+      font-size:10.5px;
+      line-height:1.25;
+    }
+    #screen-game .element-overlay strong{
+      font-size:9px;
+      letter-spacing:0.08em;
+    }
+    #screen-game .elements-legend{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:5px;
+      padding:8px 9px;
+    }
+    #screen-game .legend-item{
+      padding:6px 4px;
+      border-radius:8px;
+      min-width:0;
+    }
+    #screen-game .legend-icon{
+      width:24px;
+      height:24px;
+      margin-bottom:4px;
+      font-size:11px;
+    }
+    #screen-game .legend-name{
+      font-size:8.5px;
+      line-height:1.1;
+    }
+    #screen-game .legend-progress{
+      margin-top:4px;
+    }
+    #screen-game .q-hdr{
+      padding:9px 12px;
+      flex-wrap:nowrap;
+      align-items:center;
+    }
+    #screen-game .q-hdr > div:first-child{
+      flex:1 1 auto;
+    }
+    #screen-game .timer-ring{
+      width:38px;
+      height:38px;
+    }
+    #screen-game .timer-num{
+      font-size:12px;
+    }
+    #screen-game .q-body{
+      padding:12px 12px 14px;
+    }
+    #screen-game .q-element-tag{
+      margin-bottom:7px;
+      padding:3px 8px;
+      font-size:9px;
+      letter-spacing:0.07em;
+    }
+    #screen-game .q-text{
+      font-size:clamp(19px,5.8vw,23px);
+      line-height:1.16;
+      margin-bottom:10px;
+    }
+    #screen-game .q-options{
+      gap:7px;
+    }
+    #screen-game .q-opt{
+      padding:8px 9px;
+      gap:8px;
+      border-radius:8px;
+    }
+    #screen-game .q-opt-letter{
+      width:24px;
+      height:24px;
+      border-radius:6px;
+      font-size:10px;
+    }
+    #screen-game .q-opt-text{
+      font-size:12px;
+      line-height:1.35;
+    }
+    #screen-game .q-feedback{
+      margin-top:10px;
+      padding:10px 11px;
+      font-size:12px;
+      line-height:1.4;
+    }
+    #screen-game .q-feedback-body{
+      font-size:12px;
+    }
+    #screen-game .q-cta{
+      margin-top:8px;
+    }
+    #screen-game .q-score-live{
+      margin-bottom:0;
+      width:auto;
+    }
+    .results-hero{
+      padding:30px 18px;
+      border-radius:18px;
+    }
+    .rh-title{
+      font-size:clamp(34px,10vw,44px);
+      line-height:1.08;
+    }
+    .rh-sub{
+      font-size:15.5px;
+    }
+    .rh-stats{
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+    }
+    .rh-stat{
+      padding:15px 10px;
+    }
+    .rh-stat .v{
+      font-size:28px;
+      overflow-wrap:anywhere;
+    }
+    .honor-banner{
+      padding:18px 16px;
+      text-align:center;
+    }
+    .honor-cup{
+      position:static;
+      transform:none;
+      margin:0 auto 12px;
+    }
+    .elements-result{
+      grid-template-columns:1fr;
+    }
+  }
+
+  @media(max-width:430px){
+    .wrap{padding-left:12px;padding-right:12px}
+    .brand-stack .b2{font-size:14px}
+    .chip{font-size:11px}
+    .hero-title{font-size:clamp(34px,11vw,42px)}
+    .canvas-stage{min-height:240px}
+    #screen-game .canvas-stage{min-height:0;height:104px}
+    #screen-game .station-svg{height:104px}
+    .q-text{font-size:clamp(24px,7.4vw,30px)}
+    #screen-game .q-text{font-size:clamp(18px,5.6vw,22px)}
+    .q-hdr{align-items:flex-start}
+    #screen-game .q-hdr{align-items:center}
+    .rh-title{font-size:clamp(32px,11vw,40px)}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="plx-mark"></div>
+      <div class="brand-stack">
+        <div class="b1">Petrolimex · GAMIFICATION</div>
+        <div class="b2">Xây dựng CHXD chuẩn thương hiệu Petrolimex</div>
+      </div>
+    </div>
+    <div class="top-right">
+      <div class="chip mono" id="score-chip">0 điểm</div>
+      <div class="chip">Game 03/03</div>
+    </div>
+  </header>
+
+  <!-- ═══════ LOBBY ═══════ -->
+  <section class="screen active" id="screen-lobby">
+    <div class="wrap">
+      <div class="lobby-hero">
+        <div class="hero-content">
+          <h1 class="hero-title">
+            Xây dựng CHXD <em>chuẩn thương hiệu Petrolimex</em>
+          </h1>
+          <p class="hero-sub">
+            Là một cửa hàng trưởng, bạn hãy lần lượt xây dựng 7 yếu tố thương hiệu để nhận được một CHXD hoàn chỉnh, chuẩn Petrolimex.
+            Mỗi yếu tố thương hiệu sẽ gồm 2 câu hỏi, trả lời đúng mỗi câu sẽ giúp bạn mở khóa 1 mảnh ghép của cửa hàng. Đủ 7 yếu tố đồng nghĩa bạn là một Cửa hàng trưởng chuyên nghiệp, nắm vững nhận diện thương hiệu mới, hệ giá trị cốt lõi và chuẩn phục vụ của Petrolimex.
+          </p>
+
+          <div class="blueprint-showcase">
+            <div class="blueprint-panel">
+              <div class="blueprint-label">CHXD chuẩn PLX</div>
+              <div class="blueprint-title">7 yếu tố bạn sẽ xây dựng</div>
+              <div class="blueprint-grid">
+                <div class="bp-cell"><div class="bp-icon">1</div><div class="bp-name">Biển hiệu</div></div>
+                <div class="bp-cell"><div class="bp-icon">2</div><div class="bp-name">Đồng phục</div></div>
+                <div class="bp-cell"><div class="bp-icon">3</div><div class="bp-name">An toàn</div></div>
+                <div class="bp-cell"><div class="bp-icon">4</div><div class="bp-name">Vệ sinh</div></div>
+                <div class="bp-cell"><div class="bp-icon">5</div><div class="bp-name">Bảng giá</div></div>
+                <div class="bp-cell"><div class="bp-icon">6</div><div class="bp-name">Chào hỏi</div></div>
+                <div class="bp-cell"><div class="bp-icon">7</div><div class="bp-name">Tận tâm</div></div>
+                <div class="bp-cell" style="border-style:solid;border-color:rgba(240,165,0,0.4)">
+                  <div class="bp-icon" style="color:#fff;font-size:14px;letter-spacing:0">PLX</div>
+                  <div class="bp-name" style="opacity:1;color:var(--plx-gold)">CHXD mẫu</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="rules-panel">
+              <h4>Luật chơi</h4>
+              <div class="rule-item">
+                <div class="rule-badge">1</div>
+                <div class="rule-body">
+                  <div class="rule-title">7 yếu tố - 14 câu hỏi</div>
+                  <div class="rule-desc">Trả lời đúng cả 2 câu, bạn sẽ mở khóa yếu tố thương hiệu đó.</div>
+                </div>
+              </div>
+              <div class="rule-item">
+                <div class="rule-badge">2</div>
+                <div class="rule-body">
+                  <div class="rule-title">30 giây mỗi câu</div>
+                  <div class="rule-desc">Trả lời trong 10 giây đầu được thưởng tốc độ +2 điểm.</div>
+                </div>
+              </div>
+              <div class="rule-item">
+                <div class="rule-badge">3</div>
+                <div class="rule-body">
+                  <div class="rule-title">Mỗi câu đúng = +10 điểm</div>
+                  <div class="rule-desc">Sai câu không mất điểm, nhưng yếu tố đó chỉ mở một phần.</div>
+                </div>
+              </div>
+              <div class="rule-item">
+                <div class="rule-badge">4</div>
+                <div class="rule-body">
+                  <div class="rule-title">Đủ 7/7 yếu tố → CHT đẳng cấp</div>
+                  <div class="rule-desc">Xếp loại A+ và nhận cam kết thương hiệu cá nhân.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cta-row">
+            <button class="btn btn-primary btn-lg" id="btn-start">
+              Bắt đầu xây dựng
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="meta">Thời lượng: 15 phút</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════ GAME ═══════ -->
+  <section class="screen" id="screen-game">
+    <div class="wrap">
+      <div class="game-layout">
+
+        <!-- LEFT: Canvas -->
+        <div class="canvas-panel">
+          <div class="canvas-hdr">
+            <div class="canvas-hdr-title">Cửa hàng xăng dầu của bạn</div>
+            <div class="canvas-hdr-progress"><strong id="unlocked-count">0</strong>/7 yếu tố đã mở</div>
+          </div>
+          <div class="elements-legend" id="elements-legend"></div>
+          <div class="canvas-stage" id="canvas-stage">
+            <svg class="station-svg" viewBox="0 0 800 450" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg" id="station-svg">
+              <!-- Sky gradient -->
+              <defs>
+                <linearGradient id="sky-grad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#6FA7E8"/>
+                  <stop offset="60%" stop-color="#9BCAE5"/>
+                </linearGradient>
+                <linearGradient id="ground-grad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#E8D8B0"/>
+                  <stop offset="100%" stop-color="#C9A974"/>
+                </linearGradient>
+                <linearGradient id="canopy-grad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#00459B"/>
+                  <stop offset="100%" stop-color="#002D74"/>
+                </linearGradient>
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+                  <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              </defs>
+
+              <!-- Sky & ground -->
+              <rect width="800" height="280" fill="url(#sky-grad)"/>
+              <rect x="0" y="280" width="800" height="170" fill="url(#ground-grad)"/>
+              <!-- Pavement -->
+              <rect x="0" y="340" width="800" height="110" fill="#3E3A33"/>
+              <line x1="0" y1="355" x2="800" y2="355" stroke="#F0A500" stroke-width="2" stroke-dasharray="14 10"/>
+              <!-- Sun -->
+              <circle cx="680" cy="80" r="42" fill="#FFD15C" opacity="0.7"/>
+
+              <!-- Element group: BACKGROUND STRUCTURE (always visible) -->
+              <!-- Canopy columns -->
+              <rect x="120" y="130" width="16" height="210" fill="#6C6258"/>
+              <rect x="680" y="130" width="16" height="210" fill="#6C6258"/>
+              <!-- Base plate under columns -->
+              <rect x="112" y="338" width="32" height="8" fill="#3E3A33"/>
+              <rect x="672" y="338" width="32" height="8" fill="#3E3A33"/>
+
+              <!-- Element 1: SIGN (locked state = grey, unlocked = full color) -->
+              <g id="el-sign" opacity="0.35" style="filter:grayscale(1);transition:all 0.6s ease">
+                <rect x="100" y="90" width="600" height="60" rx="4" fill="url(#canopy-grad)"/>
+                <rect x="100" y="150" width="600" height="8" fill="#F58220"/>
+                <circle cx="184" cy="122" r="24" fill="#FFFFFF"/>
+                <image x="164" y="101" width="40" height="43" preserveAspectRatio="xMidYMid meet" href="./petrolimex-p-logo.png"/>
+                <text x="430" y="130" text-anchor="middle" fill="white" font-family="Public Sans, Arial, sans-serif" font-size="34" font-weight="900" letter-spacing="1.6">PETROLIMEX</text>
+                <text x="430" y="148" text-anchor="middle" fill="white" font-family="Public Sans, Arial, sans-serif" font-size="12" font-weight="800">Cùng tiến xa hơn</text>
+              </g>
+
+              <!-- Element 2: UNIFORM (staff figures) -->
+              <g id="el-uniform" opacity="0.35" style="filter:grayscale(1);transition:all 0.6s ease">
+                <!-- Left staff -->
+                <g transform="translate(200,250)">
+                  <ellipse cx="0" cy="80" rx="28" ry="6" fill="rgba(0,0,0,0.2)"/>
+                  <!-- Legs -->
+                  <rect x="-12" y="50" width="10" height="36" fill="#002D74"/>
+                  <rect x="2" y="50" width="10" height="36" fill="#002D74"/>
+                  <rect x="-14" y="82" width="14" height="6" fill="#1A1814"/>
+                  <rect x="0" y="82" width="14" height="6" fill="#1A1814"/>
+                  <!-- Body (uniform blue) -->
+                  <rect x="-18" y="10" width="36" height="44" fill="#00459B" rx="2"/>
+                  <path d="M -18 10 L -5 10 L -18 24 Z M 18 10 L 5 10 L 18 24 Z" fill="#F58220"/>
+                  <!-- Name tag -->
+                  <rect x="-8" y="22" width="16" height="6" fill="white" stroke="#DDE7F5" stroke-width="0.5"/>
+                  <!-- Head -->
+                  <circle cx="0" cy="0" r="12" fill="#F4C98D"/>
+                  <!-- Cap -->
+                  <rect x="-11" y="-7" width="22" height="7" fill="#002D74" rx="1"/>
+                  <rect x="-13" y="-2" width="26" height="3" fill="#002D74"/>
+                  <circle cx="0" cy="-4" r="2" fill="#F0A500"/>
+                </g>
+              </g>
+
+              <!-- Element 3: SAFETY / PUMP -->
+              <g id="el-safety" opacity="0.35" style="filter:grayscale(1);transition:all 0.6s ease">
+                <!-- Pump station -->
+                <g transform="translate(380,260)">
+                  <rect x="-30" y="-14" width="60" height="104" fill="#F3F0E8" rx="4"/>
+                  <rect x="-30" y="-14" width="60" height="104" fill="none" stroke="#1E3A8A" stroke-width="2"/>
+                  <rect x="-22" y="2" width="44" height="24" fill="#111827" rx="2"/>
+                  <text x="0" y="18" text-anchor="middle" fill="#1D4ED8" font-family="monospace" font-size="11" font-weight="900">0.00</text>
+                  <!-- Neutral status plate -->
+                  <rect x="-10" y="42" width="20" height="16" fill="#FDFBF4" stroke="#CBD5E1" stroke-width="0.8" rx="3"/>
+                  <!-- Nozzle -->
+                  <rect x="28" y="40" width="10" height="4" fill="#444" rx="1"/>
+                  <path d="M 38 42 Q 55 42 55 60 L 55 72" stroke="#222" stroke-width="3" fill="none" stroke-linecap="round"/>
+                  <!-- PCCC sign -->
+                  <g transform="translate(-50,-2)">
+                    <rect x="-12" y="0" width="24" height="24" fill="#00459B" stroke="#002D74" stroke-width="1.5" rx="2"/>
+                    <text x="0" y="16" text-anchor="middle" fill="#FFFFFF" font-size="13" font-weight="900" font-family="Arial">!</text>
+                  </g>
+                </g>
+              </g>
+
+              <!-- Element 4: CLEANLINESS (sparkles + clean ground) -->
+              <g id="el-clean" opacity="0.35" style="filter:grayscale(1);transition:all 0.6s ease">
+                <!-- Sparkles around -->
+                <g>
+                  <path d="M 550 200 L 555 210 L 565 215 L 555 220 L 550 230 L 545 220 L 535 215 L 545 210 Z" fill="#FFD15C"/>
+                  <path d="M 250 220 L 253 226 L 259 229 L 253 232 L 250 238 L 247 232 L 241 229 L 247 226 Z" fill="#FFD15C"/>
+                  <path d="M 620 300 L 623 306 L 629 309 L 623 312 L 620 318 L 617 312 L 611 309 L 617 306 Z" fill="#FFD15C"/>
+                </g>
+                <!-- Clean gloss on ground -->
+                <ellipse cx="400" cy="380" rx="280" ry="10" fill="white" opacity="0.2"/>
+                <!-- Cleaning sign -->
+                <g transform="translate(600,280)">
+                  <rect x="-18" y="0" width="36" height="30" fill="white" stroke="#2D9B4E" stroke-width="2" rx="3"/>
+                  <text x="0" y="20" text-anchor="middle" fill="#2D9B4E" font-size="18" font-family="Arial" font-weight="900">✓</text>
+                </g>
+              </g>
+
+              <!-- Element 5: PRICE BOARD -->
+              <g id="el-price" opacity="0.35" style="filter:grayscale(1);transition:all 0.6s ease">
+                <g transform="translate(80,200)">
+                  <rect x="0" y="0" width="92" height="110" fill="#002D74" rx="4"/>
+                  <rect x="4" y="4" width="84" height="102" fill="#001A4A" rx="2"/>
+                  <text x="46" y="22" text-anchor="middle" fill="#F0A500" font-family="Fraunces, serif" font-size="9" font-weight="700">GIÁ HÔM NAY</text>
+                  <line x1="8" y1="28" x2="84" y2="28" stroke="#F0A500" stroke-width="0.5" opacity="0.5"/>
+                  <text x="8" y="44" fill="white" font-family="monospace" font-size="7.2" font-weight="700">RON 95</text>
+                  <text x="84" y="44" text-anchor="end" fill="#F0A500" font-family="monospace" font-size="8.5" font-weight="700">23,450</text>
+                  <text x="8" y="62" fill="white" font-family="monospace" font-size="7.2" font-weight="700">RON 92</text>
+                  <text x="84" y="62" text-anchor="end" fill="#F0A500" font-family="monospace" font-size="8.5" font-weight="700">22,100</text>
+                  <text x="8" y="80" fill="white" font-family="monospace" font-size="7.2" font-weight="700">E5</text>
+                  <text x="84" y="80" text-anchor="end" fill="#F0A500" font-family="monospace" font-size="8.5" font-weight="700">21,900</text>
+                  <text x="8" y="98" fill="white" font-family="monospace" font-size="7.2" font-weight="700">DIESEL</text>
+                  <text x="84" y="98" text-anchor="end" fill="#F0A500" font-family="monospace" font-size="8.5" font-weight="700">19,800</text>
+                </g>
+                <rect x="121" y="310" width="10" height="30" fill="#6C6258"/>
+              </g>
+
+              <!-- Element 6: GREETING BUBBLE -->
+              <g id="el-greeting" opacity="0.35" style="filter:grayscale(1);transition:all 0.6s ease">
+                <g transform="translate(180,180)">
+                  <path d="M 0 0 L 140 0 Q 150 0 150 10 L 150 45 Q 150 55 140 55 L 40 55 L 26 68 L 30 55 L 10 55 Q 0 55 0 45 L 0 10 Q 0 0 10 0 Z" fill="white" stroke="#F0A500" stroke-width="1.5"/>
+                  <text x="75" y="22" text-anchor="middle" fill="#002D74" font-family="Fraunces, serif" font-size="10" font-weight="700" font-style="italic">"Xin chào anh/chị,</text>
+                  <text x="75" y="38" text-anchor="middle" fill="#002D74" font-family="Fraunces, serif" font-size="10" font-weight="700" font-style="italic">mời vào vị trí số 3 ạ"</text>
+                </g>
+              </g>
+
+              <!-- Element 7: DEDICATION (heart + extras) -->
+              <g id="el-dedication" opacity="0.35" style="filter:grayscale(1);transition:all 0.6s ease">
+                <!-- Service kiosk -->
+                <g transform="translate(540,260)">
+                  <rect x="0" y="0" width="100" height="80" fill="#F0A500" rx="4"/>
+                  <rect x="0" y="0" width="100" height="20" fill="#C08500"/>
+                  <text x="50" y="15" text-anchor="middle" fill="white" font-size="9" font-weight="900" font-family="Arial">TIỆN ÍCH</text>
+                  <circle cx="20" cy="40" r="8" fill="white"/>
+                  <text x="20" y="44" text-anchor="middle" fill="#E30613" font-size="10" font-weight="900" font-family="Arial">♥</text>
+                  <rect x="32" y="33" width="60" height="4" fill="white" rx="1"/>
+                  <rect x="32" y="41" width="45" height="3" fill="white" opacity="0.7" rx="1"/>
+                  <text x="20" y="66" text-anchor="middle" fill="white" font-size="7" font-weight="700" font-family="Arial">WiFi</text>
+                  <circle cx="50" cy="64" r="4" fill="white" opacity="0.5"/>
+                  <text x="50" y="66" text-anchor="middle" fill="#C08500" font-size="6" font-weight="700" font-family="Arial">WC</text>
+                  <circle cx="80" cy="64" r="4" fill="white" opacity="0.5"/>
+                  <text x="80" y="66" text-anchor="middle" fill="#C08500" font-size="5" font-weight="700" font-family="Arial">ID</text>
+                </g>
+              </g>
+
+            </svg>
+
+            <div class="element-overlay hidden-overlay" id="overlay">
+              <strong id="overlay-title">Đã mở khoá</strong>
+              <div id="overlay-body">—</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT: Question panel -->
+        <div class="q-panel">
+          <div class="q-hdr">
+            <div class="q-step">Câu <strong id="q-num">1</strong> / 14</div>
+            <div class="timer-ring" id="timer-ring">
+              <svg viewBox="0 0 44 44">
+                <circle class="timer-ring-bg" cx="22" cy="22" r="18"/>
+                <circle class="timer-ring-fg" cx="22" cy="22" r="18" id="timer-ring-fg"
+                  stroke-dasharray="113.1"
+                  stroke-dashoffset="0"/>
+              </svg>
+              <div class="timer-num" id="timer-num">30</div>
+            </div>
+          </div>
+          <div class="q-body">
+            <div class="q-element-tag" id="q-element-tag"><span class="dot"></span><span id="q-element-name">—</span></div>
+            <div class="q-text" id="q-text">—</div>
+            <div class="q-options" id="q-options"></div>
+            <div id="q-feedback"></div>
+            <div class="q-cta">
+              <div class="q-score-live">Điểm hiện tại: <strong id="live-score">0</strong></div>
+              <button class="knowledge-btn" id="btn-hint" type="button">💡 Gợi ý từ tài liệu</button>
+            </div>
+            <div class="game-rank-card">
+              <div class="game-rank-stat">
+                <div class="v" id="game-score-val">0</div>
+                <div class="l">Điểm</div>
+              </div>
+              <div class="game-rank-stat rank">
+                <div class="v" id="player-rank-val">—</div>
+                <div class="l">Thứ hạng</div>
+              </div>
+              <div class="game-rank-stat">
+                <div class="v" id="game-unlocked-val">0/7</div>
+                <div class="l">Mảnh ghép</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════ RESULTS ═══════ -->
+  <section class="screen" id="screen-results">
+    <div class="wrap">
+      <div class="results-hero">
+        <div class="rh-inner">
+          <div class="trophy">
+            <div class="trophy-ring">
+              <div class="trophy-inner" id="trophy-letter">A</div>
+            </div>
+          </div>
+          <h1 class="rh-title" id="rh-title">Bạn đã xây xong CHXD chuẩn PLX!</h1>
+          <p class="rh-sub" id="rh-sub">—</p>
+
+          <div class="rh-stats">
+            <div class="rh-stat"><div class="v" id="r-score">0</div><div class="l">Tổng điểm</div></div>
+            <div class="rh-stat"><div class="v" id="r-correct">0</div><div class="l">Câu đúng</div></div>
+            <div class="rh-stat"><div class="v" id="r-unlock">0</div><div class="l">Yếu tố mở</div></div>
+            <div class="rh-stat"><div class="v" id="r-speed">0</div><div class="l">Thưởng tốc độ</div></div>
+            <div class="rh-stat"><div class="v" id="r-rank">—</div><div class="l">Xếp hạng lớp</div></div>
+          </div>
+          <div class="honor-banner" id="honor-banner">
+            <div class="honor-confetti"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="honor-cup" id="honor-cup">1</div>
+            <div class="honor-title" id="honor-title">Vinh danh Top 3</div>
+            <div class="honor-sub" id="honor-sub">Bạn đang nằm trong nhóm dẫn đầu lớp.</div>
+            <div class="honor-podium" aria-hidden="true">
+              <div class="podium-step s2" id="podium-2">2</div>
+              <div class="podium-step s1" id="podium-1">1</div>
+              <div class="podium-step s3" id="podium-3">3</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="results-grid">
+        <div class="panel">
+          <h3>7 yếu tố thương hiệu — tình trạng</h3>
+          <div class="sub">Yếu tố chưa hoàn thành là vùng bạn nên ôn lại trong bài thu hoạch 90 ngày.</div>
+          <div class="elements-result" id="elements-result"></div>
+        </div>
+
+        <div class="panel">
+          <h3>Cam kết thương hiệu cá nhân</h3>
+          <div class="sub">Lời hứa bạn mang về cửa hàng của mình — hiệu lực bắt đầu từ ca sáng mai.</div>
+
+          <div class="commit-box">
+            <div class="commit-lbl">Cam kết hành động</div>
+            <blockquote id="commit-text">—</blockquote>
+          </div>
+
+        </div>
+      </div>
+      <div class="end-cta">
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ═══════════════ 7 ELEMENTS ═══════════════
+  var ELEMENTS = [
+    { id:"sign",      svgId:"el-sign",       name:"Biển hiệu PLX",     short:"Biển hiệu",   color:"#002D74", desc:"Biển hiệu xanh, chữ trắng, dễ đọc — đúng chuẩn nhận diện mới." },
+    { id:"uniform",   svgId:"el-uniform",    name:"Đồng phục NV",      short:"Đồng phục",   color:"#002D74", desc:"Áo đồng phục xanh, cam + quần xanh + thẻ tên + mũ + giày bảo hộ — đồng bộ toàn hệ thống." },
+    { id:"safety",    svgId:"el-safety",     name:"Cột bơm & An toàn",  short:"An toàn",     color:"#C08500", desc:"Cột bơm chuẩn + biển báo PCCC + quy trình bơm an toàn." },
+    { id:"clean",     svgId:"el-clean",      name:"Vệ sinh & Gọn gàng", short:"Vệ sinh",     color:"#2D9B4E", desc:"Sân trạm sạch, WC sạch, checklist 30p/lần — chuẩn phục vụ." },
+    { id:"price",     svgId:"el-price",      name:"Bảng giá niêm yết",  short:"Bảng giá",    color:"#002D74", desc:"Bảng giá điện tử đủ thông tin + cập nhật tức thời theo Tập đoàn." },
+    { id:"greeting",  svgId:"el-greeting",   name:"Chào hỏi & Giao tiếp", short:"Chào hỏi", color:"#B30510", desc:"Lời chào chuẩn PLX + ánh mắt tiếp xúc + hướng dẫn cụ thể." },
+    { id:"dedication",svgId:"el-dedication", name:"Tận tâm & Tiện ích",  short:"Tận tâm",    color:"#F0A500", desc:"Chương trình tích điểm, tiện ích (WC, WiFi, nước uống), chủ động tạo giá trị." }
+  ];
+
+  // ═══════════════ 14 QUESTIONS ═══════════════
+  // Each tied to one element. 2 questions per element.
+  var QUESTIONS = [
+    // ── SIGN (Biển hiệu) ──
+    {
+      element:"sign",
+      text:"Thông điệp thương hiệu mới của Petrolimex là gì?",
+      options:[
+        {id:"A", text:"Nhiên liệu vì tương lai"},
+        {id:"B", text:"Cùng tiến xa hơn", correct:true},
+        {id:"C", text:"Đồng hành xanh"},
+        {id:"D", text:"Bước chuyển mới"}
+      ],
+      feedback:"'Cùng tiến xa hơn' thể hiện cam kết đồng hành lâu dài với khách hàng và đất nước — là thông điệp gắn với nhận diện mới công bố."
+    },
+    {
+      element:"sign",
+      text:"Hệ thống nhận diện thương hiệu mới PLX sử dụng những màu nào?",
+      options:[
+        {id:"A", text:"Đỏ · Trắng · Xanh dương"},
+        {id:"B", text:"Cam · Xanh", correct:true},
+        {id:"C", text:"Đỏ · Vàng · Xanh lá"},
+        {id:"D", text:"Xanh navy · Bạc · Trắng"}
+      ],
+      feedback:"Cam năng lượng (Energetic Orange) đại diện cho sức sống, nguồn năng lượng; và Xanh sáng tạo (Innovative Blue) đại diện cho công nghệ, sáng tạo."
+    },
+
+    // ── UNIFORM (Đồng phục) ──
+    {
+      element:"uniform",
+      text:"Đồng phục BẮT BUỘC cho nhân viên CHXD ca sáng gồm những gì?",
+      options:[
+        {id:"A", text:"Áo đồng phục xanh, cam + quần tối màu + thẻ tên"},
+        {id:"B", text:"Áo đồng phục xanh, cam + quần xanh + thẻ tên + mũ + giày bảo hộ", correct:true},
+        {id:"C", text:"Đồng phục áo xanh, quần cam và giày bất kỳ"},
+        {id:"D", text:"Chỉ áo xanh, cam – các món khác tùy thời tiết"}
+      ],
+      feedback:"Đồng phục đúng chuẩn nhận diện và màu sắc giúp Petrolimex các cửa hàng xăng dầu mang hình ảnh đồng nhất, chuyên nghiệp."
+    },
+    {
+      element:"uniform",
+      text:"Thẻ tên nhân viên tại CHXD BẮT BUỘC hiển thị thông tin gì?",
+      options:[
+        {id:"A", text:"Họ tên đầy đủ + ảnh + chức danh", correct:true},
+        {id:"B", text:"Chỉ họ tên"},
+        {id:"C", text:"Họ tên + số điện thoại cá nhân"},
+        {id:"D", text:"Biệt danh + mã nhân viên"}
+      ],
+      feedback:"Thẻ tên là một điểm chạm minh bạch — khách hàng biết mình đang tương tác với ai, có ảnh để xác thực, biết chức danh để hiểu vai trò."
+    },
+
+    // ── SAFETY (An toàn) ──
+    {
+      element:"safety",
+      text:"Trước khi bơm xăng cho khách, nhân viên PHẢI làm gì?",
+      options:[
+        {id:"A", text:"Bấm reset và bơm luôn cho nhanh"},
+        {id:"B", text:"Hỏi khách đổ bao nhiêu trước"},
+        {id:"C", text:"Mời khách nhìn đồng hồ về 0 trước khi bơm", correct:true},
+        {id:"D", text:"Kiểm tra khách có tiền không"}
+      ],
+      feedback:"Đây là điểm chạm niềm tin số 1 — khách cần THẤY đồng hồ về 0. Không nhìn = có thể nghi ngờ về sau."
+    },
+    {
+      element:"safety",
+      text:"Trong khu vực bơm xăng, điều nào bị NGHIÊM CẤM tuyệt đối?",
+      options:[
+        {id:"A", text:"Sử dụng điện thoại · Hút thuốc · Để máy xe nổ khi bơm", correct:true},
+        {id:"B", text:"Chỉ hút thuốc lá"},
+        {id:"C", text:"Chỉ sử dụng điện thoại"},
+        {id:"D", text:"Chỉ để máy xe nổ"}
+      ],
+      feedback:"Cả 3 hành vi đều là nguồn tạo tia lửa tiềm ẩn — tuyệt đối cấm trong phạm vi 10m quanh cột bơm. Nhân viên phải chủ động nhắc khách."
+    },
+
+    // ── CLEAN (Vệ sinh) ──
+    {
+      element:"clean",
+      text:"Tần suất kiểm tra và vệ sinh WC khách hàng TỐI THIỂU là?",
+      options:[
+        {id:"A", text:"1 lần mỗi ngày"},
+        {id:"B", text:"1 lần mỗi ca (8 giờ)"},
+        {id:"C", text:"30 phút/lần, có checklist ký xác nhận", correct:true},
+        {id:"D", text:"Khi khách phản ánh mới dọn"}
+      ],
+      feedback:"30 phút/lần là chuẩn phục vụ mới — kèm checklist ký xác nhận để CHT có thể kiểm tra. Đây là lá chắn ngăn sự cố khách hàng phản ánh WC bẩn."
+    },
+    {
+      element:"clean",
+      text:"Checklist vệ sinh sân trạm đầu ca sáng bao gồm những gì?",
+      options:[
+        {id:"A", text:"Chỉ quét sân"},
+        {id:"B", text:"Quét sân · Kiểm tra bình chữa cháy · Lau cột bơm · Kiểm tra đèn · Kiểm tra biển báo", correct:true},
+        {id:"C", text:"Quét sân + lau cột bơm là đủ"},
+        {id:"D", text:"Chỉ cần kiểm tra bình chữa cháy"}
+      ],
+      feedback:"5 hạng mục đầu ca — đảm bảo cả yếu tố visual (sạch đẹp) lẫn an toàn (PCCC) cùng hoạt động. Mất 10-15 phút nhưng ngăn 90% sự cố trong ca."
+    },
+
+    // ── PRICE (Bảng giá) ──
+    {
+      element:"price",
+      text:"Bảng giá tại CHXD PHẢI được cập nhật khi nào?",
+      options:[
+        {id:"A", text:"Khi có khách hỏi"},
+        {id:"B", text:"Ngay khi có thông báo điều chỉnh giá từ Tập đoàn", correct:true},
+        {id:"C", text:"Một tuần một lần vào thứ Hai"},
+        {id:"D", text:"Cuối mỗi ca"}
+      ],
+      feedback:"Độ trễ trong cập nhật giá = rủi ro pháp lý + mất niềm tin. Quy trình chuẩn: nhận thông báo → cập nhật trong vòng 1 giờ → ký biên bản."
+    },
+    {
+      element:"price",
+      text:"Thông tin nào BẮT BUỘC hiển thị trên bảng giá CHXD theo quy định?",
+      options:[
+        {id:"A", text:"Chỉ đơn giá từng loại xăng"},
+        {id:"B", text:"Đơn giá + tên sản phẩm"},
+        {id:"C", text:"Tên sản phẩm · Đơn giá · Đơn vị tính · Thời điểm áp dụng", correct:true},
+        {id:"D", text:"Giá bán buôn và bán lẻ"}
+      ],
+      feedback:"4 thông tin theo Thông tư quản lý thị trường. Thiếu 1 trong 4 là vi phạm — có thể bị xử phạt hành chính khi thanh tra kiểm tra."
+    },
+
+    // ── GREETING (Chào hỏi) ──
+    {
+      element:"greeting",
+      text:"Câu chào CHUẨN PLX khi khách vừa đến trạm là?",
+      options:[
+        {id:"A", text:"'Chào ạ'"},
+        {id:"B", text:"'Xin chào anh/chị, mời di chuyển vào vị trí số 3 ạ' — kèm theo ánh mắt và hướng dẫn chỉ tay vào vị trí số 3", correct:true},
+        {id:"C", text:"'Anh/chị đổ xăng gì ạ?'"},
+        {id:"D", text:"Vẫy tay không cần nói"}
+      ],
+      feedback:"Câu chào chuẩn có 3 yếu tố: lời chào + hướng dẫn cụ thể + ngôn ngữ cơ thể. Đây là 5 giây quyết định cảm nhận đầu tiên của khách."
+    },
+    {
+      element:"greeting",
+      text:"Khi tiễn khách rời trạm, câu chào nào đúng chuẩn mới?",
+      options:[
+        {id:"A", text:"'Chào ạ' rồi quay lại phục vụ khách tiếp theo"},
+        {id:"B", text:"'Cảm ơn anh/chị đã ghé Petrolimex, chúc anh/chị đi đường may mắn ạ' — kèm theo ánh mắt, nụ cười và đầu hơi cúi chào", correct:true},
+        {id:"C", text:"'Lần sau đến nhé'"},
+        {id:"D", text:"Không cần chào tiễn, khách đã trả tiền rồi"}
+      ],
+      feedback:"Khoảnh khắc cuối quyết định ấn tượng đọng lại. Câu chào đúng có: cảm ơn + tên thương hiệu + lời chúc + ánh mắt — biến khách thành người 'được yêu'."
+    },
+
+    // ── DEDICATION (Tận tâm) ──
+    {
+      element:"dedication",
+      text:"Giá trị 'Tận tâm' trong hệ giá trị cốt lõi PLX được thể hiện qua điều gì?",
+      options:[
+        {id:"A", text:"Làm đúng nhiệm vụ được giao, không hơn"},
+        {id:"B", text:"Làm đủ giờ, không trễ giờ"},
+        {id:"C", text:"Chủ động tạo trải nghiệm tích cực cho khách hàng vượt kỳ vọng thông thường", correct:true},
+        {id:"D", text:"Không sai sót nào trong ca"}
+      ],
+      feedback:"'Tận tâm' = chủ động làm HƠN yêu cầu tối thiểu. Đó là khoảng cách giữa 'được tin cậy' (làm đúng) và 'được yêu mến' (làm vượt kỳ vọng)."
+    },
+    {
+      element:"dedication",
+      text:"Ví dụ nào thể hiện đúng tinh thần 'Tận tâm' của nhân viên PLX?",
+      options:[
+        {id:"A", text:"Bơm xăng nhanh nhất có thể cho khách"},
+        {id:"B", text:"Đếm tiền thối chính xác cho khách"},
+        {id:"C", text:"Mặc đồng phục đúng quy định"},
+        {id:"D", text:"Trong lúc bơm, chủ động thông báo chương trình tích điểm PLX ID và mời khách quét QR nhận khăn lau tặng kèm", correct:true}
+      ],
+      feedback:"3 phương án đầu là 'đủ', không phải 'tận tâm'. Phương án D là chủ động mang giá trị gia tăng — đó mới là tận tâm theo nghĩa PLX mới."
+    }
+  ];
+
+  // ═══════════════ STATE ═══════════════
+  var state = {
+    screen: "lobby",
+    qIdx: 0,
+    score: 0,
+    speedBonus: 0,
+    correctCount: 0,
+    answered: false,
+    elementsProgress: {},   // id → 0/1/2 correct answers
+    elementHistory: {},     // id → [{qIdx, correct}]
+    timer: 30,
+    timerInterval: null,
+    lastWarningSecond: null,
+    playerRank: null,
+    questionStartTime: 0,
+    picks: []               // {qIdx, chosenId, correct, timeSpent}
+  };
+  var audioCtx = null;
+  var timerHtmlAudioPool = [];
+  var timerHtmlAudioIndex = 0;
+  var timerBeepUris = {};
+
+  // ═══════════════ HELPERS ═══════════════
+  function $(s){ return document.querySelector(s); }
+  function $$(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); }
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+  function showScreen(id){
+    $$(".screen").forEach(function(s){s.classList.remove("active");});
+    var t = document.getElementById("screen-" + id);
+    if(t) t.classList.add("active");
+    state.screen = id;
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+  function scrollQuestionIntoView(instant){
+    var target = $("#screen-game .game-layout") || $("#screen-game");
+    if(!target) return;
+    requestAnimationFrame(function(){
+      target.scrollIntoView({
+        behavior: instant ? "auto" : "smooth",
+        block: "start"
+      });
+    });
+  }
+  function findElement(id){
+    for(var i=0; i<ELEMENTS.length; i++) if(ELEMENTS[i].id === id) return ELEMENTS[i];
+    return null;
+  }
+  function animateNum(el, from, to, dur){
+    dur = dur || 500;
+    var start = performance.now();
+    function tick(now){
+      var p = Math.min(1, (now - start) / dur);
+      el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3)));
+      if(p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  function getAudioContext(){
+    var AudioCtor = window.AudioContext || window.webkitAudioContext;
+    if(!AudioCtor) return null;
+    if(!audioCtx) audioCtx = new AudioCtor();
+    if(audioCtx.state === "suspended" && audioCtx.resume) audioCtx.resume();
+    return audioCtx;
+  }
+  function primeAudioContext(){
+    var ctx = getAudioContext();
+    if(!ctx) return;
+    try {
+      var buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+      var source = ctx.createBufferSource();
+      var gain = ctx.createGain();
+      source.buffer = buffer;
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      source.connect(gain);
+      gain.connect(ctx.destination);
+      source.start(0);
+    } catch(error) {}
+    initTimerHtmlAudio();
+  }
+  function isIosAudioDevice(){
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  }
+  function makeBeepDataUri(freq){
+    var sampleRate = 12000;
+    var duration = 0.22;
+    var samples = Math.floor(sampleRate * duration);
+    var dataSize = samples * 2;
+    var bytes = [];
+    function str(s){ for(var i=0;i<s.length;i++) bytes.push(s.charCodeAt(i)); }
+    function u16(v){ bytes.push(v & 255, (v >> 8) & 255); }
+    function u32(v){ bytes.push(v & 255, (v >> 8) & 255, (v >> 16) & 255, (v >> 24) & 255); }
+    str("RIFF"); u32(36 + dataSize); str("WAVEfmt "); u32(16); u16(1); u16(1); u32(sampleRate); u32(sampleRate * 2); u16(2); u16(16); str("data"); u32(dataSize);
+    for(var i=0;i<samples;i++){
+      var attack = Math.min(1, i / (sampleRate * 0.015));
+      var release = Math.min(1, (samples - i) / (sampleRate * 0.04));
+      var env = Math.max(0, Math.min(1, attack * release));
+      var sample = Math.round(Math.sin(2 * Math.PI * freq * (i / sampleRate)) * 32767 * 0.85 * env);
+      if(sample < 0) sample += 65536;
+      u16(sample);
+    }
+    var chunk = "";
+    for(var j=0;j<bytes.length;j++) chunk += String.fromCharCode(bytes[j]);
+    return "data:audio/wav;base64," + btoa(chunk);
+  }
+  function getTimerBeepUri(second){
+    var key = second <= 3 ? "urgent" : "normal";
+    if(!timerBeepUris[key]) timerBeepUris[key] = makeBeepDataUri(key === "urgent" ? 1080 : 880);
+    return timerBeepUris[key];
+  }
+  function initTimerHtmlAudio(){
+    if(timerHtmlAudioPool.length || typeof Audio === "undefined") return;
+    timerHtmlAudioPool = [0,1,2].map(function(){
+      var audio = new Audio(getTimerBeepUri(10));
+      audio.preload = "auto";
+      audio.playsInline = true;
+      return audio;
+    });
+    var unlock = timerHtmlAudioPool[0];
+    unlock.muted = true;
+    unlock.volume = 0;
+    var played = unlock.play();
+    if(played && typeof played.then === "function"){
+      played.then(function(){
+        unlock.pause();
+        unlock.currentTime = 0;
+        unlock.muted = false;
+        unlock.volume = 1;
+      }).catch(function(){});
+    }
+  }
+  function playTimerHtmlAudio(second){
+    initTimerHtmlAudio();
+    if(!timerHtmlAudioPool.length) return;
+    var audio = timerHtmlAudioPool[timerHtmlAudioIndex++ % timerHtmlAudioPool.length];
+    audio.src = getTimerBeepUri(second);
+    audio.muted = false;
+    audio.volume = 1;
+    try { audio.currentTime = 0; } catch(error) {}
+    var played = audio.play();
+    if(played && typeof played.catch === "function") played.catch(function(){});
+  }
+  function playCountdownBeep(second){
+    if(isIosAudioDevice()){
+      playTimerHtmlAudio(second);
+      return;
+    }
+    var ctx = getAudioContext();
+    if(!ctx) return;
+    if(ctx.state === "suspended" && ctx.resume){
+      ctx.resume().then(function(){ playCountdownBeep(second); }).catch(function(){});
+      return;
+    }
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    var now = ctx.currentTime;
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(second <= 1 ? 1040 : 880, now);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(second <= 1 ? 0.55 : 0.42, now + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.2);
+  }
+
+  // ═══════════════ RENDER ELEMENTS LEGEND ═══════════════
+  function renderLegend(){
+    var leg = $("#elements-legend");
+    leg.innerHTML = "";
+    ELEMENTS.forEach(function(el, idx){
+      var progress = state.elementsProgress[el.id] || 0;
+      var status = progress >= 2 ? "unlocked" : progress === 1 ? "partial" : "locked";
+      var item = document.createElement("div");
+      item.className = "legend-item " + status;
+      item.setAttribute("data-element", el.id);
+      var widthPct = progress * 50;
+      item.innerHTML = ''
+        + '<div class="legend-icon">' + (idx+1) + '</div>'
+        + '<div class="legend-name"></div>'
+        + '<div class="legend-progress"><div class="fill" style="width:' + widthPct + '%"></div></div>';
+      item.querySelector(".legend-name").textContent = el.short;
+      leg.appendChild(item);
+    });
+  }
+
+  // ═══════════════ CANVAS ELEMENT UNLOCK ═══════════════
+  function updateCanvasElement(elementId, state2){
+    var el = findElement(elementId);
+    if(!el) return;
+    var node = document.getElementById(el.svgId);
+    if(!node) return;
+
+    if(state2 === "unlocked"){
+      node.style.opacity = "1";
+      node.style.filter = "grayscale(0)";
+      node.classList.add("unlocking");
+      setTimeout(function(){ node.classList.remove("unlocking"); }, 800);
+    } else if(state2 === "partial"){
+      node.style.opacity = "0.7";
+      node.style.filter = "grayscale(0.5)";
+    } else {
+      node.style.opacity = "0.35";
+      node.style.filter = "grayscale(1)";
+    }
+  }
+
+  // ═══════════════ OVERLAY (unlock announcement) ═══════════════
+  function showOverlay(title, body, autoHide){
+    var o = $("#overlay");
+    $("#overlay-title").textContent = title;
+    $("#overlay-body").textContent = body;
+    o.classList.remove("hidden-overlay");
+    if(autoHide){
+      setTimeout(function(){ o.classList.add("hidden-overlay"); }, 3500);
+    }
+  }
+
+  // ═══════════════ TIMER ═══════════════
+  function startTimer(){
+    clearInterval(state.timerInterval);
+    state.timer = 30;
+    state.lastWarningSecond = null;
+    state.questionStartTime = performance.now();
+    updateTimerUI();
+
+    state.timerInterval = setInterval(function(){
+      state.timer--;
+      updateTimerUI();
+      if(state.timer <= 0){
+        clearInterval(state.timerInterval);
+        if(!state.answered){
+          // Force wrong answer on timeout
+          handleAnswer(null, true);
+        }
+      }
+    }, 1000);
+  }
+  function updateTimerUI(){
+    var ring = $("#timer-ring");
+    var fg = $("#timer-ring-fg");
+    var num = $("#timer-num");
+    num.textContent = String(Math.max(0, state.timer));
+
+    var circumference = 2 * Math.PI * 18; // ≈ 113.1
+    var offset = circumference * (1 - state.timer / 30);
+    fg.setAttribute("stroke-dashoffset", offset);
+
+    ring.classList.remove("warn", "danger");
+    if(state.timer <= 10) ring.classList.add("danger");
+    else if(state.timer <= 15) ring.classList.add("warn");
+
+    if(!state.answered && state.timer > 0 && state.timer <= 10 && state.lastWarningSecond !== state.timer){
+      state.lastWarningSecond = state.timer;
+      playCountdownBeep(state.timer);
+    }
+  }
+
+  // ═══════════════ RENDER QUESTION ═══════════════
+  function renderQuestion(){
+    var q = QUESTIONS[state.qIdx];
+    state.answered = false;
+    var el = findElement(q.element);
+    if(document.activeElement && document.activeElement.blur){
+      document.activeElement.blur();
+    }
+
+    $("#q-num").textContent = String(state.qIdx + 1);
+    $("#q-element-name").textContent = el.short + " · " + el.name;
+    $("#q-element-tag .dot").style.background = el.color;
+    $("#q-text").textContent = q.text;
+
+    // Options
+    var optsEl = $("#q-options");
+    optsEl.innerHTML = "";
+    q.options.forEach(function(opt){
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "q-opt";
+      btn.setAttribute("data-id", opt.id);
+      btn.setAttribute("data-correct", opt.correct ? "1" : "0");
+      btn.innerHTML = '<span class="q-opt-letter">' + opt.id + '</span><span class="q-opt-text"></span>';
+      btn.querySelector(".q-opt-text").textContent = opt.text;
+      btn.addEventListener("click", function(){
+        if(state.answered) return;
+        handleAnswer(opt, false);
+      });
+      optsEl.appendChild(btn);
+    });
+
+    $("#q-feedback").innerHTML = "";
+    startTimer();
+    $("#live-score").textContent = String(state.score);
+    scrollQuestionIntoView(true);
+  }
+
+  // ═══════════════ HANDLE ANSWER ═══════════════
+  function handleAnswer(opt, timedOut){
+    if(state.answered) return;
+    state.answered = true;
+    clearInterval(state.timerInterval);
+
+    var q = QUESTIONS[state.qIdx];
+    var timeSpent = (performance.now() - state.questionStartTime) / 1000;
+    var remainingTime = Math.max(0, 30 - timeSpent);
+
+    var isCorrect = !timedOut && opt && opt.correct;
+    var scoreAdd = 0;
+    var speedAdd = 0;
+
+    if(isCorrect){
+      scoreAdd = 10;
+      state.correctCount++;
+      // Speed bonus if answered in < 10 seconds (i.e., remaining > 20)
+      if(remainingTime > 20){
+        speedAdd = 2;
+        state.speedBonus += 2;
+      }
+      state.score += scoreAdd + speedAdd;
+      // Element progress
+      state.elementsProgress[q.element] = (state.elementsProgress[q.element] || 0) + 1;
+
+      // Update canvas
+      var progress = state.elementsProgress[q.element];
+      if(progress === 1){
+        updateCanvasElement(q.element, "partial");
+      } else if(progress >= 2){
+        updateCanvasElement(q.element, "unlocked");
+        var el = findElement(q.element);
+        showOverlay("✨ Mở khoá: " + el.name, el.desc, true);
+      }
+    }
+
+    // Save pick
+    state.picks.push({
+      qIdx: state.qIdx,
+      element: q.element,
+      chosenId: opt ? opt.id : null,
+      correct: isCorrect,
+      timedOut: !!timedOut,
+      timeSpent: timeSpent
+    });
+
+    // Visual marking
+    var allBtns = $$(".q-opt");
+    allBtns.forEach(function(btn){
+      btn.disabled = true;
+      var btnId = btn.getAttribute("data-id");
+      var btnCorrect = btn.getAttribute("data-correct") === "1";
+      if(btnCorrect){
+        btn.classList.add("correct");
+      } else if(opt && btnId === opt.id && !isCorrect){
+        btn.classList.add("incorrect");
+      } else if(!isCorrect && !btnCorrect){
+        btn.classList.add("muted");
+      }
+    });
+
+    // Feedback panel
+    var fb = $("#q-feedback");
+    var lblCls = isCorrect ? "good" : "bad";
+    var lblText = isCorrect
+      ? (speedAdd > 0 ? "Chính xác · +10 điểm · +2 tốc độ" : "Chính xác · +10 điểm")
+      : (timedOut ? "Hết giờ — mời ôn lại" : "Chưa đúng");
+
+    var isLast = state.qIdx >= QUESTIONS.length - 1;
+    fb.innerHTML = ''
+      + '<div class="q-feedback ' + lblCls + '">'
+      + '<div class="q-feedback-lbl">' + lblText + '</div>'
+      + '<div class="q-feedback-body">' + escapeHtml(q.feedback) + '</div>'
+      + '<div style="margin-top:12px;text-align:right">'
+      + '<button class="btn btn-primary" id="btn-next-q">' + (isLast ? "Xem kết quả" : "Câu tiếp theo")
+      + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="margin-left:6px"><path d="M5 12h14m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      + '</button></div>'
+      + '</div>';
+
+    $("#btn-next-q").addEventListener("click", function(){
+      if(isLast) showResults();
+      else {
+        state.qIdx++;
+        renderQuestion();
+        scrollQuestionIntoView(false);
+      }
+    });
+
+    // Update live score + chip
+    animateNum($("#live-score"), state.score - scoreAdd - speedAdd, state.score);
+    $("#score-chip").textContent = state.score + " điểm";
+    $("#unlocked-count").textContent = String(countUnlocked());
+    renderLegend();
+    renderGameStats();
+  }
+
+  function countUnlocked(){
+    var c = 0;
+    ELEMENTS.forEach(function(el){
+      if((state.elementsProgress[el.id] || 0) >= 2) c++;
+    });
+    return c;
+  }
+  function getPlayerRankData(){
+    var rankData = state.playerRank || window.PLXPlayerRank || null;
+    var scores = rankData && Array.isArray(rankData.scores) ? rankData.scores : [];
+    var total = rankData && Number(rankData.total) > 0 ? Number(rankData.total) : scores.length;
+    var rank = rankData && Number(rankData.rank) > 0 ? Number(rankData.rank) : null;
+
+    if(!rank && scores.length){
+      rank = 1;
+      scores.forEach(function(score){
+        if((Number(score) || 0) > state.score) rank++;
+      });
+      total = Math.max(total, scores.length + 1);
+    }
+
+    return { rank: rank || null, total: total || null };
+  }
+  function formatPlayerRank(){
+    var data = getPlayerRankData();
+    var rank = data.rank;
+    var total = data.total;
+    if(rank && total) return "#" + rank + "/" + total;
+    if(rank) return "#" + rank;
+    return "Đang cập nhật";
+  }
+  function renderPlayerRank(){
+    var rankText = formatPlayerRank();
+    var resultNode = $("#r-rank");
+    if(resultNode) resultNode.textContent = rankText;
+    var gameNode = $("#player-rank-val");
+    if(gameNode) gameNode.textContent = rankText;
+  }
+  function renderGameStats(){
+    var scoreNode = $("#game-score-val");
+    if(scoreNode) scoreNode.textContent = String(state.score);
+    var unlockNode = $("#game-unlocked-val");
+    if(unlockNode) unlockNode.textContent = countUnlocked() + "/7";
+    renderPlayerRank();
+  }
+  function renderHonorBanner(){
+    var banner = $("#honor-banner");
+    if(!banner) return;
+    var data = getPlayerRankData();
+    var rank = Number(data.rank) || 0;
+    banner.classList.remove("active", "rank-1", "rank-2", "rank-3");
+    [1, 2, 3].forEach(function(pos){
+      var step = $("#podium-" + pos);
+      if(step) step.classList.remove("active");
+    });
+    if(rank < 1 || rank > 3) return;
+
+    var labels = {
+      1: { cup:"1", title:"Cúp vàng Top 1 lớp", sub:"Bạn đang dẫn đầu bảng xếp hạng. Đây là bậc vinh danh cao nhất cho CHXD chuẩn thương hiệu." },
+      2: { cup:"2", title:"Huy chương bạc Top 2", sub:"Bạn nằm trong nhóm xuất sắc của lớp. Giữ độ chính xác và tối ưu thêm tốc độ để bứt lên." },
+      3: { cup:"3", title:"Huy chương đồng Top 3", sub:"Bạn đã vào nhóm vinh danh. Tiếp tục giữ nhịp trả lời ổn định để bảo vệ vị trí này." }
+    };
+    $("#honor-cup").textContent = labels[rank].cup;
+    $("#honor-title").textContent = labels[rank].title;
+    $("#honor-sub").textContent = labels[rank].sub;
+    var activeStep = $("#podium-" + rank);
+    if(activeStep) activeStep.classList.add("active");
+    banner.classList.add("active", "rank-" + rank);
+  }
+  function setPlayerRank(rankData){
+    state.playerRank = rankData || null;
+    renderGameStats();
+    if(state.screen === "results") renderHonorBanner();
+  }
+
+  // ═══════════════ HINT BUTTON ═══════════════
+  function handleHint(){
+    var q = QUESTIONS[state.qIdx];
+    var el = findElement(q.element);
+    alert("💡 Gợi ý từ tài liệu:\n\n" + el.name + " — " + el.desc);
+  }
+
+  // ═══════════════ RESULTS ═══════════════
+  function showResults(){
+    var unlocked = countUnlocked();
+    var maxScore = QUESTIONS.length * 10 + QUESTIONS.length * 2;  // 14*10 + 14*2 = 168
+    var pct = (state.score / maxScore) * 100;
+
+    var letter, title, sub, commit;
+    if(unlocked === 7 && pct >= 85){
+      letter = "A+"; title = "Xuất sắc — CHXD chuẩn vàng PLX!";
+      sub = "Bạn đã mở khoá đủ 7 yếu tố và nắm vững hệ thống thương hiệu mới. Đây là cửa hàng mẫu để các đồng nghiệp học hỏi.";
+      commit = "Tôi cam kết là 'đại sứ thương hiệu PLX' tại CHXD của mình — từng lời chào, từng thao tác bơm, từng điểm chạm đều phản ánh nhận diện mới.";
+    } else if(unlocked >= 6 && pct >= 70){
+      letter = "A"; title = "Xuất sắc — nền tảng thương hiệu vững chắc";
+      sub = "Bạn đã hoàn thành " + unlocked + "/7 yếu tố với chất lượng tốt. Yếu tố còn thiếu hãy ôn kỹ trước khi áp dụng.";
+      commit = "Tôi cam kết mỗi tuần dành 30 phút để đào tạo lại đội về 1 trong 7 yếu tố thương hiệu — đảm bảo đồng đều toàn đội.";
+    } else if(unlocked >= 4){
+      letter = "B"; title = "Khá — cần củng cố thêm một số yếu tố";
+      sub = "Bạn mở khoá " + unlocked + "/7 yếu tố. Các yếu tố chưa hoàn thành chính là vùng yếu cần ưu tiên luyện tập.";
+      commit = "Tôi cam kết ôn lại " + (7 - unlocked) + " yếu tố thương hiệu còn chưa hoàn chỉnh trước khi bước vào triển khai 90 ngày.";
+    } else if(unlocked >= 2){
+      letter = "C"; title = "Trung bình — cần ôn tập thêm";
+      sub = "Mới " + unlocked + "/7 yếu tố được mở — cho thấy kiến thức về nhận diện mới chưa đồng đều.";
+      commit = "Tôi cam kết đọc lại toàn bộ tài liệu 'Nhận diện thương hiệu mới PLX' trước khi tham gia bài thu hoạch 90 ngày.";
+    } else {
+      letter = "D"; title = "Cần học lại từ đầu";
+      sub = "Kết quả cho thấy bạn nên dành thêm thời gian cho tài liệu đào tạo trước khi triển khai thay đổi tại cửa hàng.";
+      commit = "Tôi cam kết hoàn thành lại chương trình đào tạo trước khi nhận trách nhiệm triển khai thương hiệu mới tại CHXD.";
+    }
+
+    $("#trophy-letter").textContent = letter;
+    $("#rh-title").textContent = title;
+    $("#rh-sub").textContent = sub;
+    $("#r-score").textContent = String(state.score);
+    $("#r-correct").textContent = state.correctCount + "/" + QUESTIONS.length;
+    $("#r-unlock").textContent = unlocked + "/7";
+    $("#r-speed").textContent = String(state.speedBonus);
+    renderPlayerRank();
+    renderHonorBanner();
+    $("#commit-text").textContent = commit;
+
+    // Elements result cards
+    var cont = $("#elements-result");
+    cont.innerHTML = "";
+    ELEMENTS.forEach(function(el, idx){
+      var progress = state.elementsProgress[el.id] || 0;
+      var cls = progress >= 2 ? "done" : progress === 1 ? "partial" : "empty";
+      var status = progress >= 2 ? "Hoàn chỉnh" : progress === 1 ? "Một phần (1/2)" : "Chưa đạt";
+      var badgeBg = progress >= 2 ? "var(--plx-green)" : progress === 1 ? "var(--plx-gold)" : "var(--plx-red)";
+
+      var card = document.createElement("div");
+      card.className = "er-card " + cls;
+      card.innerHTML = ''
+        + '<div class="er-head">'
+        + '<div class="er-badge" style="background:' + badgeBg + '">' + (idx+1) + '</div>'
+        + '<div class="er-title"></div>'
+        + '</div>'
+        + '<div class="er-meta"></div>';
+      card.querySelector(".er-title").textContent = el.name;
+      card.querySelector(".er-meta").textContent = status + " · " + progress + "/2 câu đúng";
+      cont.appendChild(card);
+    });
+
+    showScreen("results");
+  }
+
+  // ═══════════════ START GAME ═══════════════
+  function startGame(){
+    primeAudioContext();
+    state.qIdx = 0;
+    state.score = 0;
+    state.speedBonus = 0;
+    state.correctCount = 0;
+    state.answered = false;
+    state.playerRank = window.PLXPlayerRank || null;
+    state.elementsProgress = {};
+    state.picks = [];
+
+    // Reset canvas elements
+    ELEMENTS.forEach(function(el){ updateCanvasElement(el.id, "locked"); });
+    $("#unlocked-count").textContent = "0";
+    $("#score-chip").textContent = "0 điểm";
+    $("#live-score").textContent = "0";
+
+    // Hide overlay
+    $("#overlay").classList.add("hidden-overlay");
+
+    renderLegend();
+    renderGameStats();
+    showScreen("game");
+    renderQuestion();
+  }
+
+  // ═══════════════ INIT ═══════════════
+  function getLiveScoreData(){
+    return {
+      totalScore: Number(state.score) || 0,
+      progress: Number(state.qIdx) || 0
+    };
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    // Init canvas to locked
+    ELEMENTS.forEach(function(el){ updateCanvasElement(el.id, "locked"); });
+    renderLegend();
+    renderGameStats();
+    window.PLXGame = window.PLXGame || {};
+    window.PLXGame.setPlayerRank = setPlayerRank;
+    window.PLXGame.getLiveScoreData = getLiveScoreData;
+
+    $("#btn-start").addEventListener("click", startGame);
+    $("#btn-hint").addEventListener("click", handleHint);
+  });
+
+})();
+</script>
+<script src="/games/plx-bridge.js"></script>
+</body>
+</html>

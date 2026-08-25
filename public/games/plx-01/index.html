@@ -1,0 +1,2354 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Khám phá Điểm chạm trong Hành trình khách hàng Petrolimex · PLX GAMIFICATION</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    /* ═════ OFFICIAL PLX BRAND COLORS (per Brand Guidelines) ═════ */
+    --plx-orange:#EE5021;       /* Tiên phong · Pioneering · primary action */
+    --plx-orange-deep:#C63D0F;
+    --plx-navy:#001A4A;          /* Di sản · Heritage · deep authority */
+    --plx-navy-ink:#000F2E;
+    --plx-blue-soft:#7B8FC7;     /* Tận tâm · Devoted · emotional warmth */
+    --plx-blue-soft-deep:#5C6FA8;
+    --plx-gold:#F0A500;
+    --plx-gold-deep:#C08500;
+    --cream:#F5F1E8;             /* warm paper tone from guideline */
+    --cream-deep:#EBE5D2;
+    --paper:#FFFFFF;
+    --ink:#0F1013;
+    --muted:#5C5A55;
+    --faint:#D9D3C7;
+    --line:rgba(15,16,19,0.09);
+    --line-strong:rgba(15,16,19,0.16);
+    --sans:'Be Vietnam Pro',-apple-system,sans-serif;
+    --serif:'Fraunces',Georgia,serif;
+  }
+  html,body{height:100%}
+  body{
+    font-family:var(--sans);
+    background:var(--cream);
+    color:var(--ink);
+    font-feature-settings:"ss01","ss02","cv11";
+    letter-spacing:-0.005em;
+    overflow-x:hidden;
+  }
+
+  /* ═════════ TOPBAR — orange primary per brand guideline ═════════ */
+  .topbar{
+    min-height:56px;
+    background:var(--plx-orange);
+    background-image:linear-gradient(100deg,var(--plx-orange) 0%,var(--plx-orange-deep) 100%);
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:8px 20px;
+    border-bottom:3px solid var(--plx-navy);
+    position:sticky;top:0;z-index:50;
+  }
+  .topbar .brand{display:flex;align-items:center;gap:12px;min-width:0}
+  .plx-mark{
+    width:34px;height:34px;border-radius:50%;
+    background:#fff;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 0 3px rgba(255,255,255,0.2);
+    position:relative;
+  }
+  .plx-mark::before{
+    content:"";position:absolute;inset:7px;
+    background:var(--plx-orange);
+    border-radius:50%;
+    clip-path:polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    transform:rotate(45deg);
+  }
+  .brand-stack{color:#fff;line-height:1.1;min-width:0}
+  .brand-stack .b1{font-size:11px;letter-spacing:0.18em;font-weight:600;opacity:0.85;text-transform:uppercase}
+  .brand-stack .b2{font-family:var(--serif);font-size:clamp(13px,1.7vw,17px);font-weight:600;line-height:1.15}
+
+  .top-right{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+  .chip{
+    background:rgba(255,255,255,0.14);color:#fff;
+    font-size:11px;font-weight:600;
+    padding:5px 11px;border-radius:20px;
+    display:flex;align-items:center;gap:6px;
+    border:1px solid rgba(255,255,255,0.18);
+  }
+  .chip .dot{width:6px;height:6px;border-radius:50%;background:#fff;box-shadow:0 0 8px rgba(255,255,255,0.6)}
+
+  @media(max-width:640px){
+    .topbar{
+      min-height:auto;
+      align-items:stretch;
+      flex-direction:column;
+      gap:10px;
+      padding:10px 14px;
+    }
+    .topbar .brand{
+      width:100%;
+      align-items:center;
+      gap:10px;
+    }
+    .plx-mark{
+      flex:0 0 auto;
+      width:30px;
+      height:30px;
+    }
+    .brand-stack{
+      flex:1 1 auto;
+      min-width:0;
+    }
+    .brand-stack .b1{
+      font-size:10px;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .brand-stack .b2{
+      font-size:14px;
+      line-height:1.22;
+      word-break:normal;
+      overflow-wrap:normal;
+      hyphens:none;
+    }
+    .top-right{
+      width:100%;
+      justify-content:flex-start;
+      gap:8px;
+      overflow-x:auto;
+      padding-bottom:2px;
+      scrollbar-width:none;
+    }
+    .top-right::-webkit-scrollbar{display:none}
+    .chip{
+      flex:0 0 auto;
+      white-space:nowrap;
+      font-size:12px;
+      padding:6px 10px;
+    }
+  }
+
+  /* ═════════ BUTTONS ═════════ */
+  .btn{
+    font-family:var(--sans);font-weight:600;font-size:14px;
+    border:none;cursor:pointer;padding:12px 22px;
+    border-radius:10px;display:inline-flex;align-items:center;gap:8px;justify-content:center;
+    transition:all 0.18s ease;letter-spacing:-0.005em;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{
+    background:var(--plx-orange);color:#fff;
+    box-shadow:0 4px 0 var(--plx-orange-deep),0 8px 20px rgba(238,80,33,0.28);
+  }
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 0 var(--plx-orange-deep),0 10px 24px rgba(238,80,33,0.35)}
+  .btn-ghost{
+    background:transparent;color:var(--ink);
+    border:1.5px solid var(--line-strong);
+  }
+  .btn-ghost:hover{border-color:var(--ink);background:rgba(0,0,0,0.03)}
+  .btn-lg{padding:16px 30px;font-size:15px;border-radius:12px}
+
+  /* ═════════ SCREEN ═════════ */
+  .screen{display:none;animation:fadeIn 0.4s ease}
+  .screen.active{display:block}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 24px 60px}
+
+  /* ═════════ LOBBY ═════════ */
+  .lobby-hero{
+    background:var(--paper);
+    border-radius:20px;
+    padding:40px 44px 36px;
+    position:relative;overflow:hidden;
+    border:1px solid var(--line);
+    box-shadow:0 2px 0 rgba(0,0,0,0.02),0 30px 60px -20px rgba(0,26,74,0.1);
+  }
+  .lobby-hero::before{
+    content:"";position:absolute;top:-80px;right:-60px;
+    width:280px;height:280px;border-radius:50%;
+    background:radial-gradient(circle,rgba(238,80,33,0.12) 0%,transparent 60%);
+    pointer-events:none;
+  }
+  .lobby-hero::after{
+    content:"";position:absolute;bottom:-100px;left:-80px;
+    width:340px;height:340px;border-radius:50%;
+    background:radial-gradient(circle,rgba(0,26,74,0.05) 0%,transparent 60%);
+    pointer-events:none;
+  }
+  .hero-content{position:relative;z-index:1}
+  .kicker{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--plx-orange);
+    background:rgba(238,80,33,0.08);
+    padding:6px 12px;border-radius:30px;
+    margin-bottom:20px;
+  }
+  .kicker .k-dot{width:6px;height:6px;border-radius:50%;background:var(--plx-orange)}
+
+  .hero-title{
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:clamp(36px,5vw,58px);
+    line-height:1.02;letter-spacing:-0.025em;
+    color:var(--plx-navy);
+    max-width:760px;
+  }
+  .hero-title em{color:var(--plx-orange);font-style:normal;position:relative;display:inline-block}
+  .hero-title em::after{
+    content:"";position:absolute;left:-2px;right:-2px;bottom:4px;height:10px;
+    background:var(--plx-gold);opacity:0.25;z-index:-1;
+    border-radius:2px;
+  }
+
+  .hero-sub{
+    font-size:17px;line-height:1.55;color:var(--muted);
+    margin-top:18px;max-width:660px;
+  }
+  .hero-sub strong{color:var(--ink);font-weight:600}
+
+  .brand-quote{
+    margin-top:22px;padding:16px 20px;
+    background:var(--cream);border-radius:12px;
+    border-left:3px solid var(--plx-orange);
+    width:100%;box-sizing:border-box;
+  }
+  .brand-quote-label{
+    font-family:var(--serif);font-size:11px;font-weight:600;letter-spacing:0.12em;
+    text-transform:uppercase;color:var(--plx-orange);margin-bottom:4px;
+  }
+  .brand-quote-text{
+    font-family:var(--serif);font-size:clamp(11px,1.35vw,15px);font-style:italic;font-weight:500;
+    color:var(--plx-navy);line-height:1.5;white-space:nowrap;
+    overflow-x:auto;
+  }
+
+  .hero-grid{
+    margin-top:32px;
+    display:grid;grid-template-columns:1.3fr 1fr;gap:28px;
+  }
+  @media(max-width:820px){.hero-grid{grid-template-columns:1fr}}
+
+  .stats-card{
+    background:var(--cream-deep);
+    border-radius:14px;padding:22px 24px;
+    border:1px solid var(--line);
+  }
+  .stats-card h4{
+    font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--muted);font-weight:700;margin-bottom:16px;
+  }
+  .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:18px}
+  .stat-num{font-family:var(--serif);font-size:34px;font-weight:600;color:var(--plx-navy);line-height:1}
+  .stat-label{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.3}
+
+  /* 3 core values strip — official brand colors */
+  .values-strip{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px;
+    padding-top:16px;border-top:1px dashed var(--line-strong);
+  }
+  .val-chip{
+    font-size:12px;font-weight:700;
+    padding:10px 12px;border-radius:10px;
+    display:flex;flex-direction:column;gap:2px;
+    background:#fff;border:1px solid var(--line);
+    position:relative;overflow:hidden;
+  }
+  .val-chip::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+  }
+  .val-chip.heritage::before{background:var(--plx-navy)}
+  .val-chip.devoted::before{background:var(--plx-blue-soft)}
+  .val-chip.pioneering::before{background:var(--plx-orange)}
+  .val-chip .v-name{font-family:var(--serif);color:var(--ink);font-size:14px;font-weight:700;padding-left:4px}
+  .val-chip .v-en{font-family:var(--serif);color:var(--muted);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;font-style:italic;font-weight:500;padding-left:4px}
+
+  @media(max-width:640px){
+    .brand-quote{
+      padding:14px 14px 15px;
+    }
+    .brand-quote-text{
+      white-space:normal;
+      overflow:visible;
+      font-size:13px;
+      line-height:1.55;
+    }
+    .stats-card{
+      padding:18px 14px;
+    }
+    .stats-row{
+      gap:10px;
+    }
+    .stat-num{
+      font-size:30px;
+    }
+    .stat-label{
+      font-size:11px;
+      overflow-wrap:anywhere;
+    }
+    .values-strip{
+      grid-template-columns:1fr;
+      gap:8px;
+    }
+    .val-chip{
+      min-height:44px;
+      padding:10px 12px 10px 14px;
+    }
+    .val-chip .v-name{
+      font-size:15px;
+    }
+    .val-chip .v-en{
+      font-size:10px;
+      letter-spacing:0.06em;
+    }
+  }
+
+  .team-setup{
+    background:var(--paper);
+    border:1.5px solid var(--line);
+    border-radius:14px;padding:22px 24px;
+  }
+  .team-setup h4{
+    font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--muted);font-weight:700;margin-bottom:16px;
+  }
+  .team-name-input{
+    width:100%;font-family:var(--sans);font-size:18px;font-weight:600;
+    padding:12px 14px;border:1.5px solid var(--line-strong);border-radius:10px;
+    background:var(--cream);color:var(--ink);
+    transition:border-color 0.15s;
+  }
+  .team-name-input:focus{outline:none;border-color:var(--plx-navy)}
+  .member-grid{
+    margin-top:14px;
+    display:grid;grid-template-columns:repeat(5,1fr);gap:6px;
+  }
+  .member-dot{
+    aspect-ratio:1;border-radius:50%;
+    background:var(--cream-deep);
+    border:1.5px dashed var(--line-strong);
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px;font-weight:700;color:var(--muted);
+    cursor:pointer;transition:all 0.15s;
+  }
+  .member-dot.filled{
+    background:var(--plx-navy);color:#fff;border-style:solid;border-color:var(--plx-navy);
+  }
+  .member-info{font-size:11px;color:var(--muted);margin-top:10px;text-align:center}
+
+  .rules-row{
+    margin-top:30px;
+    display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+  }
+  @media(max-width:820px){.rules-row{grid-template-columns:1fr}}
+  .rule{
+    background:var(--paper);border:1px solid var(--line);
+    border-radius:12px;padding:18px 20px;position:relative;
+  }
+  .rule-num{
+    font-family:var(--serif);font-size:32px;font-weight:600;
+    color:var(--plx-orange);line-height:1;
+    position:absolute;top:12px;right:16px;opacity:0.8;
+  }
+  .rule-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px}
+  .rule-body{font-size:13px;line-height:1.5;color:var(--muted)}
+
+  .cta-row{margin-top:32px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .cta-row .meta{font-size:12px;color:var(--muted)}
+
+  /* ═════════ JOURNEY MAP ═════════ */
+  .journey-bar{
+    background:var(--paper);
+    border-radius:14px;
+    padding:18px 22px;
+    border:1px solid var(--line);
+    margin-bottom:20px;
+  }
+  .journey-bar-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .journey-title{font-size:11px;letter-spacing:0.14em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+  .journey-progress{font-family:var(--serif);font-size:14px;font-weight:600;color:var(--plx-navy)}
+  .journey-progress strong{color:var(--plx-orange);font-size:17px}
+
+  .journey-track{display:flex;align-items:center;gap:0;position:relative}
+  .tp-node{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative}
+  .tp-node::before{
+    content:"";position:absolute;top:13px;left:-50%;right:50%;
+    height:2px;background:var(--faint);z-index:0;
+  }
+  .tp-node:first-child::before{display:none}
+  .tp-node.done::before{background:var(--plx-navy)}
+  .tp-node.current::before{background:var(--plx-gold)}
+  .tp-dot{
+    width:28px;height:28px;border-radius:50%;
+    background:var(--paper);border:2px solid var(--faint);
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px;font-weight:700;color:var(--muted);
+    position:relative;z-index:1;transition:all 0.3s;
+  }
+  .tp-node.done .tp-dot{background:var(--plx-navy);border-color:var(--plx-navy);color:#fff}
+  .tp-node.current .tp-dot{
+    background:var(--plx-orange);border-color:var(--plx-orange);color:#fff;
+    box-shadow:0 0 0 4px rgba(238,80,33,0.15);
+    animation:pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 4px rgba(238,80,33,0.15)}50%{box-shadow:0 0 0 8px rgba(238,80,33,0.08)}}
+  .tp-label{font-size:10px;font-weight:600;color:var(--muted);text-align:center;line-height:1.2;max-width:80px}
+  .tp-node.done .tp-label,.tp-node.current .tp-label{color:var(--ink)}
+
+  /* ═════════ GAME ═════════ */
+  .game-grid{display:grid;grid-template-columns:1fr 300px;gap:20px}
+  @media(max-width:960px){.game-grid{grid-template-columns:1fr}}
+
+  .stage{
+    background:var(--paper);
+    border-radius:16px;
+    border:1px solid var(--line);
+    overflow:hidden;
+  }
+
+  .stage-hero{
+    position:relative;height:220px;overflow:hidden;
+    background:linear-gradient(135deg,#0A2866 0%,var(--plx-navy) 60%,var(--plx-navy-ink) 100%);
+  }
+  .stage-hero-bg{position:absolute;inset:0;opacity:0.9}
+  .stage-hero-overlay{
+    position:absolute;inset:0;
+    background:linear-gradient(180deg,transparent 30%,rgba(0,15,46,0.85) 100%);
+  }
+  .stage-tp-badge{
+    position:absolute;top:16px;left:20px;z-index:2;
+    display:flex;align-items:center;gap:8px;
+    background:rgba(255,255,255,0.14);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    color:#fff;
+    padding:6px 14px;border-radius:30px;
+    font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+    border:1px solid rgba(255,255,255,0.2);
+  }
+  .stage-tp-badge strong{color:var(--plx-gold)}
+
+  .stage-title-wrap{position:absolute;bottom:20px;left:24px;right:24px;z-index:2;color:#fff}
+  .stage-title{font-family:var(--serif);font-weight:700;font-size:30px;line-height:1.1;letter-spacing:-0.02em}
+  .stage-cx{font-size:13px;margin-top:6px;opacity:0.85;display:flex;align-items:center;gap:8px}
+
+  .timer-cap{
+    position:absolute;top:16px;right:20px;z-index:3;
+    display:flex;align-items:center;gap:8px;
+    background:rgba(255,255,255,0.95);
+    padding:6px 14px;border-radius:30px;
+    font-family:var(--serif);font-size:22px;font-weight:700;color:var(--plx-navy);
+    line-height:1;
+    box-shadow:0 4px 12px rgba(0,0,0,0.15);
+  }
+  .timer-cap.warn{background:var(--plx-gold);color:#fff}
+  .timer-cap.danger{background:var(--plx-orange);color:#fff;animation:shake 0.4s ease infinite}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+  .timer-cap svg{width:18px;height:18px}
+
+  .stage-body{padding:26px 28px 30px}
+
+  .scenario{
+    background:var(--cream);
+    border-left:3px solid var(--plx-gold);
+    border-radius:4px 10px 10px 4px;
+    padding:14px 18px;margin-bottom:22px;
+  }
+  .scenario-lbl{
+    font-size:10px;letter-spacing:0.14em;text-transform:uppercase;
+    font-weight:700;color:var(--plx-gold-deep);margin-bottom:6px;
+  }
+  .scenario-text{font-size:15px;line-height:1.55;color:var(--ink)}
+
+  .question{
+    font-family:var(--serif);font-size:20px;font-weight:600;
+    line-height:1.35;color:var(--plx-navy);margin-bottom:18px;letter-spacing:-0.01em;
+  }
+
+  .choices{display:grid;gap:10px}
+  .choice{
+    display:flex;align-items:flex-start;gap:14px;
+    padding:15px 18px;border-radius:12px;
+    background:var(--paper);
+    border:1.5px solid var(--line-strong);
+    cursor:pointer;transition:all 0.15s;
+    text-align:left;font-family:var(--sans);
+    width:100%;
+  }
+  .choice:hover:not(:disabled){border-color:var(--plx-navy);background:var(--cream);transform:translateX(2px)}
+  .choice:disabled{cursor:default}
+  .choice .letter{
+    flex-shrink:0;width:30px;height:30px;border-radius:8px;
+    background:var(--cream-deep);
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:800;color:var(--plx-navy);
+    transition:all 0.15s;
+  }
+  .choice:hover:not(:disabled) .letter{background:var(--plx-navy);color:#fff}
+  .choice .text{font-size:14px;line-height:1.5;color:var(--ink);flex:1}
+
+  .choice.correct{background:#ECFDF3;border-color:#2D9B4E;box-shadow:0 0 0 2px rgba(45,155,78,0.12)}
+  .choice.correct .letter{background:#2D9B4E;color:#fff}
+  .choice.correct::after{
+    content:"✓ Đáp án đúng";
+    margin-left:auto;align-self:flex-start;
+    display:inline-flex;align-items:center;gap:4px;
+    color:#166534;background:#DFF8E7;border:1px solid rgba(45,155,78,0.28);
+    border-radius:999px;padding:4px 9px;
+    font-size:11px;font-weight:800;white-space:nowrap;
+  }
+  .choice.incorrect{background:#F4F4F5;border-color:#D4D4D8;opacity:1}
+  .choice.incorrect .letter{background:#71717A;color:#fff}
+  .choice.muted{opacity:0.45}
+  @media(max-width:640px){
+    .choice.correct::after{
+      content:"✓";
+      padding:3px 7px;
+      font-size:12px;
+    }
+  }
+
+  /* ═════════ FEEDBACK ═════════ */
+  .feedback{
+    margin-top:20px;
+    border-radius:12px;padding:20px 22px;
+    border:1.5px solid;
+    animation:slideUp 0.35s ease;
+  }
+  @keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .feedback.good{background:#EAF2FF;border-color:var(--plx-navy)}
+  .feedback.mid{background:#FEF5E4;border-color:var(--plx-gold)}
+  .feedback.bad{background:#FEECE5;border-color:var(--plx-orange)}
+  .feedback.timeout{background:#F4F4F5;border-color:#9CA3AF}
+
+  .fb-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .fb-icon{
+    width:32px;height:32px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    color:#fff;font-weight:900;font-size:16px;
+  }
+  .feedback.good .fb-icon{background:var(--plx-navy)}
+  .feedback.mid .fb-icon{background:var(--plx-gold)}
+  .feedback.bad .fb-icon{background:var(--plx-orange)}
+  .feedback.timeout .fb-icon{background:#6B7280}
+
+  .fb-title{font-size:15px;font-weight:700;color:var(--ink)}
+  .fb-score{font-family:var(--serif);font-size:14px;font-weight:600;margin-left:auto}
+  .fb-score .delta{padding:2px 10px;border-radius:20px;margin-left:4px;color:#fff}
+  .feedback.good .fb-score .delta{background:var(--plx-navy)}
+  .feedback.mid .fb-score .delta{background:var(--plx-gold)}
+  .feedback.bad .fb-score .delta{background:var(--plx-orange)}
+  .feedback.timeout .fb-score .delta{background:#6B7280}
+
+  .fb-body{font-size:14px;line-height:1.6;color:var(--ink)}
+  .fb-body .lesson-ttl{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;font-weight:700;color:var(--muted);margin-top:12px;margin-bottom:4px}
+
+  .fb-team{
+    margin-top:14px;padding-top:14px;
+    border-top:1px dashed var(--line-strong);
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  }
+  .fb-team-lbl{font-size:12px;color:var(--muted);font-weight:600}
+  .team-bars{display:flex;gap:4px;flex:1;min-width:180px}
+  .tb-col{flex:1;height:6px;border-radius:3px;background:var(--faint);overflow:hidden;position:relative}
+  .tb-col .fill{position:absolute;inset:0;transform-origin:left;transform:scaleX(0);animation:grow 0.8s ease forwards}
+  @keyframes grow{to{transform:scaleX(var(--w,0.5))}}
+  .tb-col[data-type="A"] .fill{background:var(--plx-navy)}
+  .tb-col[data-type="B"] .fill{background:var(--plx-blue-soft)}
+  .tb-col[data-type="C"] .fill{background:var(--plx-orange)}
+  .tb-col[data-type="D"] .fill{background:var(--plx-gold)}
+
+  .fb-cta{margin-top:16px;display:flex;justify-content:flex-end}
+
+  /* ═════════ SIDEBAR ═════════ */
+  .side{display:flex;flex-direction:column;gap:16px}
+
+  .score-card{
+    background:var(--plx-navy);
+    background-image:linear-gradient(150deg,var(--plx-navy) 0%,#001336 50%,var(--plx-navy-ink) 100%);
+    border-radius:16px;padding:20px 22px;color:#fff;
+    position:relative;overflow:hidden;
+  }
+  .score-card::before{
+    content:"";position:absolute;top:-50px;right:-50px;
+    width:150px;height:150px;border-radius:50%;
+    background:radial-gradient(circle,rgba(238,80,33,0.25) 0%,transparent 70%);
+  }
+  .sc-label{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;font-weight:700;opacity:0.7;margin-bottom:8px}
+  .sc-value{
+    font-family:var(--serif);font-size:48px;font-weight:700;line-height:1;
+    letter-spacing:-0.03em;margin-bottom:4px;
+    display:flex;align-items:baseline;gap:8px;
+  }
+  .sc-value .unit{font-size:16px;opacity:0.6;font-weight:500}
+  .sc-bar{
+    height:6px;border-radius:3px;background:rgba(255,255,255,0.15);
+    margin-top:14px;overflow:hidden;
+  }
+  .sc-bar .fill{
+    height:100%;background:linear-gradient(90deg,var(--plx-orange) 0%,var(--plx-gold) 100%);
+    width:0%;transition:width 0.8s cubic-bezier(0.4,0,0.2,1);
+    box-shadow:0 0 10px rgba(238,80,33,0.5);
+  }
+
+  .mini-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .mini-card{
+    background:var(--paper);border:1px solid var(--line);
+    border-radius:12px;padding:13px 10px;text-align:center;
+  }
+  .mini-card .mc-val{font-family:var(--serif);font-size:26px;font-weight:700;color:var(--ink);line-height:1}
+  .mini-card .mc-lbl{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;font-weight:600;color:var(--muted);margin-top:6px}
+  .mini-card.rank-card .mc-val{font-size:24px;color:var(--plx-navy);white-space:nowrap}
+  .mini-card.streak .mc-val{color:var(--plx-orange)}
+  .mini-card.streak .mc-val::before{content:"🔥";margin-right:3px;font-size:20px}
+
+  /* Value tracker — Di sản / Tận tâm / Tiên phong */
+  .value-track{
+    background:var(--paper);border:1px solid var(--line);
+    border-radius:14px;padding:18px 20px;
+  }
+  .vt-head{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;font-weight:700;color:var(--muted);margin-bottom:14px}
+  .vt-item{margin-bottom:16px}
+  .vt-item:last-child{margin-bottom:0}
+  .vt-item-head{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;font-weight:700;margin-bottom:5px;color:var(--ink)}
+  .vt-item-head .vt-name{display:flex;align-items:center;gap:6px}
+  .vt-name-vi{font-family:var(--serif)}
+  .vt-name-en{font-family:var(--serif);font-style:italic;font-size:10px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;font-weight:500}
+  .vt-item-head .vt-score{font-family:var(--serif);color:var(--plx-navy)}
+  .vt-bar{height:6px;border-radius:3px;background:var(--cream-deep);overflow:hidden}
+  .vt-bar .fill{height:100%;transition:width 0.8s ease;border-radius:3px}
+
+  .live-log{
+    background:var(--paper);border:1px solid var(--line);
+    border-radius:14px;padding:16px 18px;
+  }
+  .ll-head{
+    font-size:11px;letter-spacing:0.12em;text-transform:uppercase;font-weight:700;color:var(--muted);
+    margin-bottom:10px;display:flex;align-items:center;gap:6px;
+  }
+  .ll-head::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--plx-orange);box-shadow:0 0 6px var(--plx-orange);animation:blink 1.5s infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+  .ll-list{display:flex;flex-direction:column;gap:8px;max-height:180px;overflow-y:auto}
+  .ll-item{font-size:12px;line-height:1.4;color:var(--ink);padding-left:12px;position:relative}
+  .ll-item::before{content:"";position:absolute;left:0;top:6px;width:4px;height:4px;border-radius:50%;background:var(--plx-gold)}
+  .ll-item.good::before{background:var(--plx-navy)}
+  .ll-item.bad::before{background:var(--plx-orange)}
+  .ll-time{font-size:10px;color:var(--muted);font-weight:500}
+  .ll-empty{font-size:12px;color:var(--muted);font-style:italic}
+
+  /* ═════════ RESULTS ═════════ */
+  .results-hero{
+    background:var(--paper);
+    border-radius:18px;
+    border:1px solid var(--line);
+    padding:40px 44px 36px;
+    position:relative;overflow:hidden;
+    text-align:center;
+  }
+  .results-hero::before{
+    content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse at top,rgba(238,80,33,0.1) 0%,transparent 60%);
+    pointer-events:none;
+  }
+  .rh-inner{position:relative;z-index:1;max-width:720px;margin:0 auto}
+
+  .rh-medal{
+    width:100px;height:100px;border-radius:50%;margin:0 auto 20px;
+    background:linear-gradient(135deg,var(--plx-orange) 0%,var(--plx-gold) 60%,var(--plx-orange-deep) 100%);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-size:40px;font-weight:700;color:#fff;
+    box-shadow:0 10px 30px rgba(238,80,33,0.35),inset 0 -4px 10px rgba(0,0,0,0.15);
+    position:relative;
+  }
+  .rh-medal::after{
+    content:"";position:absolute;inset:-6px;border-radius:50%;
+    border:3px dashed var(--plx-orange);opacity:0.3;
+    animation:spin 20s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .rh-title{
+    font-family:var(--serif);font-size:40px;font-weight:700;
+    color:var(--plx-navy);letter-spacing:-0.02em;line-height:1.1;
+  }
+  .rh-sub{font-size:16px;color:var(--muted);margin-top:10px;line-height:1.5}
+
+  .rh-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:30px}
+  .rh-stats--ranking{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media(max-width:720px){.rh-stats{grid-template-columns:repeat(2,1fr)}}
+  .rh-stat{background:var(--cream);border-radius:12px;padding:18px 14px;border:1px solid var(--line)}
+  .rh-stats--ranking .rh-stat{min-height:78px;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px 12px}
+  .rh-stat .v{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--plx-navy);line-height:1}
+  .rh-stats--ranking .rh-stat .v{font-size:clamp(20px,2.7vw,30px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .rh-stat .l{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-top:6px}
+  .rh-stats--ranking .rh-stat .l{display:none}
+  .cup-celebration{
+    display:none;
+    position:relative;
+    margin:22px auto 0;
+    max-width:560px;
+    padding:18px 18px 16px 88px;
+    border-radius:18px;
+    overflow:hidden;
+    text-align:left;
+    background:linear-gradient(135deg,#FFF3C4 0%,#FFFFFF 68%);
+    border:1.5px solid rgba(240,165,0,0.7);
+    box-shadow:0 16px 36px rgba(240,165,0,0.18);
+  }
+  .cup-celebration.active{display:block;animation:cupPop .55s ease both}
+  .cup-mark{
+    position:absolute;left:18px;top:18px;
+    width:52px;height:52px;border-radius:16px;
+    display:grid;place-items:center;
+    font-family:var(--serif);font-size:24px;font-weight:800;color:#5A3500;
+    background:linear-gradient(135deg,#FFE17A 0%,#F0A500 70%,#C56E00 100%);
+    box-shadow:0 10px 22px rgba(197,110,0,0.28),inset 0 -3px 8px rgba(0,0,0,0.16);
+  }
+  .cup-title{font-family:var(--serif);font-size:22px;font-weight:800;color:var(--plx-navy);line-height:1.15}
+  .cup-sub{font-size:13px;line-height:1.45;color:var(--ink);margin-top:5px}
+  .cup-fireworks{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .cup-fireworks span{position:absolute;width:8px;height:8px;border-radius:50%;background:var(--plx-gold);animation:fireworkBurst 1.15s ease-out infinite}
+  .cup-fireworks span:nth-child(1){left:15%;top:28%;background:var(--plx-red);animation-delay:0s}
+  .cup-fireworks span:nth-child(2){left:30%;top:13%;background:var(--plx-gold);animation-delay:.12s}
+  .cup-fireworks span:nth-child(3){left:52%;top:20%;background:var(--plx-green);animation-delay:.24s}
+  .cup-fireworks span:nth-child(4){left:72%;top:18%;background:var(--plx-navy);animation-delay:.36s}
+  .cup-fireworks span:nth-child(5){left:88%;top:36%;background:var(--plx-orange);animation-delay:.48s}
+  .cup-fireworks span:nth-child(6){left:62%;top:64%;background:#fff;animation-delay:.6s}
+  @keyframes cupPop{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+  @keyframes fireworkBurst{
+    0%{opacity:0;transform:translate3d(0,0,0) scale(.4)}
+    18%{opacity:1}
+    100%{opacity:0;transform:translate3d(var(--fx,18px),var(--fy,28px),0) scale(1.8)}
+  }
+  .cup-fireworks span:nth-child(1){--fx:-22px;--fy:-28px}
+  .cup-fireworks span:nth-child(2){--fx:18px;--fy:-34px}
+  .cup-fireworks span:nth-child(3){--fx:-26px;--fy:30px}
+  .cup-fireworks span:nth-child(4){--fx:26px;--fy:-26px}
+  .cup-fireworks span:nth-child(5){--fx:-18px;--fy:34px}
+  .cup-fireworks span:nth-child(6){--fx:24px;--fy:24px}
+
+  .results-grid{margin-top:24px;display:grid;grid-template-columns:1.3fr 1fr;gap:20px}
+  @media(max-width:820px){.results-grid{grid-template-columns:1fr}}
+  .rank-insights{margin-top:18px;display:grid;grid-template-columns:1.08fr 1.18fr 0.9fr;gap:18px}
+  @media(max-width:1020px){.rank-insights{grid-template-columns:1fr}}
+  .rank-insights .panel{min-height:100%}
+  .overview-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+  .mini-stat{background:var(--cream);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:0 1px 0 rgba(0,0,0,0.02)}
+  .mini-stat .ms-label{font-size:11px;text-transform:uppercase;letter-spacing:0.14em;color:var(--muted);font-weight:700;margin-bottom:6px}
+  .mini-stat .ms-value{font-family:var(--serif);font-size:28px;line-height:1;color:var(--plx-navy);font-weight:700}
+  .mini-stat .ms-sub{margin-top:6px;color:var(--muted);font-size:12px;line-height:1.35}
+  .touch-avg-list{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+  .touch-avg-item{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px;border-radius:14px;background:var(--cream);border:1px solid var(--line);border-left:3px solid var(--plx-orange)}
+  .touch-avg-item .ta-num{width:32px;height:32px;border-radius:50%;border:1px solid var(--line-strong);display:flex;align-items:center;justify-content:center;background:#fff;color:var(--plx-navy);font-weight:700;font-size:12px}
+  .touch-avg-item .ta-text strong{display:block;font-size:14px;color:var(--ink);margin-bottom:2px}
+  .touch-avg-item .ta-text span{display:block;font-size:12px;color:var(--muted);line-height:1.35}
+  .touch-avg-item .ta-score{text-align:right;font-family:var(--serif);color:var(--plx-navy);font-weight:700;font-size:20px;line-height:1}
+  .touch-avg-item .ta-score .ta-sub{display:block;margin-top:4px;font-family:var(--sans);font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0.02em}
+  .auto-comment{margin-top:14px;padding:16px 18px;border-radius:16px;background:var(--cream);border:1px solid var(--line);border-left:3px solid var(--plx-orange)}
+  .auto-comment .ac-title{font-size:11px;text-transform:uppercase;letter-spacing:0.14em;color:var(--plx-orange);font-weight:800;margin-bottom:8px}
+  .auto-comment .ac-head{font-family:var(--serif);font-size:22px;line-height:1.15;color:var(--plx-navy);font-weight:700;margin-bottom:10px}
+  .auto-comment .ac-body{color:var(--ink);font-size:14px;line-height:1.6}
+  .auto-comment .ac-points{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+  .auto-comment .ac-point{padding:10px 12px;border-radius:12px;background:#fff;border:1px solid var(--line);font-size:13px;line-height:1.45;color:var(--muted)}
+
+  .panel{
+    background:var(--paper);border:1px solid var(--line);
+    border-radius:16px;padding:24px 26px;
+  }
+  .panel h3{
+    font-family:var(--serif);font-size:22px;font-weight:600;color:var(--plx-navy);
+    margin-bottom:4px;letter-spacing:-0.01em;
+  }
+  .panel .sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+
+  .tp-review{display:flex;flex-direction:column;gap:10px}
+  .tpr{
+    display:grid;grid-template-columns:28px 1fr auto;gap:12px;align-items:center;
+    padding:12px 14px;
+    background:var(--cream);border-radius:10px;
+    border-left:3px solid var(--plx-navy);
+  }
+  .tpr.good{border-left-color:var(--plx-navy)}
+  .tpr.mid{border-left-color:var(--plx-gold)}
+  .tpr.bad{border-left-color:var(--plx-orange)}
+  .tpr .tpr-num{
+    width:28px;height:28px;border-radius:50%;
+    background:var(--paper);border:1.5px solid var(--line-strong);
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:800;color:var(--plx-navy);
+  }
+  .tpr-text{font-size:13px;line-height:1.4}
+  .tpr-text strong{display:block;font-weight:700;color:var(--ink)}
+  .tpr-text span{color:var(--muted);font-size:12px}
+  .tpr-score{font-family:var(--serif);font-weight:700;font-size:18px}
+  .tpr.good .tpr-score{color:var(--plx-navy)}
+  .tpr.mid .tpr-score{color:var(--plx-gold-deep)}
+  .tpr.bad .tpr-score{color:var(--plx-orange)}
+
+  /* Insights — 3 values per brand guideline */
+  .insights{display:flex;flex-direction:column;gap:16px}
+  .insight{border-left:3px solid;padding:4px 0 4px 18px;position:relative}
+  .insight.heritage{border-color:var(--plx-navy)}
+  .insight.devoted{border-color:var(--plx-blue-soft)}
+  .insight.pioneering{border-color:var(--plx-orange)}
+  .insight-head{display:flex;align-items:baseline;gap:8px;margin-bottom:5px}
+  .insight-ttl-vi{font-family:var(--serif);font-size:15px;font-weight:700;color:var(--ink)}
+  .insight-ttl-en{font-family:var(--serif);font-style:italic;font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase}
+  .insight-subttl{font-size:12px;color:var(--plx-navy);font-weight:600;margin-bottom:4px}
+  .insight-body{font-size:13px;color:var(--muted);line-height:1.55}
+  .insight-score{
+    margin-top:6px;display:inline-flex;align-items:center;gap:6px;
+    font-family:var(--serif);font-size:12px;font-weight:600;color:var(--plx-navy);
+    padding:3px 10px;background:var(--cream);border-radius:20px;
+  }
+
+  .commit-box{
+    background:linear-gradient(135deg,var(--cream) 0%,#FFF9ED 100%);
+    border:1.5px solid var(--plx-orange);
+    border-radius:14px;padding:20px 22px;
+    margin-top:20px;
+  }
+  .commit-lbl{font-family:var(--serif);font-size:13px;font-weight:600;color:var(--plx-orange);margin-bottom:8px;letter-spacing:0.02em}
+  .commit-box blockquote{
+    font-family:var(--serif);font-size:17px;font-style:italic;font-weight:500;
+    line-height:1.5;color:var(--plx-navy);
+  }
+  .commit-box blockquote::before{content:"\201C";font-size:36px;color:var(--plx-orange);opacity:0.5;line-height:0;vertical-align:-12px;margin-right:4px}
+  .commit-box blockquote::after{content:"\201D";font-size:36px;color:var(--plx-orange);opacity:0.5;line-height:0;vertical-align:-20px;margin-left:4px}
+
+  .end-cta{margin-top:26px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+  .hidden{display:none !important}
+  /* Mobile polish patch: layout only, no game logic changes */
+  @media(max-width:640px){
+    body{background:var(--cream)}
+    .wrap{padding:16px 14px 84px}
+    .lobby-hero{
+      padding:24px 18px 26px;
+      border-radius:18px;
+    }
+    .kicker{
+      max-width:100%;
+      white-space:normal;
+      line-height:1.25;
+      letter-spacing:0.1em;
+    }
+    .hero-title{
+      font-size:clamp(34px,10vw,44px);
+      line-height:1.12;
+      letter-spacing:0;
+      max-width:100%;
+    }
+    .hero-title em{
+      display:inline;
+    }
+    .hero-title em::after{
+      bottom:1px;
+      height:5px;
+      opacity:0.22;
+    }
+    .hero-sub{
+      font-size:16px;
+      line-height:1.58;
+      max-width:100%;
+    }
+    .journey-bar{
+      padding:16px 14px;
+      border-radius:16px;
+      overflow:hidden;
+    }
+    .journey-bar-head{
+      align-items:flex-start;
+      gap:8px;
+    }
+    .journey-title{
+      max-width:58%;
+      line-height:1.25;
+      letter-spacing:0.1em;
+    }
+    .journey-progress{
+      flex:0 0 auto;
+      white-space:nowrap;
+    }
+    .journey-track{
+      overflow-x:auto;
+      gap:10px;
+      padding:4px 2px 8px;
+      scrollbar-width:none;
+    }
+    .journey-track::-webkit-scrollbar{display:none}
+    .tp-node{
+      flex:0 0 72px;
+      min-width:72px;
+    }
+    .tp-node::before{display:none}
+    .tp-label{
+      font-size:11px;
+      line-height:1.2;
+      min-height:26px;
+      max-width:68px;
+      overflow-wrap:normal;
+    }
+    .stage{
+      border-radius:18px;
+      overflow:hidden;
+    }
+    .stage-hero{
+      height:230px;
+    }
+    .stage-title-wrap{
+      left:18px;
+      right:18px;
+      bottom:18px;
+    }
+    .stage-title{
+      font-size:clamp(30px,9vw,40px);
+      line-height:1.05;
+      letter-spacing:0;
+      max-width:92%;
+    }
+    .stage-tp-badge{
+      top:12px;
+      left:14px;
+      max-width:58%;
+      flex-wrap:wrap;
+      line-height:1.1;
+    }
+    .timer-cap{
+      top:12px;
+      right:14px;
+      padding:7px 11px;
+      font-size:16px;
+    }
+    .stage-body{
+      padding:22px 18px 24px;
+    }
+    .scenario{
+      padding:16px 16px;
+      border-radius:14px;
+    }
+    .scenario-text{
+      font-size:15px;
+      line-height:1.62;
+    }
+    .question{
+      font-size:clamp(23px,6.5vw,30px);
+      line-height:1.22;
+      margin-bottom:16px;
+    }
+    .choice{
+      padding:14px 14px;
+      gap:12px;
+    }
+    .choice .letter{
+      width:34px;
+      height:34px;
+      border-radius:10px;
+    }
+    .choice .text{
+      font-size:15px;
+      line-height:1.55;
+      min-width:0;
+    }
+    .score-card{
+      border-radius:18px;
+      padding:24px 22px;
+    }
+    .rh-title{
+      font-size:clamp(24px,7.2vw,30px);
+      line-height:1.08;
+      letter-spacing:0;
+      max-width:260px;
+      margin:0 auto;
+    }
+    .results-hero{
+      padding:22px 16px 18px;
+      border-radius:16px;
+    }
+    .rh-medal{
+      width:72px;
+      height:72px;
+      margin-bottom:12px;
+      font-size:30px;
+    }
+    .rh-medal::after{
+      inset:-4px;
+      border-width:2px;
+    }
+    .rh-sub{
+      font-size:13px;
+      line-height:1.42;
+      margin:8px auto 0;
+      max-width:270px;
+    }
+    .rh-stats,
+    .rh-stats--ranking{
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:8px;
+      margin-top:16px;
+    }
+    .rh-stat{
+      padding:12px 8px;
+      border-radius:10px;
+    }
+    .cup-celebration{
+      margin-top:14px;
+      padding:14px 14px 14px 70px;
+      border-radius:14px;
+    }
+    .cup-mark{left:14px;top:14px;width:42px;height:42px;border-radius:13px;font-size:20px}
+    .cup-title{font-size:18px}
+    .cup-sub{font-size:12px}
+    .rh-stat .v{
+      font-size:22px;
+      overflow-wrap:anywhere;
+    }
+    .rh-stat .l{
+      font-size:9px;
+      margin-top:5px;
+      letter-spacing:0.08em;
+    }
+    .panel{
+      padding:20px 18px;
+      border-radius:16px;
+    }
+  }
+
+  @media(max-width:430px){
+    .topbar{border-radius:0 0 18px 18px}
+    .brand-stack .b2{
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+    }
+    .top-right{justify-content:flex-start}
+    .chip{font-size:11px}
+    .hero-title{font-size:clamp(32px,11vw,40px)}
+    .hero-sub{font-size:15.5px}
+    .journey-title{max-width:54%}
+    .stage-title{font-size:clamp(28px,10vw,36px)}
+    .question{font-size:clamp(22px,7vw,28px)}
+    .results-hero{padding:28px 18px}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="plx-mark"></div>
+      <div class="brand-stack">
+        <div class="b1">Petrolimex · GAMIFICATION</div>
+        <div class="b2">Khám phá Điểm chạm trong Hành trình khách hàng Petrolimex</div>
+      </div>
+    </div>
+    <div class="top-right">
+      <div class="chip" id="team-chip"><span class="dot"></span><span id="team-chip-name">Chưa có nhóm</span></div>
+      <div class="chip">Game 01/03</div>
+    </div>
+  </header>
+
+  <!-- ══════════════════ LOBBY ══════════════════ -->
+  <section class="screen active" id="screen-lobby">
+    <div class="wrap">
+      <div class="lobby-hero">
+        <div class="hero-content">
+          <div class="kicker"><span class="k-dot"></span>Chuyên đề 2 · Trải nghiệm khách hàng</div>
+          <h1 class="hero-title">
+            Mỗi điểm chạm là một <em>lời hứa thương hiệu</em>
+          </h1>
+          <p class="hero-sub">
+            Game mô phỏng một ca làm việc tại CHXD. Là Cửa hàng trưởng, bạn hãy nhập vai và giải quyết các điểm chạm trong Hành trình khách hàng. Có tất cả <strong>7 điểm chạm</strong>, tương ứng từ khi khách đến cửa hàng đến khi khách rời đi. Mỗi điểm chạm, bạn có <strong>60 giây</strong> để quyết định cách xử lý.
+          </p>
+          <p class="hero-sub">
+            Điểm trải nghiệm khách hàng (CX) và điểm thương hiệu sẽ phản ánh mức độ bạn hiện thực hóa 3 giá trị cốt lõi <strong>Di sản – Tận tâm – Tiên phong</strong> vào từng hành vi.
+          </p>
+
+          <div class="brand-quote">
+            <div class="brand-quote-label">Triết lý Hợp lực</div>
+            <div class="brand-quote-text">"Giữ trọn Di sản, Tận tâm đồng hành, Tiên phong dẫn lối — một tầm nhìn, một tinh thần, một hướng đi."</div>
+          </div>
+
+          <div class="hero-grid">
+            <div class="stats-card">
+              <h4>Quy mô vòng chơi</h4>
+              <div class="stats-row">
+                <div><div class="stat-num">7</div><div class="stat-label">Điểm chạm mô phỏng</div></div>
+                <div><div class="stat-num">60<span style="font-size:18px">s</span></div><div class="stat-label">Mỗi quyết định</div></div>
+                <div><div class="stat-num">4</div><div class="stat-label">Lựa chọn mỗi vòng</div></div>
+              </div>
+              <div class="values-strip">
+                <div class="val-chip heritage">
+                  <div class="v-name">Di sản</div>
+                  <div class="v-en">Heritage</div>
+                </div>
+                <div class="val-chip devoted">
+                  <div class="v-name">Tận tâm</div>
+                  <div class="v-en">Devoted</div>
+                </div>
+                <div class="val-chip pioneering">
+                  <div class="v-name">Tiên phong</div>
+                  <div class="v-en">Pioneering</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="team-setup">
+              <h4>Thiết lập nhóm</h4>
+              <input type="text" class="team-name-input" id="team-name" placeholder="Tên nhóm (VD: Nhóm Hà Nội 01)" value="Nhóm CHT Hà Nội 01">
+              <div class="member-grid" id="member-grid"></div>
+              <div class="member-info">10 CHT trong nhóm · Tính điểm theo lựa chọn đa số</div>
+            </div>
+          </div>
+
+          <div class="rules-row">
+            <div class="rule">
+              <div class="rule-num">01</div>
+              <div class="rule-title">Đọc tình huống</div>
+              <div class="rule-body">Quan sát bối cảnh và câu nói/hành động của khách hàng tại điểm chạm đó.</div>
+            </div>
+            <div class="rule">
+              <div class="rule-num">02</div>
+              <div class="rule-title">Thảo luận 60 giây</div>
+              <div class="rule-body">Nhóm chọn cách xử lý phù hợp nhất với chuẩn thương hiệu PLX mới.</div>
+            </div>
+            <div class="rule">
+              <div class="rule-num">03</div>
+              <div class="rule-title">Ghi nhận bài học</div>
+              <div class="rule-body">Mỗi vòng kết thúc sẽ có đúc kết + bài học gắn với 3 giá trị cốt lõi.</div>
+            </div>
+          </div>
+
+          <div class="cta-row">
+            <button class="btn btn-primary btn-lg" id="btn-start">
+              Bắt đầu hành trình
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="meta">Thời lượng ước tính: 18–22 phút · Không cần internet</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ GAME ══════════════════ -->
+  <section class="screen" id="screen-game">
+    <div class="wrap">
+      <div class="journey-bar">
+        <div class="journey-bar-head">
+          <div class="journey-title">Hành trình khách hàng tại CHXD</div>
+          <div class="journey-progress">Điểm chạm <strong id="jb-current">1</strong> / 7</div>
+        </div>
+        <div class="journey-track" id="journey-track"></div>
+      </div>
+
+      <div class="game-grid">
+        <div class="stage">
+          <div class="stage-hero" id="stage-hero">
+            <div class="stage-hero-bg" id="scene-svg"></div>
+            <div class="stage-hero-overlay"></div>
+            <div class="stage-tp-badge"><span>Điểm chạm</span><strong id="tp-num">1/7</strong></div>
+            <div class="timer-cap" id="timer"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="2"/><path d="M12 9v4l2 2M9 2h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span id="timer-val">60</span></div>
+            <div class="stage-title-wrap">
+              <div class="stage-title" id="stage-title">—</div>
+              <div class="stage-cx" id="stage-cx"></div>
+            </div>
+          </div>
+
+          <div class="stage-body">
+            <div class="scenario">
+              <div class="scenario-lbl">Tình huống</div>
+              <div class="scenario-text" id="scenario-text">—</div>
+            </div>
+
+            <div class="question" id="question-text">—</div>
+            <div class="choices" id="choices"></div>
+            <div id="feedback" class="hidden"></div>
+          </div>
+        </div>
+
+        <aside class="side">
+          <div class="score-card">
+            <div class="sc-label">Điểm CX tổng</div>
+            <div class="sc-value"><span id="cx-score">0</span><span class="unit">/ 700</span></div>
+            <div class="sc-bar"><div class="fill" id="cx-bar"></div></div>
+          </div>
+
+          <div class="mini-row">
+            <div class="mini-card">
+              <div class="mc-val" id="brand-pts">0</div>
+              <div class="mc-lbl">Điểm thương hiệu</div>
+            </div>
+            <div class="mini-card rank-card">
+              <div class="mc-val" id="player-rank-val">—</div>
+              <div class="mc-lbl">Thứ hạng</div>
+            </div>
+            <div class="mini-card streak">
+              <div class="mc-val" id="streak-val">0</div>
+              <div class="mc-lbl">Chuỗi đúng</div>
+            </div>
+          </div>
+
+          <div class="value-track">
+            <div class="vt-head">Ba giá trị cốt lõi · trong từng quyết định</div>
+            <div class="vt-item">
+              <div class="vt-item-head">
+                <span class="vt-name"><span class="vt-name-vi">Di sản</span><span class="vt-name-en">Heritage</span></span>
+                <span class="vt-score" id="vt-heritage">0</span>
+              </div>
+              <div class="vt-bar"><div class="fill" id="vt-heritage-bar" style="width:0%;background:var(--plx-navy)"></div></div>
+            </div>
+            <div class="vt-item">
+              <div class="vt-item-head">
+                <span class="vt-name"><span class="vt-name-vi">Tận tâm</span><span class="vt-name-en">Devoted</span></span>
+                <span class="vt-score" id="vt-devoted">0</span>
+              </div>
+              <div class="vt-bar"><div class="fill" id="vt-devoted-bar" style="width:0%;background:var(--plx-blue-soft)"></div></div>
+            </div>
+            <div class="vt-item">
+              <div class="vt-item-head">
+                <span class="vt-name"><span class="vt-name-vi">Tiên phong</span><span class="vt-name-en">Pioneering</span></span>
+                <span class="vt-score" id="vt-pioneering">0</span>
+              </div>
+              <div class="vt-bar"><div class="fill" id="vt-pioneering-bar" style="width:0%;background:var(--plx-orange)"></div></div>
+            </div>
+          </div>
+
+          <div class="live-log">
+            <div class="ll-head">Nhật ký quyết định</div>
+            <div class="ll-list" id="log-list"><div class="ll-empty">Chưa có quyết định nào</div></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ RESULTS ══════════════════ -->
+  <section class="screen" id="screen-results">
+    <div class="wrap">
+      <div class="results-hero">
+        <div class="rh-inner">
+          <div class="rh-medal" id="rh-medal">—</div>
+          <h1 class="rh-title" id="rh-title">Hoàn thành!</h1>
+          <p class="rh-sub" id="rh-sub">Nhóm đã đi qua toàn bộ 7 điểm chạm. Dưới đây là kết quả chi tiết.</p>
+
+          <div class="rh-stats">
+            <div class="rh-stat"><div class="v" id="r-cx">0</div><div class="l">Điểm CX</div></div>
+            <div class="rh-stat"><div class="v" id="r-brand">0</div><div class="l">Điểm thương hiệu</div></div>
+            <div class="rh-stat"><div class="v" id="r-streak">0</div><div class="l">Chuỗi dài nhất</div></div>
+            <div class="rh-stat"><div class="v" id="r-rank">—</div><div class="l">Xếp loại</div></div>
+          </div>
+          <div class="cup-celebration" id="cup-celebration" aria-live="polite">
+            <div class="cup-fireworks" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="cup-mark">1</div>
+            <div class="cup-title">Cúp vàng Top 1 lớp</div>
+            <div class="cup-sub">Nhóm đang dẫn đầu bảng xếp hạng. Hệ thống đã ghi nhận kết quả xuất sắc này.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="results-grid">
+        <div class="panel">
+          <h3>Rà soát 7 điểm chạm</h3>
+          <div class="sub">Điểm số từng lựa chọn của nhóm, sắp xếp theo thứ tự trong hành trình khách hàng.</div>
+          <div class="tp-review" id="tp-review"></div>
+        </div>
+
+        <div class="panel">
+          <h3>Ba giá trị cốt lõi Petrolimex</h3>
+          <div class="sub">Mức độ nhóm đã thể hiện từng giá trị qua 7 quyết định vừa rồi.</div>
+          <div class="insights">
+            <div class="insight heritage">
+              <div class="insight-head">
+                <span class="insight-ttl-vi">Di sản</span>
+                <span class="insight-ttl-en">/ Heritage</span>
+              </div>
+              <div class="insight-subttl">Giữ trọn nền tảng — kế thừa nền tảng vững chắc và uy tín lịch sử</div>
+              <div class="insight-body">70 năm uy tín được xây bằng kỷ luật, trách nhiệm và phụng sự. Mỗi CHT là người nối dài di sản đó bằng chuẩn mực phục vụ hôm nay — đặt lợi ích quốc gia và khách hàng làm kim chỉ nam, lấy di sản làm nền tảng cho phát triển.</div>
+              <div class="insight-score">Điểm Di sản: <span id="is-heritage">0</span>/21</div>
+            </div>
+            <div class="insight devoted">
+              <div class="insight-head">
+                <span class="insight-ttl-vi">Tận tâm</span>
+                <span class="insight-ttl-en">/ Devoted</span>
+              </div>
+              <div class="insight-subttl">Tận tâm đồng hành — xây dựng kết nối cảm xúc qua dịch vụ đồng nhất</div>
+              <div class="insight-body">Tận tâm là lắng nghe bằng thấu cảm, chân thành từ trái tim, trách nhiệm phụng sự. Biến mỗi điểm chạm từ giao dịch đơn thuần thành trải nghiệm đủ đầy, chỉn chu và gắn kết — chuyển Petrolimex từ "được tin tưởng" thành "được yêu thích".</div>
+              <div class="insight-score">Điểm Tận tâm: <span id="is-devoted">0</span>/21</div>
+            </div>
+            <div class="insight pioneering">
+              <div class="insight-head">
+                <span class="insight-ttl-vi">Tiên phong</span>
+                <span class="insight-ttl-en">/ Pioneering</span>
+              </div>
+              <div class="insight-subttl">Tiên phong dẫn lối — hiệu triệu vai trò dẫn dắt, dám nghĩ dám làm</div>
+              <div class="insight-body">Tiên phong là chủ động để dẫn dắt, sáng tạo và cải tiến, đột phá tạo giá trị. Tại CHXD, đó là chủ động giới thiệu Petrolimex ID, chủ động giải quyết khủng hoảng bằng minh bạch, chủ động biến 30 giây chờ bơm thành "moment of delight".</div>
+              <div class="insight-score">Điểm Tiên phong: <span id="is-pioneering">0</span>/21</div>
+            </div>
+          </div>
+
+          <div class="commit-box">
+            <div class="commit-lbl">Cam kết cá nhân của nhóm</div>
+            <blockquote id="commit-text">Mỗi ca làm việc, tôi sẽ biến 7 điểm chạm thành 7 lời hứa thương hiệu — vì Petrolimex "Cùng tiến xa hơn".</blockquote>
+          </div>
+        </div>
+      </div>
+
+        <div class="end-cta">
+        </div>
+    </div>
+  </section>
+
+  <!-- RANKING -->
+  <section class="screen" id="screen-ranking">
+    <div class="wrap">
+        <div class="results-grid">
+          <div class="panel">
+            <h3>Bảng xếp hạng cá nhân</h3>
+            <div class="sub">Top học viên theo tổng điểm tích lũy từ toàn bộ lượt chơi.</div>
+            <div class="tp-review" id="rank-personal-list"></div>
+        </div>
+
+        <div class="panel">
+            <h3>Bảng xếp hạng nhóm</h3>
+            <div class="sub">Top nhóm theo tổng điểm cộng dồn của tất cả thành viên.</div>
+            <div class="tp-review" id="rank-group-list"></div>
+          </div>
+        </div>
+
+        <div class="rank-insights">
+          <div class="panel" id="rank-class-overview"></div>
+          <div class="panel" id="rank-touchpoint-averages"></div>
+          <div class="panel" id="rank-auto-comment"></div>
+        </div>
+
+        <div class="end-cta">
+        <button class="btn btn-ghost" id="btn-back-results">Quay lại kết quả</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ═════════════════════════════════════════════════════════
+     TOUCHPOINT DATA — 7 điểm chạm
+     3 values per brand guideline: heritage, devoted, pioneering
+     Answers balanced in length (30–50 words each) to avoid signal.
+     ═════════════════════════════════════════════════════════ */
+  var TOUCHPOINTS = [
+    /* ─── TP 1: Đón tiếp ─────────────────────────── */
+    {
+      id:1,
+      label:"Đón tiếp",
+      shortLabel:"Đón tiếp",
+      title:"Xe vào trạm giờ cao điểm",
+      cx:"Ấn tượng đầu tiên — 5 giây quyết định cảm nhận",
+      scenario:"17h30 giờ tan tầm. Một chiếc xe máy chạy vào trạm, khách đội mũ bảo hiểm và có vẻ đang vội. Bạn vừa phục vụ xong xe trước và đang đứng cạnh cột bơm số 3.",
+      question:"Hành động đón xe phù hợp nhất với chuẩn phục vụ Petrolimex trong giai đoạn mới là gì?",
+      bgGradient:"linear-gradient(135deg,#0A2866 0%,#001A4A 60%,#000F2E 100%)",
+      choices:[
+        { id:"A", text:"Vẫy tay chỉ khách vào vị trí trống và tiếp tục thao tác của bạn cho đến khi khách dừng xe hẳn rồi mới quay ra phục vụ.", cx:55, brand:3, values:{heritage:1,devoted:1,pioneering:0}, quality:"mid", teamVote:24,
+          feedback:"Có hành động hướng dẫn nhưng thiếu lời chào mở đầu — khách cảm nhận 'được xử lý' thay vì 'được đón'. Di sản phục vụ yêu cầu một lời chào rõ ràng trước khi bắt tay vào thao tác." },
+        { id:"B", text:"Chào khách với câu đầy đủ, giao tiếp bằng ánh mắt, chỉ tay dứt khoát về vị trí bơm còn trống và xác nhận khách đã hiểu trước khi quay về cột bơm.", cx:95, brand:12, values:{heritage:3,devoted:2,pioneering:2}, quality:"good", teamVote:38,
+          feedback:"Đây là chuẩn đón tiếp PLX: có lời chào, có tiếp xúc mắt, có hướng dẫn cụ thể và xác nhận. Di sản phục vụ biến ngay điểm chạm đầu tiên thành ấn tượng 'được đón chủ động'." },
+        { id:"C", text:"Nhìn lướt khách một cái để ghi nhận rồi tiếp tục công việc đang làm dở trên cột bơm hiện tại, đợi khách tự chọn vị trí và đứng chờ.", cx:25, brand:-6, values:{heritage:0,devoted:0,pioneering:0}, quality:"bad", teamVote:10,
+          feedback:"Khách cảm thấy 'bị bỏ quên' ngay từ giây đầu. Điểm chạm 1 hỏng = toàn bộ 6 điểm chạm sau đều khó gỡ lại ấn tượng xấu. Đây không phải chuẩn của một thương hiệu có di sản dẫn đầu." },
+        { id:"D", text:"Ra hiệu cho khách dừng xe chờ, hoàn tất việc phục vụ xe trước cho thật xong, kiểm tra lại hoá đơn rồi mới tiến đến để chào khách mới đến.", cx:48, brand:0, values:{heritage:1,devoted:1,pioneering:0}, quality:"mid", teamVote:28,
+          feedback:"Đúng nguyên tắc 'một việc tại một thời điểm' nhưng bỏ lỡ cơ hội đón tiếp. Cao điểm yêu cầu song song: tay hoàn tất việc cũ + miệng chào khách mới — đó là tiên phong trong thao tác." }
+      ]
+    },
+
+    /* ─── TP 2: Xác nhận thông tin ─────────────────── */
+    {
+      id:2,
+      label:"Xác nhận thông tin",
+      shortLabel:"Xác nhận thông tin",
+      title:"Xác nhận loại xăng và số lượng",
+      cx:"Khoảnh khắc 'hiểu khách' — tránh 99% nhầm lẫn về sau",
+      scenario:"Khách vừa dừng xe, chưa kịp nói gì. Bạn đứng cạnh cột bơm, tay đã sẵn sàng vòi bơm và nhận thấy loại xe này thường đổ RON 95.",
+      question:"Câu mở đầu nào thể hiện đúng chuẩn phục vụ mới của Petrolimex khi tiếp nhận nhu cầu khách?",
+      bgGradient:"linear-gradient(135deg,#0A2866 0%,#001A4A 60%,#000F2E 100%)",
+      choices:[
+        { id:"A", text:"\"Đổ bao nhiêu ạ?\" — câu hỏi ngắn gọn thường dùng khi cao điểm đông khách để tiết kiệm thời gian cho cả hai bên trong thao tác.", cx:38, brand:-3, values:{heritage:1,devoted:0,pioneering:0}, quality:"bad", teamVote:16,
+          feedback:"Thiếu lời chào, thiếu xác nhận loại xăng. Khách cảm thấy 'bị xử lý' chứ không 'được phục vụ'. Tận tâm yêu cầu đủ hai yếu tố: loại nhiên liệu + số lượng — không cộc lốc dù đông khách." },
+        { id:"B", text:"\"Dạ, anh/chị đổ xăng loại gì ạ — RON 95, E5 hay là Diesel? Và số lượng bao nhiêu ạ?\" — hỏi đầy đủ hai thông tin cần thiết trước khi bơm.", cx:92, brand:10, values:{heritage:2,devoted:3,pioneering:1}, quality:"good", teamVote:32,
+          feedback:"Đúng chuẩn tận tâm: hỏi cả loại nhiên liệu lẫn số lượng, có lời 'dạ' tôn trọng, liệt kê để khách không phải suy nghĩ. Đây là 'lắng nghe bằng thấu cảm' trong tài liệu thương hiệu." },
+        { id:"C", text:"Tự quan sát loại xe và ước lượng, bấm nút RON 95 theo thói quen vì phần lớn khách đi xe này chọn loại đó, sau đó hỏi khách số lượng.", cx:15, brand:-12, values:{heritage:0,devoted:0,pioneering:0}, quality:"bad", teamVote:7,
+          feedback:"Vi phạm nguyên tắc — khách chưa xác nhận thì tuyệt đối không được bơm. Rủi ro pháp lý cao nếu khách phản ứng, và phá vỡ di sản uy tín cửa hàng đã xây dựng." },
+        { id:"D", text:"\"Dạ anh/chị đổ đầy bình phải không ạ?\" — giả định nhu cầu theo thói quen thường thấy của đa số khách đi xe máy tại trạm giờ này.", cx:52, brand:0, values:{heritage:1,devoted:1,pioneering:0}, quality:"mid", teamVote:25,
+          feedback:"Lịch sự nhưng vẫn là giả định. Tốt hơn nên hỏi cả 'đổ gì' lẫn 'bao nhiêu' — đừng tự điền thông tin cho khách. Tận tâm = chủ động hỏi, không chủ động giả định." }
+      ]
+    },
+
+    /* ─── TP 3: Minh bạch ─────────────────── */
+    {
+      id:3,
+      label:"Minh bạch",
+      shortLabel:"Minh bạch",
+      title:"Thao tác minh bạch trước khi bơm",
+      cx:"Điểm chạm niềm tin — khách phải thấy 'đồng hồ về 0'",
+      scenario:"Khách đã xác nhận: \"Em cho anh RON 95, 200 nghìn.\" Bạn bước tới cột bơm, tay cầm vòi và đồng hồ cột bơm vẫn đang hiển thị số tiền của khách trước.",
+      question:"Thao tác nào thể hiện đúng tinh thần minh bạch — nền tảng của giá trị Di sản?",
+      bgGradient:"linear-gradient(135deg,#0A2866 0%,#001A4A 60%,#000F2E 100%)",
+      choices:[
+        { id:"A", text:"Bấm nút reset một cách nhanh gọn, lập tức cắm vòi và bóp tay bơm để tiết kiệm thời gian và không làm khách phải chờ quá lâu tại cột.", cx:40, brand:-2, values:{heritage:1,devoted:0,pioneering:0}, quality:"bad", teamVote:22,
+          feedback:"Thiếu một bước quan trọng: mời khách nhìn đồng hồ. Khách cần THẤY số về 0, không chỉ nghe tiếng máy reset. Di sản Petrolimex xây bằng minh bạch chủ động — không để khách tự kiểm." },
+        { id:"B", text:"Đứng chắn một phần đồng hồ để tập trung thao tác, tránh việc khách đứng sát và chạm vào máy trong lúc bơm có thể gây sự cố không đáng có.", cx:20, brand:-10, values:{heritage:0,devoted:0,pioneering:0}, quality:"bad", teamVote:4,
+          feedback:"Dù vô tình, hành vi 'chắn đồng hồ' sẽ khiến khách nghi ngờ minh bạch. Một clip quay lại có thể viral rất xấu. Luôn để khách thấy toàn bộ quá trình — đó là di sản uy tín." },
+        { id:"C", text:"Bấm reset rồi chỉ tay về phía đồng hồ và nói \"dạ em mời anh/chị nhìn đồng hồ về 0 ạ\" — chờ khách gật đầu hoặc xác nhận bằng mắt trước khi cắm vòi bơm.", cx:98, brand:15, values:{heritage:3,devoted:3,pioneering:2}, quality:"good", teamVote:28,
+          feedback:"CHUẨN VÀNG minh bạch PLX: chủ động mời, có động tác lẫn lời nói, chờ xác nhận. Đây là thực thi đồng thời 3 giá trị — Di sản (uy tín), Tận tâm (tôn trọng), Tiên phong (chủ động)." },
+        { id:"D", text:"Bấm reset, chỉ tay nhanh vào đồng hồ trong tư thế chuyên nghiệp nhưng không kịp nói gì vì đang tập trung vào việc cầm vòi và cắm vào bình xăng.", cx:62, brand:3, values:{heritage:2,devoted:1,pioneering:1}, quality:"mid", teamVote:26,
+          feedback:"Có thao tác nhưng thiếu lời nói. Khách có thể không hiểu ý hoặc không kịp nhìn. Minh bạch đúng chuẩn cần đủ cả hai: hành động rõ ràng + lời mời rõ ràng." }
+      ]
+    },
+
+    /* ─── TP 4: Giao tiếp 30s ─────────────────── */
+    {
+      id:4,
+      label:"Giao tiếp khi bơm",
+      shortLabel:"Giao tiếp",
+      title:"30 giây trong lúc bơm xăng",
+      cx:"Chất lượng phục vụ = chất lượng khoảng trống",
+      scenario:"Xăng đang chạy, còn khoảng 30 giây nữa đầy bình. Khách đứng cạnh xe, không nói gì và đang xem điện thoại. Xung quanh không có khách khác chờ.",
+      question:"Bạn tận dụng 30 giây này thế nào để thể hiện tinh thần Tiên phong trong phục vụ?",
+      bgGradient:"linear-gradient(135deg,#0A2866 0%,#001A4A 60%,#000F2E 100%)",
+      choices:[
+        { id:"A", text:"Đứng im một cách lịch sự, nhìn về phía đồng hồ cột bơm để giám sát, tôn trọng không gian riêng của khách đang xem điện thoại và không làm phiền họ.", cx:58, brand:2, values:{heritage:2,devoted:2,pioneering:0}, quality:"mid", teamVote:32,
+          feedback:"An toàn nhưng bỏ lỡ cơ hội. 30 giây chờ là thời điểm quý để tạo khác biệt. Di sản và Tận tâm đã đủ — nhưng thiếu Tiên phong (chủ động). 'Không làm phiền' khác với 'vô hình'." },
+        { id:"B", text:"Rút điện thoại cá nhân xem tin nhắn công việc hoặc lướt mạng xã hội, tranh thủ 30 giây chờ để không lãng phí thời gian của bản thân trong ca.", cx:8, brand:-15, values:{heritage:0,devoted:0,pioneering:0}, quality:"bad", teamVote:5,
+          feedback:"Vi phạm chuẩn phục vụ nghiêm trọng. Khách sẽ cảm thấy mình là 'nhiệm vụ thứ yếu'. Ngoài ra, dùng điện thoại cạnh cột bơm là rủi ro cháy nổ — vi phạm PCCC và di sản an toàn." },
+        { id:"C", text:"Chủ động gợi ý bằng giọng thân thiện: \"Em thấy xe anh/chị hãng X, cửa hàng có chương trình tặng khăn lau miễn phí khi đổ trên 150k ạ\" — thông tin có giá trị cho khách.", cx:88, brand:13, values:{heritage:1,devoted:3,pioneering:3}, quality:"good", teamVote:28,
+          feedback:"Đúng tinh thần Tiên phong: chủ động mang thông tin CÓ GIÁ TRỊ, không bán ép. 30 giây 'bình thường' biến thành 'moment of delight'. Đây là cách biến giao dịch thành trải nghiệm." },
+        { id:"D", text:"Đi sang cột bơm kế bên để lau chùi hoặc sắp xếp các vòi bơm khác trong lúc chờ, tận dụng thời gian để cửa hàng luôn sạch sẽ và gọn gàng.", cx:42, brand:-4, values:{heritage:1,devoted:0,pioneering:1}, quality:"bad", teamVote:19,
+          feedback:"Để khách và vòi bơm một mình là rủi ro an toàn cấp cao. Quy định yêu cầu NV bơm phải luôn giữ mắt với thao tác bơm của mình — đây là di sản an toàn không được vi phạm." }
+      ]
+    },
+
+    /* ─── TP 5: Thanh toán ─────────────────── */
+    {
+      id:5,
+      label:"Thanh toán",
+      shortLabel:"Thanh toán",
+      title:"Thanh toán đa kênh và minh bạch",
+      cx:"Đúng giá — đúng cách — đúng kênh = đúng niềm tin",
+      scenario:"Đồng hồ cột bơm hiện 200.000đ. Khách rút ví đưa tờ 500.000đ và chờ nhận tiền thối. Cạnh cột có bảng QR Petrolimex ID và máy POS đang hoạt động bình thường.",
+      question:"Cách xử lý thanh toán nào thể hiện đúng tinh thần Tiên phong trong chuyển đổi số của Petrolimex?",
+      bgGradient:"linear-gradient(135deg,#0A2866 0%,#001A4A 60%,#000F2E 100%)",
+      choices:[
+        { id:"A", text:"Nhận tiền mặt, đếm rõ ràng, trả lại 300.000đ và cảm ơn khách — không đề cập kênh khác vì khách đã chủ động chọn tiền mặt với số tiền đã chuẩn bị sẵn.", cx:50, brand:-2, values:{heritage:2,devoted:1,pioneering:0}, quality:"mid", teamVote:36,
+          feedback:"Đúng nghiệp vụ nhưng bỏ lỡ cơ hội Tiên phong. Chủ động giới thiệu Petrolimex ID và QR là cách biến mỗi thanh toán thành một cơ hội chuyển đổi số — không đợi khách hỏi." },
+        { id:"B", text:"\"Dạ hoá đơn 200.000 đồng ạ. Anh/chị có thể quét QR Petrolimex ID để nhận 1% tích điểm cho lần sau, hoặc em xin phép thối tiền mặt ngay ạ\" — để khách chọn.", cx:95, brand:14, values:{heritage:2,devoted:3,pioneering:3}, quality:"good", teamVote:29,
+          feedback:"Chuẩn mực mới đồng thời 3 giá trị: đọc to hoá đơn (Di sản minh bạch) + giới thiệu kênh số (Tiên phong) + để khách chọn (Tận tâm tôn trọng)." },
+        { id:"C", text:"Đếm tiền nhanh trong đầu, trả lại 300.000đ một cách chuyên nghiệp và chuyển ngay sang phục vụ khách tiếp theo đang chờ sau lưng — thao tác gọn.", cx:35, brand:-5, values:{heritage:0,devoted:0,pioneering:0}, quality:"bad", teamVote:11,
+          feedback:"Không đọc to số tiền là lỗ hổng niềm tin rất lớn. Sau này nếu khách nói 'tôi đưa 500k' mà không có chứng cứ — cửa hàng khó xử lý. Di sản minh bạch yêu cầu đọc to cả số nhận và số thối." },
+        { id:"D", text:"\"Anh/chị quét QR đi cho nhanh, đỡ phải chờ em đếm tiền thối ạ\" — hướng khách sang kênh số một cách trực tiếp để thúc đẩy chuyển đổi số của cửa hàng.", cx:32, brand:-8, values:{heritage:0,devoted:0,pioneering:1}, quality:"bad", teamVote:4,
+          feedback:"Đang ÉP khách thay vì MỜI. Chuyển đổi số đúng tinh thần PLX là lựa chọn hấp dẫn — không áp đặt. Tận tâm yêu cầu tôn trọng lựa chọn của khách, đặc biệt khách trung niên/cao tuổi." }
+      ]
+    },
+
+    /* ─── TP 6: Khiếu nại ─────────────────── */
+    {
+      id:6,
+      label:"Xử lý khiếu nại",
+      shortLabel:"Khiếu nại",
+      title:"Khách nghi ngờ cột đo — rút điện thoại quay clip",
+      cx:"Khoảnh khắc khủng hoảng = khoảnh khắc xây uy tín",
+      scenario:"Khách bất ngờ lớn tiếng: \"Cột này gian rồi! Xe tôi bình 4L mà đã đổ 4.5L?!\" — rút điện thoại bật camera quay trực tiếp. Vài khách khác xung quanh đang quay lại nhìn và một người cũng rút điện thoại ra.",
+      question:"Phản ứng nào thể hiện đúng cả ba giá trị Di sản – Tận tâm – Tiên phong?",
+      bgGradient:"linear-gradient(135deg,#0A2866 0%,#001A4A 60%,#000F2E 100%)",
+      choices:[
+        { id:"A", text:"Bình tĩnh giải thích ngay tại chỗ: \"Anh nhầm rồi ạ, cột bơm của cửa hàng được Chi cục Đo lường kiểm định định kỳ, có giấy tờ đầy đủ\" để bảo vệ uy tín cửa hàng.", cx:22, brand:-12, values:{heritage:1,devoted:0,pioneering:0}, quality:"bad", teamVote:11,
+          feedback:"Đối đầu giữa chỗ đông = thua ngay cả khi mình đúng. Clip lan truyền sẽ thấy 'nhân viên PLX cãi khách' — rất hại di sản thương hiệu. Bảo vệ uy tín bằng quy trình, không bằng tranh cãi." },
+        { id:"B", text:"Gọi ngay bảo vệ đến hỗ trợ, mời khách ra khu vực riêng bên cạnh quầy để tránh làm ảnh hưởng các khách khác đang phục vụ tại cột bơm trong giờ cao điểm.", cx:8, brand:-18, values:{heritage:0,devoted:0,pioneering:0}, quality:"bad", teamVote:3,
+          feedback:"Phản ứng tệ nhất. Clip 'bảo vệ đuổi khách tại PLX' sẽ viral trong vài giờ. Cần hàng tháng để khôi phục uy tín. Tận tâm không cho phép ứng xử này, dù khách có sai." },
+        { id:"C", text:"Dùng giọng điềm tĩnh: \"Dạ em hiểu anh đang lo lắng. Em xin phép mời anh vào phòng CHT, em lấy phiếu kiểm định hiệu chuẩn và thiết bị đo của cửa hàng, mình cùng kiểm tra có biên bản ạ.\"", cx:98, brand:18, values:{heritage:3,devoted:3,pioneering:3}, quality:"good", teamVote:40,
+          feedback:"CHUẨN VÀNG xử lý khủng hoảng hiện thân cả 3 giá trị: Tận tâm (công nhận cảm xúc) → Di sản (quy trình kiểm định minh bạch) → Tiên phong (chủ động đề nghị lập biên bản). Clip này có thể là quảng cáo miễn phí." },
+        { id:"D", text:"Im lặng để khách quay tự do, đồng thời gọi điện thoại báo ngay cho CHT khu vực xin hướng dẫn vì đây là tình huống nhạy cảm vượt thẩm quyền của nhân viên bơm.", cx:42, brand:-5, values:{heritage:1,devoted:1,pioneering:0}, quality:"mid", teamVote:27,
+          feedback:"An toàn cá nhân nhưng khách vẫn đang tức giận và quay clip. Phải có phản ứng chủ động tại chỗ — bình tĩnh nhưng không thụ động. Tiên phong yêu cầu hành động, không né tránh." }
+      ]
+    },
+
+    /* ─── TP 7: Tiễn khách ─────────────────── */
+    {
+      id:7,
+      label:"Tiễn khách",
+      shortLabel:"Tiễn khách",
+      title:"Khoảnh khắc cuối — ấn tượng đọng lại",
+      cx:"Khách nhớ 2 khoảnh khắc: đầu và cuối. Bạn làm chủ được cả hai.",
+      scenario:"Khách đã nhận tiền thối xong, cài khoá bình xăng và đang chuẩn bị nổ máy rời trạm. Cửa hàng còn đang đông và có khách tiếp theo đang chờ được phục vụ.",
+      question:"Câu chào tiễn nào để lại ấn tượng sâu và gắn với thông điệp 'Cùng tiến xa hơn'?",
+      bgGradient:"linear-gradient(135deg,#0A2866 0%,#001A4A 60%,#000F2E 100%)",
+      choices:[
+        { id:"A", text:"\"Dạ cảm ơn anh/chị đã ghé Petrolimex, chúc anh/chị đi đường may mắn ạ\" — nói với ánh mắt tiếp xúc và nụ cười nhẹ trước khi quay sang khách tiếp theo.", cx:96, brand:13, values:{heritage:3,devoted:3,pioneering:1}, quality:"good", teamVote:34,
+          feedback:"Hoàn hảo — có lời cảm ơn, có tên thương hiệu, có lời chúc, có ngôn ngữ cơ thể tích cực. Đây là khoảnh khắc cuối mà khách sẽ nhớ lâu nhất — đủ 3 yếu tố Di sản, Tận tâm và một phần Tiên phong." },
+        { id:"B", text:"Không thực hiện động tác tiễn chào đặc biệt nào, quay ngay sang đón khách tiếp theo đang chờ để tiết kiệm thời gian cho cả hai khách trong giờ đông đúc.", cx:28, brand:-8, values:{heritage:0,devoted:0,pioneering:0}, quality:"bad", teamVote:10,
+          feedback:"Bỏ qua khoảnh khắc cuối = phủi đi nỗ lực ở 6 điểm chạm trước. Khách chỉ nhớ 'họ xong tiền là hết' — không có ấn tượng gì đọng lại. Tận tâm yêu cầu một lời chào tiễn, dù ngắn." },
+        { id:"C", text:"Nói \"Chào ạ\" ngắn gọn rồi chuyển ngay sang việc tiếp theo — vừa lịch sự đúng mực vừa không làm chậm nhịp phục vụ trong thời điểm cửa hàng đang nhiều khách.", cx:55, brand:0, values:{heritage:1,devoted:1,pioneering:0}, quality:"mid", teamVote:28,
+          feedback:"Có lời chào nhưng thiếu hai thành tố quan trọng: cảm ơn và tên thương hiệu. Ấn tượng 'trung tính' — không xấu nhưng không đáng nhớ. Di sản 70 năm xứng đáng có câu chào đủ đầy hơn." },
+        { id:"D", text:"\"Lần sau đến nhé anh/chị\" — câu thân thiện mời quay lại, gần gũi và tạo cảm giác quen thuộc giữa nhân viên và khách hàng thường xuyên đến đổ xăng.", cx:68, brand:4, values:{heritage:1,devoted:2,pioneering:1}, quality:"mid", teamVote:28,
+          feedback:"Thân thiện nhưng hơi suồng sã, chưa chuẩn phục vụ mới. Ngôn ngữ nên giữ tính chuyên nghiệp: 'rất mong được phục vụ anh/chị lần sau ạ' — giữ Tận tâm nhưng không mất Di sản phục vụ." }
+      ]
+    }
+  ];
+
+  /* ═════════════════════════════════════════════════════════
+     SCENE SVG — minh hoạ cho từng điểm chạm
+     ═════════════════════════════════════════════════════════ */
+  function sceneSVG(tp){
+    var common = '<defs><linearGradient id="sky' + tp.id + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2961A8"/><stop offset="100%" stop-color="#001A4A"/></linearGradient></defs>';
+    var canopy = '<rect x="20" y="40" width="240" height="18" fill="#EE5021" rx="2"/>' +
+                 '<rect x="30" y="58" width="220" height="4" fill="#C63D0F"/>' +
+                 '<rect x="35" y="30" width="4" height="12" fill="#F0A500"/>' +
+                 '<rect x="241" y="30" width="4" height="12" fill="#F0A500"/>' +
+                 '<text x="140" y="54" text-anchor="middle" fill="white" font-size="11" font-weight="900" font-family="Arial">PETROLIMEX</text>' +
+                 '<rect x="50" y="58" width="6" height="90" fill="#8B4513"/>' +
+                 '<rect x="224" y="58" width="6" height="90" fill="#8B4513"/>';
+    var pump = '<g transform="translate(120,100)">' +
+               '<rect x="0" y="0" width="40" height="55" fill="#EE5021" rx="3" stroke="#C63D0F" stroke-width="1"/>' +
+               '<rect x="6" y="8" width="28" height="14" fill="#0A0A0A" rx="2"/>' +
+               '<text x="20" y="18" text-anchor="middle" fill="#F0A500" font-size="8" font-weight="900" font-family="monospace">0.00</text>' +
+               '<circle cx="20" cy="32" r="5" fill="white"/>' +
+               '<text x="20" y="36" text-anchor="middle" font-size="8" font-weight="900" fill="#EE5021" font-family="Arial">P</text>' +
+               '<rect x="38" y="20" width="10" height="3" fill="#444" rx="1"/>' +
+               '<path d="M48 22 Q62 22 62 35 L62 42" stroke="#222" stroke-width="2" fill="none"/>' +
+               '</g>';
+
+    var full = '<svg viewBox="0 0 280 180" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">' +
+               common +
+               '<rect width="280" height="180" fill="url(#sky' + tp.id + ')"/>' +
+               '<rect x="0" y="148" width="280" height="32" fill="#1a1a1a"/>' +
+               '<rect x="0" y="148" width="280" height="2" fill="#F0A500" opacity="0.3"/>' +
+               canopy + pump;
+
+    if(tp.id === 1){
+      full += '<g transform="translate(180,128)">' +
+              '<circle cx="8" cy="16" r="7" fill="#222"/><circle cx="8" cy="16" r="3" fill="#555"/>' +
+              '<circle cx="34" cy="16" r="7" fill="#222"/><circle cx="34" cy="16" r="3" fill="#555"/>' +
+              '<path d="M8 12 L18 2 L30 2 L34 12" fill="#EE5021"/>' +
+              '<rect x="18" y="-6" width="10" height="10" fill="#F4A460" rx="2"/>' +
+              '<circle cx="23" cy="-10" r="5" fill="#FFDAB9"/>' +
+              '<rect x="20" y="-16" width="8" height="6" fill="#111" rx="1"/>' +
+              '</g>';
+    } else if(tp.id === 6){
+      full += '<g transform="translate(170,110)">' +
+              '<rect x="0" y="0" width="20" height="14" fill="#EE5021" stroke="white" stroke-width="1"/>' +
+              '<circle cx="10" cy="7" r="4" fill="none" stroke="white" stroke-width="1"/>' +
+              '<circle cx="10" cy="7" r="1.5" fill="white"/>' +
+              '<text x="10" y="22" text-anchor="middle" fill="#F0A500" font-size="6" font-weight="700">REC</text>' +
+              '</g>';
+    } else {
+      full += '<g transform="translate(195,115)">' +
+              '<ellipse cx="8" cy="28" rx="10" ry="4" fill="rgba(0,0,0,0.25)"/>' +
+              '<rect x="4" y="8" width="10" height="18" fill="#F0A500" rx="1"/>' +
+              '<circle cx="9" cy="4" r="5" fill="#FFDAB9"/>' +
+              '</g>';
+    }
+
+    full += '<g transform="translate(75,110)">' +
+            '<ellipse cx="6" cy="28" rx="8" ry="3" fill="rgba(0,0,0,0.25)"/>' +
+            '<rect x="2" y="6" width="9" height="18" fill="#EE5021" rx="1"/>' +
+            '<circle cx="6" cy="2" r="5" fill="#FFDAB9"/>' +
+            '<rect x="3" y="-2" width="7" height="3" fill="#001A4A"/>' +
+            '</g>';
+
+    full += '</svg>';
+    return full;
+  }
+
+  /* ═════════════════════════════════════════════════════════
+     STATE
+     ═════════════════════════════════════════════════════════ */
+  var state = {
+    screen: "lobby",
+    currentTP: 0,
+    cxScore: 0,
+    brandPts: 0,
+    streak: 0,
+    maxStreak: 0,
+    values: { heritage:0, devoted:0, pioneering:0 },
+    answers: [],
+    timerInterval: null,
+    timerLeft: 60,
+    timerAudioContext: null,
+    answered: false,
+    resultNotified: false,
+    cupCelebrated: false,
+    teamName: "Nhóm CHT Hà Nội 01",
+    teamSize: 10
+  };
+  var timerHtmlAudioPool = [];
+  var timerHtmlAudioIndex = 0;
+  var timerBeepUris = {};
+
+  /* ═════════════════════════════════════════════════════════
+     HELPERS
+     ═════════════════════════════════════════════════════════ */
+  function $(sel){ return document.querySelector(sel); }
+  function $$(sel){ return Array.prototype.slice.call(document.querySelectorAll(sel)); }
+
+  function showScreen(id){
+    $$(".screen").forEach(function(s){ s.classList.remove("active"); });
+    var target = document.getElementById("screen-" + id);
+    if(target) target.classList.add("active");
+    state.screen = id;
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+
+  function animateNumber(el, from, to, dur){
+    dur = dur || 600;
+    var start = performance.now();
+    function tick(now){
+      var p = Math.min(1, (now - start) / dur);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(from + (to - from) * eased);
+      if(p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function updatePlayerRankUI(rankData){
+    if(rankData){
+      window.PLXPlayerRank = rankData;
+    }
+
+    var node = $("#player-rank-val");
+    if(!node) return;
+
+    var rank = window.PLXPlayerRank || {};
+    var rankValue = Number(rank.rank) || 0;
+    var totalValue = Number(rank.total) || 0;
+    var scores = Array.isArray(rank.scores)
+      ? rank.scores
+      : (Array.isArray(window.PLXLeaderboardScores) ? window.PLXLeaderboardScores : []);
+
+    if(scores.length){
+      var currentScore = (Number(state.cxScore) || 0) + (Number(state.brandPts) || 0);
+      var higherCount = scores.filter(function(score){
+        return (Number(score) || 0) > currentScore;
+      }).length;
+      rankValue = higherCount + 1;
+      totalValue = Math.max(totalValue, scores.length + 1);
+    }
+
+    node.textContent = rankValue > 0
+      ? "#" + rankValue + (totalValue > 0 ? "/" + totalValue : "")
+      : "Đang cập nhật";
+  }
+
+  /* ═════════════════════════════════════════════════════════
+     LOBBY INIT
+     ═════════════════════════════════════════════════════════ */
+  function initLobby(){
+    var grid = $("#member-grid");
+    grid.innerHTML = "";
+    for(var i=0; i<10; i++){
+      var dot = document.createElement("div");
+      dot.className = "member-dot filled";
+      dot.textContent = String(i+1);
+      grid.appendChild(dot);
+    }
+
+    $("#team-name").addEventListener("input", function(e){
+      state.teamName = e.target.value || "Nhóm chưa đặt tên";
+      $("#team-chip-name").textContent = state.teamName;
+    });
+    $("#team-chip-name").textContent = state.teamName;
+
+    $("#btn-start").addEventListener("click", function(){
+      state.teamName = $("#team-name").value || state.teamName;
+      $("#team-chip-name").textContent = state.teamName;
+      startGame();
+    });
+  }
+
+  /* ═════════════════════════════════════════════════════════
+     JOURNEY TRACK
+     ═════════════════════════════════════════════════════════ */
+  function renderJourney(){
+    var track = $("#journey-track");
+    track.innerHTML = "";
+    TOUCHPOINTS.forEach(function(tp, idx){
+      var node = document.createElement("div");
+      node.className = "tp-node";
+      if(idx < state.currentTP) node.classList.add("done");
+      else if(idx === state.currentTP) node.classList.add("current");
+
+      var dot = document.createElement("div");
+      dot.className = "tp-dot";
+      dot.textContent = String(idx + 1);
+
+      var label = document.createElement("div");
+      label.className = "tp-label";
+      label.textContent = tp.shortLabel;
+
+      node.appendChild(dot);
+      node.appendChild(label);
+      track.appendChild(node);
+    });
+    $("#jb-current").textContent = String(state.currentTP + 1);
+  }
+
+  /* ═════════════════════════════════════════════════════════
+     TIMER
+     ═════════════════════════════════════════════════════════ */
+  function initReminderAudio(){
+    if(state.timerAudioContext) return;
+    var AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if(!AudioCtx) return;
+    try {
+      state.timerAudioContext = new AudioCtx();
+      unlockReminderAudio();
+      primeReminderAudio();
+      initTimerHtmlAudio();
+    } catch(err) {
+      state.timerAudioContext = null;
+    }
+  }
+
+  function unlockReminderAudio(){
+    var ctx = state.timerAudioContext;
+    if(!ctx) return;
+    if(ctx.state === "suspended"){
+      ctx.resume().catch(function(){});
+    }
+  }
+
+  function primeReminderAudio(){
+    var ctx = state.timerAudioContext;
+    if(!ctx) return;
+    try {
+      var buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+      var source = ctx.createBufferSource();
+      var gain = ctx.createGain();
+      source.buffer = buffer;
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      source.connect(gain);
+      gain.connect(ctx.destination);
+      source.start(0);
+    } catch(err) {}
+  }
+
+  function isIosAudioDevice(){
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  }
+
+  function makeBeepDataUri(freq){
+    var sampleRate = 12000;
+    var duration = 0.22;
+    var samples = Math.floor(sampleRate * duration);
+    var dataSize = samples * 2;
+    var bytes = [];
+    function str(s){ for(var i=0;i<s.length;i++) bytes.push(s.charCodeAt(i)); }
+    function u16(v){ bytes.push(v & 255, (v >> 8) & 255); }
+    function u32(v){ bytes.push(v & 255, (v >> 8) & 255, (v >> 16) & 255, (v >> 24) & 255); }
+    str("RIFF"); u32(36 + dataSize); str("WAVEfmt "); u32(16); u16(1); u16(1); u32(sampleRate); u32(sampleRate * 2); u16(2); u16(16); str("data"); u32(dataSize);
+    for(var i=0;i<samples;i++){
+      var attack = Math.min(1, i / (sampleRate * 0.015));
+      var release = Math.min(1, (samples - i) / (sampleRate * 0.04));
+      var env = Math.max(0, Math.min(1, attack * release));
+      var sample = Math.round(Math.sin(2 * Math.PI * freq * (i / sampleRate)) * 32767 * 0.85 * env);
+      if(sample < 0) sample += 65536;
+      u16(sample);
+    }
+    var chunk = "";
+    for(var j=0;j<bytes.length;j++) chunk += String.fromCharCode(bytes[j]);
+    return "data:audio/wav;base64," + btoa(chunk);
+  }
+
+  function getTimerBeepUri(secondLeft){
+    var key = secondLeft <= 3 ? "urgent" : "normal";
+    if(!timerBeepUris[key]) timerBeepUris[key] = makeBeepDataUri(key === "urgent" ? 1080 : 880);
+    return timerBeepUris[key];
+  }
+
+  function initTimerHtmlAudio(){
+    if(timerHtmlAudioPool.length || typeof Audio === "undefined") return;
+    timerHtmlAudioPool = [0,1,2].map(function(){
+      var audio = new Audio(getTimerBeepUri(10));
+      audio.preload = "auto";
+      audio.playsInline = true;
+      return audio;
+    });
+    var unlock = timerHtmlAudioPool[0];
+    unlock.muted = true;
+    unlock.volume = 0;
+    var played = unlock.play();
+    if(played && typeof played.then === "function"){
+      played.then(function(){
+        unlock.pause();
+        unlock.currentTime = 0;
+        unlock.muted = false;
+        unlock.volume = 1;
+      }).catch(function(){});
+    }
+  }
+
+  function playTimerHtmlAudio(secondLeft){
+    initTimerHtmlAudio();
+    if(!timerHtmlAudioPool.length) return;
+    var audio = timerHtmlAudioPool[timerHtmlAudioIndex++ % timerHtmlAudioPool.length];
+    audio.src = getTimerBeepUri(secondLeft);
+    audio.muted = false;
+    audio.volume = 1;
+    try { audio.currentTime = 0; } catch(err) {}
+    var played = audio.play();
+    if(played && typeof played.catch === "function") played.catch(function(){});
+  }
+
+  function playTimerBell(secondLeft){
+    if(isIosAudioDevice()){
+      playTimerHtmlAudio(secondLeft);
+      return;
+    }
+    var ctx = state.timerAudioContext;
+    if(!ctx) return;
+    if(ctx.state === "suspended"){
+      ctx.resume().then(function(){ playTimerBell(secondLeft); }).catch(function(){});
+      return;
+    }
+
+    var now = ctx.currentTime;
+    var gain = ctx.createGain();
+    var osc = ctx.createOscillator();
+    var volume = secondLeft <= 3 ? 0.52 : 0.38;
+    var baseFreq = secondLeft <= 3 ? 980 : 760;
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(baseFreq, now);
+    osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.35, now + 0.08);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(volume, now + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.2);
+  }
+
+  function getRankPosition(rankText){
+    var match = String(rankText || "").trim().match(/^#?(\d+)/);
+    return match ? Number(match[1]) : 0;
+  }
+
+  function playCupChime(){
+    if(isIosAudioDevice()){
+      playTimerHtmlAudio(3);
+      setTimeout(function(){ playTimerHtmlAudio(5); }, 140);
+      setTimeout(function(){ playTimerHtmlAudio(3); }, 280);
+      return;
+    }
+    var ctx = state.timerAudioContext;
+    if(!ctx) return;
+    if(ctx.state === "suspended"){
+      ctx.resume().then(playCupChime).catch(function(){});
+      return;
+    }
+    var now = ctx.currentTime;
+    var freqs = [660, 880, 1180];
+    freqs.forEach(function(freq, idx){
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      var start = now + idx * 0.11;
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(freq, start);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.34, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.26);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + 0.3);
+    });
+  }
+
+  function triggerTopRankCelebration(rankText){
+    var banner = $("#cup-celebration");
+    if(!banner) return;
+    banner.classList.remove("active");
+    if(getRankPosition(rankText) !== 1) return;
+    void banner.offsetWidth;
+    banner.classList.add("active");
+    if(!state.cupCelebrated){
+      state.cupCelebrated = true;
+      playCupChime();
+    }
+  }
+
+  function startTimer(){
+    clearInterval(state.timerInterval);
+    state.timerLeft = 60;
+    updateTimerUI();
+    state.timerInterval = setInterval(function(){
+      state.timerLeft--;
+      updateTimerUI();
+      if(!state.answered && state.timerLeft <= 10 && state.timerLeft > 0){
+        playTimerBell(state.timerLeft);
+      }
+      if(state.timerLeft <= 0){
+        clearInterval(state.timerInterval);
+        if(!state.answered){
+          handleTimeout();
+        }
+      }
+    }, 1000);
+  }
+
+  function updateTimerUI(){
+    var el = $("#timer");
+    var val = $("#timer-val");
+    val.textContent = String(state.timerLeft);
+    el.classList.remove("warn", "danger");
+    if(state.timerLeft <= 10) el.classList.add("danger");
+    else if(state.timerLeft <= 25) el.classList.add("warn");
+  }
+
+  function scrollToCurrentQuestion(){
+    var target = $(".journey-bar") || $("#stage-hero") || $(".stage");
+    if(!target) return;
+    var top = target.getBoundingClientRect().top + window.pageYOffset - 12;
+    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  }
+
+  /* ═════════════════════════════════════════════════════════
+     RENDER TOUCHPOINT
+     ═════════════════════════════════════════════════════════ */
+  function renderTouchpoint(){
+    var tp = TOUCHPOINTS[state.currentTP];
+    state.answered = false;
+
+    renderJourney();
+
+    var hero = $("#stage-hero");
+    hero.style.background = tp.bgGradient;
+    $("#scene-svg").innerHTML = sceneSVG(tp);
+    $("#tp-num").textContent = (state.currentTP + 1) + "/7";
+    $("#stage-title").textContent = tp.title;
+    $("#stage-cx").textContent = tp.cx;
+
+    $("#scenario-text").textContent = tp.scenario;
+    $("#question-text").textContent = tp.question;
+
+    var ch = $("#choices");
+    ch.innerHTML = "";
+    tp.choices.forEach(function(choice){
+      var btn = document.createElement("button");
+      btn.className = "choice";
+      btn.setAttribute("data-id", choice.id);
+      btn.innerHTML = '<span class="letter">' + choice.id + '</span><span class="text"></span>';
+      btn.querySelector(".text").textContent = choice.text;
+      btn.addEventListener("click", function(){
+        if(state.answered) return;
+        handleChoice(choice, false);
+      });
+      ch.appendChild(btn);
+    });
+
+    $("#feedback").classList.add("hidden");
+    $("#feedback").innerHTML = "";
+
+    startTimer();
+  }
+
+  /* ═════════════════════════════════════════════════════════
+     HANDLE CHOICE
+     ═════════════════════════════════════════════════════════ */
+  function handleChoice(choice){
+    if(state.answered) return;
+    state.answered = true;
+    clearInterval(state.timerInterval);
+
+    var tp = TOUCHPOINTS[state.currentTP];
+
+    $$(".choice").forEach(function(btn){
+      btn.disabled = true;
+      var id = btn.getAttribute("data-id");
+      var c = tp.choices.find(function(x){ return x.id === id; });
+      if(c.quality === "good") btn.classList.add("correct");
+      if(id === choice.id && choice.quality !== "good") btn.classList.add("incorrect");
+      if(id !== choice.id && c.quality !== "good") btn.classList.add("muted");
+    });
+
+    var prevCX = state.cxScore;
+    state.cxScore += choice.cx;
+    state.brandPts += choice.brand;
+    state.values.heritage += choice.values.heritage;
+    state.values.devoted += choice.values.devoted;
+    state.values.pioneering += choice.values.pioneering;
+
+    if(choice.quality === "good"){
+      state.streak++;
+      if(state.streak > state.maxStreak) state.maxStreak = state.streak;
+    } else {
+      state.streak = 0;
+    }
+
+    state.answers.push({
+      tpId: tp.id,
+      tpLabel: tp.label,
+      tpTitle: tp.title,
+      choiceId: choice.id,
+      choiceText: choice.text,
+      quality: choice.quality,
+      cx: choice.cx,
+      brand: choice.brand,
+      feedback: choice.feedback,
+      timedOut: false
+    });
+
+    renderFeedback(tp, choice);
+    updateSidebar(prevCX);
+  }
+
+  function handleTimeout(){
+    if(state.answered) return;
+    state.answered = true;
+    clearInterval(state.timerInterval);
+
+    var tp = TOUCHPOINTS[state.currentTP];
+    $$(".choice").forEach(function(btn){
+      btn.disabled = true;
+    });
+
+    var timeoutChoice = {
+      id: "TIMEOUT",
+      text: "Không chọn đáp án",
+      quality: "timeout",
+      cx: 0,
+      brand: 0,
+      feedback: "",
+      teamVote: 0
+    };
+
+    var prevCX = state.cxScore;
+    state.streak = 0;
+    state.answers.push({
+      tpId: tp.id,
+      tpLabel: tp.label,
+      tpTitle: tp.title,
+      choiceId: "",
+      choiceText: timeoutChoice.text,
+      quality: timeoutChoice.quality,
+      cx: 0,
+      brand: 0,
+      feedback: timeoutChoice.feedback,
+      timedOut: true
+    });
+
+    renderFeedback(tp, timeoutChoice);
+    updateSidebar(prevCX);
+  }
+
+  function renderFeedback(tp, choice){
+    var fb = $("#feedback");
+    fb.classList.remove("hidden");
+    fb.className = "feedback " + (choice.quality === "good" ? "good" : choice.quality === "mid" ? "mid" : choice.quality === "timeout" ? "timeout" : "bad");
+
+    var iconChar = choice.quality === "good" ? "✓" : choice.quality === "mid" ? "!" : choice.quality === "timeout" ? "⏱" : "✗";
+    var title = choice.quality === "good"
+      ? "Lựa chọn chuẩn — đúng tinh thần PLX"
+      : choice.quality === "mid"
+        ? "Lựa chọn chấp nhận được — nhưng chưa tối ưu"
+        : choice.quality === "timeout"
+          ? "Hết giờ — chưa có lựa chọn"
+        : "Lựa chọn này đi ngược chuẩn phục vụ";
+
+    var deltaStr = (choice.cx >= 0 ? "+" : "") + choice.cx + " CX / " + (choice.brand >= 0 ? "+" : "") + choice.brand + " TH";
+
+    var teamBars = tp.choices.map(function(c){
+      return '<div class="tb-col" data-type="' + c.id + '" title="' + c.id + ': ' + c.teamVote + '%"><div class="fill" style="--w:' + (c.teamVote / 100) + '"></div></div>';
+    }).join("");
+
+    var numVoted = Math.round(state.teamSize * ((choice.teamVote || 0) / 100));
+    var teamHtml = choice.quality === "timeout"
+      ? '<div class="fb-team"><span class="fb-team-lbl">Không có đáp án được chọn</span></div>'
+      : '<div class="fb-team">'
+        + '<span class="fb-team-lbl">' + numVoted + '/10 chọn ' + choice.id + '</span>'
+        + '<div class="team-bars">' + teamBars + '</div>'
+        + '</div>';
+
+    var html = ''
+      + '<div class="fb-head">'
+      + '<div class="fb-icon">' + iconChar + '</div>'
+      + '<div class="fb-title">' + title + '</div>'
+      + '<div class="fb-score">Kết quả <span class="delta">' + deltaStr + '</span></div>'
+      + '</div>'
+      + '<div class="fb-body">'
+      + choice.feedback
+      + (choice.quality === "timeout" ? "" : '<div class="lesson-ttl">Phân bố ý kiến nhóm (mô phỏng)</div>')
+      + '</div>'
+      + teamHtml
+      + '<div class="fb-cta">'
+      + '<button class="btn btn-primary" id="btn-next">'
+      + (state.currentTP < 6 ? "Điểm chạm tiếp theo" : "Xem kết quả")
+      + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      + '</button>'
+      + '</div>';
+
+    fb.innerHTML = html;
+
+    $("#btn-next").addEventListener("click", function(){
+      nextTouchpoint();
+    });
+
+    addLog(tp, choice);
+  }
+
+  /* ═════════════════════════════════════════════════════════
+     SIDEBAR UPDATES
+     ═════════════════════════════════════════════════════════ */
+  function updateSidebar(prevCX){
+    animateNumber($("#cx-score"), prevCX, state.cxScore);
+    $("#brand-pts").textContent = String(state.brandPts);
+    $("#streak-val").textContent = String(state.streak);
+    updatePlayerRankUI();
+
+    var pct = Math.max(0, Math.min(100, (state.cxScore / 700) * 100));
+    $("#cx-bar").style.width = pct + "%";
+
+    var maxVal = 21;
+    $("#vt-heritage").textContent = String(state.values.heritage);
+    $("#vt-devoted").textContent = String(state.values.devoted);
+    $("#vt-pioneering").textContent = String(state.values.pioneering);
+    $("#vt-heritage-bar").style.width = ((state.values.heritage / maxVal) * 100) + "%";
+    $("#vt-devoted-bar").style.width = ((state.values.devoted / maxVal) * 100) + "%";
+    $("#vt-pioneering-bar").style.width = ((state.values.pioneering / maxVal) * 100) + "%";
+  }
+
+  function addLog(tp, choice){
+    var list = $("#log-list");
+    var empty = list.querySelector(".ll-empty");
+    if(empty) empty.remove();
+
+    var item = document.createElement("div");
+    var cls = choice.quality === "good" ? "good" : choice.quality === "bad" ? "bad" : "";
+    item.className = "ll-item " + cls;
+    var emoji = choice.quality === "good" ? "✓" : choice.quality === "bad" ? "✗" : choice.quality === "timeout" ? "⏱" : "!";
+    var deltaTxt = (choice.cx >= 0 ? "+" : "") + choice.cx;
+    var choiceLabel = choice.quality === "timeout" ? "Không chọn" : choice.id;
+    item.innerHTML = '<span class="ll-time">Điểm chạm 0' + tp.id + ' · ' + choiceLabel + '</span> ' + emoji + ' ' + tp.shortLabel + ' <strong>(' + deltaTxt + ' CX)</strong>';
+    list.insertBefore(item, list.firstChild);
+  }
+
+  /* ═════════════════════════════════════════════════════════
+     NEXT TOUCHPOINT
+     ═════════════════════════════════════════════════════════ */
+  function nextTouchpoint(){
+    if(state.currentTP < 6){
+      state.currentTP++;
+      renderTouchpoint();
+      requestAnimationFrame(scrollToCurrentQuestion);
+    } else {
+      showResults();
+    }
+  }
+
+  /* ═════════════════════════════════════════════════════════
+     START GAME
+     ═════════════════════════════════════════════════════════ */
+  function startGame(){
+    initReminderAudio();
+    state.currentTP = 0;
+    state.cxScore = 0;
+    state.brandPts = 0;
+    state.streak = 0;
+    state.maxStreak = 0;
+    state.values = { heritage:0, devoted:0, pioneering:0 };
+    state.answers = [];
+    state.resultNotified = false;
+    state.cupCelebrated = false;
+
+    $("#cx-score").textContent = "0";
+    $("#brand-pts").textContent = "0";
+    updatePlayerRankUI();
+    $("#streak-val").textContent = "0";
+    $("#cx-bar").style.width = "0%";
+    $("#vt-heritage").textContent = "0";
+    $("#vt-devoted").textContent = "0";
+    $("#vt-pioneering").textContent = "0";
+    $("#vt-heritage-bar").style.width = "0%";
+    $("#vt-devoted-bar").style.width = "0%";
+    $("#vt-pioneering-bar").style.width = "0%";
+    $("#log-list").innerHTML = '<div class="ll-empty">Chưa có quyết định nào</div>';
+    var cup = $("#cup-celebration");
+    if(cup) cup.classList.remove("active");
+
+    showScreen("game");
+    renderTouchpoint();
+  }
+
+  /* ═════════════════════════════════════════════════════════
+     RESULTS
+     ═════════════════════════════════════════════════════════ */
+  function showResults(){
+    clearInterval(state.timerInterval);
+    updatePlayerRankUI();
+    var gameRankText = $("#player-rank-val") ? $("#player-rank-val").textContent : "—";
+
+    var rank, medal, title, sub;
+    if(state.cxScore >= 550){
+      rank = "Xuất sắc"; medal = "A+";
+      title = "Đội ngũ CHT đã hiện thực hoá đầy đủ 3 giá trị cốt lõi";
+      sub = "Nhóm thể hiện tư duy 'khách hàng là trung tâm' nhất quán — đồng thời hiện thực hoá Di sản, Tận tâm và Tiên phong. Đây là mẫu mực cho toàn hệ thống.";
+    } else if(state.cxScore >= 430){
+      rank = "Khá"; medal = "B";
+      title = "Bạn đã làm chủ phần lớn điểm chạm";
+      sub = "Ba giá trị cốt lõi đã được thể hiện nhưng chưa đồng đều. Xem biểu đồ bên phải để biết giá trị nào cần củng cố.";
+    } else if(state.cxScore >= 300){
+      rank = "Trung bình"; medal = "C";
+      title = "Cần luyện tập thêm các chuẩn phục vụ mới";
+      sub = "Nhóm còn nhiều lựa chọn theo phản xạ cũ. Đây chính xác là lý do có khoá đào tạo này — hãy thảo luận lại các TP bị điểm thấp.";
+    } else {
+      rank = "Cần cải thiện"; medal = "D";
+      title = "Cần rà soát lại tư duy về điểm chạm";
+      sub = "Có nhiều lựa chọn đi ngược chuẩn PLX. Nhóm cần ôn lại tài liệu 'Nền tảng thương hiệu Petrolimex' trước khi thử lại.";
+    }
+
+    $("#rh-medal").textContent = medal;
+    $("#rh-title").textContent = title;
+    $("#rh-sub").textContent = sub;
+    $("#r-cx").textContent = String(state.cxScore);
+    $("#r-brand").textContent = String(state.brandPts);
+    $("#r-streak").textContent = String(state.maxStreak);
+    $("#r-rank").textContent = rank;
+    state.rankLabel = rank;
+
+    // Update insight scores
+    $("#is-heritage").textContent = String(state.values.heritage);
+    $("#is-devoted").textContent = String(state.values.devoted);
+    $("#is-pioneering").textContent = String(state.values.pioneering);
+
+    // Review list
+    var rev = $("#tp-review");
+    rev.innerHTML = "";
+    state.answers.forEach(function(a, idx){
+      var div = document.createElement("div");
+      div.className = "tpr " + (a.quality === "good" ? "good" : a.quality === "bad" ? "bad" : "mid");
+      var deltaLabel = (a.cx >= 0 ? "+" : "") + a.cx;
+      div.innerHTML = ''
+        + '<div class="tpr-num">' + (idx + 1) + '</div>'
+        + '<div class="tpr-text"><strong></strong><span></span></div>'
+        + '<div class="tpr-score">' + deltaLabel + '</div>';
+      div.querySelector("strong").textContent = a.tpTitle;
+      div.querySelector("span").textContent = "Chọn " + a.choiceId + " — " + (a.quality === "good" ? "Chuẩn vàng" : a.quality === "bad" ? "Cần sửa" : "Chấp nhận được");
+      rev.appendChild(div);
+    });
+
+    // Commit based on weakest of 3 core values (Di sản / Tận tâm / Tiên phong)
+    var weakest = "heritage", min = state.values.heritage;
+    if(state.values.devoted < min){ weakest = "devoted"; min = state.values.devoted; }
+    if(state.values.pioneering < min){ weakest = "pioneering"; min = state.values.pioneering; }
+
+    var commits = {
+      "heritage": "Mỗi ca làm việc, tôi sẽ giữ vững chuẩn mực phục vụ như giữ lửa nghề — bởi 70 năm uy tín Petrolimex không được phép đứt đoạn ở bất kỳ điểm chạm nào trong ca của tôi.",
+      "devoted": "Tôi cam kết lắng nghe bằng thấu cảm, hành động bằng chân thành từ trái tim — biến từng giao dịch tại CHXD thành một trải nghiệm đủ đầy, chỉn chu và gắn kết.",
+      "pioneering": "Tôi cam kết luôn là người đi đầu tại điểm chạm của mình — chủ động giới thiệu tiện ích số, chủ động giải quyết khủng hoảng bằng minh bạch, chủ động biến mỗi khoảnh khắc bình thường thành trải nghiệm đáng nhớ."
+    };
+    $("#commit-text").textContent = commits[weakest];
+
+    showScreen("results");
+    triggerTopRankCelebration(gameRankText);
+
+    if(!state.resultNotified && window.parent && window.parent !== window){
+      state.resultNotified = true;
+      try {
+        window.parent.postMessage({
+          type: "plx-result-ready",
+          gameId: "plx-01",
+          payload: window.PLXGame && typeof window.PLXGame.getResultData === "function"
+            ? window.PLXGame.getResultData()
+            : null
+        }, window.location.origin);
+      } catch (error) {
+        state.resultNotified = false;
+      }
+    }
+  }
+
+  function showRanking(){
+    clearInterval(state.timerInterval);
+    showScreen("ranking");
+  }
+
+  window.showRanking = showRanking;
+  window.showResults = showResults;
+  window.startGame = startGame;
+  window.PLXGame = {
+    showRanking: showRanking,
+    showResults: showResults,
+    startGame: startGame,
+    setPlayerRank: updatePlayerRankUI,
+    getTouchpointsMeta: function(){
+      return TOUCHPOINTS.map(function(tp){
+        return {
+          id: String(tp.id),
+          label: tp.label,
+          shortLabel: tp.shortLabel,
+          title: tp.title
+        };
+      });
+    },
+    getLiveScoreData: function(){
+      return {
+        totalScore: (Number(state.cxScore) || 0) + (Number(state.brandPts) || 0),
+        progress: Number(state.currentTP) || 0
+      };
+    },
+    getResultData: function(){
+      return {
+        cxScore: state.cxScore,
+        brandPts: state.brandPts,
+        maxStreak: state.maxStreak,
+        rankLabel: state.rankLabel || "",
+        values: {
+          heritage: state.values.heritage,
+          devoted: state.values.devoted,
+          pioneering: state.values.pioneering
+        },
+        answers: state.answers.map(function(a){
+          return {
+            tpId: a.tpId,
+            tpLabel: a.tpLabel,
+            tpTitle: a.tpTitle,
+            choiceId: a.choiceId,
+            choiceText: a.choiceText,
+            quality: a.quality,
+            cx: a.cx,
+            brand: a.brand,
+            feedback: a.feedback,
+            timedOut: !!a.timedOut
+          };
+        })
+      };
+    }
+  };
+
+  /* ═════════════════════════════════════════════════════════
+     EVENT BINDINGS
+     ═════════════════════════════════════════════════════════ */
+  document.addEventListener("DOMContentLoaded", function(){
+    initLobby();
+
+    var initialView = new URLSearchParams(window.location.search).get("view");
+    if(initialView === "rank"){
+      showRanking();
+    }
+
+    $("#btn-back-results").addEventListener("click", function(){ showResults(); });
+  });
+
+})();
+</script>
+</body>
+</html>

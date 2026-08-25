@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>__SURVEY_TITLE__</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f5f7fa;color:#1f2937}.wrap{max-width:980px;margin:0 auto;padding:24px 14px 40px}.hero{background:var(--primary);color:#fff;padding:24px;border-radius:8px}.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.04em;opacity:.9;font-weight:700}.hero h1{margin:10px 0 10px;font-size:23px;line-height:1.2;max-width:none;white-space:pre-line}.hero p{margin:0;line-height:1.55;white-space:pre-line;font-size:14px;opacity:.96}.panel{background:#fff;border:1px solid #e5e7eb;border-radius:8px;margin-top:14px;padding:18px}.intro-body{line-height:1.48}.intro-paragraph{margin:0 0 10px}.intro-paragraph:last-child{margin-bottom:0}.intro-line{margin:0 0 4px}.intro-line:last-child{margin-bottom:0}.identity-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.identity-grid .q{border-top:0;padding:0}.identity-grid .title{display:block;font-weight:700;margin-bottom:8px}.progress-box{margin-top:14px}.progress-meta{display:flex;justify-content:space-between;gap:12px;font-size:13px;font-weight:700;color:#374151}.progress-detail{color:#6b7280;font-weight:600}.progress-track{height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin-top:8px}.progress-fill{height:100%;width:0;background:var(--accent);border-radius:999px;transition:width .2s ease}.tabs{display:flex;gap:8px;overflow:auto;padding-bottom:4px}.tabs button{border:1px solid #d1d5db;background:#fff;border-radius:999px;padding:8px 12px;white-space:nowrap;cursor:pointer}.tabs button.active{background:var(--primary);border-color:var(--primary);color:#fff}.q{border-top:1px solid #eef2f7;padding:16px 0}.q:first-child{border-top:0}.q label.title{display:block;font-weight:700;margin-bottom:8px}.hint{font-size:13px;color:#6b7280;margin-top:-2px;margin-bottom:10px;line-height:1.5;white-space:pre-line;font-style:italic}.hint ul{margin:4px 0 0 20px;padding-left:14px;white-space:normal}.hint li{margin:3px 0;padding-left:2px}.options{display:grid;gap:8px}.option{display:flex;gap:9px;align-items:flex-start;border:1px solid #e5e7eb;border-radius:6px;padding:8px 10px;line-height:1.35}.option input[type=radio],.option input[type=checkbox]{appearance:none;-webkit-appearance:none;width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:2px 0 0;border:1.5px solid #9ca3af;background:#fff;display:inline-grid;place-content:center}.option input[type=radio]{border-radius:999px}.option input[type=checkbox]{border-radius:4px}.option input[type=radio]::before,.option input[type=checkbox]::before{content:"";width:6px;height:6px;transform:scale(0);transition:transform .12s ease;background:var(--accent)}.option input[type=radio]::before{border-radius:999px}.option input[type=checkbox]::before{width:7px;height:7px;border-radius:2px}.option input[type=radio]:checked,.option input[type=checkbox]:checked{border-color:var(--accent)}.option input[type=radio]:checked::before,.option input[type=checkbox]:checked::before{transform:scale(1)}.option input[type=radio]:focus-visible,.option input[type=checkbox]:focus-visible{outline:2px solid color-mix(in srgb,var(--accent) 35%,transparent);outline-offset:2px}.option span{min-width:0;display:block}.matrix-wrap{overflow:auto;margin-top:10px}.matrix-table{width:100%;border-collapse:collapse;min-width:760px}.matrix-table th,.matrix-table td{border:1px solid #e5e7eb;padding:10px;text-align:center;vertical-align:middle}.matrix-table th:first-child,.matrix-table td:first-child{text-align:left;width:42%}.matrix-table thead th{background:#f8fafc;font-size:13px}.matrix-scale-value{display:block;font-weight:800}.matrix-scale-label{display:block;margin-top:3px;color:#4b5563;font-size:11px;line-height:1.25}.matrix-card-options{display:none}.matrix-radio{appearance:none;-webkit-appearance:none;width:18px;height:18px;border:1.5px solid #9ca3af;border-radius:999px;display:inline-grid;place-content:center;background:#fff}.matrix-radio:checked{border-color:var(--accent)}.matrix-radio:checked:before{content:"";width:8px;height:8px;border-radius:999px;background:var(--accent)}textarea,input[type=text],input[type=email],input[type=tel],input[type=date]{width:100%;border:1px solid #cfd4da;border-radius:6px;padding:10px;font:inherit}textarea{min-height:84px;resize:vertical}.q[data-qid="a_hoten"] input[type=text]{max-width:360px}.q[data-qid="a_so_nhanvien"] input[type=text],.q[data-qid="a_so_cotbom"] input[type=text],.q[data-qid="a_sanluong"] input[type=text]{max-width:260px}.actions{display:flex;justify-content:space-between;gap:10px;margin-top:16px}.btn{border:0;border-radius:6px;padding:10px 16px;font-weight:700;cursor:pointer}.primary{background:var(--accent);color:#fff}.ghost{background:#eef2f7;color:#1f2937}.notice{margin-top:12px;padding:10px;border-radius:6px;background:#fff7ed;color:#9a3412}.thanks{font-size:18px;font-weight:700;color:#065f46}.required{color:#dc2626}.footer{font-size:12px;color:#6b7280;text-align:center;margin-top:18px}@media(max-width:640px){.hero h1{font-size:20px}.hero{padding:20px}.actions{flex-direction:column}.btn{width:100%}.identity-grid{grid-template-columns:1fr}.matrix-wrap{overflow:visible}.matrix-table{min-width:0}.matrix-table thead th:not(:first-child),.matrix-table tbody td:not(:first-child){display:none}.matrix-table th:first-child,.matrix-table td:first-child{width:100%}.matrix-card-options{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px}.matrix-card-option{display:flex;gap:8px;align-items:flex-start;border:1px solid #e5e7eb;border-radius:6px;background:#fff;padding:9px}.matrix-card-option span{line-height:1.35}.matrix-card-label{font-size:13px;color:#374151}.q[data-qid="a_hoten"] input[type=text],.q[data-qid="a_so_nhanvien"] input[type=text],.q[data-qid="a_so_cotbom"] input[type=text],.q[data-qid="a_sanluong"] input[type=text]{max-width:none}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const FORM_ID="__FORM_ID__";
+const SUPABASE_URL="__SUPABASE_URL__";
+const SUPABASE_ANON_KEY="__SUPABASE_ANON_KEY__";
+const SETTINGS=__DISPLAY_CONFIG__;
+const QUESTIONS=__SURVEY_QUESTIONS__;
+const SECTIONS=__SURVEY_SECTIONS__;
+const STORE_KEY=`generic_survey_${FORM_ID}`;
+const root=document.getElementById('app');
+document.documentElement.style.setProperty('--primary', SETTINGS.primaryColor || '#005BAC');
+document.documentElement.style.setProperty('--accent', SETTINGS.accentColor || '#F58220');
+let activeSection=SECTIONS[0]?.id || 'profile';
+let answers=loadDraft();
+let sending=false;
+
+function loadDraft(){try{return JSON.parse(localStorage.getItem(STORE_KEY)||'{}')}catch{return {}}}
+function saveDraft(){try{localStorage.setItem(STORE_KEY,JSON.stringify(answers))}catch{}}
+function esc(v){return String(v ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
+function normalizeBannerLines(value){
+  return String(value??'')
+    .replace(/\s*(Quy m\u00f4:|H\u00ecnh th\u1ee9c:|Th\u1eddi l\u01b0\u1ee3ng d\u1ef1 ki\u1ebfn:|Th\u1eddi h\u1ea1n ho\u00e0n th\u00e0nh:)/g,'\n$1')
+    .trim();
+}
+function multiline(v){return esc(normalizeBannerLines(v)).replace(/\r\n?|\n/g,'<br>')}
+function bannerTitleHtml(){
+  const title=String(SETTINGS.bannerTitle??'').trim();
+  return title?`<h1>${multiline(title)}</h1>`:'';
+}
+function introBlockHtml(block){
+  const lines=String(block||'').split('\n').map(line=>line.trim()).filter(Boolean);
+  if(!lines.length)return '';
+  if(lines.some(line=>/^[-\u2022]\s+/.test(line))){
+    return `<div class="intro-paragraph">${lines.map(line=>`<div class="intro-line">${esc(line)}</div>`).join('')}</div>`;
+  }
+  return `<p class="intro-paragraph">${esc(lines.join(' '))}</p>`;
+}
+function introBodyHtml(value){
+  return String(value??'').replace(/\r\n?/g,'\n').split(/\n{2,}/).map(introBlockHtml).filter(Boolean).join('');
+}
+function questionsFor(sectionId){return QUESTIONS.filter(q=>q.sectionId===sectionId)}
+function matrixGroupKey(q){
+  const match=String(q.code||'').match(/^(Q0*\d+)-\d+$/i);
+  return match?match[1].toUpperCase():'';
+}
+function progressQuestions(){
+  const source=QUESTIONS.filter(q=>/^Q\d+(?:-\d+)?$/i.test(String(q.code||'')));
+  const groups=new Set();
+  const items=[];
+  for(const q of source){
+    const base=matrixGroupKey(q);
+    if(!base){items.push(q);continue}
+    if(groups.has(base))continue;
+    groups.add(base);
+    items.push({...q,id:`__matrix_${base}`,matrixItems:source.filter(item=>matrixGroupKey(item)===base)});
+  }
+  return items;
+}
+function selectedValues(id){const value=answers[id];return Array.isArray(value)?value:[]}
+function isAnswered(q){
+  if(Array.isArray(q.matrixItems))return q.matrixItems.every(item=>isAnswered(item));
+  const v=answers[q.id];return Array.isArray(v)?v.length>0:String(v||'').trim().length>0;
+}
+function missingRequiredForSection(sectionId){return questionsFor(sectionId).filter(q=>q.required&&!isAnswered(q))}
+function setAnswer(id,value){answers={...answers,[id]:value};saveDraft();updateProgress()}
+function showLimitNotice(message){
+  const notice=document.getElementById('limitNotice');
+  if(!notice)return;
+  notice.textContent=message;
+  notice.style.display='block';
+  window.clearTimeout(showLimitNotice.timer);
+  showLimitNotice.timer=window.setTimeout(()=>{notice.textContent='';notice.style.display='none'},1800);
+}
+function toggleAnswer(id,value,maxSelections,input){
+  const current=selectedValues(id);
+  if(current.includes(value)){setAnswer(id,current.filter(item=>item!==value));return}
+  if(maxSelections&&current.length>=maxSelections){
+    if(input)input.checked=false;
+    showLimitNotice(`Ch\u1ec9 \u0111\u01b0\u1ee3c ch\u1ecdn t\u1ed1i \u0111a ${maxSelections} ph\u01b0\u01a1ng \u00e1n.`);
+    return;
+  }
+  setAnswer(id,[...current,value])
+}
+function canLeaveCurrentSection(){
+  const missing=missingRequiredForSection(activeSection);
+  if(!missing.length)return true;
+  alert(`Vui l\u00f2ng ho\u00e0n th\u00e0nh ph\u1ea7n hi\u1ec7n t\u1ea1i tr\u01b0\u1edbc khi chuy\u1ec3n ph\u1ea7n. C\u00f2n ${missing.length} c\u00e2u b\u1eaft bu\u1ed9c ch\u01b0a tr\u1ea3 l\u1eddi.`);
+  return false;
+}
+function goToSection(sectionId){
+  if(sectionId===activeSection)return;
+  const currentIndex=SECTIONS.findIndex(s=>s.id===activeSection);
+  const targetIndex=SECTIONS.findIndex(s=>s.id===sectionId);
+  if(targetIndex>currentIndex&&!canLeaveCurrentSection())return;
+  activeSection=sectionId;
+  render();
+  window.requestAnimationFrame(()=>{
+    const target=document.getElementById('surveySectionPanel');
+    if(target)target.scrollIntoView({block:'start',behavior:'smooth'});
+  });
+}
+function nextSection(){
+  const currentIndex=SECTIONS.findIndex(s=>s.id===activeSection);
+  const next=SECTIONS[currentIndex+1];
+  if(next)goToSection(next.id);
+}
+function previousSection(){
+  const currentIndex=SECTIONS.findIndex(s=>s.id===activeSection);
+  const previous=SECTIONS[currentIndex-1];
+  if(previous)goToSection(previous.id);
+}
+function updateProgress(){
+  const items=progressQuestions();
+  const answered=items.filter(isAnswered).length;
+  const percent=items.length?Math.round((answered/items.length)*100):0;
+  const fill=document.getElementById('progressFill');
+  const value=document.getElementById('progressValue');
+  if(fill)fill.style.width=`${percent}%`;
+  if(value)value.textContent=`${answered}/${items.length} c\u00e2u \u00b7 ${percent}%`;
+}
+function progressHtml(){return '<div class="progress-box" aria-label="Ti\u1ebfn \u0111\u1ed9 kh\u1ea3o s\u00e1t"><div class="progress-meta"><span>Ti\u1ebfn \u0111\u1ed9 to\u00e0n phi\u1ebfu</span><span id="progressValue">0/0 c\u00e2u \u00b7 0%</span></div><div class="progress-track"><div class="progress-fill" id="progressFill"></div></div></div>'}
+function antiSpamHtml(){
+  return '<div style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden" aria-hidden="true"><label>Website<input type="text" tabindex="-1" autocomplete="off" value="'+esc(answers.__vc_trap||'')+'" oninput="setAnswer(\'__vc_trap\', this.value)"></label></div>';
+}
+function respondentIdentityHtml(){
+  const needName=Boolean(SETTINGS.requireRespondentName);
+  const needEmail=Boolean(SETTINGS.requireRespondentEmail);
+  if(!needName&&!needEmail)return '';
+  return `<div class="panel"><h2>Th\u00f4ng tin ng\u01b0\u1eddi tr\u1ea3 l\u1eddi</h2><div class="identity-grid">${needName?`<label class="q"><span class="title">H\u1ecd t\u00ean ng\u01b0\u1eddi tr\u1ea3 l\u1eddi<span class="required"> *</span></span><input type="text" autocomplete="name" value="${esc(answers.contact_name||answers.a_hoten||'')}" oninput="setAnswer('contact_name', this.value)" placeholder="Nh\u1eadp h\u1ecd t\u00ean"></label>`:''}${needEmail?`<label class="q"><span class="title">Email<span class="required"> *</span></span><input type="email" autocomplete="email" value="${esc(answers.email||'')}" oninput="setAnswer('email', this.value)" placeholder="name@company.com"></label>`:''}</div></div>`;
+}
+function questionTitle(q){
+  const match=String(q.code||'').match(/^Q0*(\d+)(?:-(\d+))?$/);
+  if(!match)return q.prompt;
+  const suffix=match[2]?`.${Number(match[2])}`:'';
+  return `C\u00e2u ${Number(match[1])}${suffix}. ${q.prompt}`;
+}
+function hasOtherNote(q){
+  return (q.options||[]).some(o=>/(ghi r\u00f5|b\u1ed5 sung)/i.test(String(o.label||'')));
+}
+function noteInputHtml(q){
+  if(!hasOtherNote(q))return '';
+  return `<input type="text" placeholder="Kh\u00e1c/ghi ch\u00fa th\u00eam..." value="${esc(answers[`${q.id}__note`]||'')}" oninput="setAnswer('${esc(q.id)}__note', this.value)">`;
+}
+function hintHtml(value){
+  const raw=String(value||'').trim();
+  if(!raw)return '';
+  const lines=raw.split(/\r?\n/).map(line=>line.trim()).filter(Boolean);
+  if(lines.length>1&&/^G\u1ee3i \u00fd\s*:?$/i.test(lines[0])){
+    return `<div class="hint"><div>G\u1ee3i \u00fd:</div><ul>${lines.slice(1).map(line=>`<li>${esc(line)}</li>`).join('')}</ul></div>`;
+  }
+  return `<div class="hint">${esc(raw)}</div>`;
+}
+function matrixBaseCode(q){
+  return matrixGroupKey(q);
+}
+function matrixTitle(baseCode,items){
+  const sourceTitle=items?.[0]?.groupTitle;
+  if(sourceTitle)return sourceTitle;
+  const match=String(baseCode||'').match(/^Q0*(\d+)$/i);
+  return match?`C\u00e2u ${Number(match[1])}. \u0110\u00e1nh gi\u00e1 m\u1ee9c \u0111\u1ed9 t\u1ed3n t\u1ea1i c\u1ee7a c\u00e1c bi\u1ec3u hi\u1ec7n sau trong \u0111\u01a1n v\u1ecb`:'\u0110\u00e1nh gi\u00e1 m\u1ee9c \u0111\u1ed9';
+}
+function matrixScaleLabel(option){
+  return String(option?.label||option?.value||'').replace(new RegExp(`^${String(option?.value||'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\s*`),'').trim();
+}
+function matrixScaleHeaderHtml(option){
+  const label=matrixScaleLabel(option);
+  return `<th><span class="matrix-scale-value">${esc(option.value)}</span>${label?`<span class="matrix-scale-label">${esc(label)}</span>`:''}</th>`;
+}
+function matrixCardOptionsHtml(q,options){
+  return `<div class="matrix-card-options">${options.map(o=>`<label class="matrix-card-option"><input class="matrix-radio" aria-label="${esc(q.prompt)} - ${esc(o.label)}" type="radio" name="${esc(q.id)}" value="${esc(o.value)}" ${answers[q.id]===o.value?'checked':''} onchange="setAnswer('${esc(q.id)}', this.value)"><span><strong>${esc(o.value)}</strong>${matrixScaleLabel(o)?` <span class="matrix-card-label">${esc(matrixScaleLabel(o))}</span>`:''}</span></label>`).join('')}</div>`;
+}
+function matrixQuestionHtml(items){
+  const base=matrixBaseCode(items[0]);
+  const options=items[0].options||[{value:'1',label:'1'},{value:'2',label:'2'},{value:'3',label:'3'},{value:'4',label:'4'},{value:'5',label:'5'}];
+  const hint=items.find(q=>q.hint)?.hint||'1 = H\u1ea7u nh\u01b0 kh\u00f4ng t\u1ed3n t\u1ea1i\n2 = C\u00f3 t\u1ed3n t\u1ea1i nh\u01b0ng r\u1ea5t \u00edt\n3 = T\u1ed3n t\u1ea1i \u1edf m\u1ee9c trung b\u00ecnh\n4 = T\u1ed3n t\u1ea1i kh\u00e1 r\u00f5\n5 = T\u1ed3n t\u1ea1i r\u1ea5t r\u00f5';
+  return `<div class="q matrix-q"><label class="title">${esc(matrixTitle(base,items))}<span class="required"> *</span></label>${hintHtml(hint)}<div class="matrix-wrap"><table class="matrix-table"><thead><tr><th>Bi\u1ec3u hi\u1ec7n</th>${options.map(matrixScaleHeaderHtml).join('')}</tr></thead><tbody>${items.map(q=>`<tr><td>${esc(q.prompt)}${matrixCardOptionsHtml(q,options)}</td>${options.map(o=>`<td><input class="matrix-radio" aria-label="${esc(q.prompt)} - ${esc(o.label)}" type="radio" name="${esc(q.id)}" value="${esc(o.value)}" ${answers[q.id]===o.value?'checked':''} onchange="setAnswer('${esc(q.id)}', this.value)"></td>`).join('')}</tr>`).join('')}</tbody></table></div></div>`;
+}
+function sectionQuestionsHtml(sectionId){
+  const items=questionsFor(sectionId);
+  const html=[];
+  for(let i=0;i<items.length;i+=1){
+    const q=items[i];
+    const base=matrixBaseCode(q);
+    if(base){
+      const group=[];
+      while(i<items.length&&matrixBaseCode(items[i])===base){group.push(items[i]);i+=1}
+      i-=1;
+      html.push(matrixQuestionHtml(group));
+      continue;
+    }
+    html.push(questionHtml(q));
+  }
+  return html.join('');
+}
+function questionHtml(q){
+  const required=q.required?'<span class="required"> *</span>':'';
+  const hint=hintHtml(q.hint);
+  if(q.type==='single'){
+    return `<div class="q" data-qid="${esc(q.id)}"><label class="title">${esc(questionTitle(q))}${required}</label>${hint}<div class="options">${(q.options||[]).map(o=>`<label class="option"><input type="radio" name="${esc(q.id)}" value="${esc(o.value)}" ${answers[q.id]===o.value?'checked':''} onchange="setAnswer('${esc(q.id)}', this.value)"><span>${esc(o.label)}</span></label>`).join('')}</div>${noteInputHtml(q)}</div>`;
+  }
+  if(q.type==='multiple'){
+    const values=selectedValues(q.id);
+    return `<div class="q" data-qid="${esc(q.id)}"><label class="title">${esc(questionTitle(q))}${required}</label>${hint}<div class="options">${(q.options||[]).map(o=>`<label class="option"><input type="checkbox" value="${esc(o.value)}" ${values.includes(o.value)?'checked':''} onchange="toggleAnswer('${esc(q.id)}', this.value, ${Number(q.maxSelections||0)}, this)"><span>${esc(o.label)}</span></label>`).join('')}</div>${noteInputHtml(q)}</div>`;
+  }
+  if(q.type==='rating'){
+    return `<div class="q" data-qid="${esc(q.id)}"><label class="title">${esc(questionTitle(q))}${required}</label>${hint}<div class="options">${(q.options||[{value:'1',label:'1'},{value:'2',label:'2'},{value:'3',label:'3'},{value:'4',label:'4'},{value:'5',label:'5'}]).map(o=>`<label class="option"><input type="radio" name="${esc(q.id)}" value="${esc(o.value)}" ${answers[q.id]===o.value?'checked':''} onchange="setAnswer('${esc(q.id)}', this.value)"><span>${esc(o.label)}</span></label>`).join('')}</div></div>`;
+  }
+  return `<div class="q" data-qid="${esc(q.id)}"><label class="title">${esc(questionTitle(q))}${required}</label>${hint}<textarea placeholder="${esc(q.placeholder||'Nh\u1eadp c\u00e2u tr\u1ea3 l\u1eddi...')}" oninput="setAnswer('${esc(q.id)}', this.value)">${esc(answers[q.id]||'')}</textarea></div>`;
+}
+async function submitSurvey(){
+  if(sending)return;
+  const missing=QUESTIONS.filter(q=>q.required).filter(q=>{const v=answers[q.id];return Array.isArray(v)?!v.length:!String(v||'').trim()});
+  if(missing.length){alert(`Vui l\u00f2ng tr\u1ea3 l\u1eddi ${missing.length} c\u00e2u b\u1eaft bu\u1ed9c.`);return}
+  if(SETTINGS.requireRespondentName&&!String(answers.contact_name||answers.a_hoten||'').trim()){alert('Vui l\u00f2ng nh\u1eadp h\u1ecd t\u00ean ng\u01b0\u1eddi tr\u1ea3 l\u1eddi.');return}
+  if(SETTINGS.requireRespondentEmail&&!String(answers.email||'').trim()){alert('Vui l\u00f2ng nh\u1eadp email ng\u01b0\u1eddi tr\u1ea3 l\u1eddi.');return}
+  if(String(answers.__vc_trap||'').trim()){alert('Chưa gửi được khảo sát. Vui lòng tải lại trang và thử lại.');return}
+  const inviteCode=String(answers.invite_code||answers.a_ma_moi||answers.email||answers.phone||'').trim();
+  const cleanAnswers={...answers,__vc_trap:'',__vc_challenge:'9'};
+  sending=true;render();
+  const payload={
+    id:`SSS-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`,
+    form_id:FORM_ID,
+    unit_name:String(answers.a_congty||answers.unit_name||'').trim(),
+    contact_name:String(answers.contact_name||answers.a_hoten||'').trim(),
+    position_name:String(answers.a_chxd||answers.position_name||'').trim(),
+    phone:String(answers.phone||'').trim() || null,
+    email:String(answers.email||'').trim() || null,
+    invite_code:inviteCode || null,
+    spam_trap:'',
+    client_meta:{userAgent:navigator.userAgent,submittedPath:location.pathname,submittedAt:new Date().toISOString()},
+    completed_on:new Date().toISOString().slice(0,10),
+    answers:cleanAnswers,
+  };
+  const res=await fetch(`${SUPABASE_URL}/rest/v1/vcontent_student_survey_submissions`,{method:'POST',headers:{apikey:SUPABASE_ANON_KEY,Authorization:`Bearer ${SUPABASE_ANON_KEY}`,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(payload)});
+  if(!res.ok){sending=false;render();alert(res.status===409?'Thông tin này đã được ghi nhận trước đó. Nếu cần chỉnh sửa, vui lòng liên hệ ban tổ chức.':'Ch\u01b0a g\u1eedi \u0111\u01b0\u1ee3c kh\u1ea3o s\u00e1t. Vui l\u00f2ng th\u1eed l\u1ea1i.');return}
+  localStorage.removeItem(STORE_KEY);
+  root.innerHTML=`<div class="wrap"><div class="panel thanks">${esc(SETTINGS.thankYouMessage||'C\u1ea3m \u01a1n Anh/Ch\u1ecb \u0111\u00e3 g\u1eedi kh\u1ea3o s\u00e1t.')}</div></div>`;
+  try{window.parent&&window.parent.postMessage({type:'vcontent.studentSurvey.submitted',formId:FORM_ID},'*')}catch(e){}
+  window.scrollTo({top:0,left:0,behavior:'auto'});
+}
+window.SURVEY_QUESTIONS_RUNTIME=QUESTIONS;window.setAnswer=setAnswer;window.toggleAnswer=toggleAnswer;window.submitSurvey=submitSurvey;
+function render(){
+  const currentIndex=SECTIONS.findIndex(s=>s.id===activeSection);
+  const current=SECTIONS[currentIndex]||SECTIONS[0];
+  root.innerHTML=`<div class="wrap"><div class="hero"><div class="eyebrow">${esc(SETTINGS.bannerEyebrow||'Kh\u1ea3o s\u00e1t')}</div>${bannerTitleHtml()}${SETTINGS.bannerSubtitle?`<p>${multiline(SETTINGS.bannerSubtitle||'')}</p>`:''}</div><div class="panel"><h2>${esc(SETTINGS.introTitle||'L\u1eddi d\u1eabn')}</h2><div class="intro-body">${introBodyHtml(SETTINGS.introBody||'')}</div>${progressHtml()}<div class="notice" id="limitNotice" style="display:none"></div></div>${respondentIdentityHtml()}<div class="panel tabs">${SECTIONS.map(s=>`<button class="${s.id===activeSection?'active':''}" onclick="goToSection('${esc(s.id)}')">${esc(s.title)}</button>`).join('')}</div><div class="panel" id="surveySectionPanel"><h2>${esc(current?.title||'N\u1ed9i dung')}</h2>${current?.description?`<p class="hint">${esc(current.description)}</p>`:''}${sectionQuestionsHtml(activeSection)}${currentIndex>=SECTIONS.length-1?antiSpamHtml():''}<div class="actions"><button class="btn ghost" ${currentIndex<=0||sending?'disabled':''} onclick="previousSection()">Quay l\u1ea1i</button>${currentIndex<SECTIONS.length-1?`<button class="btn primary" ${sending?'disabled':''} onclick="nextSection()">Ti\u1ebfp t\u1ee5c</button>`:`<button class="btn primary" ${sending?'disabled aria-busy="true"':''} onclick="submitSurvey()">${sending?'\u0110ang g\u1eedi...':esc(SETTINGS.submitButtonLabel||'G\u1eedi kh\u1ea3o s\u00e1t')}</button>`}</div></div><div class="footer">${esc(SETTINGS.footerText||'')}</div></div>`;
+  updateProgress();
+}
+render();
+</script>
+</body>
+</html>

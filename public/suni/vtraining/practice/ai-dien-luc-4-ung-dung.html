@@ -1,0 +1,1853 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="practice-guide-video-1" content="https://vimeo.com/1146531580?share=copy&amp;fl=cl&amp;fe=ci">
+<meta name="practice-guide-video-2" content="https://vimeo.com/1146531580?share=copy&amp;fl=cl&amp;fe=ci">
+<meta name="practice-guide-video-3" content="https://vimeo.com/1146531580?share=copy&amp;fl=cl&amp;fe=ci">
+<meta name="practice-guide-video-4" content="https://vimeo.com/1146531580?share=copy&amp;fl=cl&amp;fe=ci">
+<title>Thực hành AI trong Quản lý Điện lực — 4 tình huống demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red-900:#4a0f0e;
+    --red-800:#611613;
+    --red-700:#7a1c17;
+    --red-600:#9c2a20;
+    --red-500:#b53a2c;
+    --red-400:#c95946;
+    --red-100:#f4e0dc;
+    --red-50:#fbf2ef;
+    --ink:#141210;
+    --ink-2:#2a2624;
+    --gray-700:#4d4a47;
+    --gray-500:#7a7672;
+    --gray-300:#dcd8d3;
+    --gray-200:#eae7e2;
+    --gray-100:#f5f3f0;
+    --white:#ffffff;
+    --font-d:'Be Vietnam Pro',sans-serif;
+    --font-b:'Be Vietnam Pro',sans-serif;
+    --font-m:'JetBrains Mono',monospace;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:var(--font-b);
+    color:var(--ink);
+    background:var(--white);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--red-500);color:#fff;}
+
+  /* ---------- Scrollbar ---------- */
+  ::-webkit-scrollbar{width:10px;height:10px;}
+  ::-webkit-scrollbar-track{background:var(--gray-100);}
+  ::-webkit-scrollbar-thumb{background:var(--red-600);border-radius:10px;}
+
+  /* ---------- Header / Hero ---------- */
+  .hero{
+    position:relative;
+    background:var(--ink);
+    color:var(--white);
+    padding:56px 24px 40px;
+    overflow:hidden;
+  }
+  .hero-inner{max-width:1080px;margin:0 auto;position:relative;z-index:2;}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:var(--font-m);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--red-400);border:1px solid rgba(197,92,70,.45);
+    padding:6px 12px;border-radius:999px;background:rgba(197,92,70,.08);
+  }
+  .hero h1{
+    font-family:var(--font-d);
+    font-weight:800;
+    font-size:clamp(28px,4.4vw,46px);
+    margin:0 0 12px;
+    letter-spacing:-0.01em;
+    max-width:820px;
+  }
+  .hero p.sub{
+    color:var(--gray-300);
+    max-width:680px;
+    font-size:16px;
+    margin:0 0 26px;
+  }
+  .hero .stats{display:flex;flex-wrap:wrap;gap:28px;margin-top:8px;}
+  .hero .stat b{display:block;font-family:var(--font-d);font-size:24px;color:#fff;font-weight:700;}
+  .hero .stat span{font-size:12.5px;color:var(--gray-300);text-transform:uppercase;letter-spacing:.06em;}
+
+  /* electric wave signature */
+  .wave-wrap{position:absolute;left:0;right:0;bottom:-1px;height:64px;z-index:1;opacity:.9;}
+  .wave-wrap svg{width:100%;height:100%;display:block;}
+
+  /* ---------- How-to banner ---------- */
+  .howto{
+    max-width:1080px;margin:-26px auto 0;padding:0 24px;position:relative;z-index:3;
+  }
+  .howto-card{
+    background:var(--white);
+    border:1px solid var(--gray-200);
+    border-top:4px solid var(--red-600);
+    border-radius:var(--radius);
+    box-shadow:0 18px 40px -20px rgba(0,0,0,.25);
+    padding:26px 28px 28px;
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    column-gap:36px;
+    row-gap:24px;
+  }
+  .howto-card h3{
+    grid-column:1/-1;
+    margin:0 0 6px;font-family:var(--font-d);font-size:15px;font-weight:700;
+    color:var(--red-700);text-transform:uppercase;letter-spacing:.04em;
+  }
+  .howto-item{display:flex;gap:14px;}
+  .howto-item:nth-of-type(2n){border-left:1px solid var(--gray-200);padding-left:22px;}
+  .howto-item:nth-of-type(n+3){border-top:1px solid var(--gray-200);padding-top:20px;}
+  .howto-item .num{
+    flex:none;width:26px;height:26px;border-radius:50%;
+    background:var(--ink);color:#fff;font-family:var(--font-m);font-size:12px;
+    display:flex;align-items:center;justify-content:center;font-weight:700;
+  }
+  .howto-item p{margin:0;font-size:13.5px;color:var(--gray-700);line-height:1.55;}
+  .howto-item strong{color:var(--ink);}
+
+  @media (max-width:700px){
+    .howto-card{grid-template-columns:1fr;row-gap:18px;}
+    .howto-item:nth-of-type(2n){border-left:none;padding-left:0;}
+    .howto-item:nth-of-type(n+3){border-top:none;padding-top:0;}
+    .howto-item:not(:first-of-type){border-top:1px solid var(--gray-200);padding-top:18px;}
+  }
+
+  /* ---------- Video hướng dẫn thao tác ---------- */
+  .practice-guide-video{max-width:1080px;margin:24px auto 0;padding:0 24px;}
+  .practice-guide-video-card{
+    display:grid;grid-template-columns:minmax(220px,.72fr) minmax(0,1.28fr);gap:24px;align-items:center;
+    padding:22px;border:1px solid var(--gray-200);border-radius:var(--radius);background:linear-gradient(135deg,#fff 0%,var(--red-50) 100%);
+    box-shadow:0 14px 34px -28px rgba(74,15,14,.55);
+  }
+  .practice-guide-video-copy .tag{font-family:var(--font-m);font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--red-600);text-transform:uppercase;}
+  .practice-guide-video-copy h2{margin:7px 0 8px;font-family:var(--font-d);font-size:clamp(19px,2vw,25px);line-height:1.3;color:var(--ink);}
+  .practice-guide-video-copy p{margin:0;font-size:13.5px;color:var(--gray-700);line-height:1.6;}
+  .practice-guide-video-frame{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:12px;background:#111;border:1px solid rgba(20,18,16,.18);box-shadow:0 18px 36px -20px rgba(0,0,0,.65);}
+  .practice-guide-video-frame iframe,.practice-guide-video-frame video{display:block;width:100%;height:100%;border:0;background:#111;object-fit:contain;}
+  @media (max-width:760px){
+    .practice-guide-video-card{grid-template-columns:1fr;padding:16px;gap:15px;}
+  }
+
+  /* ---------- Tabs ---------- */
+  .tabs-wrap{
+    max-width:1080px;margin:34px auto 0;padding:0 24px;
+    position:sticky;top:0;z-index:50;background:var(--white);
+  }
+  .tabs{
+    display:flex;gap:8px;border-bottom:2px solid var(--gray-200);
+    padding-top:14px;overflow-x:auto;
+  }
+  .tab-btn{
+    flex:1 1 auto;min-width:150px;
+    background:transparent;border:none;cursor:pointer;
+    padding:14px 14px 16px;
+    font-family:var(--font-d);font-weight:700;font-size:14px;color:var(--gray-500);
+    display:flex;flex-direction:column;align-items:flex-start;gap:6px;
+    border-bottom:3px solid transparent;
+    transition:color .18s ease, border-color .18s ease;
+    text-align:left;
+  }
+  .tab-btn .tag{
+    font-family:var(--font-m);font-size:11px;letter-spacing:.08em;color:var(--red-500);
+  }
+  .tab-btn.active{color:var(--ink);border-bottom-color:var(--red-600);}
+  .tab-btn.active .tag{color:var(--red-700);}
+  .tab-btn:hover{color:var(--ink);}
+
+  main{max-width:1080px;margin:0 auto;padding:30px 24px 90px;}
+  .exercise-panel{display:none;animation:fade .25s ease;}
+  .exercise-panel.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  /* ---------- Info bar ---------- */
+  .info-bar{
+    background:linear-gradient(135deg,var(--red-700),var(--red-900));
+    color:#fff;border-radius:var(--radius);padding:24px 26px;
+    display:grid;grid-template-columns:1.4fr 1fr;gap:22px;margin-bottom:22px;
+  }
+  .info-bar h2{
+    font-family:var(--font-d);font-size:22px;margin:0 0 10px;font-weight:800;
+  }
+  .info-bar .goal{font-size:14.5px;color:#f4d9d3;margin:0;}
+  .info-side{border-left:1px solid rgba(255,255,255,.22);padding-left:20px;font-size:13px;}
+  .info-side dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 10px;}
+  .info-side dt{color:#f0b7ab;font-family:var(--font-m);font-size:11px;text-transform:uppercase;letter-spacing:.06em;align-self:start;padding-top:2px;}
+  .info-side dd{margin:0;color:#fff;}
+  .info-side ul{margin:0;padding-left:16px;}
+
+  .compare-strip{
+    display:flex;gap:14px;flex-wrap:wrap;margin-bottom:22px;
+  }
+  .compare-box{
+    flex:1 1 200px;border:1px solid var(--gray-200);border-radius:var(--radius);
+    padding:16px 18px;background:var(--gray-100);
+  }
+  .compare-box.manual{border-color:var(--gray-300);}
+  .compare-box.ai{border-color:var(--red-200,#e7c3ba);background:var(--red-50);}
+  .compare-box .time{font-family:var(--font-d);font-weight:800;font-size:22px;color:var(--ink);}
+  .compare-box.ai .time{color:var(--red-700);}
+  .compare-box .lbl{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--gray-500);font-family:var(--font-m);}
+  .compare-box p{margin:6px 0 0;font-size:13px;color:var(--gray-700);}
+
+  .security-note{
+    display:flex;gap:12px;align-items:flex-start;
+    background:#fff7f0;border:1px solid #f0d9a8;border-left:4px solid #c9861b;
+    border-radius:10px;padding:14px 16px;margin-bottom:22px;font-size:13.5px;color:#5c4315;
+  }
+  .security-note .ic{font-size:18px;line-height:1;}
+  .security-note.danger{background:var(--red-50);border-color:#e7c3ba;border-left-color:var(--red-600);color:var(--red-800);}
+
+  /* ---------- Stepper ---------- */
+  .stepper{
+    display:flex;gap:6px;margin-bottom:22px;flex-wrap:wrap;
+    background:var(--gray-100);padding:6px;border-radius:999px;
+    scroll-margin-top:96px;
+  }
+  .step-btn{
+    flex:1 1 auto;min-width:120px;
+    border:none;background:transparent;cursor:pointer;
+    padding:10px 14px;border-radius:999px;
+    font-family:var(--font-d);font-size:13px;font-weight:700;color:var(--gray-700);
+    display:flex;align-items:center;gap:8px;justify-content:center;
+    transition:all .18s ease;position:relative;
+  }
+  .step-btn .dot{
+    width:20px;height:20px;border-radius:50%;background:var(--white);border:2px solid var(--gray-300);
+    font-family:var(--font-m);font-size:10.5px;display:flex;align-items:center;justify-content:center;color:var(--gray-500);
+    flex:none;
+  }
+  .step-btn.active{background:var(--ink);color:#fff;}
+  .step-btn.active .dot{border-color:var(--red-500);background:var(--red-600);color:#fff;}
+  .step-btn.done .dot{background:var(--red-600);border-color:var(--red-600);color:#fff;}
+  .step-btn.done .dot::after{content:'✓';}
+  .step-btn.done:not(.active) .dot{font-size:0;}
+  .step-btn.locked{opacity:.45;cursor:not-allowed;}
+  .step-btn.locked .dot::before{content:'🔒';font-size:9px;}
+  .step-btn.locked:not(.active) .dot{font-size:0;}
+  .step-btn.locked:hover{background:transparent;color:var(--gray-700);}
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    20%{transform:translateX(-4px);}
+    40%{transform:translateX(4px);}
+    60%{transform:translateX(-3px);}
+    80%{transform:translateX(3px);}
+  }
+  .step-btn.shake{animation:shake .35s ease;}
+
+  /* ---------- Step panel content ---------- */
+  .step-panel{display:none;}
+  .step-panel.active{display:block;animation:fade .2s ease;}
+  .block{
+    border:1px solid var(--gray-200);border-radius:var(--radius);
+    padding:22px 24px;margin-bottom:18px;background:#fff;
+  }
+  .block h3{
+    margin:0 0 10px;font-family:var(--font-d);font-size:16px;font-weight:800;color:var(--ink);
+    display:flex;align-items:center;gap:10px;
+  }
+  .block h3 .k{
+    font-family:var(--font-m);font-size:11px;color:#fff;background:var(--red-600);
+    padding:3px 9px;border-radius:6px;letter-spacing:.05em;
+  }
+  .block p{margin:0 0 12px;color:var(--gray-700);font-size:14.5px;}
+  .block p:last-child{margin-bottom:0;}
+  .why{
+    background:var(--red-50);border-left:3px solid var(--red-500);
+    border-radius:0 10px 10px 0;padding:12px 16px;font-size:13.5px;color:var(--red-900);margin:14px 0;
+  }
+  .why b{color:var(--red-700);}
+
+  table{width:100%;border-collapse:collapse;font-size:13.3px;}
+  thead th{
+    background:var(--ink);color:#fff;text-align:left;padding:10px 12px;
+    font-family:var(--font-d);font-weight:700;font-size:12.5px;
+  }
+  tbody td{padding:10px 12px;border-bottom:1px solid var(--gray-200);vertical-align:top;color:var(--ink-2);}
+  tbody tr:nth-child(even){background:var(--gray-100);}
+  tbody tr:hover{background:var(--red-50);}
+  .table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--gray-200);margin:10px 0 4px;}
+  .table-wrap table{min-width:520px;}
+
+  .copy-card{
+    border:1.5px dashed var(--red-400);
+    border-radius:12px;background:var(--red-50);
+    padding:16px 18px 18px;margin:12px 0;position:relative;
+  }
+  .copy-card .cc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;flex-wrap:wrap;}
+  .copy-card .cc-head span{font-family:var(--font-m);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--red-700);font-weight:700;}
+  .copy-btn{
+    font-family:var(--font-d);font-weight:700;font-size:12.5px;
+    background:var(--ink);color:#fff;border:none;border-radius:8px;
+    padding:8px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+    transition:background .15s ease, transform .1s ease;
+    white-space:nowrap;
+  }
+  .copy-btn:hover{background:var(--red-700);}
+  .copy-btn:active{transform:scale(.97);}
+  .copy-btn.copied{background:#276b3d;}
+  .prompt-text{
+    font-family:var(--font-m);font-size:13px;white-space:pre-wrap;color:var(--ink);
+    background:#fff;border-radius:8px;padding:14px 16px;border:1px solid var(--red-100);
+    margin:0;line-height:1.65;
+  }
+  .prompt-text .ph{color:var(--red-600);font-weight:700;}
+  .data-list-text{font-family:var(--font-m);font-size:12.8px;white-space:pre-wrap;background:#fff;border:1px solid var(--red-100);border-radius:8px;padding:14px 16px;margin:0;line-height:1.6;}
+
+  .copy-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
+  .copy-btn.ghost{background:transparent;border:1.5px solid var(--gray-300);color:var(--gray-700);}
+  .copy-btn.ghost:hover{background:var(--gray-100);border-color:var(--ink);color:var(--ink);}
+
+  .attached-data{
+    margin-top:16px;padding-top:16px;border-top:1px dashed var(--red-400);
+  }
+  .attached-data-head{
+    font-family:var(--font-d);font-weight:700;font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;
+    color:var(--red-700);margin-bottom:10px;
+  }
+  .attached-data .table-wrap{margin-top:0;}
+  .attached-data table{font-size:12.5px;}
+
+  /* ---------- Guide questions (Bước 3) ---------- */
+  .guide-block{
+    background:var(--red-50);border:1px solid var(--red-100);border-left:4px solid var(--red-600);
+  }
+  .guide-list{margin:14px 0 0;padding-left:0;list-style:none;counter-reset:gq;}
+  .guide-list li{
+    position:relative;padding:10px 0 10px 40px;border-bottom:1px dashed var(--red-100);
+    font-size:14px;color:var(--ink-2);counter-increment:gq;
+  }
+  .guide-list li:last-child{border-bottom:none;}
+  .guide-list li::before{
+    content:counter(gq);position:absolute;left:0;top:8px;width:25px;height:25px;border-radius:50%;
+    background:var(--red-600);color:#fff;font-family:var(--font-m);font-size:12px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  /* ---------- Meta-help: nhờ AI hỗ trợ khi chưa rõ ý tưởng ---------- */
+  .meta-help{
+    margin:16px 0 0;padding:16px 18px;border:1.5px dashed var(--gray-300);
+    border-radius:12px;background:var(--gray-100);
+  }
+  .meta-help-head{font-family:var(--font-d);font-weight:700;font-size:14px;color:var(--ink);margin-bottom:8px;}
+  .meta-help p{font-size:13.5px;color:var(--gray-700);margin:0 0 12px;}
+  .meta-help-note{font-size:12px;color:var(--gray-500);font-style:italic;margin-top:10px !important;}
+
+  .carry-note{
+    margin-top:14px;font-size:13px;color:var(--red-700);background:var(--red-50);
+    border-radius:8px;padding:10px 14px;display:inline-block;
+  }
+
+  /* ---------- Step 4: Upload kết quả ---------- */
+  .upload-box{
+    border:2px dashed var(--gray-300);border-radius:14px;padding:22px;text-align:center;
+    background:var(--gray-100);margin:16px 0;
+  }
+  .upload-label{
+    display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;
+    font-family:var(--font-d);font-weight:700;font-size:13.5px;padding:11px 20px;
+    border-radius:999px;cursor:pointer;transition:background .15s ease;
+  }
+  .upload-label:hover{background:var(--red-700);}
+  .upload-box input[type="file"]{display:none;}
+  .upload-title{display:block;font-family:var(--font-d);font-size:14px;color:var(--ink);margin-bottom:5px;}
+  .upload-help{display:block;font-size:12.5px;color:var(--gray-500);margin-bottom:14px;}
+  .upload-preview{margin-top:16px;}
+  .upload-preview .file-chip{
+    display:inline-flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--gray-200);
+    border-radius:10px;padding:9px 14px;font-size:13px;color:var(--ink-2);
+  }
+  .upload-preview img{max-width:240px;max-height:170px;border-radius:8px;display:block;margin:12px auto 0;border:1px solid var(--gray-200);}
+  .upload-preview .remove-file{background:none;border:none;color:var(--red-600);font-weight:700;cursor:pointer;font-size:14px;margin-left:4px;}
+  .upload-notice{display:block;margin-top:10px;font-size:12px;color:var(--gray-500);}
+  .upload-notice.success{color:#167447;}
+  .upload-notice.error{color:var(--red-700);font-weight:700;}
+
+  .reflect-group{margin-top:20px;}
+  .reflect-label{display:block;font-family:var(--font-d);font-weight:700;font-size:13.5px;color:var(--ink);margin-bottom:8px;line-height:1.4;}
+  .reflect-input{
+    width:100%;border:1.5px solid var(--gray-300);border-radius:10px;padding:12px 14px;
+    font-family:var(--font-b);font-size:13.5px;color:var(--ink);resize:vertical;
+    transition:border-color .15s ease;background:#fff;
+  }
+  .reflect-input:focus{outline:none;border-color:var(--red-500);}
+  .reflect-input::placeholder{color:var(--gray-500);}
+
+  /* ---------- Prompt annotated (hover explain) ---------- */
+  .prompt-annotated{
+    font-family:var(--font-m);font-size:13px;color:var(--ink);
+    background:#fff;border-radius:8px;padding:16px 18px;border:1px solid var(--red-100);
+    line-height:1.85;
+  }
+  .prompt-annotated .prompt-quote{margin:0;font-style:italic;}
+  .pw{
+    cursor:help;border-bottom:2px solid transparent;padding:1px 2px;border-radius:3px;
+    transition:background .15s ease;
+  }
+  .pw:hover, .pw:focus{background:var(--red-50);outline:none;}
+  .pw-context{border-bottom:2px dashed var(--ink);}
+  .pw-goal{border-bottom:2px solid var(--red-600);}
+  .pw-output{border-bottom:2px dotted var(--gray-500);}
+  .pw-data{
+    display:inline-block;margin-top:10px;background:var(--red-100);color:var(--red-800);
+    font-style:normal;font-weight:700;border:1px dashed var(--red-400);border-bottom:1px dashed var(--red-400);
+    padding:8px 12px;border-radius:8px;
+  }
+  .pw-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;}
+  .legend-chip{
+    font-family:var(--font-m);font-size:11px;padding:4px 10px;border-radius:999px;
+    background:var(--gray-100);color:var(--gray-700);
+  }
+  .legend-chip.pw-context{border-bottom:none;background:var(--gray-100);}
+  .legend-chip.pw-context::before{content:'┄ ';}
+  .legend-chip.pw-goal{border-bottom:none;background:var(--red-100);color:var(--red-700);}
+  .legend-chip.pw-goal::before{content:'▬ ';}
+  .legend-chip.pw-output{border-bottom:none;background:var(--gray-100);color:var(--gray-700);}
+  .legend-chip.pw-output::before{content:'┈ ';}
+  .legend-chip.pw-data{border:none;background:var(--red-100);color:var(--red-800);}
+  .legend-chip.pw-data::before{content:'📥 ';}
+
+  .hover-tip{
+    display:none;position:fixed;z-index:999;max-width:270px;
+    background:var(--ink);color:#fff;padding:12px 14px;border-radius:10px;
+    font-size:13px;line-height:1.55;box-shadow:0 16px 34px -10px rgba(0,0,0,.5);
+    pointer-events:none;
+  }
+  .hover-tip .tip-tag{
+    display:inline-block;margin-bottom:6px;font-family:var(--font-m);font-size:10px;
+    text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border-radius:5px;font-weight:700;
+  }
+  .hover-tip .tip-tag.pw-context{background:#fff;color:var(--ink);}
+  .hover-tip .tip-tag.pw-goal{background:var(--red-600);color:#fff;}
+  .hover-tip .tip-tag.pw-output{background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;}
+  .hover-tip .tip-tag.pw-data{background:var(--red-400);color:#fff;}
+  .hover-tip .tip-body{color:#f1f1f0;}
+
+  .three-layer{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:14px;
+  }
+  .layer-card{background:var(--gray-100);border-radius:10px;padding:12px 14px;border:1px solid var(--gray-200);}
+  .layer-card .lt{font-family:var(--font-m);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--red-600);font-weight:700;}
+  .layer-card p{font-size:13px;margin:6px 0 0;color:var(--ink-2);}
+
+  .quote-box{
+    background:var(--gray-100);border-radius:10px;padding:18px 20px;
+    font-style:italic;color:var(--ink-2);border-left:3px solid var(--ink);font-size:14px;
+  }
+  .quote-box p{margin:0 0 10px;}
+  .quote-box p:last-child{margin-bottom:0;}
+  .quote-box .who{font-style:normal;font-weight:700;color:var(--red-700);}
+
+  ul.takeaways{margin:0;padding-left:0;list-style:none;}
+  ul.takeaways li{
+    position:relative;padding:10px 0 10px 30px;border-bottom:1px dashed var(--gray-200);font-size:14px;color:var(--ink-2);
+  }
+  ul.takeaways li:last-child{border-bottom:none;}
+  ul.takeaways li::before{
+    content:'●';position:absolute;left:0;top:11px;color:var(--red-600);font-size:11px;
+  }
+
+  .final-msg{
+    background:var(--ink);color:#fff;border-radius:var(--radius);
+    padding:22px 26px;text-align:center;font-family:var(--font-d);font-weight:700;font-size:17px;
+    position:relative;overflow:hidden;
+  }
+  .final-msg::before{content:'"';position:absolute;left:14px;top:-18px;font-size:90px;color:rgba(197,92,70,.35);font-family:Georgia,serif;}
+  .final-msg span{position:relative;z-index:1;color:var(--red-400);}
+
+  .nav-buttons{display:flex;justify-content:space-between;gap:12px;margin-top:24px;}
+  .nav-btn{
+    font-family:var(--font-d);font-weight:700;font-size:13.5px;
+    border:1.5px solid var(--ink);background:#fff;color:var(--ink);
+    padding:11px 20px;border-radius:999px;cursor:pointer;display:flex;align-items:center;gap:8px;
+    transition:all .16s ease;
+  }
+  .nav-btn:hover{background:var(--ink);color:#fff;}
+  .nav-btn.primary{background:var(--red-600);border-color:var(--red-600);color:#fff;}
+  .nav-btn.primary:hover{background:var(--red-800);border-color:var(--red-800);}
+  .nav-btn[disabled]{opacity:.35;cursor:not-allowed;pointer-events:none;}
+  .nav-btn.done-btn{border-color:var(--red-500);color:var(--red-700);}
+  .nav-btn.done-btn.on{background:var(--red-600);color:#fff;}
+
+  .progress-mini{max-width:1080px;margin:0 auto;padding:0 24px;display:flex;justify-content:flex-end;}
+  .progress-mini span{font-family:var(--font-m);font-size:11.5px;color:var(--gray-500);}
+
+  footer{
+    border-top:1px solid var(--gray-200);padding:26px 24px 40px;text-align:center;
+    font-size:12.5px;color:var(--gray-500);
+  }
+
+  /* ---------- Phiếu thực hành & checkpoint VSurvey ---------- */
+  [hidden]{display:none!important;}
+  body.practice-locked{overflow:hidden;}
+  .practice-startup{
+    position:fixed;inset:0;z-index:1200;overflow:auto;padding:34px 20px;
+    display:grid;place-items:center;background:linear-gradient(145deg,#f7f5f2 0%,#fff 46%,#f7ece8 100%);
+  }
+  .practice-startup-card{
+    width:min(760px,100%);background:#fff;border:1px solid var(--gray-200);border-top:5px solid var(--red-600);
+    border-radius:18px;padding:30px;box-shadow:0 26px 70px -32px rgba(45,21,17,.48);
+  }
+  .practice-startup-card .eyebrow{font-family:var(--font-m);font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--red-700);}
+  .practice-startup-card h1{font-family:var(--font-d);font-size:clamp(25px,4vw,38px);line-height:1.16;margin:10px 0 8px;}
+  .practice-startup-card>p{color:var(--gray-700);line-height:1.6;margin:0 0 22px;}
+  .practice-startup-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;}
+  .practice-field{display:grid;gap:7px;font-size:13px;font-weight:800;color:var(--ink-2);}
+  .practice-field input,.practice-field select,.practice-entry textarea{
+    width:100%;font:inherit;color:var(--ink);background:#fff;border:1.5px solid var(--gray-300);border-radius:10px;
+    padding:12px 13px;outline:none;transition:border-color .16s ease,box-shadow .16s ease;
+  }
+  .practice-field input:focus,.practice-field select:focus,.practice-entry textarea:focus{border-color:var(--red-600);box-shadow:0 0 0 3px rgba(156,42,32,.12);}
+  .practice-field input[readonly]{background:var(--gray-100);color:var(--gray-700);}
+  .practice-startup-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-top:18px;flex-wrap:wrap;}
+  .practice-startup-note{margin-right:auto;font-size:12.5px;color:var(--gray-500);}
+  .practice-startup-note.error{color:var(--red-700);font-weight:700;}
+  .practice-session-bar{
+    position:sticky;top:0;z-index:80;background:rgba(255,255,255,.96);border-bottom:1px solid var(--gray-200);
+    padding:9px 24px;display:flex;align-items:center;justify-content:center;gap:12px;box-shadow:0 8px 22px -20px rgba(0,0,0,.55);
+  }
+  .practice-session-bar strong{font-family:var(--font-d);font-size:12.5px;}
+  .practice-session-bar span{font-size:12px;color:var(--gray-500);}
+  .practice-session-bar button{border:0;background:transparent;color:var(--red-700);font:700 12px var(--font-d);cursor:pointer;text-decoration:underline;}
+  .practice-entry{margin-top:16px;padding:16px 18px;border:1.5px solid var(--red-100);border-radius:12px;background:#fffaf8;}
+  .practice-entry h4{margin:0 0 5px;font-family:var(--font-d);font-size:15px;color:var(--red-800);}
+  .practice-entry p{margin:0 0 10px;font-size:12.8px;color:var(--gray-700);}
+  .practice-entry textarea{min-height:150px;resize:vertical;line-height:1.55;}
+  .practice-save-notice{display:block;margin-top:9px;font-size:12.5px;color:var(--gray-500);}
+  .practice-save-notice.success{color:#276b3d;font-weight:700;}
+  .practice-save-notice.error{color:var(--red-700);font-weight:700;}
+
+  @media (max-width:760px){
+    .info-bar{grid-template-columns:1fr;}
+    .info-side{border-left:none;border-top:1px solid rgba(255,255,255,.22);padding-left:0;padding-top:14px;}
+    .tabs{gap:4px;}
+    .tab-btn{min-width:auto;padding:12px 10px 14px;font-size:12.5px;}
+    .step-btn{min-width:auto;font-size:0;padding:12px;}
+    .step-btn .dot{font-size:11px;}
+    .step-btn.active{font-size:12.5px;padding:10px 14px;}
+    .step-btn.active .dot{font-size:0;}
+    .practice-startup{padding:18px 14px;place-items:start center;}
+    .practice-startup-card{padding:22px 18px;}
+    .practice-startup-fields{grid-template-columns:1fr;}
+    .practice-startup-actions{align-items:stretch;flex-direction:column;}
+    .practice-startup-note{margin-right:0;}
+    .practice-startup-actions .nav-btn{justify-content:center;width:100%;}
+    .practice-session-bar{align-items:flex-start;flex-wrap:wrap;padding:9px 14px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto;}
+    .exercise-panel,.step-panel,.step-btn.shake{animation:none!important;}
+    *{transition-duration:.01ms!important;}
+  }
+</style>
+</head>
+<body>
+
+<section class="practice-startup" id="practice-startup" aria-labelledby="practice-startup-title">
+  <div class="practice-startup-card">
+    <span class="eyebrow">SPC · QL01A · PHIẾU THỰC HÀNH NHÓM</span>
+    <h1 id="practice-startup-title">Thực hành AI trong quản lý Điện lực</h1>
+    <p>Nhập thông tin nhóm trước khi vào bài. Hệ thống ghi nhận ngay nhóm đã tham gia và tiếp tục cập nhật khi nhóm hoàn thành từng bước.</p>
+    <div class="practice-startup-fields">
+      <label class="practice-field" for="practice-class-name">Lớp <span aria-hidden="true">*</span>
+        <input id="practice-class-name" type="text" maxlength="160" autocomplete="organization" placeholder="Ví dụ: QL01A - Lớp 1" required>
+      </label>
+      <label class="practice-field" for="practice-group-name">Nhóm <span aria-hidden="true">*</span>
+        <select id="practice-group-name" required>
+          <option value="">Chọn nhóm</option>
+          <option value="Nhóm 1">Nhóm 1</option>
+          <option value="Nhóm 2">Nhóm 2</option>
+          <option value="Nhóm 3">Nhóm 3</option>
+          <option value="Nhóm 4">Nhóm 4</option>
+        </select>
+      </label>
+    </div>
+    <div class="practice-startup-actions">
+      <span class="practice-startup-note" id="practice-startup-note" role="status" aria-live="polite"></span>
+      <button class="nav-btn primary" id="practice-start-button" type="button" onclick="startPracticeSession()">Bắt đầu thực hành →</button>
+    </div>
+  </div>
+</section>
+
+<div id="practice-app" hidden>
+<div class="practice-session-bar" aria-label="Thông tin phiên thực hành">
+  <strong id="practice-session-group">Chưa có nhóm</strong>
+  <span id="practice-session-class"></span>
+  <button type="button" onclick="resetPracticeSession()">Đổi nhóm</button>
+</div>
+
+<header class="hero">
+  <div class="hero-inner">
+    <h1>Thực hành AI trong quản lý Điện lực<br>4 tình huống demo &amp; thực hành</h1>
+    <p class="sub">Ứng dụng tự học tương tác — mỗi bài gồm 4 bước: <b>tình huống</b>, <b>prompt mẫu</b> (kèm dữ liệu để copy và gợi ý nhờ AI hỗ trợ nếu chưa rõ ý tưởng), <b>kết quả AI &amp; cách người quản lý ra quyết định</b>, và <b>phản ánh cuối bài của nhóm</b>. Tiến độ được ghi nhận ngay khi nhóm xác nhận hoàn thành từng bước.</p>
+    <div class="stats">
+      <div class="stat"><b>04</b><span>Ứng dụng thực hành</span></div>
+      <div class="stat"><b>~80</b><span>Phút thực hành</span></div>
+      <div class="stat"><b>4 bước</b><span>Từ tình huống đến kết quả của anh/chị</span></div>
+      <div class="stat"><b>AI đề xuất</b><span>Người quản lý quyết định</span></div>
+    </div>
+  </div>
+  <div class="wave-wrap">
+    <svg viewBox="0 0 1200 80" preserveAspectRatio="none">
+      <path d="M0,50 L150,50 L180,15 L210,65 L240,50 L1200,50" fill="none" stroke="#9c2a20" stroke-width="2.5"/>
+      <path d="M0,64 L1200,64" fill="none" stroke="#2a2624" stroke-width="1" opacity=".5"/>
+    </svg>
+  </div>
+</header>
+
+<div class="howto">
+  <div class="howto-card">
+    <h3>Cách thực hành theo 4 bước</h3>
+    <div class="howto-item"><div class="num">1</div><p><strong>Chọn 1 trong 4 tab</strong> ứng dụng bên dưới, đọc tình huống ở Bước 1 &amp; so sánh thời gian thủ công so với AI.</p></div>
+    <div class="howto-item"><div class="num">2</div><p><strong>Sang Bước 2</strong>, sao chép prompt mẫu (đã kèm sẵn dữ liệu) và dán vào ChatGPT (hoặc công cụ AI khác). Nếu tình huống của anh/chị khác ví dụ, dùng gợi ý "nhờ AI hỗ trợ" để được đặt câu hỏi làm rõ trước.</p></div>
+    <div class="howto-item"><div class="num">3</div><p><strong>Ở Bước 3</strong>, đối chiếu kết quả AI của anh/chị với phần minh họa, xem cách người quản lý kiểm chứng &amp; ra quyết định, rồi tự hỏi các câu hỏi áp dụng riêng cho đơn vị mình.</p></div>
+    <div class="howto-item"><div class="num">4</div><p><strong>Ở Bước 4</strong>, trả lời các câu hỏi phản ánh để chốt điều nhóm đã học được và nội dung cần áp dụng sau bài.</p></div>
+  </div>
+</div>
+
+<div class="tabs-wrap">
+  <nav class="tabs" id="tabs">
+    <button class="tab-btn active" data-ex="1"><span class="tag">01 · GIAO BAN</span>Chuẩn bị giao ban đầu ngày</button>
+    <button class="tab-btn" data-ex="2"><span class="tag">02 · SỰ CỐ</span>Tổng hợp sự cố lưới điện tuần</button>
+    <button class="tab-btn" data-ex="3"><span class="tag">03 · ĐIỂM NHẤN</span>Chuẩn bị điểm nhấn giao ban</button>
+    <button class="tab-btn" data-ex="4"><span class="tag">04 · KHÁCH HÀNG</span>Chuẩn hóa phản hồi khách hàng</button>
+  </nav>
+</div>
+
+<section class="practice-guide-video" id="practice-guide-video" aria-labelledby="practice-guide-video-title" hidden>
+  <div class="practice-guide-video-card">
+    <div class="practice-guide-video-copy">
+      <span class="tag" id="practice-guide-video-tag">Xem trước khi thực hành</span>
+      <h2 id="practice-guide-video-title">Video hướng dẫn thao tác</h2>
+      <p>Xem nhanh cách mở công cụ AI, sử dụng Prompt mẫu và quay lại phiếu để hoàn thành từng bước cùng nhóm.</p>
+    </div>
+    <div class="practice-guide-video-frame" id="practice-guide-video-frame"></div>
+  </div>
+</section>
+
+<main id="main"></main>
+
+<footer>Chuyển thể từ tài liệu hướng dẫn thực hành thành ứng dụng web tương tác. Dữ liệu trong toàn bộ ứng dụng đã được ẩn danh, chỉ dùng để minh họa.</footer>
+</div>
+
+<script>
+const PRACTICE_PARAMS = new URLSearchParams(window.location.search);
+const PRACTICE_VSURVEY_MODE = PRACTICE_PARAMS.get('vsurvey') === '1';
+const PRACTICE_FORM_ID = String(PRACTICE_PARAMS.get('formId') || '').trim();
+const PRACTICE_LEGACY_GUIDE_VIDEO_PATTERN = /\/(?:video\/)?967608191(?:[/?]|$)/;
+const PRACTICE_GUIDE_VIDEO_URLS = [1,2,3,4].map(index=>{
+  const defaultUrl=String(document.querySelector(`meta[name="practice-guide-video-${index}"]`)?.content||'').trim();
+  const configuredUrl=String(PRACTICE_PARAMS.get(`guideVideo${index}`)||'').trim();
+  return !configuredUrl||PRACTICE_LEGACY_GUIDE_VIDEO_PATTERN.test(configuredUrl)?defaultUrl:configuredUrl;
+});
+const PRACTICE_STORE_KEY = `ai_power_practice_progress_${PRACTICE_FORM_ID || 'local'}`;
+const PRACTICE_APPLICATION_TITLES = [
+  'Chuẩn bị giao ban đầu ngày',
+  'Tổng hợp sự cố lưới điện tuần',
+  'Chuẩn bị điểm nhấn giao ban',
+  'Chuẩn hóa phản hồi khách hàng'
+];
+const PRACTICE_STEP_LABELS = ['Đã đọc tình huống','Đã thực hành Prompt','Đã đối chiếu và hiểu quyết định','Đã hoàn thành phản ánh cuối bài'];
+let practiceState = loadPracticeState();
+const practicePending = new Map();
+const practiceFiles = new Map();
+const practicePreviewUrls = new Map();
+const PRACTICE_MAX_FILE_BYTES = 10 * 1024 * 1024;
+const PRACTICE_FILE_EXTENSIONS = new Set(['pdf','png','jpg','jpeg','webp','doc','docx','xls','xlsx','ppt','pptx','txt']);
+
+/* ============ DATA MODEL cho 4 ứng dụng ============ */
+const EX = {
+  1:{
+    tag:"Ứng dụng 1",
+    title:"Chuẩn bị giao ban đầu ngày",
+    goal:"Cho học viên thấy AI rút ngắn thời gian sắp xếp – phân loại đầu việc trước giao ban, đồng thời khẳng định vai trò quyết định vẫn thuộc người quản lý.",
+    duration:"5 phút demo + 15 phút học viên thực hành",
+    prep:["Máy tính có kết nối internet","Công cụ AI đã đăng nhập (ChatGPT bản free cho học viên)","Dữ liệu mẫu"],
+    manualTime:"25–30 phút", aiTime:"~3 phút",
+    compareNote:"Cách làm thủ công (đọc – sắp xếp – phân công 12 đầu việc) thường mất <b>25–30 phút</b>; với AI chỉ khoảng <b>3 phút</b>. Sự so sánh trực tiếp này chính là điểm nhấn của demo.",
+    security:{level:"note", text:"Trước khi dán dữ liệu, nói rõ: đây là dữ liệu đã ẩn danh, không chứa thông tin thật của khách hàng hay nội bộ — làm mẫu cho thói quen bảo mật."},
+    step1:{
+      context:"Trưởng Điện lực có <b>12 đầu việc rời rạc</b> cần xử lý trước buổi giao ban lúc 7h30 sáng. Danh sách 12 đầu việc đang lộn xộn (bảng bên dưới): việc tồn hôm trước, việc mới phát sinh, việc khẩn, việc phối hợp... Nếu sắp xếp và phân công thủ công sẽ mất 25–30 phút, trong khi chỉ còn ít phút là tới giờ giao ban.",
+      why:"Bối cảnh áp lực thời gian là lý do AI tạo giá trị thật: AI không tạo ra việc mới, mà rút ngắn thời gian <i>sắp xếp</i> việc đã có — để người quản lý còn thời gian cho phần quan trọng hơn là <b>quyết định và chỉ đạo</b>.",
+      table:{
+        headers:["TT","Đầu việc (ẩn danh)"],
+        rows:[
+          ["1","Xử lý phiếu yêu cầu cấp điện mới của một hộ dân đã tồn đọng 2 ngày, chưa khảo sát"],
+          ["2","Một điểm mất điện cục bộ tại khu dân cư từ tối qua, khách hàng đã gọi điện phản ánh"],
+          ["3","Chuẩn bị số liệu tổn thất điện năng tuần để báo cáo Công ty (đến hạn 17h00 chiều nay)"],
+          ["4","Kiểm tra an toàn tuyến đường dây trước đợt mưa dông dự báo chiều nay"],
+          ["5","Ký duyệt đề nghị cấp vật tư nhỏ (sứ, kẹp) cho tổ kỹ thuật"],
+          ["6","Trả lời thắc mắc của một khách hàng về hóa đơn tiền điện tăng"],
+          ["7","Nhắc tổ thu ngân hoàn tất đối soát cuối tháng"],
+          ["8","Phân công người trực xử lý sự cố ngoài giờ tuần này"],
+          ["9","Rà soát danh sách khách hàng nợ tiền điện cần nhắc"],
+          ["10","Chuẩn bị nội dung tiếp đoàn kiểm tra an toàn tuần sau"],
+          ["11","Xử lý đề nghị di dời một trụ điện vướng công trình của địa phương"],
+          ["12","Cập nhật tiến độ một công trình sửa chữa lưới đang thi công dở"]
+        ]
+      },
+      copyText:"1. Xử lý phiếu yêu cầu cấp điện mới của một hộ dân đã tồn đọng 2 ngày, chưa khảo sát\n2. Một điểm mất điện cục bộ tại khu dân cư từ tối qua, khách hàng đã gọi điện phản ánh\n3. Chuẩn bị số liệu tổn thất điện năng tuần để báo cáo Công ty (đến hạn 17h00 chiều nay)\n4. Kiểm tra an toàn tuyến đường dây trước đợt mưa dông dự báo chiều nay\n5. Ký duyệt đề nghị cấp vật tư nhỏ (sứ, kẹp) cho tổ kỹ thuật\n6. Trả lời thắc mắc của một khách hàng về hóa đơn tiền điện tăng\n7. Nhắc tổ thu ngân hoàn tất đối soát cuối tháng\n8. Phân công người trực xử lý sự cố ngoài giờ tuần này\n9. Rà soát danh sách khách hàng nợ tiền điện cần nhắc\n10. Chuẩn bị nội dung tiếp đoàn kiểm tra an toàn tuần sau\n11. Xử lý đề nghị di dời một trụ điện vướng công trình của địa phương\n12. Cập nhật tiến độ một công trình sửa chữa lưới đang thi công dở"
+    },
+    step2:{
+      intro:"Dán prompt sau vào công cụ AI. Prompt được viết theo <b>công thức 3 lớp: Mục tiêu – Bối cảnh – Đầu ra</b>.",
+      prompt:`"Tôi là Trưởng Điện lực. Dưới đây là 12 đầu việc của tôi trong hôm nay (đã ẩn danh). Hãy phân loại 12 đầu việc này thành 4 nhóm theo mức ưu tiên: (1) Khẩn cấp – cần làm ngay; (2) Quan trọng – cần lên kế hoạch; (3) Có thể giao cấp dưới; (4) Có thể lùi lại. Tập trung ưu tiên các công việc theo thứ tự Kiểm tra An toàn – Trải nghiệm khách hàng – Điều hành nội bộ. Trình bày kết quả dạng bảng, mỗi đầu việc kèm gợi ý đầu mối phụ trách. Sau bảng, gợi ý giúp tôi 4 ý chính nên nhấn trong buổi giao ban sáng nay (bao gồm 1 ý về an toàn và 1 ý về khách hàng)."
+
+[Dán 12 đầu việc ẩn danh ở Bước 1 vào đây]`,
+      why:"Prompt không chỉ nói \"hãy sắp xếp\" — mà nêu rõ <b>tiêu chí ưu tiên</b> (an toàn → khách hàng → nội bộ) và <b>khuôn đầu ra</b> (bảng + đầu mối + 4 ý giao ban). Prompt càng cụ thể, kết quả AI càng bám sát nhu cầu thật, giảm công sửa lại.",
+      simpleGoal:"phân loại các đầu việc trong ngày theo mức độ ưu tiên, để chuẩn bị cho buổi giao ban sáng.",
+      layers:{goal:"Phân loại 12 đầu việc thành 4 nhóm theo mức ưu tiên đã nêu rõ.", context:"\"Tôi là Trưởng Điện lực\", chuẩn bị cho giao ban sáng.", output:"Bảng + đầu mối phụ trách + 4 ý giao ban (có an toàn &amp; khách hàng)."},
+      segments:[
+        {cls:"pw-context", tag:"Bối cảnh", text:"“Tôi là Trưởng Điện lực.", explain:"Cho AI biết vai trò của người dùng (quản lý, không phải nhân viên) — giúp AI chọn giọng văn và mức độ trách nhiệm phù hợp khi trả lời."},
+        {cls:"pw-context", tag:"Bối cảnh", text:"Dưới đây là 12 đầu việc của tôi trong hôm nay (đã ẩn danh).", explain:"Giới thiệu dữ liệu sắp đưa vào và xác nhận đã ẩn danh — nhắc cả AI lẫn người dùng rằng đây là dữ liệu an toàn để dán."},
+        {cls:"pw-goal", tag:"Mục tiêu", text:"Hãy phân loại 12 đầu việc này thành 4 nhóm theo mức ưu tiên: (1) Khẩn cấp – cần làm ngay; (2) Quan trọng – cần lên kế hoạch; (3) Có thể giao cấp dưới; (4) Có thể lùi lại.", explain:"Yêu cầu chính, nêu rõ tiêu chí phân loại (4 nhóm cụ thể) — nếu chỉ nói \"hãy sắp xếp\", AI sẽ tự bịa tiêu chí, dễ không sát nhu cầu thật."},
+        {cls:"pw-goal", tag:"Mục tiêu", text:"Tập trung ưu tiên các công việc theo thứ tự Kiểm tra An toàn – Trải nghiệm khách hàng – Điều hành nội bộ.", explain:"Bổ sung tiêu chí ưu tiên cụ thể của ngành điện — thiếu câu này, AI có thể ưu tiên theo cảm tính (ví dụ đặt việc hành chính lên trên an toàn)."},
+        {cls:"pw-output", tag:"Đầu ra", text:"Trình bày kết quả dạng bảng, mỗi đầu việc kèm gợi ý đầu mối phụ trách.", explain:"Chỉ định khuôn dạng đầu ra (bảng) và yêu cầu thêm — đầu mối phụ trách — để kết quả dùng được ngay, không phải hỏi lại AI."},
+        {cls:"pw-output", tag:"Đầu ra", text:"Sau bảng, gợi ý giúp tôi 4 ý chính nên nhấn trong buổi giao ban sáng nay (bao gồm 1 ý về an toàn và 1 ý về khách hàng).”", explain:"Yêu cầu đầu ra thứ hai (ngoài bảng) và ép buộc phải có ý an toàn + khách hàng — tránh AI bỏ sót hai ưu tiên quan trọng nhất."}
+      ],
+      dataNote:{tag:"Dữ liệu cần dán", text:"[Dán 12 đầu việc ẩn danh ở Bước 1 vào đây]", explain:"Vị trí dán dữ liệu ở Bước 1. Luôn dán dữ liệu đã ẩn danh, không gõ thêm thông tin thật của khách hàng hay nội bộ vào đây."}
+    },
+    step3Html:`
+      <p>AI trả kết quả trong vài giây. Kết quả minh họa để đối chiếu — <b>bảng ưu tiên, gợi ý đầu mối, và 4 ý giao ban:</b></p>
+      <div class="table-wrap"><table><thead><tr><th>Nhóm ưu tiên</th><th>Đầu việc (theo TT ở Bước 1)</th><th>Gợi ý đầu mối</th></tr></thead><tbody>
+      <tr><td><b>1. Khẩn cấp (làm ngay)</b></td><td>Việc 2 (mất điện, KH đã phản ánh); Việc 4 (kiểm tra an toàn trước mưa dông)</td><td>Trưởng ĐL trực tiếp + tổ trực</td></tr>
+      <tr><td><b>2. Quan trọng (lên kế hoạch)</b></td><td>Việc 1 (cấp điện tồn 2 ngày); Việc 3 (số liệu tổn thất, hạn chiều nay); Việc 12 (tiến độ công trình)</td><td>Trưởng/Phó ĐL + tổ kỹ thuật</td></tr>
+      <tr><td><b>3. Giao cấp dưới</b></td><td>Việc 5 (ký vật tư nhỏ); Việc 6 (giải thích hóa đơn); Việc 7 (đối soát thu ngân); Việc 9 (rà nợ)</td><td>Phó ĐL / Tổ trưởng KD</td></tr>
+      <tr><td><b>4. Có thể lùi</b></td><td>Việc 8 (phân trực ngoài giờ); Việc 10 (chuẩn bị tiếp đoàn); Việc 11 (di dời trụ)</td><td>Rà lại chiều nay</td></tr>
+      </tbody></table></div>
+      <p style="margin-top:14px;"><b>Kèm 4 ý giao ban AI gợi ý:</b></p>
+      <ul class="takeaways">
+        <li><b>An toàn:</b> nhắc kiểm tra tuyến đường dây trước mưa dông chiều nay.</li>
+        <li><b>Khách hàng:</b> ưu tiên xử lý điểm mất điện đã có phản ánh; cập nhật lại cho khách.</li>
+        <li><b>Tiến độ:</b> hoàn tất số liệu tổn thất tuần để kịp báo cáo chiều nay.</li>
+        <li><b>Việc tồn:</b> chốt đầu mối khảo sát phiếu cấp điện đã tồn 2 ngày.</li>
+      </ul>`,
+    step4:{
+      intro:"Đây là bước quan trọng nhất của demo — thể hiện nguyên tắc <b>“AI đề xuất – người quản lý quyết định”</b>. Chỉ ra vài chỗ AI xếp chưa đúng vì không biết đặc thù địa bàn, rồi tự chỉnh lại:",
+      headers:["AI xếp ban đầu","Vấn đề (AI chưa biết)","Người quản lý chỉnh lại"],
+      rows:[
+        ["Việc 11 (di dời trụ) xếp \u201ccó thể lùi\u201d","Địa phương đang hối thúc, liên quan tiến độ công trình công cộng — không thể lùi lâu","Nâng lên nhóm 2, hẹn làm việc với địa phương trong tuần"],
+        ["Việc 6 (giải thích hóa đơn) xếp \u201cgiao cấp dưới\u201d","Khách này từng khiếu nại gay gắt, cần người có kinh nghiệm xử lý","Vẫn giao, nhưng Phó ĐL trực tiếp theo dõi, không giao nhân viên mới"],
+        ["Việc 4 và Việc 2 cùng nhóm \u201ckhẩn cấp\u201d","Cần rõ thứ tự: an toàn lưới (mưa dông) hay điểm mất điện trước?","Ưu tiên an toàn tuyến trước; điểm mất điện xử lý song song bằng tổ khác"],
+        ["Việc 9 (rà nợ) xếp \u201cgiao cấp dưới\u201d","Cuối tháng, khối lượng lớn, một người làm không kịp","Giao 2 người + đặt hạn trong ngày"]
+      ],
+      keyPoint:"AI làm rất nhanh phần sắp xếp cơ học, nhưng <b>không biết đặc thù địa bàn, lịch sử khách hàng, quan hệ với địa phương hay nguồn lực thực tế</b>. Vì vậy, người quản lý luôn phải rà và chỉnh theo ba tiêu chí: <b>an toàn – khách hàng – nguồn lực thực tế.</b>"
+    },
+    guideQuestions:[
+      "Thứ tự ưu tiên đơn vị anh/chị áp dụng (an toàn – khách hàng – nội bộ) có giống ví dụ trên, hay có khác biệt gì cần nêu rõ trong prompt?",
+      "Đơn vị anh/chị có những đầu việc đặc thù nào (theo mùa, theo địa bàn, theo loại khách hàng) mà AI cần biết thêm để phân loại chính xác hơn?",
+      "Ai là những đầu mối thực tế trong đơn vị anh/chị cho từng nhóm việc (khẩn cấp / quan trọng / giao cấp dưới / lùi lại)? AI có gợi ý đúng người không?",
+      "Có ràng buộc nguồn lực nào (nhân sự, thiết bị, lịch trực) mà đơn vị anh/chị cần thêm vào prompt để AI phân công sát thực tế hơn?"
+    ],
+    reflectHints:[
+      "Ví dụ: mình đổi thứ tự ưu tiên Kiểm tra an toàn – khách hàng – nội bộ cho phù hợp đặc thù đơn vị, hoặc thêm tiêu chí về việc tồn đọng lâu ngày...",
+      "Ví dụ: lịch sử địa bàn hay xảy ra sự cố gì, nhân sự tổ kỹ thuật đang thiếu/đủ, khách hàng nào cần lưu ý đặc biệt, quy định phân công riêng của đơn vị...",
+      "Ví dụ: làm sao để AI luôn ưu tiên đúng theo đặc thù/quy định riêng của đơn vị mình, chứ không chỉ áp dụng khuôn mẫu chung?"
+    ],
+    summary:{
+      manualTime:"25–30 phút", aiTime:"≈ 3–5 phút",
+      manualDesc:"Đọc, sắp xếp, phân công 12 đầu việc bằng tay",
+      aiDesc:"AI phân loại ~3 phút + người quản lý rà chỉnh ~2 phút",
+      takeaways:[
+        "AI giúp <b>sắp xếp – phân loại nhanh</b>, giải phóng thời gian đầu ngày cho việc quan trọng hơn.",
+        "Chất lượng phụ thuộc vào <b>cách viết prompt</b> — nêu rõ tiêu chí phân loại và đầu ra mong muốn.",
+        "<b>Quyết định cuối cùng luôn là của người quản lý</b> — rà theo an toàn, khách hàng, nguồn lực thực tế."
+      ],
+      final:"AI đề xuất – người quản lý quyết định."
+    }
+  },
+
+  2:{
+    tag:"Ứng dụng 2",
+    title:"Tổng hợp sự cố lưới điện trong tuần",
+    goal:"Cho học viên thấy AI nhanh chóng tổng hợp dữ liệu sự cố lưới điện phân tán thành bức tranh có ý nghĩa (theo cấp điện áp, theo loại, theo địa bàn), nhận diện điểm nóng — trong khi người quản lý giữ vai trò kiểm chứng số liệu và phân tích nguyên nhân gốc.",
+    duration:"5 phút demo + 15 phút học viên thực hành",
+    prep:["Máy tính có kết nối internet","Công cụ AI đã đăng nhập (ChatGPT bản free cho học viên)","Dữ liệu mẫu"],
+    manualTime:"30–45 phút", aiTime:"~3–5 phút",
+    compareNote:"Tổng hợp thủ công (cộng, phân nhóm theo cấp điện áp – loại – địa bàn, tính thời gian mất điện) thường mất <b>30–45 phút</b>; với AI chỉ khoảng <b>3–5 phút</b>.",
+    security:{level:"note", text:"Trước khi dán dữ liệu: nói rõ đây là dữ liệu vận hành đã ẩn danh (không có tên khách hàng, đã làm tròn/đại diện). Với dữ liệu vận hành thật, luôn lấy từ hệ thống chính thức (SCADA, chương trình quản lý mất điện) và bắt buộc kiểm chứng lại kết quả AI."},
+    step1:{
+      context:"Cuối tuần, Trưởng Điện lực cần nhìn lại toàn bộ sự cố lưới điện trong tuần để báo cáo và rút kinh nghiệm. Dữ liệu nằm rải rác: sự cố đường dây và trạm biến áp các cấp điện áp, cảnh báo từ hệ thống SCADA – đo xa, thời gian mất điện từng vụ. Cộng và phân nhóm thủ công mất 30–45 phút; trong khi chỉ cần bức tranh tổng thể để nhận ra điểm nóng.",
+      why:"Dữ liệu vận hành thường rải rác nhiều nguồn — giá trị AI mang lại là <b>gộp nhanh thành bức tranh nhiều chiều</b> (cấp điện áp / loại thiết bị / địa bàn), giúp phát hiện điểm nóng sớm hơn, chứ không thay việc xác minh số liệu gốc.",
+      table:{
+        headers:["TT","Ngày","Cấp ĐA","Thiết bị / Tuyến","Loại sự cố","Thời gian mất điện","Nguyên nhân ghi nhận"],
+        rows:[
+          ["1","T2","110kV","ĐZ 110kV lộ 171 (liên tuyến)","Nhảy MC do sét đánh, tái đóng thành công","0 phút","Sét – tự đóng lại (recloser)"],
+          ["2","T2","110kV","TBA 110kV E-A, MBA T1","Cảnh báo nhiệt độ dầu cao qua SCADA","Không mất điện","Quá tải giờ cao điểm"],
+          ["3","T3","35kV","ĐZ 35kV lộ 371","Sự cố vĩnh cửu, đứt dây do cây đổ","95 phút","Cây ngoài hành lang ngã vào"],
+          ["4","T3","SCADA","RTU trạm 35kV B","Mất tín hiệu đo xa 40 phút","Không mất điện","Lỗi kênh truyền (mạng)"],
+          ["5","T4","22kV","ĐZ 22kV lộ 475","Nhảy MC, tái lập sau kiểm tra","60 phút","Chạm chập do diều/vật bay"],
+          ["6","T4","22kV","TBA phân phối X (22/0,4kV)","Nổ FCO, mất điện 1 nhánh","110 phút","Quá tải cục bộ + thiết bị cũ"],
+          ["7","T5","35kV","ĐZ 35kV lộ 373","Nhảy MC thoáng qua, tự tái lập","5 phút","Phóng điện do ẩm/ô nhiễm sứ"],
+          ["8","T5","SCADA","Công tơ đo xa khu vực C","Mất kết nối thu thập chỉ số 3 điểm đo","Không mất điện","Lỗi modem/sim đo xa"],
+          ["9","T6","110kV","TBA 110kV E-A, ngăn lộ 172","Bảo vệ tác động, cô lập ngăn lộ","35 phút","Sự cố thoáng qua trên ĐZ sau MC"],
+          ["10","T6","22kV","ĐZ 22kV lộ 477","Sự cố vĩnh cửu, sứ vỡ","130 phút","Sứ cách điện xuống cấp"],
+          ["11","T7","22kV","TBA phân phối Y (22/0,4kV)","Aptomat tổng nhảy","70 phút","Quá tải sinh hoạt cuối tuần"],
+          ["12","CN","35kV","ĐZ 35kV lộ 371 (lặp lại vụ 3)","Nhảy MC cùng khu vực với vụ T3","45 phút","Nghi cùng nguyên nhân cây/hành lang"]
+        ]
+      },
+      note:"Ghi chú: MC = máy cắt; ĐZ = đường dây; TBA = trạm biến áp; FCO = cầu chì tự rơi; RTU = thiết bị đầu cuối SCADA. Dữ liệu chỉ mang tính minh họa để demo.",
+      copyText:"TT | Ngày | Cấp ĐA | Thiết bị/Tuyến | Loại sự cố | Thời gian mất điện | Nguyên nhân\n1 | T2 | 110kV | ĐZ 110kV lộ 171 (liên tuyến) | Nhảy MC do sét đánh, tái đóng thành công | 0 phút | Sét – tự đóng lại (recloser)\n2 | T2 | 110kV | TBA 110kV E-A, MBA T1 | Cảnh báo nhiệt độ dầu cao qua SCADA | Không mất điện | Quá tải giờ cao điểm\n3 | T3 | 35kV | ĐZ 35kV lộ 371 | Sự cố vĩnh cửu, đứt dây do cây đổ | 95 phút | Cây ngoài hành lang ngã vào\n4 | T3 | SCADA | RTU trạm 35kV B | Mất tín hiệu đo xa 40 phút | Không mất điện | Lỗi kênh truyền (mạng)\n5 | T4 | 22kV | ĐZ 22kV lộ 475 | Nhảy MC, tái lập sau kiểm tra | 60 phút | Chạm chập do diều/vật bay\n6 | T4 | 22kV | TBA phân phối X (22/0,4kV) | Nổ FCO, mất điện 1 nhánh | 110 phút | Quá tải cục bộ + thiết bị cũ\n7 | T5 | 35kV | ĐZ 35kV lộ 373 | Nhảy MC thoáng qua, tự tái lập | 5 phút | Phóng điện do ẩm/ô nhiễm sứ\n8 | T5 | SCADA | Công tơ đo xa khu vực C | Mất kết nối thu thập chỉ số 3 điểm đo | Không mất điện | Lỗi modem/sim đo xa\n9 | T6 | 110kV | TBA 110kV E-A, ngăn lộ 172 | Bảo vệ tác động, cô lập ngăn lộ | 35 phút | Sự cố thoáng qua trên ĐZ sau MC\n10 | T6 | 22kV | ĐZ 22kV lộ 477 | Sự cố vĩnh cửu, sứ vỡ | 130 phút | Sứ cách điện xuống cấp\n11 | T7 | 22kV | TBA phân phối Y (22/0,4kV) | Aptomat tổng nhảy | 70 phút | Quá tải sinh hoạt cuối tuần\n12 | CN | 35kV | ĐZ 35kV lộ 371 (lặp lại vụ 3) | Nhảy MC cùng khu vực với vụ T3 | 45 phút | Nghi cùng nguyên nhân cây/hành lang\n\nGhi chú: MC = máy cắt; ĐZ = đường dây; TBA = trạm biến áp; FCO = cầu chì tự rơi; RTU = thiết bị đầu cuối SCADA."
+    },
+    step2:{
+      intro:"Prompt viết theo <b>công thức 3 lớp: Mục tiêu – Bối cảnh – Đầu ra.</b> Yêu cầu AI tổng hợp theo cấp điện áp, loại thiết bị và địa bàn, đồng thời nhận diện điểm nóng:",
+      prompt:`"Tôi là Trưởng Điện lực. Dưới đây là bảng sự cố lưới điện trong tuần của đơn vị (đã ẩn danh), gồm sự cố đường dây và trạm biến áp các cấp 110kV, 35kV, 22kV và các cảnh báo từ hệ thống SCADA – đo xa. Hãy tổng hợp giúp tôi: (1) số vụ theo cấp điện áp (số vụ, tổng thời gian, ghi chú); (2) số vụ theo loại đối tượng (đường dây / trạm biến áp / SCADA – đo xa); (3) tổng và trung bình thời gian mất điện; (4) nhận diện các điểm nóng – tuyến/trạm/khu vực có sự cố lặp lại hoặc thời gian mất điện lớn nhất. Trình bày dạng bảng, kèm 3 nhận xét ngắn về xu hướng đáng chú ý trong tuần."
+
+[Dán bảng sự cố tuần ẩn danh ở Bước 1 vào đây]`,
+      why:"Yêu cầu tách rõ 4 khía cạnh tổng hợp (cấp điện áp, loại thiết bị, thời gian mất điện, điểm nóng) giúp AI không gộp lẫn — và buộc AI phải <b>chỉ ra điểm nóng cụ thể</b> thay vì chỉ liệt kê số liệu chung chung.",
+      simpleGoal:"tổng hợp lại các sự cố lưới điện trong tuần, để nắm được tình hình tổng thể và báo cáo.",
+      layers:{goal:"Tổng hợp theo cấp điện áp – loại đối tượng – thời gian mất điện + nhận diện điểm nóng.", context:"\"Tôi là Trưởng Điện lực\", dữ liệu sự cố lưới tuần gồm 110/35/22kV và SCADA – đo xa.", output:"Bảng tổng hợp nhiều chiều + 3 nhận xét xu hướng."},
+      segments:[
+        {cls:"pw-context", tag:"Bối cảnh", text:"“Tôi là Trưởng Điện lực.", explain:"Xác định vai trò người dùng — quản lý đang cần một bản tổng hợp để ra quyết định, không phải một báo cáo học thuật."},
+        {cls:"pw-context", tag:"Bối cảnh", text:"Dưới đây là bảng sự cố lưới điện trong tuần của đơn vị (đã ẩn danh), gồm sự cố đường dây và trạm biến áp các cấp 110kV, 35kV, 22kV và các cảnh báo từ hệ thống SCADA – đo xa.", explain:"Mô tả rõ loại dữ liệu và phạm vi (đường dây, trạm biến áp, nhiều cấp điện áp, SCADA) — giúp AI không bỏ sót nhóm nào khi tổng hợp."},
+        {cls:"pw-goal", tag:"Mục tiêu", text:"Hãy tổng hợp giúp tôi: (1) số vụ theo cấp điện áp (số vụ, tổng thời gian, ghi chú); (2) số vụ theo loại đối tượng (đường dây / trạm biến áp / SCADA – đo xa); (3) tổng và trung bình thời gian mất điện; (4) nhận diện các điểm nóng – tuyến/trạm/khu vực có sự cố lặp lại hoặc thời gian mất điện lớn nhất.", explain:"Liệt kê rõ 4 chiều tổng hợp cần có — nếu chỉ nói \"tổng hợp giúp tôi\", AI có thể chỉ làm 1–2 chiều rồi dừng."},
+        {cls:"pw-output", tag:"Đầu ra", text:"Trình bày dạng bảng, kèm 3 nhận xét ngắn về xu hướng đáng chú ý trong tuần.”", explain:"Chỉ định khuôn đầu ra (bảng) và giới hạn số nhận xét (3) — giúp AI đi thẳng vào các xu hướng đáng chú ý nhất, không viết lan man."}
+      ],
+      dataNote:{tag:"Dữ liệu cần dán", text:"[Dán bảng sự cố tuần ẩn danh ở Bước 1 vào đây]", explain:"Dán nguyên bảng sự cố đã ẩn danh ở Bước 1. Với dữ liệu vận hành thật, luôn đối chiếu lại với SCADA/hệ thống chính thức sau khi AI trả lời."}
+    },
+    step3Html:`
+      <p>AI trả kết quả về các bảng tổng hợp. Kết quả minh họa để đối chiếu:</p>
+      <p style="margin-top:16px;"><b>a) Tổng hợp theo cấp điện áp:</b></p>
+      <div class="table-wrap"><table><thead><tr><th>Cấp điện áp</th><th>Số vụ</th><th>Tổng thời gian mất điện</th><th>Ghi chú</th></tr></thead><tbody>
+      <tr><td><b>110kV</b></td><td>3</td><td>35 phút</td><td>Chủ yếu thoáng qua, tự tái lập</td></tr>
+      <tr><td><b>35kV</b></td><td>3</td><td>145 phút</td><td>Có vụ lặp lại (lộ 371)</td></tr>
+      <tr><td><b>22kV</b></td><td>4</td><td>370 phút</td><td>Thời gian mất điện lớn nhất</td></tr>
+      <tr><td><b>SCADA – đo xa</b></td><td>2</td><td>0 phút (mất tín hiệu)</td><td>Ảnh hưởng giám sát, không mất điện</td></tr>
+      </tbody></table></div>
+      <p style="margin-top:16px;"><b>b) Tổng hợp theo loại đối tượng:</b></p>
+      <div class="table-wrap"><table><thead><tr><th>Loại đối tượng</th><th>Số vụ</th><th>Tỷ trọng</th><th>Nhận xét</th></tr></thead><tbody>
+      <tr><td><b>Đường dây (ĐZ)</b></td><td>6</td><td>50%</td><td>Sự cố nhiều nhất, gồm cả vĩnh cửu</td></tr>
+      <tr><td><b>Trạm biến áp (TBA)</b></td><td>4</td><td>33%</td><td>Có cảnh báo quá tải &amp; thiết bị cũ</td></tr>
+      <tr><td><b>SCADA – đo xa</b></td><td>2</td><td>17%</td><td>Lỗi kênh truyền / modem đo xa</td></tr>
+      </tbody></table></div>
+      <p style="margin-top:16px;"><b>c) Chỉ số thời gian mất điện (chỉ tính các vụ có mất điện thực tế):</b></p>
+      <ul class="takeaways">
+        <li>Tổng số vụ có gây mất điện: <b>7 vụ</b> (trong tổng số 12 sự cố/cảnh báo)</li>
+        <li>Tổng thời gian mất điện: <b>550 phút</b></li>
+        <li>Thời gian mất điện trung bình: <b>78.57 phút / vụ</b></li>
+      </ul>
+      <p style="margin-top:16px;"><b>d) Điểm nóng AI nhận diện:</b></p>
+      <ul class="takeaways">
+        <li><b>Lộ 371 (35kV):</b> sự cố lặp lại 2 lần trong tuần (T3 và CN), nghi cùng nguyên nhân cây/hành lang tuyến.</li>
+        <li><b>Nhóm 22kV:</b> thời gian mất điện lớn nhất (370 phút), nhiều vụ liên quan thiết bị cũ, quá tải.</li>
+        <li><b>TBA 110kV E-A:</b> cảnh báo nhiệt độ dầu cao và bảo vệ tác động — cần theo dõi tải MBA T1.</li>
+      </ul>
+      <p style="margin-top:16px;"><b>3 nhận xét xu hướng AI gợi ý:</b></p>
+      <ul class="takeaways">
+        <li>Lưới 22kV là nhóm cần ưu tiên xử lý (nhiều vụ + thời gian mất điện dài nhất).</li>
+        <li>Sự cố hành lang tuyến (cây cối) lặp lại ở lộ 371 — cần rà soát hành lang.</li>
+        <li>Xuất hiện cụm lỗi SCADA – đo xa (kênh truyền, modem) ảnh hưởng giám sát từ xa.</li>
+      </ul>`,
+    step4:{
+      intro:"Với dữ liệu vận hành, <b>kiểm chứng số liệu còn nghiêm ngặt hơn</b>. Vài chỗ cần rà và phần AI không thể thay người quản lý:",
+      headers:["AI đưa ra","Vấn đề cần rà","Người quản lý xử lý"],
+      rows:[
+        ["Tổng thời gian mất điện","AI cộng theo số nhập; cần đối chiếu lại với chương trình quản lý mất điện / SCADA","Kiểm tra lại tính chính xác của số liệu"],
+        ["Xếp vụ 1 (110kV) là \u201c0 phút\u201d","Tự đóng lại thành công nhưng vẫn là sự cố cần ghi nhận, không bỏ qua","Giữ trong thống kê sự cố thoáng qua để theo dõi tần suất sét/tái đóng"],
+        ["Nhận định \u201ccùng nguyên nhân\u201d lộ 371","AI chỉ suy đoán từ mô tả; nguyên nhân thật cần kiểm tra hiện trường","Cử tổ kiểm tra hành lang tuyến 371 để xác nhận, không kết luận vội"],
+        ["Gộp SCADA – đo xa vào \u201ckhông mất điện\u201d","Đúng về điện, nhưng mất giám sát từ xa là rủi ro vận hành riêng","Tách theo dõi riêng cụm lỗi kênh truyền/đo xa; đề nghị bộ phận viễn thông"]
+      ],
+      keyPoint:"AI tổng hợp và trình bày rất nhanh, chỉ ra “ở đâu, cái gì”. Nhưng <b>số liệu vận hành phải lấy từ hệ thống chính thức (SCADA, chương trình quản lý mất điện) và được kiểm chứng</b>; còn <b>nguyên nhân gốc và hành động khắc phục là phán đoán chuyên môn của người quản lý</b> — AI không thay được."
+    },
+    guideQuestions:[
+      "Đơn vị anh/chị quản lý những cấp điện áp/loại thiết bị nào? Danh mục trong ví dụ (110/35/22kV, SCADA) có đủ hay cần bổ sung/thay đổi?",
+      "Ngưỡng nào được xem là \u201cđiểm nóng\u201d ở đơn vị anh/chị (số vụ lặp lại, thời gian mất điện) — có giống cách AI nhận diện trong ví dụ không?",
+      "Đơn vị anh/chị có hệ thống nào khác (ngoài SCADA) cần đối chiếu số liệu trước khi dùng kết quả AI?",
+      "Có đặc thù địa bàn (thời tiết, địa hình, mật độ dân cư) nào ảnh hưởng đến nguyên nhân sự cố mà AI cần biết thêm?"
+    ],
+    reflectHints:[
+      "Ví dụ: mình đổi cách gộp nhóm theo đội quản lý vận hành thay vì theo cấp điện áp, hoặc thêm yêu cầu AI so sánh với tuần trước...",
+      "Ví dụ: hệ thống giám sát riêng ngoài SCADA, đặc thù địa hình/thời tiết địa phương, lịch sử sự cố các tuần/năm trước...",
+      "Ví dụ: AI có thể giúp dự báo điểm nóng trước khi xảy ra sự cố, dựa trên dữ liệu lịch sử nhiều tuần không?"
+    ],
+    summary:{
+      manualTime:"30–45 phút", aiTime:"≈ 5–7 phút",
+      manualDesc:"Cộng, phân nhóm sự cố theo cấp ĐA – loại – địa bàn bằng tay",
+      aiDesc:"AI tổng hợp ~3–5 phút + người quản lý kiểm chứng số liệu",
+      takeaways:[
+        "AI <b>tổng hợp dữ liệu phân tán thành bức tranh nhiều chiều</b> (cấp điện áp – loại thiết bị – địa bàn) và nhận diện điểm nóng rất nhanh.",
+        "Giá trị lớn nhất là <b>phát hiện sớm điểm nóng</b> (tuyến lặp sự cố, nhóm mất điện dài) để can thiệp có trọng tâm — liên quan trực tiếp trải nghiệm khách hàng.",
+        "Số liệu vận hành <b>phải từ hệ thống chính thức &amp; được kiểm chứng</b>; nguyên nhân gốc và hành động khắc phục là của người quản lý."
+      ],
+      final:"AI tổng hợp – người quản lý kiểm chứng số liệu &amp; tìm nguyên nhân gốc."
+    }
+  },
+
+  3:{
+    tag:"Ứng dụng 3",
+    title:"Chuẩn bị điểm nhấn giao ban",
+    goal:"Cho học viên thấy AI giúp chắt lọc từ nhiều thông tin trong tuần thành vài điểm nhấn giao ban trọng tâm, có cấu trúc — trong khi người quản lý là người quyết định điểm nào thực sự quan trọng với đơn vị.",
+    duration:"5 phút demo + 15 phút học viên thực hành",
+    prep:["Máy tính có kết nối internet","Công cụ AI đã đăng nhập (ChatGPT bản free cho học viên)","Dữ liệu mẫu"],
+    manualTime:"20–30 phút", aiTime:"~2 phút",
+    compareNote:"Tự sàng lọc cả tuần bề bộn để rút ra vài điểm nhấn giao ban thường mất <b>20–30 phút</b>; với AI chỉ khoảng <b>2 phút</b>.",
+    security:{level:"note", text:"Nhấn mạnh trước khi dán dữ liệu: giao ban hiệu quả là giao ban có trọng tâm. Mục tiêu demo không phải để AI “họp thay”, mà giúp người quản lý vào giao ban với vài điểm nhấn rõ ràng, có 1 điểm về khách hàng."},
+    step1:{
+      context:"Cuối tuần, trước buổi giao ban đầu tuần, Trưởng Điện lực có một bản tóm tắt tình hình tuần khá bề bộn trải trên bốn mảng: quan hệ với chính quyền xã, tình hình phụ tải trong đợt nắng nóng, chất lượng xử lý sự cố, và các việc phát sinh. Cần rút ra vài điểm nhấn thật trọng tâm để giao ban không lan man.",
+      why:"Thông tin một tuần thường tản mạn ở nhiều mảng khác nhau — nếu đưa nguyên cả bốn mảng vào giao ban 15 phút sẽ lan man. AI giúp <b>chắt lọc nhanh</b>, nhưng chọn điểm nào thật sự đáng nhấn vẫn cần người hiểu rõ đơn vị.",
+      customTable:true,
+      sections:[
+        {title:"1. Quan hệ với chính quyền xã", items:[
+          "Đề nghị phối hợp di dời 2 trụ điện vướng công trình đường giao thông nông thôn, đã gửi văn bản, chưa hồi đáp",
+          "Mời dự họp về kế hoạch cấp điện cho khu tái định cư mới (tuần tới)",
+          "Phản ánh một số cột điện trong khu dân cư có dây võng thấp, lo mất an toàn mùa mưa"
+        ]},
+        {title:"2. Phụ tải tăng cao trong đợt nắng nóng", items:[
+          "Sản lượng điện tuần tăng ~18% so với tuần trước do nắng nóng kéo dài",
+          "2 trạm biến áp phân phối khu dân cư đầy tải giờ cao điểm (11h–14h và 20h–22h)",
+          "Tăng số cuộc gọi của khách hàng hỏi về hóa đơn tiền điện tăng",
+          "Cảnh báo nguy cơ quá tải cục bộ nếu nắng nóng tiếp tục tuần tới"
+        ]},
+        {title:"3. Quản trị chất lượng xử lý sự cố (tránh lặp lại)", items:[
+          "Tuyến 35kV lộ 371 có sự cố lặp lại 2 lần trong tuần (nghi do cây/hành lang tuyến)",
+          "Một số vụ xử lý sự cố chưa ghi nhận đầy đủ nguyên nhân gốc vào hồ sơ",
+          "Thời gian khôi phục trung bình một số vụ 22kV còn dài (trên 100 phút)"
+        ]},
+        {title:"4. Các việc phát sinh khác", items:[
+          "Chuẩn bị tiếp đoàn kiểm tra công tác an toàn (dự kiến giữa tuần tới)",
+          "2 nhân viên tổ kỹ thuật nghỉ phép trùng thời điểm, cần sắp xếp lịch trực",
+          "Hạn hoàn tất đối soát chỉ số công tơ đo xa khu vực C (cuối tháng)"
+        ]}
+      ],
+      copyText:"1. QUAN HỆ VỚI CHÍNH QUYỀN XÃ\n- Đề nghị phối hợp di dời 2 trụ điện vướng công trình đường giao thông nông thôn, đã gửi văn bản, chưa hồi đáp\n- Mời dự họp về kế hoạch cấp điện cho khu tái định cư mới (tuần tới)\n- Phản ánh một số cột điện trong khu dân cư có dây võng thấp, lo mất an toàn mùa mưa\n\n2. PHỤ TẢI TĂNG CAO TRONG ĐỢT NẮNG NÓNG\n- Sản lượng điện tuần tăng ~18% so với tuần trước do nắng nóng kéo dài\n- 2 trạm biến áp phân phối khu dân cư đầy tải giờ cao điểm (11h–14h và 20h–22h)\n- Tăng số cuộc gọi của khách hàng hỏi về hóa đơn tiền điện tăng\n- Cảnh báo nguy cơ quá tải cục bộ nếu nắng nóng tiếp tục tuần tới\n\n3. QUẢN TRỊ CHẤT LƯỢNG XỬ LÝ SỰ CỐ (TRÁNH LẶP LẠI)\n- Tuyến 35kV lộ 371 có sự cố lặp lại 2 lần trong tuần (nghi do cây/hành lang tuyến)\n- Một số vụ xử lý sự cố chưa ghi nhận đầy đủ nguyên nhân gốc vào hồ sơ\n- Thời gian khôi phục trung bình một số vụ 22kV còn dài (trên 100 phút)\n\n4. CÁC VIỆC PHÁT SINH KHÁC\n- Chuẩn bị tiếp đoàn kiểm tra công tác an toàn (dự kiến giữa tuần tới)\n- 2 nhân viên tổ kỹ thuật nghỉ phép trùng thời điểm, cần sắp xếp lịch trực\n- Hạn hoàn tất đối soát chỉ số công tơ đo xa khu vực C (cuối tháng)"
+    },
+    step2:{
+      intro:"Prompt viết theo <b>công thức 3 lớp: Mục tiêu – Bối cảnh – Đầu ra.</b> Yêu cầu AI chắt lọc thành số điểm nhấn giới hạn, có thứ tự ưu tiên và bắt buộc có 1 điểm về khách hàng:",
+      prompt:`"Tôi là Trưởng Điện lực, đang chuẩn bị giao ban đầu tuần. Dưới đây là bản tóm tắt tình hình tuần (đã ẩn danh), gồm 4 mảng: quan hệ chính quyền xã, phụ tải trong đợt nắng nóng, chất lượng xử lý sự cố, và việc phát sinh. Hãy giúp tôi rút ra 5 điểm nhấn quan trọng nhất để nêu trong giao ban, sắp theo thứ tự ưu tiên, mỗi điểm 1–2 câu, nêu rõ ai cần lưu ý/hành động. Trong đó bắt buộc có ít nhất 1 điểm về an toàn và 1 điểm về khách hàng. Trình bày dạng bảng danh sách"
+
+[Dán bản tóm tắt 4 mảng ở Bước 1 vào đây]`,
+      why:"Giới hạn số điểm nhấn (5) và bắt buộc 1 điểm an toàn + 1 điểm khách hàng giúp tránh việc AI liệt kê lan man tất cả — buộc AI phải <b>ưu tiên</b>, đúng tinh thần một buổi giao ban hiệu quả.",
+      simpleGoal:"rút ra vài điểm nhấn quan trọng nhất trong tuần, để chuẩn bị cho buổi giao ban đầu tuần.",
+      layers:{goal:"Rút 5 điểm nhấn quan trọng nhất, sắp theo ưu tiên.", context:"\"Trưởng Điện lực\", chuẩn bị giao ban đầu tuần, dữ liệu 4 mảng.", output:"Danh sách đánh số, mỗi điểm 1–2 câu + người lưu ý, có 1 điểm an toàn &amp; 1 điểm khách hàng."},
+      segments:[
+        {cls:"pw-context", tag:"Bối cảnh", text:"“Tôi là Trưởng Điện lực, đang chuẩn bị giao ban đầu tuần.", explain:"Nêu vai trò và thời điểm cụ thể (chuẩn bị giao ban) — giúp AI hiểu đây là việc cần gấp, cần chắt lọc chứ không cần phân tích sâu."},
+        {cls:"pw-context", tag:"Bối cảnh", text:"Dưới đây là bản tóm tắt tình hình tuần (đã ẩn danh), gồm 4 mảng: quan hệ chính quyền xã, phụ tải trong đợt nắng nóng, chất lượng xử lý sự cố, và việc phát sinh.", explain:"Liệt kê rõ 4 mảng dữ liệu sắp dán — giúp AI biết trước phạm vi, không bỏ sót mảng nào khi chắt lọc."},
+        {cls:"pw-goal", tag:"Mục tiêu", text:"Hãy giúp tôi rút ra 5 điểm nhấn quan trọng nhất để nêu trong giao ban, sắp theo thứ tự ưu tiên, mỗi điểm 1–2 câu, nêu rõ ai cần lưu ý/hành động.", explain:"Giới hạn số điểm nhấn (5) và độ dài (1–2 câu) — ép AI phải ưu tiên, tránh liệt kê tràn lan mọi chi tiết trong bản tóm tắt."},
+        {cls:"pw-goal", tag:"Mục tiêu", text:"Trong đó bắt buộc có ít nhất 1 điểm về an toàn và 1 điểm về khách hàng.", explain:"Ràng buộc bắt buộc — đảm bảo hai ưu tiên quan trọng nhất (an toàn, khách hàng) luôn xuất hiện, dù AI có thể tự đánh giá thấp mức độ quan trọng của chúng."},
+        {cls:"pw-output", tag:"Đầu ra", text:"Trình bày dạng bảng danh sách”", explain:"Chỉ định khuôn đầu ra ngắn gọn (bảng danh sách) — dễ đọc lướt khi chuẩn bị giao ban, thay vì một đoạn văn dài."}
+      ],
+      dataNote:{tag:"Dữ liệu cần dán", text:"[Dán bản tóm tắt 4 mảng ở Bước 1 vào đây]", explain:"Dán nguyên bản tóm tắt 4 mảng ở Bước 1. AI chỉ chắt lọc dựa trên thông tin anh/chị cung cấp — mảng nào không dán, AI sẽ không biết để đưa vào."}
+    },
+    step3Html:`
+      <p>AI trả về nhanh 5 điểm nhấn có thứ tự ưu tiên. Kết quả minh họa để đối chiếu:</p>
+      <div class="table-wrap"><table><thead><tr><th>#</th><th>Điểm nhấn giao ban</th><th>Mảng</th><th>Ai lưu ý / hành động</th></tr></thead><tbody>
+      <tr><td><b>1</b></td><td>An toàn: nguy cơ quá tải cục bộ nếu nắng nóng kéo dài; rà 2 TBA đầy tải giờ cao điểm, sẵn sàng phương án san tải.</td><td>Phụ tải/An toàn</td><td>Tổ kỹ thuật + trực vận hành</td></tr>
+      <tr><td><b>2</b></td><td>Khách hàng: chủ động truyền thông về hóa đơn tăng do nắng nóng; chuẩn bị mẫu giải thích thống nhất cho tổ CSKH.</td><td>Khách hàng</td><td>Tổ kinh doanh / CSKH</td></tr>
+      <tr><td><b>3</b></td><td>Chất lượng sự cố: tuyến 35kV lộ 371 lặp sự cố 2 lần — cử kiểm tra hành lang tuyến, ghi nhận nguyên nhân gốc đầy đủ.</td><td>Chất lượng sự cố</td><td>Tổ kỹ thuật (đội đường dây)</td></tr>
+      <tr><td><b>4</b></td><td>Chính quyền: hồi đáp văn bản UBND xã A về di dời trụ; cử người dự họp cấp điện khu tái định cư.</td><td>Chính quyền xã</td><td>Trưởng/Phó ĐL</td></tr>
+      <tr><td><b>5</b></td><td>Việc phát sinh: sắp lịch trực bù 2 nhân viên nghỉ phép trùng; chuẩn bị nội dung tiếp đoàn kiểm tra an toàn.</td><td>Phát sinh</td><td>Phó ĐL / Tổ trưởng</td></tr>
+      </tbody></table></div>
+      <p style="margin-top:14px;"><b>Nhận xét:</b> AI đã sắp đúng tinh thần — đưa an toàn và khách hàng lên đầu, gộp các việc cùng mảng, mỗi điểm gắn người lưu ý. Đây là bản nháp tốt để người quản lý tinh chỉnh.</p>`,
+    step4:{
+      intro:"Thể hiện nguyên tắc <b>“AI gợi ý điểm nhấn – người quản lý chọn điều thực sự quan trọng”</b>. AI gợi ý dựa trên thông tin được đưa vào; người quản lý mới biết điều gì thật sự cấp thiết với đơn vị tuần này:",
+      headers:["AI gợi ý","Điều AI chưa biết","Người quản lý chỉnh lại"],
+      rows:[
+        ["Xếp việc chính quyền xã ở ưu tiên 4","Dây võng thấp ở một số cột điện trong khu dân cư xã là nguy cơ an toàn mùa mưa, có thể cấp thiết hơn","Nâng riêng ý \u201crà cột/dây võng thấp\u201d lên nhóm an toàn, xử lý sớm"],
+        ["Gộp cả 3 việc của xã vào 1 điểm nhấn","Họp khu tái định cư có hạn thời gian (tuần tới), dễ bị quên nếu gộp","Tách thành đầu việc có hạn rõ, giao người dự họp cụ thể"],
+        ["Điểm lặp sự cố lộ 371 để ở ưu tiên 3","Đây là vấn đề quản trị chất lượng lặp lại — cần nhấn mạnh để tránh tái diễn","Giữ ưu tiên nhưng bổ sung yêu cầu: báo cáo nguyên nhân gốc trong tuần"],
+        ["Đưa cả 5 điểm vào giao ban","Giao ban 15 phút khó nhấn sâu cả 5; cần chọn 2–3 điểm trọng tâm nhất","Chốt 3 điểm nhấn chính (an toàn – khách hàng – lộ 371), phần còn lại giao đầu mối theo dõi"]
+      ],
+      keyPoint:"AI gợi ý điểm nhấn dựa trên thông tin đưa vào — rất hữu ích để không bỏ sót. Nhưng <b>chọn điểm nào thật sự quan trọng với đơn vị tuần này, sắp xếp sao cho giao ban gọn và có trọng tâm, là quyết định của người quản lý</b>. Một buổi giao ban tốt chỉ cần 2–3 điểm nhấn được nhớ và hành động, hơn là 5 điểm nghe rồi quên."
+    },
+    guideQuestions:[
+      "Ngoài 4 mảng trong ví dụ (chính quyền xã, phụ tải, chất lượng sự cố, việc phát sinh), đơn vị anh/chị có thêm mảng nào cần theo dõi hàng tuần không?",
+      "Tiêu chí ưu tiên của đơn vị anh/chị cho giao ban là gì — có luôn cần 1 điểm an toàn + 1 điểm khách hàng như ví dụ, hay có ưu tiên khác đặc thù hơn?",
+      "Ai là người thực sự cần biết mỗi điểm nhấn ở đơn vị anh/chị? Prompt có cần nêu rõ vai trò/bộ phận cụ thể hơn không?",
+      "Đơn vị anh/chị có giới hạn thời gian giao ban khác 15 phút không? Số điểm nhấn cần rút ra có nên điều chỉnh theo đó?"
+    ],
+    reflectHints:[
+      "Ví dụ: mình thêm mảng tiến độ dự án đầu tư, hoặc đổi số điểm nhấn từ 5 xuống 3 cho gọn với giao ban 15 phút của đơn vị...",
+      "Ví dụ: các mảng công việc đặc thù của đơn vị (dự án đầu tư, quan hệ báo chí, thời vụ...), thời lượng giao ban thực tế, văn hóa ưu tiên riêng...",
+      "Ví dụ: làm sao để chọn điểm nhấn từ gợi ý của AI mà không bỏ sót việc quan trọng nhưng ít nổi bật trong tuần?"
+    ],
+    summary:{
+      manualTime:"20–30 phút", aiTime:"≈ 3–4 phút",
+      manualDesc:"Sàng lọc cả tuần bề bộn để rút ra điểm nhấn bằng tay",
+      aiDesc:"AI gợi ý ~2 phút + người quản lý chọn 2–3 điểm trọng tâm",
+      takeaways:[
+        "AI <b>chắt lọc thông tin bề bộn thành vài điểm nhấn có cấu trúc</b>, giúp giao ban có trọng tâm, không lan man.",
+        "Luôn yêu cầu AI <b>có 1 điểm về an toàn và 1 điểm về khách hàng</b> — giữ hai ưu tiên này trong tầm mắt đội ngũ mỗi tuần.",
+        "Người quản lý <b>quyết định điểm nào thực sự quan trọng</b> và chọn 2–3 điểm để nhấn sâu — chất lượng giao ban nằm ở sự chọn lọc."
+      ],
+      final:"AI gợi ý điểm nhấn – người quản lý chọn điều thực sự quan trọng."
+    }
+  },
+
+  4:{
+    tag:"Ứng dụng 4",
+    title:"Chuẩn hóa phản hồi khách hàng",
+    goal:"Cho học viên thấy AI giúp chuẩn hóa tin nhắn phản hồi khách hàng — chuyên nghiệp, đồng cảm, đúng cấu trúc — trong khi người quản lý bảo đảm không hứa sai thẩm quyền và không dùng thông tin thật của khách hàng.",
+    duration:"5 phút demo + 15 phút học viên thực hành",
+    prep:["Máy tính có kết nối internet","Công cụ AI đã đăng nhập (ChatGPT bản free cho học viên)","Dữ liệu mẫu"],
+    manualTime:"10–15 phút", aiTime:"~2 phút",
+    compareNote:"Viết mới một tin nhắn phản hồi vừa đồng cảm vừa đúng quy định, lúc đang bận, thường mất <b>10–15 phút</b> và dễ cộc lốc; với AI chỉ khoảng <b>2 phút</b> cho bản nháp tốt.",
+    security:{level:"danger", text:"Cảnh báo bảo mật (rất quan trọng ở demo này): tuyệt đối KHÔNG nhập tên thật, số hợp đồng, số công tơ, địa chỉ cụ thể của khách hàng vào AI. Chỉ mô tả tình huống bằng dữ liệu ẩn danh — “Khách hàng X ở khu vực Y”."},
+    step1:{
+      context:"Một khách hàng phàn nàn hóa đơn tiền điện tháng này tăng mạnh. Cần phản hồi vừa đồng cảm, vừa đúng quy định — không phủ nhận cảm xúc của khách, nhưng cũng không hứa điều chưa kiểm chứng. Đây là điểm chạm ảnh hưởng trực tiếp đến trải nghiệm khách hàng: cùng một nội dung, cách diễn đạt khác nhau để lại cảm nhận rất khác.",
+      why:"<b>Vì sao cần chuẩn hóa:</b> tin nhắn viết vội lúc bận dễ cộc lốc, nặng quy trình nhẹ cảm xúc; trong khi khách đánh giá trải nghiệm chủ yếu qua cảm xúc. Một phản hồi đồng cảm, rõ ràng, đúng cam kết sẽ hạ nhiệt bức xúc và giữ được lòng tin.",
+      scenarioBox:{
+        text:"Khách hàng X ở khu vực Y phản ánh hóa đơn tiền điện tháng này tăng khoảng 40% so với tháng trước, tỏ ra bức xúc và nghi ngờ công tơ đo sai. Khách đề nghị được giải thích rõ và kiểm tra lại.",
+        italic:"Bối cảnh thực tế (giảng viên/học viên có thể nêu miệng, không dán vào AI): đang đợt nắng nóng, nhiều hộ dùng điều hòa nhiều hơn nên sản lượng tăng là phổ biến — nhưng vẫn phải kiểm tra để trả lời khách chính xác."
+      },
+      copyText:"Khách hàng X ở khu vực Y phản ánh hóa đơn tiền điện tháng này tăng khoảng 40% so với tháng trước, tỏ ra bức xúc và nghi ngờ công tơ đo sai. Khách đề nghị được giải thích rõ và kiểm tra lại."
+    },
+    step2:{
+      intro:"Prompt viết theo <b>công thức 3 lớp: Mục tiêu – Bối cảnh – Đầu ra</b>, nêu rõ cấu trúc 4 ý và ràng buộc “không hứa điều chưa kiểm chứng”:",
+      prompt:`"Khách hàng X ở khu vực Y phản ánh hóa đơn tháng này tăng khoảng 40% so với tháng trước và nghi ngờ công tơ đo sai. Hãy soạn giúp tôi một tin nhắn phản hồi ngắn gọn, lịch sự, đồng cảm, theo 4 ý: (1) ghi nhận và chia sẻ với khách hàng; (2) giải thích hướng kiểm tra (có thể do thời tiết nắng nóng, sẽ rà soát công tơ và chỉ số); (3) cam kết thời hạn phản hồi cụ thể; (4) lời cảm ơn. Không hứa điều chưa kiểm chứng (không khẳng định đúng/sai khi chưa kiểm tra). Giọng văn phù hợp ngành điện, thân thiện nhưng chuyên nghiệp."`,
+      why:"Ràng buộc <b>“không hứa điều chưa kiểm chứng”</b> là chi tiết quan trọng nhất trong prompt này — nó ngăn AI tạo ra câu trả lời có thể vượt thẩm quyền hoặc cam kết sai, điều mà người quản lý phải rà lại ở Bước 4.",
+      simpleGoal:"soạn một tin nhắn phản hồi khách hàng đang phàn nàn về hóa đơn tiền điện tăng cao.",
+      layers:{goal:"Soạn tin nhắn phản hồi theo 4 ý (ghi nhận – hướng kiểm tra – cam kết thời hạn – cảm ơn).", context:"Khách hàng ẩn danh (X, khu vực Y), phản ánh hóa đơn tăng ~40%, nghi công tơ sai.", output:"Tin nhắn ngắn, đồng cảm, chuyên nghiệp; ràng buộc không hứa điều chưa kiểm chứng."},
+      segments:[
+        {cls:"pw-context", tag:"Bối cảnh", text:"“Khách hàng X ở khu vực Y phản ánh hóa đơn tháng này tăng khoảng 40% so với tháng trước và nghi ngờ công tơ đo sai.", explain:"Mô tả tình huống bằng dữ liệu ẩn danh (Khách hàng X, khu vực Y) — tuyệt đối không thay bằng tên thật, số hợp đồng hay số công tơ thật."},
+        {cls:"pw-goal", tag:"Mục tiêu", text:"Hãy soạn giúp tôi một tin nhắn phản hồi ngắn gọn, lịch sự, đồng cảm, theo 4 ý: (1) ghi nhận và chia sẻ với khách hàng; (2) giải thích hướng kiểm tra (có thể do thời tiết nắng nóng, sẽ rà soát công tơ và chỉ số); (3) cam kết thời hạn phản hồi cụ thể; (4) lời cảm ơn.", explain:"Nêu rõ cấu trúc 4 ý bắt buộc — đảm bảo tin nhắn vừa đồng cảm (ý 1, 4) vừa có hướng xử lý và cam kết cụ thể (ý 2, 3), không chỉ là lời xin lỗi suông."},
+        {cls:"pw-goal", tag:"Mục tiêu", text:"Không hứa điều chưa kiểm chứng (không khẳng định đúng/sai khi chưa kiểm tra).", explain:"Ràng buộc quan trọng nhất trong prompt này — ngăn AI khẳng định công tơ đúng/sai khi chưa kiểm tra, tránh vượt thẩm quyền của người quản lý."},
+        {cls:"pw-output", tag:"Đầu ra", text:"Giọng văn phù hợp ngành điện, thân thiện nhưng chuyên nghiệp.”", explain:"Định hướng giọng văn — tránh hai thái cực: quá máy móc hành chính, hoặc quá suồng sã, không phù hợp khi giao tiếp với khách hàng ngành điện."}
+      ]
+    },
+    step3Html:`
+      <p>AI trả về một tin nhắn phản hồi hoàn chỉnh trong vài giây. Kết quả minh họa:</p>
+      <div class="quote-box">
+        <p>Kính gửi Quý khách,</p>
+        <p>Điện lực chân thành cảm ơn Quý khách đã phản ánh về hóa đơn tiền điện tháng này. Chúng tôi rất chia sẻ với băn khoăn của Quý khách. <i>(ghi nhận)</i></p>
+        <p>Qua rà soát ban đầu, sản lượng điện thời gian này có thể tăng do thời tiết nắng nóng khiến các thiết bị làm mát hoạt động nhiều hơn. Để trả lời chính xác, chúng tôi sẽ kiểm tra lại chỉ số và tình trạng công tơ của Quý khách. <i>(hướng kiểm tra)</i></p>
+        <p>Chúng tôi sẽ liên hệ phản hồi kết quả tới Quý khách trong vòng 03 ngày làm việc. <i>(cam kết thời hạn)</i></p>
+        <p>Trân trọng cảm ơn Quý khách đã tin tưởng và đồng hành cùng ngành Điện. <i>(cảm ơn)</i></p>
+      </div>
+      <p style="margin-top:14px;"><b>Nhận xét:</b> tin nhắn đủ 4 ý, giọng đồng cảm và chuyên nghiệp, không khẳng định đúng/sai khi chưa kiểm tra. Đây là <b>bản nháp tốt</b> — người quản lý còn phải rà lại trước khi dùng.</p>`,
+    step4:{
+      intro:"Bước quan trọng nhất — với phản hồi khách hàng, cần rà kỹ <b>ba điều: thẩm quyền, quy định đơn vị, và bảo mật.</b>",
+      headers:["Nội dung cần rà","Vấn đề","Người quản lý xử lý"],
+      rows:[
+        ["Thẩm quyền cam kết","AI có thể hứa điều vượt thẩm quyền (ví dụ hứa giảm tiền, hứa chắc công tơ sai/đúng)","Chỉ cam kết việc trong thẩm quyền: kiểm tra &amp; phản hồi; không hứa kết quả trước khi kiểm"],
+        ["Thời hạn &amp; đầu mối","\u201c03 ngày làm việc\u201d có đúng quy định đơn vị không? Ai là đầu mối liên hệ?","Chỉnh thời hạn theo quy định thực tế; ghi rõ đầu mối/số điện thoại liên hệ chính thức"],
+        ["Bảo mật thông tin","Bản nháp dùng \u201cKhách hàng X\u201d — khi gửi thật phải điền đúng người, KHÔNG nhập lại vào AI","Điền thông tin thật ở khâu gửi (ngoài AI); không dán dữ liệu khách lên công cụ AI"],
+        ["Ngữ cảnh &amp; giọng văn","Có thể quá chung; cần phù hợp mức độ bức xúc và văn hóa địa phương","Điều chỉnh giọng cho phù hợp; nếu khách rất bức xúc, cân nhắc gọi điện trực tiếp"]
+      ],
+      keyPoint:"AI chuẩn hóa lời văn rất tốt — đồng cảm, đủ ý, chuyên nghiệp. Nhưng <b>người quản lý phải bảo đảm ba điều: không hứa sai thẩm quyền, đúng thời hạn/đầu mối theo quy định, và tuyệt đối không đưa thông tin thật của khách hàng vào AI</b>. Việc điền thông tin thật chỉ thực hiện ở khâu gửi, bên ngoài công cụ AI."
+    },
+    guideQuestions:[
+      "Quy định về thời hạn phản hồi khách hàng ở đơn vị anh/chị là bao lâu — có giống \u201c03 ngày làm việc\u201d trong ví dụ không?",
+      "Ai là đầu mối chính thức để khách hàng liên hệ tiếp theo ở đơn vị anh/chị? Prompt có cần nêu rõ tên bộ phận/số điện thoại không?",
+      "Đơn vị anh/chị có mẫu câu/văn phong quy định riêng (theo thương hiệu, theo văn hóa vùng miền) cần bổ sung vào prompt không?",
+      "Với mức độ bức xúc nào thì đơn vị anh/chị yêu cầu chuyển sang gọi điện trực tiếp thay vì nhắn tin?"
+    ],
+    reflectHints:[
+      "Ví dụ: mình thêm ràng buộc không dùng từ ngữ mang tính đổ lỗi cho khách, hoặc đổi thời hạn cam kết theo đúng quy định đơn vị...",
+      "Ví dụ: quy định thời hạn phản hồi khách hàng (SLA), đầu mối liên hệ chính thức, văn phong đặc trưng của thương hiệu/vùng miền...",
+      "Ví dụ: nếu khách hàng phản hồi lại và vẫn chưa hài lòng, mình nên điều chỉnh prompt như thế nào để AI hỗ trợ soạn tiếp cho phù hợp?"
+    ],
+    summary:{
+      manualTime:"10–15 phút", aiTime:"≈ 3–4 phút",
+      manualDesc:"Viết vội lúc bận, dễ cộc lốc hoặc nặng quy trình",
+      aiDesc:"AI soạn nháp ~2 phút + người quản lý rà thẩm quyền &amp; bảo mật",
+      takeaways:[
+        "AI <b>chuẩn hóa tin nhắn đồng cảm, đủ ý, chuyên nghiệp</b> — tác động trực tiếp đến trải nghiệm khách hàng.",
+        "Người quản lý <b>giữ đúng thẩm quyền</b>: chỉ cam kết việc làm được, không hứa kết quả khi chưa kiểm chứng; đúng thời hạn/đầu mối theo quy định.",
+        "<b>Bảo mật là ranh giới đỏ:</b> không nhập tên/số hợp đồng/công tơ thật vào AI — chỉ mô tả ẩn danh; điền thông tin thật ở khâu gửi."
+      ],
+      final:"AI chuẩn hóa lời văn – người quản lý giữ đúng thẩm quyền &amp; bảo mật."
+    }
+  }
+};
+
+/* ============ RENDER ============ */
+let copyCounter=0;
+function escAttr(s){return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;');}
+function escHtml(value){
+  return String(value ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function practicePromptHtml(ex){
+  const value=practiceState.answers?.[ex]?.prompt||'';
+  return `<div class="practice-entry"><h4>Prompt nhóm đã thực hành viết</h4><p>Chỉ nhập Prompt nhóm thực tế đã dùng. Không dán Kết quả AI và không nhập dữ liệu nhận diện khách hàng.</p><textarea id="practice-prompt-${ex}" maxlength="12000" oninput="setPracticeAnswer(${ex},'prompt',this.value)" placeholder="Nhập Prompt thực hành của nhóm...">${escHtml(value)}</textarea><span class="practice-save-notice" id="practice-save-notice-${ex}" role="status">Prompt được lưu khi nhóm bấm “Đã thực hành xong”.</span></div>`;
+}
+function practiceReflectionValue(ex,index){
+  return escHtml(practiceState.answers?.[ex]?.reflections?.[index]||'');
+}
+function practiceUploadHtml(ex){
+  const attachment=practiceState.answers?.[ex]?.attachment;
+  const saved=attachment?.name
+    ? `<span class="file-chip">📎 <span>${escHtml(attachment.name)}</span><small>${formatPracticeFileSize(attachment.size)}</small><button class="remove-file" type="button" onclick="removePracticeFile(${ex})" aria-label="Bỏ file">×</button></span>`
+    : '';
+  return `<div class="upload-box">
+    <strong class="upload-title">Gửi file kết quả thực hành</strong>
+    <span class="upload-help">PDF, ảnh, Word, Excel, PowerPoint hoặc TXT · tối đa 10 MB · không bắt buộc.</span>
+    <input id="practice-file-${ex}" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt" onchange="handlePracticeFile(${ex},this)">
+    <label class="upload-label" id="practice-file-label-${ex}" for="practice-file-${ex}">📤 ${attachment?.name?'Thay file':'Chọn file gửi lên'}</label>
+    <div class="upload-preview" id="practice-upload-preview-${ex}">${saved}</div>
+    <span class="upload-notice${attachment?.path?' success':''}" id="practice-upload-notice-${ex}">${attachment?.path?'File đã được ghi nhận cùng phiếu.':'File được tải lên khi nhóm bấm hoàn thành bài.'}</span>
+  </div>`;
+}
+
+function copyCard(label, textId){
+  return `<div class="copy-card"><div class="cc-head"><span>${label}</span>
+    <button class="copy-btn" onclick="doCopy('${textId}', this)">📋 Sao chép</button></div>
+    <pre class="data-list-text" id="${textId}" style="display:none;"></pre>
+    <div class="table-slot" id="${textId}-visual"></div>
+  </div>`;
+}
+
+function buildDataHtml(d){
+  let out = '';
+  if(d.step1.table){
+    out += `<div class="table-wrap"><table><thead><tr>${d.step1.table.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>
+    ${d.step1.table.rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}
+    </tbody></table></div>`;
+    if(d.step1.note) out += `<p style="margin-top:10px;font-size:12.5px;color:var(--gray-500);"><i>${d.step1.note}</i></p>`;
+  }
+  if(d.step1.sections){
+    d.step1.sections.forEach(sec=>{
+      out += `<p style="margin-top:14px;"><b>${sec.title}</b></p><ul class="takeaways">${sec.items.map(it=>`<li>${it}</li>`).join('')}</ul>`;
+    });
+  }
+  if(d.step1.scenarioBox){
+    out += `<div class="quote-box"><p>${d.step1.scenarioBox.text}</p>${d.step1.scenarioBox.italic?`<p style="font-size:12.5px;">${d.step1.scenarioBox.italic}</p>`:''}</div>`;
+  }
+  return out;
+}
+
+function renderExercise(ex){
+  const d = EX[ex];
+  const secClass = d.security.level==='danger' ? 'security-note danger':'security-note';
+  const secIcon = d.security.level==='danger' ? '⚠':'🔒';
+  const combinedText = d.step2.dataNote ? d.step2.prompt.replace(d.step2.dataNote.text, d.step1.copyText) : d.step2.prompt;
+  const dataHtml = buildDataHtml(d);
+  const metaPromptText = buildMetaPrompt(d);
+
+  let html = `
+  <div class="info-bar">
+    <div>
+      <h2>${d.tag} · ${d.title}</h2>
+      <p class="goal">${d.goal}</p>
+    </div>
+    <div class="info-side">
+      <dl>
+        <dt>Thời lượng</dt><dd>${d.duration}</dd>
+        <dt>Chuẩn bị</dt><dd><ul>${d.prep.map(p=>`<li>${p}</li>`).join('')}</ul></dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="compare-strip">
+    <div class="compare-box manual"><span class="lbl">Thủ công</span><div class="time">${d.manualTime}</div></div>
+    <div class="compare-box ai"><span class="lbl">Với AI</span><div class="time">${d.aiTime}</div></div>
+    <div class="compare-box" style="flex:2 1 260px;"><span class="lbl">Phân tích so sánh</span><p>${d.compareNote}</p></div>
+  </div>
+
+  <div class="${secClass}"><span class="ic">${secIcon}</span><div>${d.security.text}</div></div>
+
+  <div class="stepper" id="stepper-${ex}">
+    <button class="step-btn active" data-step="1" title="Tình huống công việc"><span class="dot">1</span>Tình huống</button>
+    <button class="step-btn locked" data-step="2" title="Hoàn thành Bước 1 để mở khoá"><span class="dot">2</span>Prompt mẫu</button>
+    <button class="step-btn locked" data-step="3" title="Hoàn thành Bước 2 để mở khoá"><span class="dot">3</span>Kết quả AI &amp; quyết định</button>
+    <button class="step-btn locked" data-step="4" title="Hoàn thành Bước 3 để mở khoá"><span class="dot">4</span>Kết quả</button>
+  </div>
+
+  <!-- STEP 1: TÌNH HUỐNG -->
+  <div class="step-panel active" data-step="1">
+    <div class="block">
+      <h3><span class="k">BƯỚC 1</span>Tình huống công việc</h3>
+      <p>${d.step1.context}</p>
+      <div class="why"><b>Vì sao bắt đầu từ đây:</b> ${d.step1.why}</div>
+    </div>
+    <div class="block">
+      <h3><span class="k">DỮ LIỆU</span>Dữ liệu mẫu (đã ẩn danh)</h3>
+      ${dataHtml}
+      <p class="carry-note">💡 Dữ liệu này sẽ được hiển thị đầy đủ lại và <b>tự động đính kèm cùng prompt ở Bước 2</b> — anh/chị không cần copy riêng ở đây.</p>
+    </div>
+    <div class="nav-buttons">
+      <button class="nav-btn" disabled>← Trước</button>
+      <button class="nav-btn done-btn" onclick="completePracticeStep(${ex},1,this)">✓ Đánh dấu đã đọc</button>
+      <button class="nav-btn primary" id="next-${ex}-1" disabled onclick="goStep(${ex},2)">Bước 2: Prompt mẫu →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: PROMPT MẪU (PHÂN TÍCH + DỮ LIỆU ĐỂ COPY) -->
+  <div class="step-panel" data-step="2">
+    <div class="block">
+      <h3><span class="k">BƯỚC 2</span>Prompt mẫu (câu lệnh cho AI)</h3>
+      <p>${d.step2.intro}</p>
+      <div class="copy-card">
+        <div class="cc-head"><span>👆 Di chuột (hoặc chạm) vào từng phần để xem giải thích</span></div>
+        <pre class="prompt-text" id="prompt-${ex}" style="display:none;">${d.step2.prompt}</pre>
+        ${d.step2.dataNote ? `<pre class="data-list-text" id="combined-${ex}" style="display:none;">${combinedText}</pre>` : ''}
+        <div class="prompt-annotated">${buildAnnotatedPrompt(ex)}</div>
+        <div class="pw-legend">
+          <span class="legend-chip pw-context">Bối cảnh</span>
+          <span class="legend-chip pw-goal">Mục tiêu</span>
+          <span class="legend-chip pw-output">Đầu ra</span>
+          ${d.step2.dataNote ? '<span class="legend-chip pw-data">Dữ liệu cần dán</span>' : ''}
+        </div>
+        ${d.step2.dataNote ? `
+        <div class="attached-data">
+          <div class="attached-data-head">📥 Dữ liệu đầy đủ sẽ đính kèm cùng prompt này</div>
+          ${dataHtml}
+        </div>` : ''}
+        <div class="copy-actions">
+          ${d.step2.dataNote
+            ? `<button class="copy-btn" onclick="doCopy('combined-${ex}', this)">📋 Sao chép prompt đầy đủ (đã kèm dữ liệu)</button>
+               <button class="copy-btn ghost" onclick="doCopy('prompt-${ex}', this)">Chỉ sao chép câu lệnh</button>`
+            : `<button class="copy-btn" onclick="doCopy('prompt-${ex}', this)">📋 Sao chép prompt</button>`}
+        </div>
+      </div>
+      <div class="meta-help">
+        <div class="meta-help-head">🤝 Chưa rõ nên mô tả tình huống của anh/chị như thế nào?</div>
+        <p>Tình huống mẫu ở trên chỉ để minh họa. Nếu thực tế đơn vị anh/chị khác và anh/chị chưa chắc nên mô tả bối cảnh/yêu cầu ra sao cho AI hiểu đúng, hãy thử <b>nhờ chính AI đặt câu hỏi ngược lại</b> để làm rõ trước khi viết prompt chính thức — copy đoạn dưới đây và dán vào AI trước:</p>
+        <pre class="data-list-text" id="meta-${ex}">${metaPromptText}</pre>
+        <div class="copy-actions">
+          <button class="copy-btn ghost" onclick="doCopy('meta-${ex}', this)">📋 Sao chép prompt nhờ AI gợi ý</button>
+        </div>
+        <p class="meta-help-note">Sau khi AI đặt câu hỏi và anh/chị trả lời xong, AI sẽ tự tổng hợp thành một prompt hoàn chỉnh — anh/chị có thể dùng luôn hoặc đối chiếu với prompt mẫu ở trên.</p>
+      </div>
+      ${practicePromptHtml(ex)}
+      <div class="why"><b>Vì sao viết prompt như vậy:</b> ${d.step2.why}</div>
+      <div class="three-layer">
+        <div class="layer-card"><span class="lt">Mục tiêu</span><p>${d.step2.layers.goal}</p></div>
+        <div class="layer-card"><span class="lt">Bối cảnh</span><p>${d.step2.layers.context}</p></div>
+        <div class="layer-card"><span class="lt">Đầu ra</span><p>${d.step2.layers.output}</p></div>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="goStep(${ex},1)">← Bước 1</button>
+      <button class="nav-btn done-btn" onclick="completePracticeStep(${ex},2,this)">✓ Đã thực hành xong</button>
+      <button class="nav-btn primary" id="next-${ex}-2" disabled onclick="goStep(${ex},3)">Bước 3: Kết quả AI &amp; quyết định →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: KẾT QUẢ AI & CÁCH NGƯỜI QUẢN LÝ RA QUYẾT ĐỊNH -->
+  <div class="step-panel" data-step="3">
+    <div class="block">
+      <h3><span class="k">BƯỚC 3</span>Đầu ra AI mong đợi (minh họa)</h3>
+      ${d.step3Html}
+      <div class="why"><b>Đối chiếu:</b> so kết quả AI của anh/chị với phần minh họa trên — cấu trúc có thể khác đôi chút tuỳ prompt và mô hình AI, nhưng các ý chính (ưu tiên, số liệu, điểm nhấn...) nên tương đồng.</div>
+    </div>
+    <div class="block">
+      <h3><span class="k">RA QUYẾT ĐỊNH</span>Người quản lý kiểm chứng &amp; chỉnh sửa</h3>
+      <p>${d.step4.intro}</p>
+      <div class="table-wrap"><table><thead><tr>${d.step4.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>
+      ${d.step4.rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}
+      </tbody></table></div>
+      <div class="why"><b>Điểm cần nhấn:</b> ${d.step4.keyPoint}</div>
+    </div>
+    <div class="block guide-block">
+      <h3><span class="k">TỰ HỎI</span>Áp dụng cho đơn vị của anh/chị</h3>
+      <p>Kết quả minh họa trên là ví dụ chung. Trước khi tự thực hành, hãy tự hỏi các câu sau để biết <b>cần bổ sung/điều chỉnh gì cho đúng với đơn vị mình</b> — đây cũng chính là gợi ý để trả lời phần phản ánh ở Bước 4:</p>
+      <ol class="guide-list">${d.guideQuestions.map(q=>`<li>${q}</li>`).join('')}</ol>
+    </div>
+    <div class="block">
+      <h3><span class="k">TỔNG KẾT</span>Thông điệp chốt</h3>
+      <div class="compare-strip" style="margin-bottom:6px;">
+        <div class="compare-box manual"><span class="lbl">Làm thủ công</span><div class="time">${d.summary.manualTime}</div><p>${d.summary.manualDesc}</p></div>
+        <div class="compare-box ai"><span class="lbl">Với AI (+ kiểm chứng)</span><div class="time">${d.summary.aiTime}</div><p>${d.summary.aiDesc}</p></div>
+      </div>
+      <p style="margin-top:18px;"><b>Ba điều học viên cần rút ra:</b></p>
+      <ul class="takeaways">${d.summary.takeaways.map(t=>`<li>${t}</li>`).join('')}</ul>
+      <div class="final-msg" style="margin-top:20px;"><span>${d.summary.final}</span></div>
+    </div>
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="goStep(${ex},2)">← Bước 2</button>
+      <button class="nav-btn done-btn" onclick="completePracticeStep(${ex},3,this)">✓ Đã đối chiếu &amp; hiểu quyết định</button>
+      <button class="nav-btn primary" id="next-${ex}-3" disabled onclick="goStep(${ex},4)">Bước 4: Kết quả →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: KẾT QUẢ THỰC HÀNH CỦA HỌC VIÊN -->
+  <div class="step-panel" data-step="4">
+    <div class="block">
+      <h3><span class="k">BƯỚC 4</span>Phản ánh cuối bài của nhóm</h3>
+      ${practiceUploadHtml(ex)}
+
+      <div class="reflect-group">
+        <label class="reflect-label" for="reflect-${ex}-1">1. Với tình huống này, anh, chị (hoặc nhóm) có thay đổi gì trong câu lệnh mẫu? Vì sao lại thay đổi như vậy?</label>
+        <textarea class="reflect-input" id="reflect-${ex}-1" rows="3" oninput="setPracticeReflection(${ex},1,this.value)" placeholder="${d.reflectHints[0]}">${practiceReflectionValue(ex,1)}</textarea>
+      </div>
+      <div class="reflect-group">
+        <label class="reflect-label" for="reflect-${ex}-2">2. Anh/Chị sẽ bổ sung thêm những bối cảnh (thông tin) nào để giúp AI trả lời hoàn thiện hơn?</label>
+        <textarea class="reflect-input" id="reflect-${ex}-2" rows="3" oninput="setPracticeReflection(${ex},2,this.value)" placeholder="${d.reflectHints[1]}">${practiceReflectionValue(ex,2)}</textarea>
+      </div>
+      <div class="reflect-group">
+        <label class="reflect-label" for="reflect-${ex}-3">3. Sau bài thực hành này, anh/chị còn thắc mắc hoặc câu hỏi nào muốn đặt ra không?</label>
+        <textarea class="reflect-input" id="reflect-${ex}-3" rows="2" oninput="setPracticeReflection(${ex},3,this.value)" placeholder="${d.reflectHints[2]}">${practiceReflectionValue(ex,3)}</textarea>
+      </div>
+      <span class="practice-save-notice" id="practice-final-notice-${ex}" role="status">Nội dung phản ánh được lưu khi nhóm hoàn thành bài.</span>
+    </div>
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="goStep(${ex},3)">← Bước 3</button>
+      <button class="nav-btn done-btn" onclick="completePracticeStep(${ex},4,this)">✓ Hoàn thành bài ${ex}</button>
+      ${ex<4 ? `<button class="nav-btn primary" id="next-${ex}-4" disabled onclick="goExercise(${ex+1})">Ứng dụng ${ex+1} →</button>` : `<button class="nav-btn primary" id="next-${ex}-4" disabled>Đã hoàn thành cả 4 bài 🎉</button>`}
+    </div>
+  </div>
+  `;
+  return html;
+}
+
+/* ---------- Prompt annotate (hover explain) ---------- */
+function buildAnnotatedPrompt(ex){
+  const s2 = EX[ex].step2;
+  let out = '<p class="prompt-quote">';
+  out += s2.segments.map(seg=>
+    `<span class="pw ${seg.cls}" tabindex="0" data-tag="${escAttr(seg.tag)}" data-explain="${escAttr(seg.explain)}">${seg.text}</span>`
+  ).join(' ');
+  out += '</p>';
+  if(s2.dataNote){
+    const dn = s2.dataNote;
+    out += `<div class="pw pw-data" tabindex="0" data-tag="${escAttr(dn.tag)}" data-explain="${escAttr(dn.explain)}">📥 ${dn.text}</div>`;
+  }
+  return out;
+}
+
+/* ---------- Meta-prompt: nhờ AI hỗ trợ khi chưa rõ ý tưởng/mô tả ---------- */
+function buildMetaPrompt(d){
+  return `"Tôi muốn ${d.step2.simpleGoal} Tôi chưa biết nên mô tả tình huống của mình như thế nào cho đầy đủ. Hãy đặt câu hỏi cho tôi để thu thập các thông tin anh/chị cần, giúp đưa ra câu trả lời chính xác và phù hợp nhất, rồi mới tổng hợp lại thành một prompt hoàn chỉnh giúp tôi."`;
+}
+
+function buildAll(){
+  const main = document.getElementById('main');
+  main.innerHTML = [1,2,3,4].map(ex=>`<div class="exercise-panel ${ex===1?'active':''}" data-exercise="${ex}">${renderExercise(ex)}</div>`).join('');
+}
+buildAll();
+
+/* ============ PROGRESS / LOCK STATE ============ */
+/* progress[ex] = [step1Done, step2Done, step3Done, step4Done] */
+const progress = {
+  1:[1,2,3,4].map(step=>Boolean(practiceState.progress?.[1]?.[step])),
+  2:[1,2,3,4].map(step=>Boolean(practiceState.progress?.[2]?.[step])),
+  3:[1,2,3,4].map(step=>Boolean(practiceState.progress?.[3]?.[step])),
+  4:[1,2,3,4].map(step=>Boolean(practiceState.progress?.[4]?.[step]))
+};
+
+function updateLocks(ex){
+  const panel = document.querySelector(`.exercise-panel[data-exercise="${ex}"]`);
+  if(!panel)return;
+  const prog = progress[ex];
+  for(let s=2;s<=4;s++){
+    const stepBtn = panel.querySelector(`.step-btn[data-step="${s}"]`);
+    const unlocked = prog[s-2]; // step (s-1) marked done unlocks step s
+    if(stepBtn) stepBtn.classList.toggle('locked', !unlocked);
+  }
+  for(let s=1;s<=4;s++){
+    const nextBtn = panel.querySelector(`#next-${ex}-${s}`);
+    if(nextBtn) nextBtn.disabled = !prog[s-1];
+  }
+}
+
+function restoreProgressUi(){
+  [1,2,3,4].forEach(ex=>{
+    const panel=document.querySelector(`.exercise-panel[data-exercise="${ex}"]`);
+    if(!panel)return;
+    progress[ex].forEach((done,index)=>{
+      const step=index+1;
+      panel.querySelector(`.step-btn[data-step="${step}"]`)?.classList.toggle('done',done);
+      const action=panel.querySelector(`.step-panel[data-step="${step}"] .done-btn`);
+      action?.classList.toggle('on',done);
+      if(action)action.disabled=done;
+    });
+    updateLocks(ex);
+  });
+}
+
+/* ============ INTERACTIONS ============ */
+function scrollBelowExerciseTabs(){
+  const main=document.getElementById('main');
+  const tabsWrap=document.querySelector('.tabs-wrap');
+  const videoSection=document.getElementById('practice-guide-video');
+  const target=videoSection&&!videoSection.hidden?videoSection:main;
+  if(!target)return;
+  const stickyHeight=tabsWrap?.getBoundingClientRect().height||0;
+  const targetTop=Math.max(0,target.getBoundingClientRect().top+window.scrollY-stickyHeight);
+  window.scrollTo({top:targetTop,behavior:'smooth'});
+}
+
+function goExercise(ex){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.ex==String(ex)));
+  document.querySelectorAll('.exercise-panel').forEach(p=>p.classList.toggle('active', p.dataset.exercise==String(ex)));
+  renderPracticeGuideVideo(Number(ex));
+  scrollBelowExerciseTabs();
+}
+document.getElementById('tabs').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.tab-btn');
+  if(!btn) return;
+  goExercise(btn.dataset.ex);
+});
+
+function goStep(ex, step){
+  const panel = document.querySelector(`.exercise-panel[data-exercise="${ex}"]`);
+  const targetBtn = panel.querySelector(`.step-btn[data-step="${step}"]`);
+  if(targetBtn && targetBtn.classList.contains('locked')){
+    targetBtn.classList.remove('shake'); void targetBtn.offsetWidth; targetBtn.classList.add('shake');
+    return;
+  }
+  panel.querySelectorAll('.step-btn').forEach(b=>b.classList.toggle('active', b.dataset.step==String(step)));
+  panel.querySelectorAll('.step-panel').forEach(p=>p.classList.toggle('active', p.dataset.step==String(step)));
+  const stepper = panel.querySelector('.stepper');
+  if(stepper) stepper.scrollIntoView({behavior:'smooth', block:'start'});
+}
+document.getElementById('main').addEventListener('click',(e)=>{
+  const sbtn = e.target.closest('.step-btn');
+  if(sbtn){
+    const panel = sbtn.closest('.exercise-panel');
+    goStep(panel.dataset.exercise, sbtn.dataset.step);
+  }
+});
+
+async function completePracticeStep(ex,step,btn){
+  if(progress[ex]?.[step-1]||btn.disabled)return;
+  const prompt=String(document.getElementById(`practice-prompt-${ex}`)?.value||practiceState.answers?.[ex]?.prompt||'').trim();
+  const finalNote=getPracticeFinalNote(ex);
+  if(step===2&&!prompt){
+    setPracticeNotice(ex,'Vui lòng nhập Prompt nhóm đã thực hành trước khi xác nhận.','error');
+    document.getElementById(`practice-prompt-${ex}`)?.focus();
+    return;
+  }
+  if(step===4&&!finalNote){
+    setPracticeFinalNotice(ex,'Vui lòng nhập ít nhất một nội dung phản ánh cuối bài.','error');
+    document.getElementById(`reflect-${ex}-1`)?.focus();
+    return;
+  }
+  const original=btn.innerHTML;
+  btn.disabled=true;
+  btn.innerHTML='Đang lưu...';
+  try{
+    let attachment=practiceState.answers?.[ex]?.attachment||null;
+    const selectedFile=step===4?practiceFiles.get(Number(ex)):null;
+    if(selectedFile){
+      setPracticeUploadNotice(ex,'Đang tải file lên...');
+      attachment=await uploadPracticeAttachment(ex,selectedFile);
+      setPracticeAnswer(ex,'attachment',attachment);
+      practiceFiles.delete(Number(ex));
+      renderPracticeUpload(ex,attachment);
+      setPracticeUploadNotice(ex,'Đã tải file và ghi nhận cùng phiếu.','success');
+    }
+    await savePracticeProgress({eventType:'checkpoint',applicationIndex:ex,stepIndex:step,prompt,finalNote,attachment});
+    progress[ex][step-1]=true;
+    practiceState.progress={...(practiceState.progress||{}),[ex]:{...(practiceState.progress?.[ex]||{}),[step]:new Date().toISOString()}};
+    persistPracticeState();
+    btn.classList.add('on');
+    btn.innerHTML='✓ Đã lưu tiến độ';
+    document.querySelector(`.exercise-panel[data-exercise="${ex}"] .step-btn[data-step="${step}"]`)?.classList.add('done');
+    updateLocks(ex);
+    if(step===2)setPracticeNotice(ex,'Đã lưu Prompt và tiến độ thực hành.','success');
+    if(step===4)setPracticeFinalNotice(ex,'Đã lưu nội dung cuối bài và hoàn thành tình huống.','success');
+  }catch(error){
+    btn.disabled=false;
+    btn.innerHTML=original;
+    const message=error instanceof Error?error.message:'Chưa lưu được tiến độ. Vui lòng thử lại.';
+    if(step===4&&practiceFiles.has(Number(ex)))setPracticeUploadNotice(ex,`Tải file chưa thành công: ${message} File vẫn được giữ để thử lại.`,'error');
+    if(step===4)setPracticeFinalNotice(ex,message,'error');else setPracticeNotice(ex,message,'error');
+  }
+}
+
+/* ---------- Tooltip cho prompt ---------- */
+const hoverTip = document.createElement('div');
+hoverTip.className = 'hover-tip';
+document.body.appendChild(hoverTip);
+
+function showHoverTip(el){
+  const tag = el.dataset.tag;
+  const explain = el.dataset.explain;
+  const catClass = [...el.classList].find(c=>c.indexOf('pw-')===0) || '';
+  hoverTip.innerHTML = `<span class="tip-tag ${catClass}">${tag}</span><div class="tip-body">${explain}</div>`;
+  hoverTip.style.display = 'block';
+}
+function hideHoverTip(){ hoverTip.style.display = 'none'; }
+function positionHoverTip(clientX, clientY){
+  const pad = 16;
+  const rect = hoverTip.getBoundingClientRect();
+  let x = clientX + pad, y = clientY + pad;
+  if(x + rect.width > window.innerWidth - 10) x = clientX - rect.width - pad;
+  if(y + rect.height > window.innerHeight - 10) y = clientY - rect.height - pad;
+  if(x < 10) x = 10;
+  if(y < 10) y = 10;
+  hoverTip.style.left = x + 'px';
+  hoverTip.style.top = y + 'px';
+}
+function initTooltips(){
+  document.querySelectorAll('.pw').forEach(el=>{
+    el.addEventListener('mouseenter', ()=>showHoverTip(el));
+    el.addEventListener('mousemove', (e)=>positionHoverTip(e.clientX, e.clientY));
+    el.addEventListener('mouseleave', hideHoverTip);
+    el.addEventListener('focus', ()=>{
+      const r = el.getBoundingClientRect();
+      showHoverTip(el);
+      positionHoverTip(r.left + r.width/2, r.top);
+    });
+    el.addEventListener('blur', hideHoverTip);
+    el.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const r = el.getBoundingClientRect();
+      showHoverTip(el);
+      positionHoverTip(r.left + r.width/2, r.top);
+    });
+  });
+}
+document.addEventListener('click', hideHoverTip);
+document.addEventListener('scroll', hideHoverTip, true);
+initTooltips();
+
+function doCopy(id, btn){
+  const el = document.getElementById(id);
+  const text = el.innerText || el.textContent;
+  const finish = ()=>{
+    const original = btn.innerHTML;
+    btn.innerHTML = '✓ Đã sao chép';
+    btn.classList.add('copied');
+    setTimeout(()=>{btn.innerHTML = original; btn.classList.remove('copied');}, 1700);
+  };
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(text).then(finish).catch(()=>fallbackCopy(text, finish));
+  } else {
+    fallbackCopy(text, finish);
+  }
+}
+function fallbackCopy(text, cb){
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try{ document.execCommand('copy'); }catch(e){}
+  document.body.removeChild(ta);
+  cb();
+}
+
+/* ============ PHIẾU NHÓM / LƯU CHECKPOINT ============ */
+function newPracticeSessionId(){
+  if(window.crypto?.randomUUID)return window.crypto.randomUUID();
+  return `practice-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,10)}`;
+}
+
+function getPracticeVimeoEmbedUrl(rawUrl){
+  try{
+    const url=new URL(rawUrl,window.location.href);
+    const host=url.hostname.toLowerCase();
+    if(!['vimeo.com','www.vimeo.com','player.vimeo.com'].includes(host))return '';
+    const parts=url.pathname.split('/').filter(Boolean);
+    const videoIndex=parts.findIndex(part=>/^\d+$/.test(part));
+    if(videoIndex<0)return '';
+    const videoId=parts[videoIndex];
+    const privateHash=String(url.searchParams.get('h')||parts[videoIndex+1]||'').replace(/[^a-zA-Z0-9]/g,'');
+    const params=new URLSearchParams({title:'0',byline:'0',portrait:'0',dnt:'1'});
+    if(privateHash)params.set('h',privateHash);
+    return `https://player.vimeo.com/video/${videoId}?${params.toString()}`;
+  }catch{return ''}
+}
+
+function renderPracticeGuideVideo(ex){
+  const section=document.getElementById('practice-guide-video');
+  const frame=document.getElementById('practice-guide-video-frame');
+  const title=document.getElementById('practice-guide-video-title');
+  const tag=document.getElementById('practice-guide-video-tag');
+  if(!section||!frame)return;
+  frame.replaceChildren();
+  section.hidden=true;
+  const videoUrl=PRACTICE_GUIDE_VIDEO_URLS[Number(ex)-1]||'';
+  if(!videoUrl)return;
+  if(title)title.textContent=PRACTICE_APPLICATION_TITLES[Number(ex)-1]||'Video hướng dẫn thao tác';
+  if(tag)tag.textContent=`Ứng dụng ${ex} · Xem trước khi thực hành`;
+  const vimeoUrl=getPracticeVimeoEmbedUrl(videoUrl);
+  if(vimeoUrl){
+    const iframe=document.createElement('iframe');
+    iframe.src=vimeoUrl;
+    iframe.title='Video hướng dẫn thao tác thực hành AI';
+    iframe.loading='lazy';
+    iframe.allow='autoplay; fullscreen; picture-in-picture';
+    iframe.referrerPolicy='strict-origin-when-cross-origin';
+    iframe.setAttribute('allowfullscreen','');
+    frame.appendChild(iframe);
+    section.hidden=false;
+    return;
+  }
+  try{
+    const rawUrl=new URL(videoUrl,window.location.href);
+    if(!/\.(mp4|webm)(?:$|\?)/i.test(rawUrl.href))return;
+    const video=document.createElement('video');
+    video.src=rawUrl.href;
+    video.controls=true;
+    video.playsInline=true;
+    video.preload='metadata';
+    video.textContent='Trình duyệt của bạn không hỗ trợ phát video.';
+    frame.appendChild(video);
+    section.hidden=false;
+  }catch{}
+}
+
+function loadPracticeState(){
+  try{
+    const parsed=JSON.parse(localStorage.getItem(PRACTICE_STORE_KEY)||'null');
+    if(parsed&&typeof parsed==='object')return parsed;
+  }catch{}
+  return {sessionId:'',className:'',groupName:'',started:false,answers:{},progress:{}};
+}
+
+const PRACTICE_CLASS_QUERY_ALIASES=['class','classId','lop','lopHoc'];
+
+function getLockedPracticeClass(){
+  const params=new URLSearchParams(window.location.search||'');
+  let raw='';
+  for(const key of PRACTICE_CLASS_QUERY_ALIASES){
+    raw=String(params.get(key)||'').trim();
+    if(raw)break;
+  }
+  if(!raw)return null;
+  const normalized=raw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const match=normalized.match(/\d+/);
+  const classNumber=match?Number(match[0]):0;
+  if(!Number.isInteger(classNumber)||classNumber<1||classNumber>20)return null;
+  return {code:`L${classNumber}`,name:`EVNSPC QL01A - Lớp ${classNumber}`};
+}
+
+const LOCKED_PRACTICE_CLASS=getLockedPracticeClass();
+
+function persistPracticeState(){
+  try{localStorage.setItem(PRACTICE_STORE_KEY,JSON.stringify(practiceState))}catch{}
+}
+
+function setPracticeAnswer(ex,key,value){
+  practiceState.answers={...(practiceState.answers||{}),[ex]:{...(practiceState.answers?.[ex]||{}),[key]:value}};
+  persistPracticeState();
+}
+
+function setPracticeReflection(ex,index,value){
+  const current=practiceState.answers?.[ex]||{};
+  setPracticeAnswer(ex,'reflections',{...(current.reflections||{}),[index]:value});
+}
+
+function formatPracticeFileSize(value){
+  const bytes=Number(value||0);
+  if(!bytes)return '';
+  if(bytes<1024)return `${bytes} B`;
+  if(bytes<1024*1024)return `${(bytes/1024).toFixed(1)} KB`;
+  return `${(bytes/(1024*1024)).toFixed(1)} MB`;
+}
+
+function setPracticeUploadNotice(ex,message,tone=''){
+  const notice=document.getElementById(`practice-upload-notice-${ex}`);
+  if(!notice)return;
+  notice.textContent=message;
+  notice.className=`upload-notice ${tone}`.trim();
+}
+
+function renderPracticeUpload(ex,attachment,file=null){
+  const preview=document.getElementById(`practice-upload-preview-${ex}`);
+  const label=document.getElementById(`practice-file-label-${ex}`);
+  if(!preview)return;
+  const currentUrl=practicePreviewUrls.get(Number(ex));
+  if(currentUrl){URL.revokeObjectURL(currentUrl);practicePreviewUrls.delete(Number(ex));}
+  preview.innerHTML=attachment?.name
+    ? `<span class="file-chip">📎 <span>${escHtml(attachment.name)}</span><small>${formatPracticeFileSize(attachment.size)}</small><button class="remove-file" type="button" onclick="removePracticeFile(${ex})" aria-label="Bỏ file">×</button></span>`
+    : '';
+  if(file&&String(file.type||'').startsWith('image/')){
+    const image=document.createElement('img');
+    const objectUrl=URL.createObjectURL(file);
+    practicePreviewUrls.set(Number(ex),objectUrl);
+    image.src=objectUrl;
+    image.alt=`Xem trước ${file.name}`;
+    preview.appendChild(image);
+  }
+  if(label)label.textContent=attachment?.name?'📤 Thay file':'📤 Chọn file gửi lên';
+}
+
+function handlePracticeFile(ex,input){
+  const file=input?.files?.[0];
+  if(!file)return;
+  const extension=String(file.name||'').split('.').pop()?.toLowerCase()||'';
+  if(!PRACTICE_FILE_EXTENSIONS.has(extension)){
+    input.value='';
+    setPracticeUploadNotice(ex,'Định dạng chưa hỗ trợ. Hãy chọn PDF, ảnh, Word, Excel, PowerPoint hoặc TXT.','error');
+    return;
+  }
+  if(file.size<=0||file.size>PRACTICE_MAX_FILE_BYTES){
+    input.value='';
+    setPracticeUploadNotice(ex,'File phải có dung lượng từ 1 byte đến 10 MB.','error');
+    return;
+  }
+  practiceFiles.set(Number(ex),file);
+  const attachment={name:file.name,size:file.size,type:file.type||'',bucket:'',path:''};
+  renderPracticeUpload(ex,attachment,file);
+  setPracticeUploadNotice(ex,'Đã chọn file. File được tải lên khi nhóm bấm hoàn thành bài.');
+}
+
+function removePracticeFile(ex){
+  practiceFiles.delete(Number(ex));
+  const input=document.getElementById(`practice-file-${ex}`);
+  if(input)input.value='';
+  setPracticeAnswer(ex,'attachment',null);
+  renderPracticeUpload(ex,null);
+  setPracticeUploadNotice(ex,'Đã bỏ file khỏi phiếu.');
+}
+
+function getPracticeFinalNote(ex){
+  const reflections=practiceState.answers?.[ex]?.reflections||{};
+  return [
+    ['Điều chỉnh Prompt',reflections[1]],
+    ['Bối cảnh cần bổ sung',reflections[2]],
+    ['Thắc mắc còn lại',reflections[3]]
+  ].filter(([,value])=>String(value||'').trim()).map(([label,value])=>`${label}: ${String(value).trim()}`).join('\n');
+}
+
+function setPracticeNotice(ex,message,tone=''){
+  const notice=document.getElementById(`practice-save-notice-${ex}`);
+  if(!notice)return;
+  notice.textContent=message;
+  notice.className=`practice-save-notice ${tone}`.trim();
+}
+
+function setPracticeFinalNotice(ex,message,tone=''){
+  const notice=document.getElementById(`practice-final-notice-${ex}`);
+  if(!notice)return;
+  notice.textContent=message;
+  notice.className=`practice-save-notice ${tone}`.trim();
+}
+
+function setStartupNotice(message,tone=''){
+  const notice=document.getElementById('practice-startup-note');
+  if(!notice)return;
+  notice.textContent=message;
+  notice.className=`practice-startup-note ${tone}`.trim();
+}
+
+function uploadPracticeAttachment(ex,file){
+  const requestId=`${practiceState.sessionId}:attachment:${ex}:${Date.now()}`;
+  if(!PRACTICE_VSURVEY_MODE||!PRACTICE_FORM_ID||window.parent===window){
+    return Promise.resolve({name:file.name,size:file.size,type:file.type||'',bucket:'',path:''});
+  }
+  return new Promise((resolve,reject)=>{
+    practicePending.set(requestId,{resolve,reject});
+    window.parent.postMessage({
+      type:'vcontent.aiPowerPractice.upload',formId:PRACTICE_FORM_ID,requestId,
+      sessionId:practiceState.sessionId,applicationIndex:Number(ex),file
+    },window.location.origin);
+    window.setTimeout(()=>{
+      const pending=practicePending.get(requestId);
+      if(!pending)return;
+      practicePending.delete(requestId);
+      reject(new Error('Tải file quá thời gian. Vui lòng thử lại.'));
+    },30000);
+  });
+}
+
+function savePracticeProgress({eventType,applicationIndex=0,stepIndex=0,prompt='',finalNote='',attachment=null}){
+  const applicationTitle=applicationIndex?PRACTICE_APPLICATION_TITLES[applicationIndex-1]:'Đã vào bài thực hành';
+  const stepLabel=stepIndex?PRACTICE_STEP_LABELS[stepIndex-1]:'Đã vào bài';
+  const requestId=`${practiceState.sessionId}:${eventType}:${applicationIndex}:${stepIndex}`;
+  const payload={
+    type:'vcontent.aiPowerPractice.progress',formId:PRACTICE_FORM_ID,requestId,
+    sessionId:practiceState.sessionId,className:practiceState.className,groupName:practiceState.groupName,
+    classCode:practiceState.classCode||'',groupCode:practiceState.groupCode||'',
+    eventType,applicationIndex,applicationTitle,stepIndex,stepLabel,status:stepLabel,prompt,finalNote,attachment
+  };
+  if(!PRACTICE_VSURVEY_MODE||!PRACTICE_FORM_ID||window.parent===window){
+    return Promise.resolve({local:true});
+  }
+  return new Promise((resolve,reject)=>{
+    practicePending.set(requestId,{resolve,reject});
+    window.parent.postMessage(payload,window.location.origin);
+    window.setTimeout(()=>{
+      const pending=practicePending.get(requestId);
+      if(!pending)return;
+      practicePending.delete(requestId);
+      reject(new Error('Kết nối lưu tiến độ quá thời gian. Vui lòng thử lại.'));
+    },15000);
+  });
+}
+
+window.addEventListener('message',(event)=>{
+  if(event.origin!==window.location.origin)return;
+  const data=event.data&&typeof event.data==='object'?event.data:null;
+  if(!data||data.formId!==PRACTICE_FORM_ID||!data.requestId)return;
+  const pending=practicePending.get(data.requestId);
+  if(!pending)return;
+  if(data.type==='vcontent.aiPowerPractice.saved'){
+    practicePending.delete(data.requestId);
+    try{localStorage.setItem('vcontent.aiPowerPractice.lastSaved',JSON.stringify({formId:PRACTICE_FORM_ID,sessionId:practiceState.sessionId,savedAt:new Date().toISOString()}))}catch{}
+    pending.resolve(data);
+  }else if(data.type==='vcontent.aiPowerPractice.uploaded'){
+    practicePending.delete(data.requestId);
+    pending.resolve(data.attachment);
+  }else if(data.type==='vcontent.aiPowerPractice.error'){
+    practicePending.delete(data.requestId);
+    pending.reject(new Error(data.error||'Chưa lưu được tiến độ.'));
+  }
+});
+
+function showPracticeApp(){
+  document.getElementById('practice-startup').hidden=true;
+  document.getElementById('practice-app').hidden=false;
+  document.body.classList.remove('practice-locked');
+  document.getElementById('practice-session-group').textContent=practiceState.groupName||'Chưa có nhóm';
+  document.getElementById('practice-session-class').textContent=practiceState.className?`Lớp: ${practiceState.className}`:'';
+}
+
+async function startPracticeSession(){
+  const className=LOCKED_PRACTICE_CLASS?.name||String(document.getElementById('practice-class-name')?.value||'').trim();
+  const groupName=String(document.getElementById('practice-group-name')?.value||'').trim();
+  const groupMatch=groupName.match(/\d+/);
+  const groupNumber=groupMatch?Number(groupMatch[0]):0;
+  if(!className||!groupName){setStartupNotice('Vui lòng chọn đủ Lớp và Nhóm.','error');return;}
+  if(!Number.isInteger(groupNumber)||groupNumber<1||groupNumber>4){setStartupNotice('Vui lòng chọn Nhóm 1, 2, 3 hoặc 4.','error');return;}
+  const button=document.getElementById('practice-start-button');
+  button.disabled=true;
+  button.textContent='Đang ghi nhận...';
+  practiceState={
+    ...practiceState,
+    sessionId:practiceState.sessionId||newPracticeSessionId(),
+    className,
+    classCode:LOCKED_PRACTICE_CLASS?.code||'',
+    groupName:`Nhóm ${groupNumber}`,
+    groupCode:`G${groupNumber}`
+  };
+  persistPracticeState();
+  try{
+    await savePracticeProgress({eventType:'entered'});
+    practiceState.started=true;
+    practiceState.enteredAt=practiceState.enteredAt||new Date().toISOString();
+    persistPracticeState();
+    showPracticeApp();
+    window.scrollTo({top:0,left:0,behavior:'auto'});
+  }catch(error){
+    setStartupNotice(error instanceof Error?error.message:'Chưa ghi nhận được nhóm. Vui lòng thử lại.','error');
+    button.disabled=false;
+    button.textContent='Bắt đầu thực hành →';
+  }
+}
+
+function resetPracticeSession(){
+  if(!window.confirm('Kết thúc phiên nhóm hiện tại và tạo phiếu cho nhóm khác?'))return;
+  try{localStorage.removeItem(PRACTICE_STORE_KEY)}catch{}
+  window.location.reload();
+}
+
+function initPracticeSession(){
+  document.body.classList.add('practice-locked');
+  const classInput=document.getElementById('practice-class-name');
+  const groupInput=document.getElementById('practice-group-name');
+  if(LOCKED_PRACTICE_CLASS&&practiceState.started&&practiceState.className&&practiceState.className!==LOCKED_PRACTICE_CLASS.name){
+    practiceState={sessionId:'',className:'',groupName:'',started:false,answers:{},progress:{}};
+    persistPracticeState();
+  }
+  if(classInput){
+    classInput.value=LOCKED_PRACTICE_CLASS?.name||String(practiceState.className||'');
+    classInput.readOnly=Boolean(LOCKED_PRACTICE_CLASS);
+  }
+  if(groupInput)groupInput.value=String(practiceState.groupName||'');
+  restoreProgressUi();
+  if(practiceState.started)showPracticeApp();
+}
+
+
+renderPracticeGuideVideo(1);
+initPracticeSession();
+
+</script>
+</body>
+</html>

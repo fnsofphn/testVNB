@@ -1,0 +1,17 @@
+node_modules
+dist
+.worktrees/
+.npm-cache
+.cache/
+.venv-transcript/
+coverage
+.env
+.env.local
+.vercel
+.superpowers/
+*.log
+*.tsbuildinfo
+modules/
+!src/modules/
+!src/modules/**
+docs/SUNI_INTEGRATION_RESEARCH.md
