@@ -3,6 +3,7 @@ import { enforceRateLimit, RATE_LIMITS } from './_rate-limit.js';
 import {
   TRAINING_OPERATIONS_STATE_ID,
   applyTrainingOperationsCommand,
+  assertTrainingOperationsCommandRole,
   createInitialTrainingOperationsState,
   summarizeTrainingOperationsState,
 } from '../src/modules/vplanning/trainingOperations/domain.js';
@@ -156,17 +157,19 @@ function redactInput(input) {
 function stateForRole(state, auth) {
   const output = structuredClone(state);
   const role = auth.role;
+  const isAssigned = (item) => [auth.actor.id, auth.actor.email, auth.actor.name].includes(item.assigneeId)
+    || [auth.actor.email, auth.actor.name].includes(item.assignee);
   if (['admin', 'operations'].includes(role)) return output;
   if (role === 'intake') {
     output.inputs = output.inputs.filter((item) => item.ownerRole === 'intake');
-    output.tasks = [];
+    output.tasks = output.tasks.filter(isAssigned);
     output.notifications = output.notifications.filter((item) => (item.recipients || []).some((value) => ['intake', auth.actor.id, auth.actor.email].includes(value)));
     output.auditEvents = output.auditEvents.filter((item) => item.actor?.id === auth.actor.id || ['PROJECT_CREATED', 'SCOPE_CHANGE_APPROVED'].includes(item.type));
     return output;
   }
   if (role === 'content') {
     output.inputs = output.inputs.filter((item) => item.ownerRole === 'content');
-    output.tasks = [];
+    output.tasks = output.tasks.filter(isAssigned);
     output.changeRequests = [];
     output.notifications = output.notifications.filter((item) => (item.recipients || []).some((value) => ['content', auth.actor.id, auth.actor.email].includes(value)));
     output.auditEvents = output.auditEvents.filter((item) => item.actor?.id === auth.actor.id || item.entityType === 'project');
@@ -174,13 +177,13 @@ function stateForRole(state, auth) {
   }
   if (role === 'vtraining') {
     output.inputs = output.inputs.filter((item) => item.ownerRole === 'vtraining');
-    output.tasks = output.tasks.filter((item) => ['material', 'roster'].includes(item.input));
+    output.tasks = output.tasks.filter((item) => ['material', 'roster'].includes(item.input) || isAssigned(item));
     output.changeRequests = [];
     return output;
   }
   output.inputs = output.inputs.map(redactInput);
   if (role === 'member') {
-    output.tasks = output.tasks.filter((item) => [auth.actor.id, auth.actor.email, auth.actor.name].includes(item.assigneeId) || [auth.actor.email, auth.actor.name].includes(item.assignee));
+    output.tasks = output.tasks.filter(isAssigned);
     output.changeRequests = [];
   }
   return output;
@@ -212,16 +215,74 @@ async function loadState(auth) {
 }
 
 async function loadTeamDirectory(auth) {
-  const rows = await requestJson(`${auth.restUrl}/vplanning_users?select=email,full_name,title,roles,departments,owner_ids&order=full_name.asc`, { headers: auth.serviceHeaders });
+  const [rows, profiles] = await Promise.all([
+    requestJson(`${auth.restUrl}/vplanning_users?select=email,full_name,title,roles,departments,owner_ids,payload&order=full_name.asc`, { headers: auth.serviceHeaders }),
+    requestJson(`${auth.restUrl}/vcontent_profiles?select=id,email,full_name,role,title,vplanning_roles,active&active=is.true`, { headers: auth.serviceHeaders }),
+  ]);
+  const activeProfiles = new Map((Array.isArray(profiles) ? profiles : []).map((item) => [normalizeEmail(item.email), item]));
   return (Array.isArray(rows) ? rows : []).map((item) => {
-    const roles = resolveTrainingRoles({ title: item.title }, item).filter((role) => role === 'manager' || role === 'member');
-    return roles.length ? {
-      id: normalizeEmail(item.email),
+    const email = normalizeEmail(item.email);
+    const profile = activeProfiles.get(email);
+    const roles = resolveTrainingRoles(profile || { title: item.title }, item);
+    const projectIds = Array.isArray(item.payload?.projectIds) ? item.payload.projectIds.map(String) : [];
+    const classIds = Array.isArray(item.payload?.classIds) ? item.payload.classIds.map(String) : [];
+    return profile && roles.length ? {
+      id: email,
       name: String(item.full_name || item.email || '').trim(),
-      role: roles.includes('manager') ? 'manager' : 'member',
+      email,
+      role: roles.includes('manager') ? 'manager' : roles.includes('member') ? 'member' : roles[0],
       roles,
+      active: true,
+      projectIds,
+      classIds,
     } : null;
   }).filter((item) => item?.id && item?.name);
+}
+
+function assignmentScopeAllows(person, task) {
+  const projectAllowed = !person.projectIds?.length || person.projectIds.includes(String(task.projectId));
+  const classAllowed = !person.classIds?.length || person.classIds.includes(String(task.classId)) || person.classIds.includes(String(task.classCode));
+  return projectAllowed && classAllowed;
+}
+
+async function normalizeAssignmentCommand(auth, state, command) {
+  if (String(command?.type || '').toUpperCase() !== 'ASSIGN_TASKS') return command;
+  const directory = await loadTeamDirectory(auth);
+  const payload = structuredClone(command.payload || {});
+  const assignee = directory.find((item) => item.id === normalizeEmail(payload.assigneeId));
+  const reviewer = directory.find((item) => item.id === normalizeEmail(payload.reviewerId));
+  if (!assignee?.active) {
+    const error = new Error('Người nhận không tồn tại hoặc tài khoản đã ngừng hoạt động.');
+    error.status = 400;
+    error.code = 'TRAINING_OPERATIONS_ASSIGNEE_INVALID';
+    throw error;
+  }
+  if (!reviewer?.active || !reviewer.roles.some((role) => ['manager', 'operations'].includes(role))) {
+    const error = new Error('Người xác nhận không hợp lệ trong danh mục VWork.');
+    error.status = 400;
+    error.code = 'TRAINING_OPERATIONS_REVIEWER_INVALID';
+    throw error;
+  }
+  const taskIds = Array.isArray(payload.taskIds) ? payload.taskIds : [payload.taskId];
+  const tasks = taskIds.map((taskId) => state.tasks.find((item) => item.id === taskId));
+  if (tasks.some((item) => !item)) {
+    const error = new Error('Có công việc không tồn tại trong phạm vi hiện tại.');
+    error.status = 404;
+    error.code = 'TRAINING_OPERATIONS_TASK_NOT_FOUND';
+    throw error;
+  }
+  const assigningActor = directory.find((item) => item.id === normalizeEmail(auth.actor.email));
+  if (tasks.some((task) => !assignmentScopeAllows(assignee, task) || !assignmentScopeAllows(reviewer, task) || (assigningActor && !assignmentScopeAllows(assigningActor, task)))) {
+    const error = new Error('Người giao, người nhận hoặc người xác nhận nằm ngoài phạm vi dự án/lớp.');
+    error.status = 403;
+    error.code = 'TRAINING_OPERATIONS_ASSIGNMENT_SCOPE_DENIED';
+    throw error;
+  }
+  payload.assigneeId = assignee.id;
+  payload.assigneeName = assignee.name;
+  payload.reviewerId = reviewer.id;
+  payload.reviewerName = reviewer.name;
+  return { ...command, payload };
 }
 
 async function loadCommandRequest(auth, requestId) {
@@ -343,7 +404,8 @@ export default async function handler(req, res) {
       res.status(409).json({ ok: false, code: 'TRAINING_OPERATIONS_VERSION_CONFLICT', error: 'Dữ liệu đã thay đổi trên server. Hãy tải lại trước khi lưu.', version: current.version, updatedAt: current.updatedAt });
       return;
     }
-    const command = body.command;
+    assertTrainingOperationsCommandRole(String(body.command?.type || '').toUpperCase(), auth.role);
+    const command = await normalizeAssignmentCommand(auth, current.state, body.command);
     const previousAuditLength = current.state.auditEvents?.length || 0;
     const nextState = applyTrainingOperationsCommand(current.state, command, { role: auth.role, actor: auth.actor });
     const newAuditEvents = (nextState.auditEvents || []).slice(previousAuditLength);

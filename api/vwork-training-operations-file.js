@@ -6,7 +6,12 @@ import { resolveActiveTrainingRole, resolveTrainingRoles } from '../src/modules/
 const MAX_BODY_BYTES = parseByteLimit(process.env.VWORK_TRAINING_OPERATIONS_FILE_BODY_LIMIT, 64 * 1024);
 const MAX_UPLOAD_BYTES = parseByteLimit(process.env.VWORK_TRAINING_OPERATIONS_FILE_LIMIT, 25 * 1024 * 1024);
 const readLimitedBuffer = createLimitedBufferReader({ maxBytes: MAX_BODY_BYTES });
-const ALLOWED_EXTENSIONS = new Set(['xlsx', 'xls', 'csv', 'pdf', 'docx', 'pptx', 'png', 'jpg', 'jpeg', 'webp', 'txt']);
+const BLOCKED_EXTENSIONS = new Set([
+  'ade', 'adp', 'apk', 'app', 'bat', 'bin', 'cmd', 'com', 'cpl', 'crt', 'dll', 'dmg', 'exe', 'hta', 'htm', 'html',
+  'inf', 'ins', 'iso', 'jar', 'js', 'jse', 'lnk', 'mjs', 'msi', 'msp', 'mst', 'php', 'ps1', 'reg', 'scr', 'sh',
+  'svg', 'sys', 'vb', 'vbe', 'vbs', 'ws', 'wsc', 'wsf', 'wsh',
+]);
+const BLOCKED_CONTENT_TYPES = /(?:text\/html|javascript|x-msdownload|x-sh|x-shellscript|x-dosexec|x-executable)/i;
 const DOCUMENT_ACCESS = Object.freeze({
   roster: { upload: ['intake'], download: ['intake'] },
   vlearning: { upload: ['content'], download: ['content'] },
@@ -20,6 +25,18 @@ const DOCUMENT_ACCESS = Object.freeze({
 
 function canAccessDocument(role, documentType, action) {
   return ['operations', 'admin'].includes(role) || DOCUMENT_ACCESS[documentType]?.[action]?.includes(role);
+}
+
+export function validateUploadMetadata({ fileName: rawFileName, contentType: rawContentType, size: rawSize, entityId }) {
+  const fileName = String(rawFileName || '').trim();
+  const extension = fileName.split('.').pop()?.toLowerCase() || '';
+  const contentType = String(rawContentType || 'application/octet-stream').trim().toLowerCase();
+  const size = Number(rawSize || 0);
+  const unsafeName = !fileName || fileName.length > 180 || /[\u0000-\u001f\u007f]/.test(fileName) || !/^[a-z0-9]{1,12}$/i.test(extension);
+  if (unsafeName || !entityId) return { valid: false, status: 400, error: 'Tên file hoặc định danh file không hợp lệ.' };
+  if (BLOCKED_EXTENSIONS.has(extension) || BLOCKED_CONTENT_TYPES.test(contentType)) return { valid: false, status: 400, code: 'TRAINING_OPERATIONS_UNSAFE_FILE', error: 'File thực thi hoặc định dạng chủ động không được phép tải lên.' };
+  if (!Number.isFinite(size) || size <= 0 || size > MAX_UPLOAD_BYTES) return { valid: false, status: 400, error: `File phải nhỏ hơn ${MAX_UPLOAD_BYTES} bytes.` };
+  return { valid: true, fileName, extension, contentType, size };
 }
 
 async function requestJson(url, options = {}) {
@@ -120,10 +137,8 @@ export default async function handler(req, res) {
     const fileName = String(body.fileName || '').trim();
     const documentType = String(body.documentType || 'other').trim();
     if (!canAccessDocument(role, documentType, 'upload')) { res.status(403).json({ ok: false, error: 'Vai trò hiện tại không được phép upload loại file này.' }); return; }
-    const extension = fileName.split('.').pop()?.toLowerCase() || '';
-    const size = Number(body.size || 0);
-    if (!fileName || !body.entityId || !ALLOWED_EXTENSIONS.has(extension)) { res.status(400).json({ ok: false, error: 'Loại file không được hỗ trợ.' }); return; }
-    if (!Number.isFinite(size) || size <= 0 || size > MAX_UPLOAD_BYTES) { res.status(400).json({ ok: false, error: `File phải nhỏ hơn ${MAX_UPLOAD_BYTES} bytes.` }); return; }
+    const validation = validateUploadMetadata({ fileName, contentType: body.contentType, size: body.size, entityId: body.entityId });
+    if (!validation.valid) { res.status(validation.status).json({ ok: false, ...(validation.code ? { code: validation.code } : {}), error: validation.error }); return; }
     if (documentType === 'evidence') await assertEvidenceTaskAccess(admin, profile, role, String(body.entityId), 'upload');
     const existing = await admin.storage.getBucket(config.bucket);
     if (existing.error && String(existing.error.message || '').toLowerCase().includes('not found')) {

@@ -56,6 +56,20 @@ for (const [key, definition] of Object.entries(contentInputs)) {
   assert.equal(version.sourceStepCode, definition.step);
 }
 
+// FB-01 — D05 accepts exactly 0/1/2/3 game links and preserves them as an array.
+for (const gameCount of [0, 1, 2, 3]) {
+  let dynamicState = createInitialTrainingOperationsState({ now: '2026-08-25T00:00:00.000Z' });
+  const gameContents = Array.from({ length: gameCount }, (_, index) => `https://game.example.vn/${index + 1}`);
+  dynamicState = command(dynamicState, 'SUBMIT_INPUT', {
+    projectId: 'EVNSPC-2026',
+    inputKey: 'game',
+    data: { game_count: gameCount, game_contents: gameContents, ...(gameCount ? { play_limit: 3, schedule: '2026-09-01' } : {}) },
+  }, 'content', 'Chuyên viên nội dung');
+  const savedData = dynamicState.inputs.find((item) => item.id === 'EVNSPC-2026:D05').versions[0].data;
+  assert.equal(savedData.game_count, gameCount);
+  assert.deepEqual(savedData.game_contents, gameContents);
+}
+
 // UC08 — VTraining material assignment D09.
 state = command(state, 'SUBMIT_INPUT', { projectId: 'ALPHA-2026', inputKey: 'material', sourceStepCode: 'UC08-B04', data: { class_ids: ['ALPHA01'], visible_from: '2026-10-10', visible_to: '2026-10-12', material_name_type: 'Hướng dẫn PDF' }, files: [{ name: 'guide.pdf', fileUrl: 'https://files.example/guide.pdf' }] }, 'vtraining', 'VTraining Ops');
 assert.equal(state.inputs.find((item) => item.id === 'ALPHA-2026:D09').activeVersion, 1);
@@ -97,10 +111,12 @@ assert.equal(state.tasks.find((item) => item.id === discussionTaskId).status, 'D
 assert.equal(state.tasks.find((item) => item.id === discussionTaskId).progress, 100);
 
 // UC15 — new input version, diff and affected-task decision.
-state = command(state, 'SUBMIT_INPUT_VERSION', { projectId: 'ALPHA-2026', inputKey: 'game', sourceStepCode: 'UC15-B03', data: { game_count: 2, game_content: 'Tình huống Alpha v2', play_limit: 3, schedule: '2026-10-10' }, reason: 'Khách hàng cập nhật nội dung game.', effectiveAt: '2026-09-20T00:00:00.000Z' }, 'content', 'Chuyên viên nội dung');
+state = command(state, 'SUBMIT_INPUT_VERSION', { projectId: 'ALPHA-2026', inputKey: 'game', sourceStepCode: 'UC15-B03', data: { game_count: 2, game_contents: ['Tình huống Alpha v2', 'Tình huống Alpha bổ sung'], play_limit: 3, schedule: '2026-10-10' }, reason: 'Khách hàng cập nhật nội dung game.', effectiveAt: '2026-09-20T00:00:00.000Z' }, 'content', 'Chuyên viên nội dung');
 const gameTask = state.tasks.find((item) => item.id === 'ALPHA01-T-107');
 assert.equal(state.inputs.find((item) => item.id === 'ALPHA-2026:D05').activeVersion, 2);
 assert.equal(state.inputs.find((item) => item.id === 'ALPHA-2026:D05').versions[1].sourceStepCode, 'UC15-B03');
+assert.deepEqual(state.inputs.find((item) => item.id === 'ALPHA-2026:D05').versions[1].data.game_contents, ['Tình huống Alpha v2', 'Tình huống Alpha bổ sung']);
+assert.throws(() => command(state, 'SUBMIT_INPUT_VERSION', { projectId: 'ALPHA-2026', inputKey: 'game', data: { game_count: 3, game_contents: ['Một', 'Hai'], play_limit: 3, schedule: '2026-10-10' }, reason: 'Thiếu nội dung game.' }, 'content', 'Chuyên viên nội dung'), /Input chưa hợp lệ/);
 assert.equal(gameTask.inputImpact.decision, 'PENDING');
 state = command(state, 'RESOLVE_INPUT_IMPACT', { taskIds: [gameTask.id], decision: 'REWORK' }, 'manager', 'Ngọc Trần');
 assert.equal(state.tasks.find((item) => item.id === gameTask.id).status, 'REWORK');
@@ -129,4 +145,3 @@ assert.ok(state.auditEvents.some((item) => item.type === 'SCOPE_CHANGE_APPROVED'
 assert.throws(() => command(state, 'SUBMIT_INPUT_VERSION', { projectId: 'ALPHA-2026', inputKey: 'roster', data: { classes: [{ code: 'ALPHA01' }] }, reason: 'Không hợp lệ' }, 'content', 'Chuyên viên nội dung'), /không sở hữu/);
 
 console.log('V-Work Training Operations domain UC01-UC16 passed.');
-

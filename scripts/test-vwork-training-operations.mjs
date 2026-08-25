@@ -27,7 +27,7 @@ assert(app.indexOf("identity.includes('training_manager')") < app.indexOf("ident
 assert(shell.includes("href:'/vwork/training-operations'"), 'The V-Work shell must link to the isolated Training Operations route.');
 assert(shell.includes('hidden:!ENABLE_TRAINING_OPERATIONS'), 'The V-Work navigation entry must follow the same feature flag.');
 
-assert(page.includes("const [layer, setLayer] = useState('projects')"), 'Project/course/class navigation must start from the project list.');
+assert(page.includes('const [layer, setLayer] = useState(layerFromRoute)') && page.includes("projectId: params.get('projectId')"), 'Project/course/class navigation must restore its layer from the URL context.');
 assert(page.includes('Lịch tháng thu nhỏ') && page.includes('calendar-view-switch'), 'Overview must include the mini calendar and switchable calendar views.');
 assert(page.includes("{ id: 'VSurvey', mature: false }") && page.includes("{ id: 'VEvent', mature: false }"), 'Future VSurvey and VEvent scope must remain visible without deep configuration.');
 assert(page.includes('Clone cấu hình từ') && page.includes('LỚP MẪU'), 'New classes must choose a class-template clone source.');
@@ -53,7 +53,13 @@ assert(api.includes('/rpc/persist_vwork_training_operations_state'), 'All mutati
 assert(api.includes("VWORK_TRAINING_OPERATIONS_ENABLED !== 'true'") && fileApi.includes("VWORK_TRAINING_OPERATIONS_ENABLED !== 'true'") && userApi.includes("VWORK_TRAINING_OPERATIONS_ENABLED !== 'true'"), 'Every server endpoint must remain disabled in production until the module server flag is explicitly enabled.');
 assert(userApi.includes('/auth/v1/admin/users') && userApi.includes('/vcontent_profiles') && userApi.includes('/vplanning_users?on_conflict=email'), 'Account provisioning must atomically reconcile Auth, PeopleOne profile and the VWork directory.');
 assert(userApi.includes('TRAINING_OPERATIONS_ACCOUNT_PERMISSION_DENIED') && userApi.includes('rollbackAttempted'), 'Account provisioning must enforce server authorization and attempt compensation after partial failure.');
-assert(api.includes('loadTeamDirectory(auth)') && api.includes("role === 'manager' || role === 'member'") && api.includes("roles.includes('manager') ? 'manager' : 'member'"), 'Assignment options must preserve multi-role manager/member identities from the VWork directory.');
+assert(api.includes('loadTeamDirectory(auth)') && api.includes('activeProfiles') && api.includes("roles.includes('manager') ? 'manager' : roles.includes('member') ? 'member' : roles[0]"), 'Assignment options must preserve active multi-role identities from the VWork directory.');
+assert(page.includes('Bạn muốn giao việc cho ai?') && page.includes('vwork-recent-assignees') && page.includes('Tìm theo tên hoặc email'), 'Assignment must use a searchable directory popup with recent accounts.');
+assert(api.includes('normalizeAssignmentCommand') && api.includes('TRAINING_OPERATIONS_ASSIGNMENT_SCOPE_DENIED'), 'Assignment identity and project/class scope must be validated on the server.');
+assert(page.includes('game_contents') && page.includes('GameContentFields'), 'D05 must render and persist one content/link field per configured game.');
+assert(domain.includes("case 'CREATE_CLASS_TASK'") && domain.includes("case 'ARCHIVE_TASK'"), 'Class task creation and soft archive must be enforced in the domain.');
+assert(fileApi.includes('BLOCKED_EXTENSIONS') && fileApi.includes('validateUploadMetadata') && !fileApi.includes('ALLOWED_EXTENSIONS'), 'Upload validation must use a safe deny policy instead of a narrow business-format whitelist.');
+assert(!page.includes("setTab('workflow')") && !page.includes("tab === 'workflow'"), 'The obsolete VTraining configuration page must not remain reachable from the module UI.');
 assert(api.includes('/vwork_training_operations_tasks?') && api.includes('/vwork_training_operations_audit_events?'), 'Reads must reconstruct state from independent task and audit rows.');
 assert(!api.includes("method: 'PATCH'") && !api.includes("/vwork_training_operations_state?on_conflict"), 'The API must not bypass the atomic RPC with direct aggregate writes.');
 assert(!api.includes('/vplanning_state') && !api.includes('/vplanning_records'), 'The module must not write to existing VPlanning state storage.');

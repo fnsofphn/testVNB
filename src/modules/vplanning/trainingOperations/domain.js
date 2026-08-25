@@ -38,14 +38,16 @@ export const TRAINING_DEFAULT_CLASSES = Object.freeze([
 const COMMAND_ROLES = Object.freeze({
   CREATE_PROJECT: ['operations', 'admin'],
   CLONE_CLASS: ['operations', 'admin'],
+  CREATE_CLASS_TASK: ['operations', 'vtraining', 'admin'],
   UPDATE_TASK_CONFIG: ['operations', 'vtraining', 'admin'],
+  ARCHIVE_TASK: ['operations', 'vtraining', 'admin'],
   SUBMIT_INPUT: ['intake', 'content', 'vtraining', 'operations', 'admin'],
   ASSIGN_TASKS: ['manager', 'operations', 'admin'],
   ASSIGN_GROUP_MANAGER: ['operations', 'admin'],
-  START_TASK: ['member', 'admin'],
-  UPDATE_TASK_PROGRESS: ['member', 'admin'],
-  SUBMIT_OUTPUT: ['member', 'admin'],
-  SUBMIT_REVIEW: ['member', 'admin'],
+  START_TASK: ['operations', 'intake', 'content', 'vtraining', 'manager', 'member', 'admin'],
+  UPDATE_TASK_PROGRESS: ['operations', 'intake', 'content', 'vtraining', 'manager', 'member', 'admin'],
+  SUBMIT_OUTPUT: ['operations', 'intake', 'content', 'vtraining', 'manager', 'member', 'admin'],
+  SUBMIT_REVIEW: ['operations', 'intake', 'content', 'vtraining', 'manager', 'member', 'admin'],
   REVIEW_TASK: ['manager', 'admin'],
   SUBMIT_INPUT_VERSION: ['intake', 'content', 'vtraining', 'operations', 'admin'],
   RESOLVE_INPUT_IMPACT: ['manager', 'operations', 'admin'],
@@ -96,7 +98,7 @@ export function domainError(code, message, details) {
   return error;
 }
 
-function assertCommandRole(type, role) {
+export function assertTrainingOperationsCommandRole(type, role) {
   const allowed = COMMAND_ROLES[type];
   if (!allowed) throw domainError('UNKNOWN_COMMAND', `Lệnh ${type} chưa được hỗ trợ.`);
   if (!allowed.includes(role)) throw domainError('TRAINING_OPERATIONS_PERMISSION_DENIED', `Vai trò ${role} không được phép thực hiện ${type}.`);
@@ -300,7 +302,7 @@ function assertTaskReviewer(task, context) {
 }
 
 function validateInputPayload(input, payload, state) {
-  const data = payload?.data && typeof payload.data === 'object' ? payload.data : {};
+  const data = payload?.data && typeof payload.data === 'object' ? clone(payload.data) : {};
   const files = Array.isArray(payload?.files) ? payload.files : [];
   const errors = [];
   if (input.dataCode === 'D03') {
@@ -313,7 +315,21 @@ function validateInputPayload(input, payload, state) {
   } else if (input.dataCode === 'D04') {
     for (const key of ['content_name', 'eln_count', 'eln_structure']) if (!String(data[key] ?? '').trim()) errors.push(`D04 thiếu ${key}.`);
   } else if (input.dataCode === 'D05') {
-    for (const key of ['game_count', 'game_content', 'play_limit', 'schedule']) if (!String(data[key] ?? '').trim()) errors.push(`D05 thiếu ${key}.`);
+    const gameCount = Number(data.game_count);
+    const legacyContent = String(data.game_content || '').trim();
+    const gameContents = Array.isArray(data.game_contents)
+      ? data.game_contents.map((item) => String(item || '').trim())
+      : legacyContent ? [legacyContent] : [];
+    if (!Number.isInteger(gameCount) || gameCount < 0) errors.push('D05 game_count phải là số nguyên không âm.');
+    if (Number.isInteger(gameCount) && (gameContents.slice(0, gameCount).some((item) => !item) || gameContents.length < gameCount)) {
+      errors.push(`D05 cần đủ ${Math.max(0, gameCount)} nội dung/link game.`);
+    }
+    if (gameCount > 0) {
+      for (const key of ['play_limit', 'schedule']) if (!String(data[key] ?? '').trim()) errors.push(`D05 thiếu ${key}.`);
+    }
+    data.game_count = Number.isInteger(gameCount) && gameCount >= 0 ? gameCount : data.game_count;
+    data.game_contents = gameContents;
+    data.game_content = gameContents[0] || '';
   } else if (input.dataCode === 'D06') {
     for (const key of ['discussion_count', 'topic_content', 'mode']) if (!String(data[key] ?? '').trim()) errors.push(`D06 thiếu ${key}.`);
     if (String(data.mode || '').toLowerCase().includes('nhóm') && !String(data.group_reference || '').trim()) errors.push('D06 chế độ nhóm phải có group_reference từ D03.');
@@ -472,8 +488,15 @@ function cloneClass(state, payload, context) {
 
 function updateTaskConfig(state, payload, context) {
   const task = findTask(state, payload.taskId);
+  const allowedGroups = new Set(TRAINING_TASK_TEMPLATES.map((item) => item.group));
   if (payload.enabled !== undefined) task.status = payload.enabled ? 'WAITING_INPUT' : 'CANCELLED';
   if (payload.dueOffset !== undefined) task.dueOffset = Math.max(0, Number(payload.dueOffset) || 0);
+  if (payload.title !== undefined) task.title = requiredText(payload.title, 'Tên công việc');
+  if (payload.group !== undefined) {
+    const group = requiredText(payload.group, 'Nhóm công việc');
+    if (!allowedGroups.has(group)) throw domainError('VALIDATION_ERROR', 'Nhóm công việc không hợp lệ.');
+    task.group = group;
+  }
   if (Array.isArray(payload.checklistItems)) {
     const items = payload.checklistItems.map((item) => String(item).trim()).filter(Boolean);
     if (!items.length) throw domainError('VALIDATION_ERROR', 'Checklist phải có ít nhất một tiêu chí.');
@@ -483,6 +506,55 @@ function updateTaskConfig(state, payload, context) {
   task.updatedAt = nowIso(context);
   refreshTaskReadiness(state, task.projectId, task.updatedAt);
   appendAudit(state, auditEvent('TASK_CONFIG_UPDATED', `Cập nhật cấu hình ${task.id}.`, context, 'task', task.id));
+}
+
+function createClassTask(state, payload, context) {
+  const timestamp = nowIso(context);
+  const classId = requiredText(payload.classId || payload.classCode, 'Lớp');
+  const classItem = state.classes.find((item) => item.id === classId || item.code === classId);
+  if (!classItem) throw domainError('NOT_FOUND', 'Không tìm thấy lớp cần thêm công việc.');
+  const group = requiredText(payload.group, 'Nhóm công việc');
+  if (!new Set(TRAINING_TASK_TEMPLATES.map((item) => item.group)).has(group)) throw domainError('VALIDATION_ERROR', 'Nhóm công việc không hợp lệ.');
+  const checklistItems = (Array.isArray(payload.checklistItems) ? payload.checklistItems : [])
+    .map((item) => String(item || '').trim())
+    .filter(Boolean);
+  if (!checklistItems.length) throw domainError('VALIDATION_ERROR', 'Checklist phải có ít nhất một tiêu chí.');
+  const inputKey = TRAINING_INPUT_DEFINITIONS[payload.inputKey] ? payload.inputKey : 'roster';
+  const existingIds = new Set(state.tasks.map((item) => item.id));
+  let sequence = 1;
+  let taskId = '';
+  do {
+    taskId = `${classItem.code}-CUSTOM-${String(sequence).padStart(3, '0')}`;
+    sequence += 1;
+  } while (existingIds.has(taskId));
+  const task = {
+    ...createTasksForClass(classItem.projectId, classItem.courseId, classItem, state.classes.indexOf(classItem), timestamp)[0],
+    id: taskId,
+    templateId: 'CUSTOM',
+    title: requiredText(payload.title, 'Tên công việc'),
+    group,
+    input: inputKey,
+    requiredInputCodes: taskRequiredInputs({ inputKey }),
+    dueOffset: Math.max(0, Number(payload.dueOffset) || 0),
+    checklistItems,
+    checklist: checklistItems.map(() => false),
+    custom: true,
+  };
+  state.tasks.push(task);
+  refreshTaskReadiness(state, classItem.projectId, timestamp);
+  appendAudit(state, auditEvent('CLASS_TASK_CREATED', `Thêm ${task.id} vào lớp ${classItem.code}.`, context, 'task', task.id, { classId: classItem.id, group, inputKey }));
+}
+
+function archiveTask(state, payload, context) {
+  const task = findTask(state, payload.taskId);
+  if (['IN_PROGRESS', 'IN_REVIEW'].includes(task.status)) throw domainError('INVALID_TRANSITION', 'Không thể xóa công việc đang thực hiện hoặc đang chờ review.');
+  const timestamp = nowIso(context);
+  task.status = 'CANCELLED';
+  task.archivedAt = timestamp;
+  task.archivedBy = actorFrom(context);
+  task.archiveReason = requiredText(payload.reason, 'Lý do xóa');
+  task.updatedAt = timestamp;
+  appendAudit(state, auditEvent('TASK_ARCHIVED', `Đã lưu trữ ${task.id}; lịch sử và audit được giữ nguyên.`, context, 'task', task.id, { reason: task.archiveReason }));
 }
 
 function assignTasks(state, payload, context) {
@@ -510,7 +582,15 @@ function assignTasks(state, payload, context) {
     appendNotification(state, { createdAt: timestamp, kind: 'TASK_ASSIGNED', title: `Bạn được giao ${task.id}`, body: task.title, entityType: 'task', entityId: task.id, recipients: [task.assigneeId, task.reviewerId] });
     refreshTaskReadiness(state, task.projectId, timestamp);
   });
-  appendAudit(state, auditEvent('TASKS_ASSIGNED', `Phân công ${taskIds.length} công việc cho ${assigneeName}.`, context, 'task_batch', taskIds.join(','), { taskIds, assigneeName, reviewerName }));
+  appendAudit(state, auditEvent('TASKS_ASSIGNED', `Phân công ${taskIds.length} công việc cho ${assigneeName}.`, context, 'task_batch', taskIds.join(','), {
+    taskIds,
+    assigneeId: payload.assigneeId || assigneeName,
+    assigneeName,
+    reviewerId: payload.reviewerId || reviewerName,
+    reviewerName,
+    activeRole: context.role,
+    assignedAt: timestamp,
+  }));
 }
 
 function assignGroupManager(state, payload, context) {
@@ -726,13 +806,15 @@ export function applyTrainingOperationsCommand(currentState, command, context = 
   if (!currentState || typeof currentState !== 'object' || Array.isArray(currentState)) throw domainError('INVALID_STATE', 'Training Operations state không hợp lệ.');
   const type = requiredText(command?.type, 'Loại lệnh').toUpperCase();
   const role = String(context.role || 'member');
-  assertCommandRole(type, role);
+  assertTrainingOperationsCommandRole(type, role);
   const state = clone(currentState);
   const payload = command?.payload || {};
   switch (type) {
     case 'CREATE_PROJECT': createProject(state, payload, { ...context, role }); break;
     case 'CLONE_CLASS': cloneClass(state, payload, { ...context, role }); break;
+    case 'CREATE_CLASS_TASK': createClassTask(state, payload, { ...context, role }); break;
     case 'UPDATE_TASK_CONFIG': updateTaskConfig(state, payload, { ...context, role }); break;
+    case 'ARCHIVE_TASK': archiveTask(state, payload, { ...context, role }); break;
     case 'SUBMIT_INPUT': submitInput(state, payload, { ...context, role }, false); break;
     case 'SUBMIT_INPUT_VERSION': submitInput(state, payload, { ...context, role }, true); break;
     case 'ASSIGN_TASKS': assignTasks(state, payload, { ...context, role }); break;
@@ -762,4 +844,3 @@ export function summarizeTrainingOperationsState(state) {
     auditEvents: state?.auditEvents?.length || 0,
   };
 }
-
