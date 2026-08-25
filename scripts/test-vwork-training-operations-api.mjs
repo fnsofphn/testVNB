@@ -10,9 +10,10 @@ globalThis.fetch = async (url, options = {}) => {
   const value = String(url);
   calls.push({ url: value, method: options.method || 'GET', headers: options.headers, body: options.body });
   if (value.endsWith('/auth/v1/user')) return Response.json({ id: 'auth-operations', email: 'ops@peopleone.vn' });
-  if (value.includes('/vcontent_profiles?')) return Response.json([{ id: 'profile-operations', email: 'ops@peopleone.vn', full_name: 'Quản lý vận hành', role: 'training_manager', active: true, auth_user_id: 'auth-operations' }]);
+  if (value.includes('/vcontent_profiles?')) return Response.json([{ id: 'profile-operations', email: 'ops@peopleone.vn', full_name: 'Quản trị đa vai', role: 'training_ops_admin', active: true, auth_user_id: 'auth-operations', vplanning_roles: ['vplanning_admin'] }]);
   if (value.includes('/vplanning_users?') && value.includes('email=eq.')) return Response.json([]);
   if (value.includes('/vplanning_users?')) return Response.json([
+    { email: 'ops@peopleone.vn', full_name: 'Quản trị đa vai', roles: ['training_ops_admin', 'vplanning_admin', 'vplanning_manager', 'vplanning_member'] },
     { email: 'manager@peopleone.vn', full_name: 'Ngọc Trần', roles: ['vplanning_manager'] },
     { email: 'member@peopleone.vn', full_name: 'Nam Nguyễn', roles: ['vplanning_member'] },
   ]);
@@ -46,11 +47,11 @@ function responseRecorder() {
   };
 }
 
-function request(method, body) {
+function request(method, body, activeRole) {
   return {
     method,
     body,
-    headers: { authorization: 'Bearer session-test', 'x-forwarded-for': `127.0.0.${calls.length + 1}` },
+    headers: { authorization: 'Bearer session-test', 'x-forwarded-for': `127.0.0.${calls.length + 1}`, ...(activeRole ? { 'x-vwork-role': activeRole } : {}) },
     socket: { remoteAddress: `127.0.0.${calls.length + 1}` },
   };
 }
@@ -60,9 +61,31 @@ await handler(request('GET'), getResponse);
 assert.equal(getResponse.statusCode, 200);
 assert.equal(getResponse.payload.ok, true);
 assert.equal(getResponse.payload.role, 'operations');
+assert.deepEqual(getResponse.payload.availableRoles, ['operations', 'intake', 'content', 'vtraining', 'manager', 'member']);
 assert.equal(getResponse.payload.storage, 'seed');
 assert.equal(getResponse.payload.state.tasks.length, 33);
-assert.deepEqual(getResponse.payload.directory.map((item) => [item.id, item.role]), [['manager@peopleone.vn', 'manager'], ['member@peopleone.vn', 'member']]);
+assert.deepEqual(getResponse.payload.directory.map((item) => [item.id, item.role]), [['ops@peopleone.vn', 'manager'], ['manager@peopleone.vn', 'manager'], ['member@peopleone.vn', 'member']]);
+assert.deepEqual(getResponse.payload.directory[0].roles, ['manager', 'member']);
+
+const memberView = responseRecorder();
+await handler(request('GET', undefined, 'member'), memberView);
+assert.equal(memberView.statusCode, 200);
+assert.equal(memberView.payload.role, 'member');
+assert.equal(memberView.payload.state.tasks.length, 0);
+
+const invalidRole = responseRecorder();
+await handler(request('GET', undefined, 'director'), invalidRole);
+assert.equal(invalidRole.statusCode, 403);
+assert.equal(invalidRole.payload.code, 'TRAINING_OPERATIONS_ROLE_NOT_GRANTED');
+
+const forbiddenCommand = responseRecorder();
+await handler(request('POST', {
+  expectedVersion: 0,
+  requestId: '33333333-3333-4333-8333-333333333333',
+  command: { type: 'ASSIGN_TASKS', payload: { taskIds: ['TNKH01-T-101'] } },
+}, 'intake'), forbiddenCommand);
+assert.equal(forbiddenCommand.statusCode, 403);
+assert.equal(forbiddenCommand.payload.code, 'TRAINING_OPERATIONS_PERMISSION_DENIED');
 
 const postResponse = responseRecorder();
 await handler(request('POST', {
@@ -101,4 +124,3 @@ assert.equal(missingRequestId.statusCode, 400);
 assert.equal(missingRequestId.payload.code, 'TRAINING_OPERATIONS_REQUEST_ID_REQUIRED');
 
 console.log('V-Work Training Operations API auth, persistence and concurrency checks passed.');
-

@@ -6,6 +6,11 @@ import {
   createInitialTrainingOperationsState,
   summarizeTrainingOperationsState,
 } from '../src/modules/vplanning/trainingOperations/domain.js';
+import {
+  normalizeTrainingRole,
+  resolveActiveTrainingRole,
+  resolveTrainingRoles,
+} from '../src/modules/vplanning/trainingOperations/roles.js';
 
 const MAX_BODY_BYTES = parseByteLimit(process.env.VWORK_TRAINING_OPERATIONS_BODY_LIMIT, 1024 * 1024);
 const readLimitedBuffer = createLimitedBufferReader({ maxBytes: MAX_BODY_BYTES });
@@ -62,36 +67,8 @@ function normalizeEmail(value) {
   return String(value || '').trim().toLowerCase();
 }
 
-function normalizeRole(value) {
-  return String(value || '')
-    .trim()
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_|_$/g, '');
-}
-
 function hasPeopleOneEmail(value) {
   return PEOPLEONE_EMAIL_DOMAINS.has(normalizeEmail(value).split('@')[1] || '');
-}
-
-function resolveTrainingRole(profile, vplanningUser) {
-  const tokens = [
-    profile?.role,
-    profile?.title,
-    ...(Array.isArray(profile?.vplanning_roles) ? profile.vplanning_roles : []),
-    ...(Array.isArray(vplanningUser?.roles) ? vplanningUser.roles : []),
-  ].map(normalizeRole).filter(Boolean);
-  const has = (...values) => values.some((value) => tokens.includes(value) || tokens.some((token) => token.includes(value)));
-  if (has('admin', 'training_ops_admin', 'vplanning_admin')) return 'admin';
-  if (has('client', 'sale', 'account_manager', 'dau_moi')) return 'intake';
-  if (has('specialist', 'content_manager', 'chuyen_vien_noi_dung', 'noi_dung')) return 'content';
-  if (has('vtraining', 'training_instructor', 'van_hanh_vtraining')) return 'vtraining';
-  if (has('training_manager', 'training_admin', 'production_manager', 'pm', 'vplanning_director')) return 'operations';
-  if (has('vplanning_manager', 'manager', 'teamlead', 'quan_ly_ekip')) return 'manager';
-  if (has('vplanning_member', 'vplanning_collaborator', 'ctv', 'member', 'cong_tac_vien')) return 'member';
-  return null;
 }
 
 async function findProfile(restUrl, serviceHeaders, sessionUser) {
@@ -129,8 +106,16 @@ async function authenticate(req, config) {
   const serviceHeaders = headers(config.serviceRoleKey, `Bearer ${config.serviceRoleKey}`);
   const profile = await findProfile(restUrl, serviceHeaders, sessionUser);
   const vplanningUser = await findVPlanningUser(restUrl, serviceHeaders, normalizeEmail(sessionUser?.email));
-  const role = resolveTrainingRole(profile, vplanningUser);
-  if (!profile || !role || (!hasPeopleOneEmail(profile.email) && !vplanningUser && !['admin', 'training_ops_admin'].includes(normalizeRole(profile.role)))) {
+  const availableRoles = resolveTrainingRoles(profile, vplanningUser);
+  const requestedRole = req.headers['x-vwork-role'];
+  if (requestedRole && !availableRoles.includes(normalizeTrainingRole(requestedRole))) {
+    const error = new Error('Tài khoản hiện tại không được cấp vai trò VWork đã chọn.');
+    error.status = 403;
+    error.code = 'TRAINING_OPERATIONS_ROLE_NOT_GRANTED';
+    throw error;
+  }
+  const role = resolveActiveTrainingRole(requestedRole, availableRoles);
+  if (!profile || !role || (!hasPeopleOneEmail(profile.email) && !vplanningUser && !availableRoles.includes('operations'))) {
     const error = new Error('Tài khoản hiện tại chưa được cấp quyền cho VWork Vận hành đào tạo.');
     error.status = 403;
     error.code = 'TRAINING_OPERATIONS_PERMISSION_DENIED';
@@ -138,6 +123,7 @@ async function authenticate(req, config) {
   }
   return {
     role,
+    availableRoles,
     actor: {
       id: profile.id || sessionUser.id,
       name: profile.full_name || vplanningUser?.full_name || sessionUser.email,
@@ -228,11 +214,12 @@ async function loadState(auth) {
 async function loadTeamDirectory(auth) {
   const rows = await requestJson(`${auth.restUrl}/vplanning_users?select=email,full_name,title,roles,departments,owner_ids&order=full_name.asc`, { headers: auth.serviceHeaders });
   return (Array.isArray(rows) ? rows : []).map((item) => {
-    const role = resolveTrainingRole({ title: item.title }, item);
-    return role === 'manager' || role === 'member' ? {
+    const roles = resolveTrainingRoles({ title: item.title }, item).filter((role) => role === 'manager' || role === 'member');
+    return roles.length ? {
       id: normalizeEmail(item.email),
       name: String(item.full_name || item.email || '').trim(),
-      role,
+      role: roles.includes('manager') ? 'manager' : 'member',
+      roles,
     } : null;
   }).filter((item) => item?.id && item?.name);
 }
@@ -284,7 +271,8 @@ async function saveState(auth, nextState, expectedVersion, requestId, commandTyp
 }
 
 function sendError(res, error) {
-  res.status(Number(error.status || 500)).json({
+  const status = error.code === 'TRAINING_OPERATIONS_PERMISSION_DENIED' ? 403 : Number(error.status || 500);
+  res.status(status).json({
     ok: false,
     code: error.code || (error.status === 409 ? 'TRAINING_OPERATIONS_VERSION_CONFLICT' : 'TRAINING_OPERATIONS_ERROR'),
     error: String(error.message || error),
@@ -313,7 +301,7 @@ export default async function handler(req, res) {
     const current = await loadState(auth);
     if (req.method === 'GET') {
       const directory = ['operations', 'admin', 'manager'].includes(auth.role) ? await loadTeamDirectory(auth) : [];
-      res.status(200).json({ ok: true, role: auth.role, actor: auth.actor, directory, state: stateForRole(current.state, auth), version: current.version, updatedAt: current.updatedAt, storage: current.storage });
+      res.status(200).json({ ok: true, role: auth.role, availableRoles: auth.availableRoles, actor: auth.actor, directory, state: stateForRole(current.state, auth), version: current.version, updatedAt: current.updatedAt, storage: current.storage });
       return;
     }
     if (req.method !== 'POST') {
@@ -341,6 +329,7 @@ export default async function handler(req, res) {
       res.status(200).json({
         ok: true,
         role: auth.role,
+        availableRoles: auth.availableRoles,
         state: stateForRole(current.state, auth),
         version: Number(replay.result?.version ?? current.version),
         updatedAt: replay.result?.updatedAt || current.updatedAt,
@@ -362,6 +351,7 @@ export default async function handler(req, res) {
     res.status(200).json({
       ok: true,
       role: auth.role,
+      availableRoles: auth.availableRoles,
       state: stateForRole(nextState, auth),
       version: Number(saved.version),
       updatedAt: saved.updatedAt || null,
@@ -373,4 +363,3 @@ export default async function handler(req, res) {
     sendError(res, error);
   }
 }
-

@@ -14,6 +14,8 @@ const api = read('api/vwork-training-operations.js');
 const userApi = read('api/vwork-training-operations-user.js');
 const fileApi = read('api/vwork-training-operations-file.js');
 const service = read('src/modules/vplanning/trainingOperations/service.ts');
+const roles = read('src/modules/vplanning/trainingOperations/roles.js');
+const multiRoleSql = read('supabase/manual/digitalume_vwork_multirole_admin.sql');
 const migration = read('supabase/migrations/20260824155749_vwork_training_operations.sql');
 const privilegeHardening = read('supabase/migrations/20260825170000_vwork_training_operations_privilege_hardening.sql');
 const databaseGuards = read('supabase/tests/vwork_training_operations_guards.sql');
@@ -42,8 +44,8 @@ assert(!page.includes("task.assignee === 'Nam Nguyễn'") && !page.includes('<op
 for (const field of ['content_name', 'eln_structure', 'game_content', 'play_limit', 'topic_content', 'group_reference', 'assignment_brief', 'rubric_pass_score', 'question_bank', 'test_rule', 'material_name_type', 'class_ids', 'visible_from', 'visible_to']) {
   assert(page.includes(`key: '${field}'`), `Canonical input field ${field} must be represented in the production form.`);
 }
-assert(page.includes("uploadTrainingOperationsFile(file, task.id, 'evidence')"), 'Members must be able to upload private task evidence.');
-assert(page.includes('getTrainingOperationsFileUrl(record.path, record.name)'), 'Reviewers must open private evidence through a short-lived signed URL.');
+assert(page.includes("uploadTrainingOperationsFile(file, task.id, 'evidence', role)"), 'Members must upload private evidence under the selected server-validated role.');
+assert(page.includes('getTrainingOperationsFileUrl(record.path, record.name, role)'), 'Reviewers must open private evidence under the selected server-validated role.');
 assert(page.includes('deadlineOverrideReason') && page.includes('Lý do deadline sau khai giảng'), 'Task assignment must capture a reason for post-class-start deadline exceptions.');
 assert(page.includes('Vướng mắc / blocker') && page.includes("runCommand('UPDATE_TASK_PROGRESS'"), 'Members must persist checklist blockers as part of D12 progress tracking.');
 assert(domain.includes("ASSIGN_GROUP_MANAGER: ['operations', 'admin']"), 'Group manager assignment must be authorized at the domain boundary.');
@@ -51,7 +53,7 @@ assert(api.includes('/rpc/persist_vwork_training_operations_state'), 'All mutati
 assert(api.includes("VWORK_TRAINING_OPERATIONS_ENABLED !== 'true'") && fileApi.includes("VWORK_TRAINING_OPERATIONS_ENABLED !== 'true'") && userApi.includes("VWORK_TRAINING_OPERATIONS_ENABLED !== 'true'"), 'Every server endpoint must remain disabled in production until the module server flag is explicitly enabled.');
 assert(userApi.includes('/auth/v1/admin/users') && userApi.includes('/vcontent_profiles') && userApi.includes('/vplanning_users?on_conflict=email'), 'Account provisioning must atomically reconcile Auth, PeopleOne profile and the VWork directory.');
 assert(userApi.includes('TRAINING_OPERATIONS_ACCOUNT_PERMISSION_DENIED') && userApi.includes('rollbackAttempted'), 'Account provisioning must enforce server authorization and attempt compensation after partial failure.');
-assert(api.includes('loadTeamDirectory(auth)') && api.includes("role === 'manager' || role === 'member'"), 'Assignment options must use the existing VWork user directory with stable identities.');
+assert(api.includes('loadTeamDirectory(auth)') && api.includes("role === 'manager' || role === 'member'") && api.includes("roles.includes('manager') ? 'manager' : 'member'"), 'Assignment options must preserve multi-role manager/member identities from the VWork directory.');
 assert(api.includes('/vwork_training_operations_tasks?') && api.includes('/vwork_training_operations_audit_events?'), 'Reads must reconstruct state from independent task and audit rows.');
 assert(!api.includes("method: 'PATCH'") && !api.includes("/vwork_training_operations_state?on_conflict"), 'The API must not bypass the atomic RPC with direct aggregate writes.');
 assert(!api.includes('/vplanning_state') && !api.includes('/vplanning_records'), 'The module must not write to existing VPlanning state storage.');
@@ -65,6 +67,13 @@ assert(migration.includes('enable row level security') && migration.includes('re
 assert(!/\b(?:insert into|update|delete from|alter table|create trigger on)\s+public\.(?!vwork_training_operations_)/i.test(migration), 'Migration writes must remain inside the VWork Training Operations namespace.');
 assert(service.includes("'/api/vwork-training-operations-file'") && !service.includes("'/api/vwork-file'"), 'Training Operations uploads must use the isolated private upload boundary.');
 assert(service.includes('requestId: crypto.randomUUID()'), 'Every browser mutation must carry a unique idempotency key.');
+assert(service.includes("headers.set('X-VWork-Role', activeRole)"), 'Every VWork API call must send the selected role for server validation.');
+assert(api.includes('TRAINING_OPERATIONS_ROLE_NOT_GRANTED') && api.includes('availableRoles: auth.availableRoles'), 'The main API must reject ungranted roles and return the granted role list.');
+assert(fileApi.includes("resolveActiveTrainingRole(req.headers['x-vwork-role']"), 'Private files must enforce the same selected role as the main API.');
+assert(userApi.includes("activeRole !== 'operations'"), 'Account provisioning must remain limited to the active operations role.');
+assert(roles.includes("return [...TRAINING_ROLE_VALUES]") && roles.includes("['member', 'Thành viên ekip']"), 'Training administrators must receive the six explicit operational roles.');
+assert(page.includes('availableRoles.length > 1') && page.includes('Chọn vai trò làm việc'), 'Production UI must expose a role switcher only to multi-role accounts.');
+assert(multiRoleSql.includes("'training_ops_admin'") && multiRoleSql.includes("'vplanning_manager'") && multiRoleSql.includes("'vplanning_member'") && !/(?:encrypted_password|password\s*[:=])/i.test(multiRoleSql), 'The manual SQL must grant multi-role and owner-directory access without storing a password.');
 assert(fileApi.includes("public: false") && fileApi.includes("vwork-training-operations-private"), 'Roster and evidence files must not be stored in a public bucket.');
 assert(fileApi.includes("evidence: { upload: ['member'], download: ['member', 'manager'] }"), 'Private evidence access must be limited to the assigned workflow roles and operations administrators.');
 assert(fileApi.includes("assertEvidenceTaskAccess(admin, profile, role") && fileApi.includes(".eq('task_id', taskId)"), 'Evidence upload and download must verify the current task assignment server-side.');
@@ -76,4 +85,3 @@ assert(css.includes('.vwork-training-operations.app-shell'), 'Training Operation
 assert(!/^\s*(?:body|html|:root|\.sidebar|\.topbar|button|input|select|textarea)\s*\{/m.test(css), 'Training Operations CSS must not leak generic selectors into VLearning or VTraining.');
 
 console.log('V-Work Training Operations architecture checks passed.');
-

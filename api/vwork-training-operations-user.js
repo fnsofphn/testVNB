@@ -1,5 +1,6 @@
 import { createLimitedBufferReader, parseByteLimit } from './_body-limit.js';
 import { enforceRateLimit, RATE_LIMITS } from './_rate-limit.js';
+import { resolveActiveTrainingRole, resolveTrainingRoles } from '../src/modules/vplanning/trainingOperations/roles.js';
 
 const MAX_BODY_BYTES = parseByteLimit(process.env.VWORK_TRAINING_OPERATIONS_USER_BODY_LIMIT, 64 * 1024);
 const readLimitedBuffer = createLimitedBufferReader({ maxBytes: MAX_BODY_BYTES });
@@ -144,7 +145,9 @@ export default async function handler(req, res) {
       { headers: serviceHeaders },
     ) : [];
     const requesterVplanningUser = Array.isArray(requesterUsers) ? requesterUsers[0] || null : null;
-    if (!requesterProfile || !canProvisionAccounts(requesterProfile, requesterVplanningUser)) {
+    const availableRoles = resolveTrainingRoles(requesterProfile, requesterVplanningUser);
+    const activeRole = resolveActiveTrainingRole(req.headers['x-vwork-role'], availableRoles);
+    if (!requesterProfile || activeRole !== 'operations' || !canProvisionAccounts(requesterProfile, requesterVplanningUser)) {
       res.status(403).json({ ok: false, code: 'TRAINING_OPERATIONS_ACCOUNT_PERMISSION_DENIED', error: 'Chỉ Quản lý vận hành hoặc quản trị viên VWork được tạo tài khoản ekip.' });
       return;
     }

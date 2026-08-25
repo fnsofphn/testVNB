@@ -1,6 +1,7 @@
 import { createLimitedBufferReader, parseByteLimit } from './_body-limit.js';
 import { enforceRateLimit, RATE_LIMITS } from './_rate-limit.js';
 import { TRAINING_OPERATIONS_STATE_ID } from '../src/modules/vplanning/trainingOperations/domain.js';
+import { resolveActiveTrainingRole, resolveTrainingRoles } from '../src/modules/vplanning/trainingOperations/roles.js';
 
 const MAX_BODY_BYTES = parseByteLimit(process.env.VWORK_TRAINING_OPERATIONS_FILE_BODY_LIMIT, 64 * 1024);
 const MAX_UPLOAD_BYTES = parseByteLimit(process.env.VWORK_TRAINING_OPERATIONS_FILE_LIMIT, 25 * 1024 * 1024);
@@ -16,23 +17,6 @@ const DOCUMENT_ACCESS = Object.freeze({
   material: { upload: ['vtraining'], download: ['vtraining'] },
   evidence: { upload: ['member'], download: ['member', 'manager'] },
 });
-
-function normalizeRole(value) {
-  return String(value || '').trim().toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
-}
-
-function trainingRole(profile) {
-  const tokens = [profile?.role, profile?.title, ...(Array.isArray(profile?.vplanning_roles) ? profile.vplanning_roles : [])].map(normalizeRole).filter(Boolean);
-  const has = (...values) => values.some((value) => tokens.includes(value) || tokens.some((token) => token.includes(value)));
-  if (has('admin', 'training_ops_admin', 'vplanning_admin')) return 'admin';
-  if (has('client', 'sale', 'account_manager', 'dau_moi')) return 'intake';
-  if (has('specialist', 'content_manager', 'chuyen_vien_noi_dung', 'noi_dung')) return 'content';
-  if (has('vtraining', 'training_instructor', 'van_hanh_vtraining')) return 'vtraining';
-  if (has('training_manager', 'training_admin', 'production_manager', 'vplanning_director')) return 'operations';
-  if (has('vplanning_manager', 'manager', 'teamlead', 'quan_ly_ekip')) return 'manager';
-  if (has('vplanning_member', 'vplanning_collaborator', 'ctv', 'member', 'cong_tac_vien')) return 'member';
-  return null;
-}
 
 function canAccessDocument(role, documentType, action) {
   return ['operations', 'admin'].includes(role) || DOCUMENT_ACCESS[documentType]?.[action]?.includes(role);
@@ -116,7 +100,8 @@ export default async function handler(req, res) {
   if (!config.supabaseUrl || !config.serviceRoleKey || !config.anonKey) { res.status(500).json({ ok: false, error: 'Server upload is not configured.' }); return; }
   try {
     const profile = await authorize(req, config);
-    const role = trainingRole(profile);
+    const availableRoles = resolveTrainingRoles(profile, null);
+    const role = resolveActiveTrainingRole(req.headers['x-vwork-role'], availableRoles);
     if (!role) { res.status(403).json({ ok: false, error: 'Vai trò hiện tại không được phép truy cập kho file vận hành đào tạo.' }); return; }
     const body = await readJson(req);
     const { createClient } = await import('@supabase/supabase-js');
@@ -157,4 +142,3 @@ export default async function handler(req, res) {
     res.status(Number(error.status || 500)).json({ ok: false, error: String(error.message || error) });
   }
 }
-

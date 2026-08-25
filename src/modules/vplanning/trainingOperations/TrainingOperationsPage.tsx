@@ -15,11 +15,7 @@ import {
   uploadTrainingOperationsFile,
   validateRosterWorkbook,
 } from './service';
-
-const ROLES = [
-  ['operations', 'Quản lý vận hành'], ['intake', 'Đầu mối / Sale'], ['content', 'Chuyên viên nội dung'],
-  ['vtraining', 'Chuyên viên vận hành VTraining'], ['manager', 'Quản lý ekip'], ['member', 'Thành viên ekip'],
-];
+import { TRAINING_ROLE_OPTIONS } from './roles.js';
 
 const COURSE_SYSTEMS = [
   { id: 'VTraining', mature: true },
@@ -99,9 +95,11 @@ const INITIAL_WORKSPACE = createInitialTrainingOperationsState({ now: '2026-08-2
 const initialTasks = INITIAL_WORKSPACE.tasks;
 
 const STATUS_LABEL = { WAITING_INPUT: 'Chờ input', READY: 'Sẵn sàng', IN_PROGRESS: 'Đang thực hiện', IN_REVIEW: 'Chờ review', REWORK: 'Cần làm lại', DONE: 'Hoàn thành', CANCELLED: 'Đã hủy theo scope' };
+const directoryHasRole = (item, expectedRole) => item?.role === expectedRole || item?.roles?.includes(expectedRole);
 
 export default function TrainingOperationsPage({ initialRole = 'operations', allowRolePreview = import.meta.env.DEV, onSignOut }) {
   const [role, setRole] = useState(initialRole);
+  const [availableRoles, setAvailableRoles] = useState(() => allowRolePreview ? TRAINING_ROLE_OPTIONS.map(([value]) => value) : [initialRole]);
   const [tab, setTab] = useState('overview');
   const [workspaceState, setWorkspaceState] = useState(INITIAL_WORKSPACE);
   const [stateVersion, setStateVersion] = useState(0);
@@ -141,7 +139,11 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
     const nextVersion = Number(response?.version || 0);
     versionRef.current = nextVersion;
     setStateVersion(nextVersion);
-    if (response?.role && !allowRolePreview) setRole(response.role);
+    const grantedRoles = Array.isArray(response?.availableRoles) && response.availableRoles.length
+      ? response.availableRoles
+      : allowRolePreview ? TRAINING_ROLE_OPTIONS.map(([value]) => value) : [response?.role || initialRole];
+    setAvailableRoles(grantedRoles);
+    if (response?.role) setRole(response.role);
     if (response?.actor) setActor(response.actor);
     if (Array.isArray(response?.directory)) setDirectory(response.directory);
     const nextInputs = Object.fromEntries(Object.keys(INPUT_META).map((key) => [key, state.inputs?.some((item) => item.key === key && item.status === 'ACTIVE') || false]));
@@ -165,11 +167,11 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
     }))));
   }
 
-  async function loadWorkspace({ quiet = false } = {}) {
+  async function loadWorkspace({ quiet = false, requestedRole = role } = {}) {
     if (!quiet) setSyncState('loading');
     setSyncError('');
     try {
-      const response = await fetchTrainingOperationsState();
+      const response = await fetchTrainingOperationsState(requestedRole);
       hydrate(response);
       setSyncState(response.storage === 'seed' ? 'seed' : 'synced');
       return response;
@@ -184,7 +186,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
     setSyncState('saving');
     setSyncError('');
     try {
-      const response = await createTrainingOperationsAccount(draft);
+      const response = await createTrainingOperationsAccount(draft, role);
       await loadWorkspace({ quiet: true });
       setSyncState('synced');
       notify(`Đã tạo tài khoản đăng nhập cho ${response.user.name}. Người dùng có thể đăng nhập và nhận việc ngay.`);
@@ -196,7 +198,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
     }
   }
 
-  useEffect(() => { void loadWorkspace(); }, []);
+  useEffect(() => { void loadWorkspace({ requestedRole: initialRole }); }, []);
 
   async function runCommand(type, payload, successMessage) {
     if (savingRef.current) return null;
@@ -204,7 +206,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
     setSyncState('saving');
     setSyncError('');
     try {
-      const response = await executeTrainingOperationsCommand({ type, payload }, versionRef.current);
+      const response = await executeTrainingOperationsCommand({ type, payload }, versionRef.current, role);
       hydrate(response);
       setSyncState('synced');
       if (successMessage) notify(successMessage);
@@ -240,7 +242,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
       }
       setSyncState('saving');
       try {
-        files = [await uploadTrainingOperationsFile(draft.file, inputRecord?.id || `${activeProject.id}:${INPUT_META[key][0]}`, key)];
+        files = [await uploadTrainingOperationsFile(draft.file, inputRecord?.id || `${activeProject.id}:${INPUT_META[key][0]}`, key, role)];
       } catch (error) {
         setSyncState('error');
         setSyncError(error.message || 'Không thể tải file.');
@@ -250,9 +252,11 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
     const type = inputRecord?.activeVersion > 0 ? 'SUBMIT_INPUT_VERSION' : 'SUBMIT_INPUT';
     return runCommand(type, { projectId: activeProject.id, inputKey: key, data, files, validation, reason: draft.reason || (type === 'SUBMIT_INPUT_VERSION' ? 'Cập nhật dữ liệu theo yêu cầu mới.' : 'Nộp input lần đầu'), sourceStepCode: type === 'SUBMIT_INPUT_VERSION' ? 'UC15-B03' : undefined }, `${INPUT_META[key][1]} đã được lưu và kiểm tra readiness trên server.`);
   }
-  function switchRole(nextRole) {
+  async function switchRole(nextRole) {
+    if (!availableRoles.includes(nextRole) || nextRole === role) return;
     setRole(nextRole);
     setTab(nextRole === 'member' || nextRole === 'manager' ? 'tasks' : nextRole === 'intake' || nextRole === 'content' ? 'inputs' : nextRole === 'vtraining' ? 'workflow' : nextRole === 'operations' ? 'structure' : 'overview');
+    await loadWorkspace({ requestedRole: nextRole });
   }
   async function updateTask(id, patch, message) {
     const task = tasks.find((item) => item.id === id);
@@ -300,7 +304,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
     if (approved) setChangeOpen(false);
   }
   function assignGroupManager(group, managerId, classCode = workflowClass) {
-    const manager = directory.find((item) => item.id === managerId && item.role === 'manager');
+    const manager = directory.find((item) => item.id === managerId && directoryHasRole(item, 'manager'));
     if (!manager) return;
     setGroupManagers((current) => ({ ...current, [`${classCode}:${group}`]: manager.name }));
     void runCommand('ASSIGN_GROUP_MANAGER', { classCode, group, managerId: manager.id, managerName: manager.name }, 'Đã cập nhật Quản lý ekip cho nhóm việc của đúng lớp.');
@@ -331,7 +335,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
     </aside>
 
     <div className="main-shell">
-      <header className="topbar"><div><small>{topbarPath}</small></div><div className="role-switch"><span>Vai trò hiện tại</span>{allowRolePreview ? <select aria-label="Xem thử theo vai trò" value={role} onChange={(event) => switchRole(event.target.value)}>{ROLES.map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select> : <strong>{ROLES.find(([value]) => value === role)?.[1] || 'Thành viên ekip'}</strong>}<div className="avatar">NT</div></div></header>
+      <header className="topbar"><div><small>{topbarPath}</small></div><div className="role-switch"><span>{availableRoles.length > 1 ? 'Đang làm việc với vai trò' : 'Vai trò hiện tại'}</span>{availableRoles.length > 1 ? <select aria-label="Chọn vai trò làm việc" value={role} onChange={(event) => void switchRole(event.target.value)}>{TRAINING_ROLE_OPTIONS.filter(([value]) => availableRoles.includes(value)).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select> : <strong>{TRAINING_ROLE_OPTIONS.find(([value]) => value === role)?.[1] || 'Thành viên ekip'}</strong>}<div className="avatar">NT</div></div></header>
       <main className={`workspace workspace-${tab}`}>
         {syncError && <div className="sync-error" role="alert"><span>{syncError}</span><button type="button" onClick={() => void loadWorkspace()}>Tải lại</button></div>}
         {role !== 'intake' && tab !== 'accounts' && !(role === 'content' && tab === 'inputs') && !(tab === 'change' && changeOpen) && <><section className="project-head"><div><div className="eyebrow"><span className="status-dot"></span>ĐANG CHUẨN BỊ · SCOPE V{activeScope?.version || 1}</div><h1>{activeProject?.name}</h1><p>{activeProject?.customerName} · 01 khóa học · {String(classes.length).padStart(2, '0')} lớp · {(activeCourse?.systems || []).join(' + ')} · {formatDate(activeProject?.startDate)} — {formatDate(activeProject?.deadline)}</p></div><div className="head-actions">{role === 'operations' && <button onClick={() => { setShowCreate(true); setCreateStep(1); }}>+ Tạo dự án</button>}{['operations', 'intake'].includes(role) && tab !== 'change' && <button className="primary" onClick={() => { setTab('change'); setChangeOpen(true); }}>+ Yêu cầu thay đổi</button>}</div></section>{!['manager', 'member'].includes(role) && <div className="journey structure-journey"><button className="done" onClick={() => setTab('structure')}><b>1</b><span>Dự án<small>{activeProject?.code}</small></span></button><i></i><button className="done" onClick={() => setTab('structure')}><b>2</b><span>Khóa học<small>{(activeCourse?.systems || []).join(' + ')}</small></span></button><i></i><button className="done" onClick={() => setTab('structure')}><b>3</b><span>{String(classes.length).padStart(2, '0')} lớp<small>Đã tạo & clone</small></span></button><i></i><button className={readyCount === INPUT_TOTAL ? 'done' : 'current'} onClick={() => setTab('inputs')}><b>4</b><span>Nhận input<small>{readyCount}/{INPUT_TOTAL} sẵn sàng</small></span></button><i></i><button onClick={() => setTab('tasks')}><b>5</b><span>Thực thi<small>{tasks.length} việc theo lớp</small></span></button></div>}</>}
@@ -701,7 +705,7 @@ function WorkflowGroups({ role, tasks, classes = CLASS_META, directory = [], upd
   const activeClass = classes.find((item) => item.code === classCode) || classes[0] || CLASS_META[0];
   function updateDue(id, dueOffset) { void updateTask(id, { dueOffset }); }
   function toggleEnabled(id) { const task = tasks.find((item) => item.id === id); void updateTask(id, { status: task?.status === 'CANCELLED' ? 'WAITING_INPUT' : 'CANCELLED' }); }
-  return <section className="card full"><div className="page-title"><div><small>VTRAINING WORKFLOW · CÔNG VIỆC THEO LỚP</small><h2>Nhóm công việc → task → checklist</h2><p>Chọn đúng lớp trước khi giao nhóm, đổi deadline hoặc tùy chỉnh task.</p></div><label className="workflow-class-picker">Lớp đang cấu hình<select value={classCode} onChange={(event) => setClassCode(event.target.value)}>{classes.map((item) => <option value={item.code} key={item.code}>{item.code} · {item.name}</option>)}</select></label></div><div className="deadline-anchor"><div><small>MỐC LỊCH LỚP</small><b>Khai giảng {activeClass.name} · {formatDate(activeClass.startDate)}</b></div><span>Khởi tạo: trước lớp 2 ngày</span><span>Học viên: trước lớp 1 ngày</span></div><div className="workflow-groups">{groups.map((group) => { const groupTasks = tasks.filter((task) => task.group === group && task.classCode === classCode); const currentManagerId = directory.find((item) => item.role === 'manager' && item.name === groupManagers[`${classCode}:${group}`])?.id || ''; return <article className="workflow-group" key={group}><div className="workflow-group-head"><div><span>{GROUP_META[group][0]} · {classCode}</span><h3>{GROUP_META[group][1]}</h3><p>{groupTasks.length} công việc · {groupTasks.reduce((sum, task) => sum + task.checklistItems.length, 0)} checklist</p></div><label>Quản lý ekip<select value={currentManagerId} disabled={role !== 'operations'} onChange={(event) => assignGroupManager(group, event.target.value, classCode)}><option value="">Chưa giao</option>{directory.filter((item) => item.role === 'manager').map((item) => <option value={item.id} key={item.id}>{item.name}</option>)}</select></label></div><div className="workflow-task-list">{groupTasks.map((task) => <div className={task.status === 'CANCELLED' ? 'workflow-task disabled' : 'workflow-task'} key={task.id}><label className="task-enable"><input type="checkbox" checked={task.status !== 'CANCELLED'} disabled={!['operations', 'vtraining'].includes(role)} onChange={() => toggleEnabled(task.id)}/></label><div><b>{task.title}</b><small>{task.id} · {task.checklistItems.length} tiêu chí bắt buộc</small></div><label>Deadline<select value={task.dueOffset} disabled={!['operations', 'vtraining'].includes(role)} onChange={(event) => updateDue(task.id, Number(event.target.value))}><option value="3">Trước lớp 3 ngày</option><option value="2">Trước lớp 2 ngày</option><option value="1">Trước lớp 1 ngày</option><option value="0">Ngày chạy lớp</option></select></label></div>)}</div></article>; })}</div><div className="deferred-note"><b>VLearning</b><span>Bài tập VLearning đã được quản lý bằng input D04 và task T-108; cấu hình chuyên sâu tiếp tục thực hiện tại VLearning theo mã nguồn tham chiếu.</span></div></section>;
+  return <section className="card full"><div className="page-title"><div><small>VTRAINING WORKFLOW · CÔNG VIỆC THEO LỚP</small><h2>Nhóm công việc → task → checklist</h2><p>Chọn đúng lớp trước khi giao nhóm, đổi deadline hoặc tùy chỉnh task.</p></div><label className="workflow-class-picker">Lớp đang cấu hình<select value={classCode} onChange={(event) => setClassCode(event.target.value)}>{classes.map((item) => <option value={item.code} key={item.code}>{item.code} · {item.name}</option>)}</select></label></div><div className="deadline-anchor"><div><small>MỐC LỊCH LỚP</small><b>Khai giảng {activeClass.name} · {formatDate(activeClass.startDate)}</b></div><span>Khởi tạo: trước lớp 2 ngày</span><span>Học viên: trước lớp 1 ngày</span></div><div className="workflow-groups">{groups.map((group) => { const groupTasks = tasks.filter((task) => task.group === group && task.classCode === classCode); const currentManagerId = directory.find((item) => directoryHasRole(item, 'manager') && item.name === groupManagers[`${classCode}:${group}`])?.id || ''; return <article className="workflow-group" key={group}><div className="workflow-group-head"><div><span>{GROUP_META[group][0]} · {classCode}</span><h3>{GROUP_META[group][1]}</h3><p>{groupTasks.length} công việc · {groupTasks.reduce((sum, task) => sum + task.checklistItems.length, 0)} checklist</p></div><label>Quản lý ekip<select value={currentManagerId} disabled={role !== 'operations'} onChange={(event) => assignGroupManager(group, event.target.value, classCode)}><option value="">Chưa giao</option>{directory.filter((item) => directoryHasRole(item, 'manager')).map((item) => <option value={item.id} key={item.id}>{item.name}</option>)}</select></label></div><div className="workflow-task-list">{groupTasks.map((task) => <div className={task.status === 'CANCELLED' ? 'workflow-task disabled' : 'workflow-task'} key={task.id}><label className="task-enable"><input type="checkbox" checked={task.status !== 'CANCELLED'} disabled={!['operations', 'vtraining'].includes(role)} onChange={() => toggleEnabled(task.id)}/></label><div><b>{task.title}</b><small>{task.id} · {task.checklistItems.length} tiêu chí bắt buộc</small></div><label>Deadline<select value={task.dueOffset} disabled={!['operations', 'vtraining'].includes(role)} onChange={(event) => updateDue(task.id, Number(event.target.value))}><option value="3">Trước lớp 3 ngày</option><option value="2">Trước lớp 2 ngày</option><option value="1">Trước lớp 1 ngày</option><option value="0">Ngày chạy lớp</option></select></label></div>)}</div></article>; })}</div><div className="deferred-note"><b>VLearning</b><span>Bài tập VLearning đã được quản lý bằng input D04 và task T-108; cấu hình chuyên sâu tiếp tục thực hiện tại VLearning theo mã nguồn tham chiếu.</span></div></section>;
 }
 
 function LayeredTasks({ role, tasks, classes = CLASS_META, directory = [], actor, project, course, selectedTask, setSelectedTaskId, updateTask, assignTasks, toggleChecklist }) {
@@ -710,8 +714,8 @@ function LayeredTasks({ role, tasks, classes = CLASS_META, directory = [], actor
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkAssignee, setBulkAssignee] = useState('');
   const baseTasks = tasks;
-  const members = directory.filter((item) => item.role === 'member');
-  const reviewerId = actor?.role === 'manager' ? actor.id : directory.find((item) => item.role === 'manager')?.id;
+  const members = directory.filter((item) => directoryHasRole(item, 'member'));
+  const reviewerId = actor?.role === 'manager' ? actor.id : directory.find((item) => directoryHasRole(item, 'manager'))?.id;
   const activeClass = classes.find((item) => item.code === classCode) || classes[0] || CLASS_META[0];
   const classTasks = baseTasks.filter((task) => task.classCode === classCode);
   const activeTask = classTasks.find((task) => task.id === selectedTask?.id) || classTasks[0];
@@ -758,8 +762,8 @@ function Tasks({ role, tasks, classes = CLASS_META, directory = [], actor, proje
   const [bulkAssignee, setBulkAssignee] = useState('');
   const [activeClassCode, setActiveClassCode] = useState(selectedTask?.classCode || classes[0]?.code || CLASS_META[0].code);
   const baseVisible = tasks;
-  const members = directory.filter((item) => item.role === 'member');
-  const reviewerId = actor?.role === 'manager' ? actor.id : directory.find((item) => item.role === 'manager')?.id;
+  const members = directory.filter((item) => directoryHasRole(item, 'member'));
+  const reviewerId = actor?.role === 'manager' ? actor.id : directory.find((item) => directoryHasRole(item, 'manager'))?.id;
   const classVisible = baseVisible.filter((task) => task.classCode === activeClassCode);
   const visible = view === 'due' ? [...baseVisible].filter((task) => !['DONE', 'CANCELLED'].includes(task.status)).sort((a, b) => dueDate(a) - dueDate(b)).slice(0, 7) : classVisible;
   const grouped = view === 'hierarchy'
@@ -808,7 +812,7 @@ function TaskDrawer({ role, task, directory = [], actor, updateTask, toggleCheck
     setUploadingEvidence(true);
     setEvidenceError('');
     try {
-      const uploaded = await uploadTrainingOperationsFile(file, task.id, 'evidence');
+      const uploaded = await uploadTrainingOperationsFile(file, task.id, 'evidence', role);
       setEvidenceRecord(uploaded);
       setEvidence(uploaded.name);
     } catch (error) {
@@ -822,7 +826,7 @@ function TaskDrawer({ role, task, directory = [], actor, updateTask, toggleCheck
     <div className="drawer-head"><div><span>{task.classCode} · {GROUP_META[task.group]?.[0]} · {task.id}</span><h2>{task.title}</h2><small>{task.className} · Cấp lớp · {GROUP_META[task.group]?.[1]}</small></div><span className={`badge ${task.status}`}>{STATUS_LABEL[task.status]}</span></div>
     <div className="meta-grid"><div><small>Quản lý ekip</small><b>{task.manager}</b></div><div><small>CTV thực hiện</small><b>{task.assignee}</b></div><div><small>Deadline</small><b>{dueLabel(task.startDate, task.dueOffset, task.dueDirection, task.anchorType)}</b></div><div><small>Progress tự động</small><b>{task.progress}%</b></div></div>
     <section><h3>Required / Actual Input</h3>{task.requiredInputCodes?.map((code) => { const input = Object.values(INPUT_META).find(([itemCode]) => itemCode === code); return <div className="input-line" key={code}><span>{code} · {input?.[1] || 'Input bắt buộc'}</span><b>{task.requiredInputVersions?.[code] ? `Đã khóa v${task.requiredInputVersions[code]}` : 'Còn thiếu'}</b></div>; })}</section>
-    {role === 'manager' && <section><h3>Giao CTV thực hiện</h3><div className="form-grid"><label>Người thực hiện<select value={assigneeId} onChange={(event) => setAssigneeId(event.target.value)}><option value="">Chưa giao</option>{directory.filter((item) => item.role === 'member').map((item) => <option value={item.id} key={item.id}>{item.name}</option>)}</select></label><label>Người xác nhận<input value={task.reviewer || actor?.name || task.manager} readOnly/></label><label>Priority<select value={priority} onChange={(event) => setPriority(event.target.value)}><option>Low</option><option>Normal</option><option>High</option><option>Critical</option></select></label><label>Deadline<input type="date" value={plannedDeadline} onChange={(event) => setPlannedDeadline(event.target.value)}/></label>{needsDeadlineReason && <label className="wide">Lý do deadline sau khai giảng<textarea value={deadlineOverrideReason} onChange={(event) => setDeadlineOverrideReason(event.target.value)} placeholder="Nêu rõ ngoại lệ vận hành..."/></label>}</div><button disabled={!assigneeId || (needsDeadlineReason && !deadlineOverrideReason.trim())} onClick={() => { const assignee = directory.find((item) => item.id === assigneeId); const reviewer = actor?.role === 'manager' ? actor : directory.find((item) => item.id === task.reviewerId); if (assignee && reviewer) void updateTask(task.id, { assigneeId: assignee.id, assignee: assignee.name, priority, reviewerId: reviewer.id, reviewer: reviewer.name, plannedDeadline, deadlineOverrideReason: deadlineOverrideReason.trim() }, `Đã giao ${task.id} cho ${assignee.name}.`); }}>Lưu phân công</button></section>}
+    {role === 'manager' && <section><h3>Giao CTV thực hiện</h3><div className="form-grid"><label>Người thực hiện<select value={assigneeId} onChange={(event) => setAssigneeId(event.target.value)}><option value="">Chưa giao</option>{directory.filter((item) => directoryHasRole(item, 'member')).map((item) => <option value={item.id} key={item.id}>{item.name}</option>)}</select></label><label>Người xác nhận<input value={task.reviewer || actor?.name || task.manager} readOnly/></label><label>Priority<select value={priority} onChange={(event) => setPriority(event.target.value)}><option>Low</option><option>Normal</option><option>High</option><option>Critical</option></select></label><label>Deadline<input type="date" value={plannedDeadline} onChange={(event) => setPlannedDeadline(event.target.value)}/></label>{needsDeadlineReason && <label className="wide">Lý do deadline sau khai giảng<textarea value={deadlineOverrideReason} onChange={(event) => setDeadlineOverrideReason(event.target.value)} placeholder="Nêu rõ ngoại lệ vận hành..."/></label>}</div><button disabled={!assigneeId || (needsDeadlineReason && !deadlineOverrideReason.trim())} onClick={() => { const assignee = directory.find((item) => item.id === assigneeId); const reviewer = actor?.role === 'manager' ? actor : directory.find((item) => item.id === task.reviewerId); if (assignee && reviewer) void updateTask(task.id, { assigneeId: assignee.id, assignee: assignee.name, priority, reviewerId: reviewer.id, reviewer: reviewer.name, plannedDeadline, deadlineOverrideReason: deadlineOverrideReason.trim() }, `Đã giao ${task.id} cho ${assignee.name}.`); }}>Lưu phân công</button></section>}
     {role === 'member' && <section><h3>Checklist hoàn thành</h3>{task.checklist.map((checked, index) => <label className="check-row" key={task.checklistItems[index]}><input type="checkbox" checked={checked} disabled={!['IN_PROGRESS', 'REWORK'].includes(task.status)} onChange={() => toggleChecklist(index)}/><span>{task.checklistItems[index]}</span></label>)}{task.status === 'READY' && <button className="primary" onClick={() => updateTask(task.id, { status: 'IN_PROGRESS' }, `Bắt đầu ${task.id}.`)}>Bắt đầu công việc</button>}{['IN_PROGRESS', 'REWORK'].includes(task.status) && <><label className="field">Vướng mắc / blocker<textarea value={blocker} onChange={(event) => setBlocker(event.target.value)} placeholder="Để trống nếu không có vướng mắc..."/></label><button type="button" onClick={() => updateTask(task.id, { blocker }, `Đã lưu vướng mắc của ${task.id}.`)}>Lưu tiến độ</button><label className="field">Kết quả thực tế<textarea value={actualOutput} onChange={(event) => setActualOutput(event.target.value)} placeholder="Mô tả kết quả thực tế..."/></label><label className="field">Evidence URL / ID<input value={evidenceRecord ? '' : evidence} disabled={Boolean(evidenceRecord)} onChange={(event) => setEvidence(event.target.value)} placeholder="https://... hoặc ID VTraining"/></label><label className="field">Hoặc tải file minh chứng<input type="file" disabled={uploadingEvidence} onChange={(event) => void selectEvidenceFile(event.target.files?.[0])}/></label>{evidenceRecord && <small className="hint">Đã tải riêng tư: {evidenceRecord.name}</small>}{evidenceError && <small className="hint error">{evidenceError}</small>}<button className="primary" disabled={uploadingEvidence || !allDone || !actualOutput.trim() || (!evidence.trim() && !evidenceRecord)} onClick={() => updateTask(task.id, { status: 'IN_REVIEW', actualOutput: actualOutput.trim(), evidence: evidence.trim(), evidenceRecord }, `Đã gửi ${task.id} yêu cầu xác nhận hoàn thành.`)}>Gửi yêu cầu xác nhận</button>{(!allDone || !actualOutput.trim() || (!evidence.trim() && !evidenceRecord)) && <small className="hint">Hoàn tất checklist, mô tả kết quả và thêm URL/ID hoặc file minh chứng để gửi xác nhận.</small>}</>}</section>}
     {!['member', 'manager'].includes(role) && <div className="read-only">Vai trò hiện tại chỉ được xem trạng thái công việc.</div>}
   </aside>;
@@ -835,7 +839,7 @@ function ReviewQueue({ tasks, updateTask }) {
     const record = task.outputs?.at(-1)?.evidence?.[0];
     setEvidenceError('');
     try {
-      const url = record?.path ? await getTrainingOperationsFileUrl(record.path, record.name) : record?.url || task.evidence;
+      const url = record?.path ? await getTrainingOperationsFileUrl(record.path, record.name, role) : record?.url || task.evidence;
       if (!url) throw new Error('Công việc chưa có minh chứng hợp lệ.');
       window.open(url, '_blank', 'noopener,noreferrer');
     } catch (error) {
@@ -910,7 +914,7 @@ function Audit({ entries }) { return <section className="card full"><div classNa
 
 function CreateWizard({ step, setStep, close, confirm, directory = [] }) {
   const stages = ['Dự án', 'Khóa học', 'Lớp', 'Nhóm việc', 'Xác nhận'];
-  const managers = directory.filter((item) => item.role === 'manager');
+  const managers = directory.filter((item) => directoryHasRole(item, 'manager'));
   const [systems, setSystems] = useState(['VTraining', 'VLearning']);
   const [projectDraft, setProjectDraft] = useState({ id: 'EVNSPC-2026-02', name: 'Đào tạo Trải nghiệm khách hàng EVNSPC 2026 · Đợt 2', customerName: 'EVNSPC', startDate: '2026-10-01', deadline: '2026-10-31', teamId: managers[0]?.id || '' });
   const [courseDraft, setCourseDraft] = useState({ id: 'CX-FOUNDATION-02', name: 'Trải nghiệm khách hàng · Đợt 2', contentVersion: '2026-v1' });
@@ -952,4 +956,3 @@ function CreateWizard({ step, setStep, close, confirm, directory = [] }) {
     <div className="modal-actions"><button disabled={step === 1} onClick={() => setStep((value) => value - 1)}>Quay lại</button>{step < stages.length ? <button className="primary" disabled={step === 1 && !projectDraft.teamId} onClick={() => setStep((value) => value + 1)}>Tiếp tục</button> : <button className="primary" onClick={() => confirm(createPayload())}>Xác nhận & sinh việc theo lớp</button>}</div>
   </div></div>;
 }
-
