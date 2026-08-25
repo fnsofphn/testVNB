@@ -7,12 +7,6 @@
     "sin1"
   ],
   "functions": {
-    "api/vevent-join.js": {
-      "maxDuration": 10
-    },
-    "api/notice-dispatch.js": {
-      "maxDuration": 30
-    },
     "api/**/*.js": {
       "maxDuration": 60
     }
@@ -51,24 +45,8 @@
   ],
   "rewrites": [
     {
-      "source": "/api/scorm-content-file/:packageId",
-      "destination": "/api/scorm-content?packageId=:packageId&path=index_lms.html"
-    },
-    {
-      "source": "/api/scorm-content-file/:packageId/:path*",
-      "destination": "/api/scorm-content?packageId=:packageId&path=:path*"
-    },
-    {
       "source": "/api/(.*)",
       "destination": "/api/$1"
-    },
-    {
-      "source": "/v-events/join",
-      "destination": "/api/vevent-join"
-    },
-    {
-      "source": "/v-events/join/:code",
-      "destination": "/api/vevent-join?code=:code"
     },
     {
       "source": "/vuni-api/(.*)",
