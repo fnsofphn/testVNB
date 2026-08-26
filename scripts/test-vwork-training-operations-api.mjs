@@ -74,11 +74,17 @@ assert.equal(getResponse.payload.role, 'operations');
 assert.deepEqual(getResponse.payload.availableRoles, ['operations', 'intake', 'content', 'vtraining', 'manager', 'member']);
 assert.equal(getResponse.payload.storage, 'seed');
 assert.equal(getResponse.payload.state.tasks.length, 33);
-assert.deepEqual(getResponse.payload.directory.map((item) => [item.id, item.role]), [['ops@peopleone.vn', 'manager'], ['manager@peopleone.vn', 'manager'], ['member@peopleone.vn', 'member'], ['scoped@peopleone.vn', 'member']]);
+assert.deepEqual(getResponse.payload.directory.map((item) => [item.id, item.role]), [['ops@peopleone.vn', 'manager'], ['manager@peopleone.vn', 'manager'], ['member@peopleone.vn', 'member'], ['scoped@peopleone.vn', 'member'], ['inactive@peopleone.vn', 'member']]);
 assert.deepEqual(getResponse.payload.directory[0].roles, ['operations', 'intake', 'content', 'vtraining', 'manager', 'member']);
-assert.equal(getResponse.payload.directory.some((item) => item.id === 'inactive@peopleone.vn'), false);
+assert.equal(getResponse.payload.directory.find((item) => item.id === 'inactive@peopleone.vn').assignable, false);
 assert.equal(getResponse.payload.accountDirectory.length, 5);
 assert.equal(getResponse.payload.accountDirectory.find((item) => item.id === 'inactive@peopleone.vn').profileLinked, false);
+
+const managerView = responseRecorder();
+await handler(request('GET', undefined, 'manager'), managerView);
+assert.equal(managerView.statusCode, 200);
+assert.equal(managerView.payload.directory.length, 5);
+assert.equal(managerView.payload.accountDirectory.length, 0);
 
 const memberView = responseRecorder();
 await handler(request('GET', undefined, 'member'), memberView);

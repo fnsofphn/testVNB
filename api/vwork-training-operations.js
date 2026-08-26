@@ -234,6 +234,7 @@ async function loadVWorkAccountDirectory(auth) {
       roles,
       active: Boolean(profile) && profile.active !== false,
       profileLinked: Boolean(profile),
+      assignable: Boolean(profile) && profile.active !== false && roles.length > 0,
       projectIds,
       classIds,
     };
@@ -374,10 +375,10 @@ export default async function handler(req, res) {
     const current = await loadState(auth);
     if (req.method === 'GET') {
       const canManageAccounts = ['operations', 'admin'].includes(auth.role);
-      const accountDirectory = canManageAccounts ? await loadVWorkAccountDirectory(auth) : [];
-      const directory = canManageAccounts
-        ? accountDirectory.filter((item) => item.active && item.roles.length)
-        : auth.role === 'manager' ? await loadTeamDirectory(auth) : [];
+      const canAssignTasks = canManageAccounts || auth.role === 'manager';
+      const fullDirectory = canAssignTasks ? await loadVWorkAccountDirectory(auth) : [];
+      const accountDirectory = canManageAccounts ? fullDirectory : [];
+      const directory = canAssignTasks ? fullDirectory : [];
       res.status(200).json({ ok: true, role: auth.role, availableRoles: auth.availableRoles, actor: auth.actor, directory, accountDirectory, state: stateForRole(current.state, auth), version: current.version, updatedAt: current.updatedAt, storage: current.storage });
       return;
     }
