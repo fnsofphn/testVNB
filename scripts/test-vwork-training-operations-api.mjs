@@ -27,6 +27,7 @@ globalThis.fetch = async (url, options = {}) => {
     { email: 'scoped@peopleone.vn', full_name: 'Ngoài phạm vi', roles: ['vplanning_member'], payload: { projectIds: ['OUTSIDE-PROJECT'] } },
     { email: 'chieuanh18082003@gmail.com', full_name: 'Chiêu Anh', roles: ['vplanning_member'], payload: { authUserId: 'auth-chieu-anh' } },
     { email: 'inactive@peopleone.vn', full_name: 'Đã khóa', roles: ['vplanning_member'] },
+    { email: 'content@peopleone.vn', full_name: 'Chỉ nội dung', roles: ['vplanning_content'] },
   ]);
   if (value.includes('/vwork_training_operations_state?') && (options.method || 'GET') === 'GET') return Response.json([]);
   if (value.includes('/vwork_training_operations_tasks?') && (options.method || 'GET') === 'GET') return Response.json([]);
@@ -80,8 +81,9 @@ assert.deepEqual(getResponse.payload.directory.map((item) => [item.id, item.role
 assert.deepEqual(getResponse.payload.directory[0].roles, ['operations', 'intake', 'content', 'vtraining', 'manager', 'member']);
 assert.equal(getResponse.payload.directory.find((item) => item.id === 'chieuanh18082003@gmail.com').assignable, true);
 assert.equal(getResponse.payload.directory.find((item) => item.id === 'chieuanh18082003@gmail.com').profileLinked, true);
-assert.equal(getResponse.payload.directory.find((item) => item.id === 'inactive@peopleone.vn').assignable, false);
-assert.equal(getResponse.payload.accountDirectory.length, 6);
+assert.equal(getResponse.payload.directory.find((item) => item.id === 'inactive@peopleone.vn').assignable, true);
+assert.equal(getResponse.payload.directory.some((item) => item.id === 'content@peopleone.vn'), false);
+assert.equal(getResponse.payload.accountDirectory.length, 7);
 assert.equal(getResponse.payload.accountDirectory.find((item) => item.id === 'inactive@peopleone.vn').profileLinked, false);
 
 const managerView = responseRecorder();
@@ -167,6 +169,17 @@ const assignedTasks = lastPersistedBody.p_tasks.filter((item) => ['TNKH01-T-101'
 assert.equal(assignedTasks.length, 2);
 assert.ok(assignedTasks.every((item) => item.assigneeId === 'member@peopleone.vn' && item.assignee === 'Nam Nguyễn'));
 assert.ok(assignedTasks.every((item) => item.reviewerId === 'manager@peopleone.vn' && item.reviewer === 'Ngọc Trần'));
+
+persistedRequest = null;
+lastPersistedBody = null;
+const vworkRoleOnlyAssignment = responseRecorder();
+await handler(request('POST', {
+  expectedVersion: 0,
+  requestId: '77777777-7777-4777-8777-777777777777',
+  command: { type: 'ASSIGN_TASKS', payload: { taskIds: ['TNKH01-T-101'], assigneeId: 'inactive@peopleone.vn', reviewerId: 'manager@peopleone.vn', requireSeparation: true } },
+}), vworkRoleOnlyAssignment);
+assert.equal(vworkRoleOnlyAssignment.statusCode, 200);
+assert.equal(lastPersistedBody.p_tasks.find((item) => item.id === 'TNKH01-T-101').assigneeId, 'inactive@peopleone.vn');
 
 persistedRequest = null;
 const scopedAssignment = responseRecorder();

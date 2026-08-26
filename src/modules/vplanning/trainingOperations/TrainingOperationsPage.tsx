@@ -1109,19 +1109,19 @@ function AssigneePickerDialog({ open, directory, loading, taskCount, selectedId 
   const chosenPerson = directory.find((item) => item.id === chosenId);
   const selectPerson = () => {
     const person = chosenPerson;
-    if (!person || person.assignable === false) return;
+    if (!person) return;
     const nextRecent = [person.id, ...recentIds.filter((id) => id !== person.id)].slice(0, 5);
     window.localStorage.setItem('vwork-recent-assignees', JSON.stringify(nextRecent));
     onSelect(person);
   };
-  const PersonRow = ({ person }) => <label className={`assignee-person${person.assignable === false ? ' is-disabled' : ''}`}><input type="radio" name="assignee" checked={chosenId === person.id} disabled={person.assignable === false} onChange={() => setChosenId(person.id)} aria-label={`${person.name} · ${person.email || person.id}`}/><span><b>{person.name}</b><small>{person.email || person.id}</small></span></label>;
+  const PersonRow = ({ person }) => <label className="assignee-person"><input type="radio" name="assignee" checked={chosenId === person.id} onChange={() => setChosenId(person.id)} aria-label={`${person.name} · ${person.email || person.id}`}/><span><b>{person.name}</b><small>{person.email || person.id}</small></span></label>;
   return <div className="assignment-dialog-backdrop" onMouseDown={onClose}><section className="assignment-dialog" role="dialog" aria-modal="true" aria-labelledby="assignment-dialog-title" onMouseDown={(event) => event.stopPropagation()}>
     <div className="modal-head"><div><small>PHÂN CÔNG THEO DIRECTORY</small><h2 id="assignment-dialog-title">Bạn muốn giao việc cho ai?</h2></div><button type="button" aria-label="Đóng popup giao việc" onClick={onClose}>×</button></div>
     <div className="assignment-dialog-body"><label className="assignee-search">Tìm theo tên hoặc email<input ref={inputRef} value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Nhập tên hoặc email…"/></label><p>Mỗi công việc hiện hỗ trợ một người thực hiện; lựa chọn này áp dụng cho {taskCount || 1} công việc đã chọn.</p>
       {!query && recent.length > 0 && <div className="assignee-section"><b>Đã chọn gần đây</b>{recent.map((person) => <PersonRow person={person} key={`recent-${person.id}`}/>)}</div>}
-      <div className="assignee-section"><b>Toàn bộ tài khoản VWork</b>{loading ? <div className="assignee-state">Đang tải danh mục tài khoản…</div> : !filtered.length ? <div className="assignee-state">{directory.length ? 'Không tìm thấy tài khoản phù hợp.' : 'Chưa có tài khoản VWork.'}</div> : filtered.map((person) => <PersonRow person={person} key={person.id}/>)}</div>
+      <div className="assignee-section"><b>Tài khoản có thể nhận việc</b>{loading ? <div className="assignee-state">Đang tải danh mục tài khoản…</div> : !filtered.length ? <div className="assignee-state">{directory.length ? 'Không tìm thấy tài khoản phù hợp.' : 'Chưa có tài khoản Quản lý ekip hoặc Thành viên ekip.'}</div> : filtered.map((person) => <PersonRow person={person} key={person.id}/>)}</div>
     </div>
-    <div className="modal-actions"><button type="button" onClick={onClose}>Hủy</button><button type="button" className="primary" disabled={!chosenPerson || chosenPerson.assignable === false} onClick={selectPerson}>Giao việc</button></div>
+    <div className="modal-actions"><button type="button" onClick={onClose}>Hủy</button><button type="button" className="primary" disabled={!chosenPerson} onClick={selectPerson}>Giao việc</button></div>
   </section></div>;
 }
 

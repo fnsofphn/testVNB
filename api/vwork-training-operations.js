@@ -68,6 +68,10 @@ function normalizeEmail(value) {
   return String(value || '').trim().toLowerCase();
 }
 
+function canReceiveVWorkTasks(roles) {
+  return Array.isArray(roles) && roles.some((role) => ['manager', 'member'].includes(role));
+}
+
 function hasPeopleOneEmail(value) {
   return PEOPLEONE_EMAIL_DOMAINS.has(normalizeEmail(value).split('@')[1] || '');
 }
@@ -236,7 +240,7 @@ async function loadVWorkAccountDirectory(auth) {
       roles,
       active: Boolean(profile) && profile.active !== false,
       profileLinked: Boolean(profile),
-      assignable: Boolean(profile) && profile.active !== false && roles.length > 0,
+      assignable: canReceiveVWorkTasks(roles),
       projectIds,
       classIds,
     };
@@ -245,7 +249,7 @@ async function loadVWorkAccountDirectory(auth) {
 
 async function loadTeamDirectory(auth) {
   const accounts = await loadVWorkAccountDirectory(auth);
-  return accounts.filter((item) => item.active && item.roles.length);
+  return accounts.filter((item) => item.assignable);
 }
 
 function assignmentScopeAllows(person, task) {
@@ -260,13 +264,13 @@ async function normalizeAssignmentCommand(auth, state, command) {
   const payload = structuredClone(command.payload || {});
   const assignee = directory.find((item) => item.id === normalizeEmail(payload.assigneeId));
   const reviewer = directory.find((item) => item.id === normalizeEmail(payload.reviewerId));
-  if (!assignee?.active) {
-    const error = new Error('Người nhận không tồn tại hoặc tài khoản đã ngừng hoạt động.');
+  if (!assignee?.assignable) {
+    const error = new Error('Người nhận phải có vai trò Quản lý ekip hoặc Thành viên ekip trong VWork.');
     error.status = 400;
     error.code = 'TRAINING_OPERATIONS_ASSIGNEE_INVALID';
     throw error;
   }
-  if (!reviewer?.active || !reviewer.roles.some((role) => ['manager', 'operations'].includes(role))) {
+  if (!reviewer || !reviewer.roles.some((role) => ['manager', 'operations'].includes(role))) {
     const error = new Error('Người xác nhận không hợp lệ trong danh mục VWork.');
     error.status = 400;
     error.code = 'TRAINING_OPERATIONS_REVIEWER_INVALID';
@@ -380,7 +384,7 @@ export default async function handler(req, res) {
       const canAssignTasks = canManageAccounts || auth.role === 'manager';
       const fullDirectory = canAssignTasks ? await loadVWorkAccountDirectory(auth) : [];
       const accountDirectory = canManageAccounts ? fullDirectory : [];
-      const directory = canAssignTasks ? fullDirectory : [];
+      const directory = canAssignTasks ? fullDirectory.filter((item) => item.assignable) : [];
       res.status(200).json({ ok: true, role: auth.role, availableRoles: auth.availableRoles, actor: auth.actor, directory, accountDirectory, state: stateForRole(current.state, auth), version: current.version, updatedAt: current.updatedAt, storage: current.storage });
       return;
     }
