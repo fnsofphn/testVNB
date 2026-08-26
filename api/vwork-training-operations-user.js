@@ -207,13 +207,6 @@ export default async function handler(req, res) {
     const knownAuthUserId = String(previousProfile?.auth_user_id || previousVplanningUser?.payload?.authUserId || '');
     let authUser = await getAuthUserById(config.supabaseUrl, serviceHeaders, knownAuthUserId);
     if (authUser && normalizeEmail(authUser.email) !== email) authUser = null;
-    if (!authUser && (password.length < 8 || password.length > 128)) {
-      authUser = await findAuthUserByEmail(config.supabaseUrl, serviceHeaders, email);
-      if (!authUser) {
-        res.status(400).json({ ok: false, code: 'TRAINING_OPERATIONS_PASSWORD_INVALID', error: 'Tài khoản mới cần mật khẩu tạm từ 8 đến 128 ký tự.' });
-        return;
-      }
-    }
     if (!authUser) {
       try {
         const created = await requestJson(`${config.supabaseUrl}/auth/v1/admin/users`, {
