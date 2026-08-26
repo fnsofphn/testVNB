@@ -425,7 +425,25 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
         {role !== 'intake' && tab !== 'accounts' && !(role === 'content' && tab === 'inputs') && !(tab === 'change' && changeOpen) && <><section className="project-head"><div><div className="eyebrow"><span className="status-dot"></span>ĐANG CHUẨN BỊ · SCOPE V{activeScope?.version || 1}</div><h1>{activeProject?.name}</h1><p>{activeProject?.customerName} · 01 khóa học · {String(classes.length).padStart(2, '0')} lớp · {(activeCourse?.systems || []).join(' + ')} · {formatDate(activeProject?.startDate)} — {formatDate(activeProject?.deadline)}</p></div><div className="head-actions">{role === 'operations' && <button onClick={() => { setShowCreate(true); setCreateStep(1); }}>+ Tạo dự án</button>}{['operations', 'intake'].includes(role) && tab !== 'change' && <button className="primary" onClick={() => { setTab('change'); setChangeOpen(true); }}>+ Yêu cầu thay đổi</button>}</div></section>{!['manager', 'member'].includes(role) && <div className="journey structure-journey"><button className="done" onClick={() => setTab('structure')}><b>1</b><span>Dự án<small>{activeProject?.code}</small></span></button><i></i><button className="done" onClick={() => setTab('structure')}><b>2</b><span>Khóa học<small>{(activeCourse?.systems || []).join(' + ')}</small></span></button><i></i><button className="done" onClick={() => setTab('structure')}><b>3</b><span>{String(classes.length).padStart(2, '0')} lớp<small>Đã tạo & clone</small></span></button><i></i><button className={readyCount === INPUT_TOTAL ? 'done' : 'current'} onClick={() => setTab('inputs')}><b>4</b><span>Nhận input<small>{readyCount}/{INPUT_TOTAL} sẵn sàng</small></span></button><i></i><button onClick={() => setTab('tasks')}><b>5</b><span>Thực thi<small>{tasks.length} việc theo lớp</small></span></button></div>}</>}
 
         {toast && <div className="toast" role="status">{toast}</div>}
-        {tab === 'overview' && <Overview role={role} kpis={kpis} readyCount={readyCount} tasks={tasks} classes={classes} course={activeCourse} audit={audit} onInput={() => setTab('inputs')} onTasks={(classItem) => classItem ? navigateWork({ projectId: activeProject?.id, courseId: activeCourse?.id, classId: classItem.id || classItem.code }) : setTab('tasks')}/>}
+        {tab === 'overview' && (
+          <Overview
+            tasks={tasks}
+            classes={classes}
+            project={activeProject}
+            course={activeCourse}
+            projects={workspaceState.projects || []}
+            courses={workspaceState.courses || []}
+            allClasses={workspaceState.classes || classes}
+            onTasks={(classItem) => classItem
+              ? navigateWork({ projectId: activeProject?.id, courseId: activeCourse?.id, classId: classItem.id || classItem.code })
+              : setTab('tasks')}
+            onOpenClass={(classItem) => {
+              const classCourse = (workspaceState.courses || []).find((item) => item.id === classItem.courseId) || activeCourse;
+              const classProject = (workspaceState.projects || []).find((item) => item.id === classItem.projectId) || activeProject;
+              navigateWork({ projectId: classProject?.id, courseId: classCourse?.id, classId: classItem.id || classItem.code });
+            }}
+          />
+        )}
         {tab === 'structure' && <StructureWorkspace role={role} tasks={tasks} classes={classes} project={activeProject} course={activeCourse} updateTask={updateTask} workflowClass={workflowClass} setWorkflowClass={setWorkflowClass}/>}
         {tab === 'inputs' && <Inputs role={role} inputs={inputs} inputRecords={workspaceState.inputs || []} classes={classes} uploadStep={uploadStep} setUploadStep={setUploadStep} submitInput={submitInput}/>}
         {tab === 'tasks' && <LayeredTasks role={role} tasks={tasks} classes={classes} directory={directory} directoryLoading={syncState === 'loading'} actor={actor} project={activeProject} course={activeCourse} routeContext={routeContext} onNavigate={navigateWork} selectedTask={selectedTask} setSelectedTaskId={setSelectedTaskId} updateTask={updateTask} createClassTask={createClassTask} archiveTask={archiveTask} assignTasks={assignTasks} toggleChecklist={toggleChecklist}/>}
@@ -465,7 +483,7 @@ function buildCalendarWeeks(classes) {
   return weeks.length ? weeks : [[['2026-09-01', 'T3', '01']]];
 }
 
-function Overview({ tasks, classes = CLASS_META, course, onTasks }) {
+function Overview({ tasks, classes = CLASS_META, project, course, projects = [], courses = [], allClasses = [], onTasks, onOpenClass }) {
   const weeks = useMemo(() => buildCalendarWeeks(classes), [classes]);
   const firstClassDate = classes[0]?.startDate || weeks[0][0][0];
   const firstDate = new Date(`${firstClassDate}T00:00:00Z`);
@@ -509,6 +527,7 @@ function Overview({ tasks, classes = CLASS_META, course, onTasks }) {
   }
 
   return <section className="calendar-overview">
+    <OverviewHierarchy projects={projects.length ? projects : [project].filter(Boolean)} courses={courses.length ? courses : [course].filter(Boolean)} classes={allClasses.length ? allClasses : classes} tasks={tasks} onOpenClass={onOpenClass}/>
     <div className="calendar-head">
       <div>
         <small>TỔNG QUAN THEO LỊCH · FEEDBACK 05</small>
@@ -565,6 +584,19 @@ function Overview({ tasks, classes = CLASS_META, course, onTasks }) {
     </div>
     {selectedEvent && <div className="calendar-dialog-backdrop" onClick={() => setSelectedEvent(null)}><div className="calendar-dialog" role="dialog" aria-modal="true" aria-label="Chi tiết lớp" onClick={(event) => event.stopPropagation()}><div className="calendar-dialog-head"><div><span>{selectedEvent.item.code}</span><h3>{selectedEvent.item.name}</h3><p>{formatDate(selectedEvent.item.startDate)} — {formatDate(selectedEvent.item.endDate)}</p></div><button aria-label="Đóng chi tiết lớp" onClick={() => setSelectedEvent(null)}>×</button></div><div className="calendar-dialog-grid"><div><small>Ngày đang chọn</small><b>{formatDate(selectedEvent.date)}</b></div><div><small>Khóa học</small><b>Trải nghiệm khách hàng</b></div><div><small>Hình thức</small><b>VTraining + VLearning</b></div><div><small>Công việc</small><b>{tasks.filter((task) => task.classCode === selectedEvent.item.code).length} việc</b></div></div><div className="calendar-dialog-actions"><button onClick={() => setSelectedEvent(null)}>Đóng</button><button className="primary" onClick={() => onTasks(selectedEvent.item)}>Mở công việc của lớp</button></div></div></div>}
     {selectedCalendarTask && <div className="calendar-dialog-backdrop" onClick={() => setSelectedCalendarTask(null)}><div className="calendar-dialog task-preview" role="dialog" aria-modal="true" aria-label="Chi tiết công việc" onClick={(event) => event.stopPropagation()}><div className="calendar-dialog-head"><div><span>{selectedCalendarTask.id} · {GROUP_META[selectedCalendarTask.group]?.[0]}</span><h3>{selectedCalendarTask.title}</h3><p>{activeClass.name}</p></div><button aria-label="Đóng chi tiết công việc" onClick={() => setSelectedCalendarTask(null)}>×</button></div><div className="calendar-dialog-grid"><div><small>Deadline</small><b>{dueLabel(selectedCalendarTask.startDate, selectedCalendarTask.dueOffset, selectedCalendarTask.dueDirection, selectedCalendarTask.anchorType)}</b></div><div><small>Trạng thái</small><b>{STATUS_LABEL[selectedCalendarTask.status]}</b></div><div><small>Quản lý ekip</small><b>{selectedCalendarTask.manager}</b></div><div><small>CTV thực hiện</small><b>{selectedCalendarTask.assignee}</b></div></div><section><h4>Checklist</h4>{selectedCalendarTask.checklistItems.map((item, index) => <label className="check-row" key={item}><input type="checkbox" checked={selectedCalendarTask.checklist[index]} readOnly/><span>{item}</span></label>)}</section><div className="calendar-dialog-actions"><button onClick={() => setSelectedCalendarTask(null)}>Đóng</button><button className="primary" onClick={onTasks}>Mở màn công việc</button></div></div></div>}
+  </section>;
+}
+
+function OverviewHierarchy({ projects = [], courses = [], classes = [], tasks = [], onOpenClass }) {
+  return <section className="card overview-hierarchy" aria-label="Cấu trúc dự án, khóa học và lớp">
+    <div className="overview-hierarchy-head"><div><small>CẤU TRÚC VWORK</small><h2>Dự án, khóa học và lớp</h2><p>Chọn lớp để mở thẳng danh sách công việc của lớp đó.</p></div><b>{projects.length} dự án · {courses.length} khóa học · {classes.length} lớp</b></div>
+    <div className="overview-project-list">{projects.map((projectItem) => {
+      const projectCourses = courses.filter((courseItem) => !courseItem.projectId || courseItem.projectId === projectItem.id);
+      return <article className="overview-project" key={projectItem.id || projectItem.code}><header><div><span>DỰ ÁN</span><b>{projectItem.name}</b><small>{projectItem.code} · {projectItem.customerName}</small></div><em>{projectCourses.length} khóa học</em></header>{projectCourses.map((courseItem) => {
+        const courseClasses = classes.filter((classItem) => (!classItem.courseId || classItem.courseId === courseItem.id) && (!classItem.projectId || classItem.projectId === projectItem.id));
+        return <section className="overview-course" key={courseItem.id || courseItem.code}><div><span>KHÓA HỌC</span><b>{courseItem.name}</b><small>{courseItem.code} · {(courseItem.systems || []).join(' + ')}</small></div><div className="overview-class-list">{courseClasses.map((classItem) => { const classTasks = tasks.filter((task) => task.classId === classItem.id || task.classCode === classItem.code); return <button type="button" onClick={() => onOpenClass?.(classItem)} key={classItem.id || classItem.code}><span>{classItem.code}</span><b>{classItem.name}</b><small>{formatDate(classItem.startDate)} — {formatDate(classItem.endDate)} · {classTasks.length} việc</small></button>; })}</div></section>;
+      })}</article>;
+    })}</div>
   </section>;
 }
 function Kpi({ label, value, tone = '' }) { return <article className={`kpi ${tone}`}><span>{label}</span><strong>{value}</strong><small>Trong dự án hiện tại</small></article>; }
@@ -966,7 +998,7 @@ function LegacyLayeredTasks({ role, tasks, classes = CLASS_META, directory = [],
 }
 
 function LayeredTasks({ role, tasks, classes = CLASS_META, directory = [], directoryLoading = false, actor, project, course, routeContext, onNavigate, selectedTask, setSelectedTaskId, updateTask, createClassTask, archiveTask, assignTasks, toggleChecklist }) {
-  const layerFromRoute = () => routeContext.classId ? 'detail' : routeContext.courseId ? 'classes' : routeContext.projectId ? 'courses' : 'projects';
+  const layerFromRoute = () => routeContext.classId ? 'detail' : 'classes';
   const [layer, setLayer] = useState(layerFromRoute);
   const [classCode, setClassCode] = useState(routeContext.classId || classes[0]?.code || CLASS_META[0].code);
   const [selectedIds, setSelectedIds] = useState([]);
@@ -989,8 +1021,6 @@ function LayeredTasks({ role, tasks, classes = CLASS_META, directory = [], direc
     if (routeContext.taskId && baseTasks.some((task) => task.id === routeContext.taskId)) setSelectedTaskId(routeContext.taskId);
   }, [routeContext.projectId, routeContext.courseId, routeContext.classId, routeContext.taskId]);
 
-  function showProjects() { setLayer('projects'); setSelectedTaskId(''); onNavigate({}); }
-  function showCourses() { setLayer('courses'); setSelectedTaskId(''); onNavigate({ projectId: project?.id }); }
   function showClasses() { setLayer('classes'); setSelectedTaskId(''); onNavigate({ projectId: project?.id, courseId: course?.id }); }
   function openClass(item) {
     setClassCode(item.id || item.code);
@@ -1022,16 +1052,12 @@ function LayeredTasks({ role, tasks, classes = CLASS_META, directory = [], direc
   return <section className="layered-task-browser">
     <div className="card full layered-browser">
       <div className="page-title">
-        <div><small>CÔNG VIỆC · ĐIỀU HƯỚNG NHIỀU TẦNG</small><h2>{layer === 'projects' ? 'Danh sách dự án' : layer === 'courses' ? 'Các khóa học thuộc dự án' : layer === 'classes' ? 'Các lớp thuộc khóa học' : `Công việc · ${activeClass.name}`}</h2><p>Dự án, khóa học, lớp và công việc là các tầng độc lập; refresh và URL trực tiếp giữ nguyên ngữ cảnh.</p></div>
-        <nav className="layer-breadcrumb" aria-label="Dự án, Khóa học, Lớp, Công việc">
-          <button className={layer === 'projects' ? 'active' : ''} onClick={showProjects}>Dự án</button>
-          {layer !== 'projects' && <><span>/</span><button className={layer === 'courses' ? 'active' : ''} onClick={showCourses}>{project?.code}</button></>}
-          {['classes', 'detail'].includes(layer) && <><span>/</span><button className={layer === 'classes' ? 'active' : ''} onClick={showClasses}>{course?.name}</button></>}
+        <div><small>CÔNG VIỆC · THEO LỚP</small><h2>{layer === 'classes' ? 'Chọn lớp để xem công việc' : `Công việc · ${activeClass.name}`}</h2><p>Vào thẳng danh sách lớp; cấu trúc dự án và khóa học được quản lý tại Tổng quan dự án.</p></div>
+        <nav className="layer-breadcrumb" aria-label="Khóa học, Lớp, Công việc">
+          <button className={layer === 'classes' ? 'active' : ''} onClick={showClasses}>{course?.name}</button>
           {layer === 'detail' && <><span>/</span><button onClick={showClasses}>{activeClass.code}</button><span>/</span><b>Công việc</b></>}
         </nav>
       </div>
-      {layer === 'projects' && <div className="layer-list"><div className="layer-table-head project-layer"><span>Dự án</span><span>Khách hàng</span><span>Khóa học</span><span>Trạng thái</span></div><button className="layer-row project-layer" onClick={showCourses}><div><b>{project?.name}</b><small>{project?.code} · {formatDate(project?.startDate)} — {formatDate(project?.deadline)}</small></div><span>{project?.customerName}</span><span>01 khóa học</span><em>Đang chuẩn bị</em></button></div>}
-      {layer === 'courses' && <div className="layer-list"><div className="layer-table-head"><span>Khóa học</span><span>Hệ thống</span><span>Lớp</span><span>Trạng thái</span></div><button className="layer-row" onClick={showClasses}><div><b>{course?.name}</b><small>{course?.code} · {course?.contentVersion}</small></div><span>{(course?.systems || []).join(' · ')}</span><span>{String(classes.length).padStart(2, '0')} lớp</span><em>Đang chuẩn bị</em></button></div>}
       {layer === 'classes' && <div className="layer-list"><div className="layer-table-head class-layer"><span>Lớp</span><span>Thời gian</span><span>Công việc</span><span>Trạng thái</span></div>{classes.map((item) => { const items = baseTasks.filter((task) => task.classId === item.id || task.classCode === item.code); const done = items.filter((task) => task.status === 'DONE').length; return <button className="layer-row class-layer" onClick={() => openClass(item)} key={item.id || item.code}><div><b>{item.name}</b><small>{item.code} · clone từ Lớp mẫu</small></div><span>{formatDate(item.startDate)} — {formatDate(item.endDate)}</span><span>{items.length} công việc</span><em>{done}/{items.length} hoàn thành</em></button>; })}</div>}
     </div>
 

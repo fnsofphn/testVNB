@@ -29,6 +29,8 @@ assert(shell.includes('hidden:!ENABLE_TRAINING_OPERATIONS'), 'The V-Work navigat
 
 assert(page.includes('const [layer, setLayer] = useState(layerFromRoute)') && page.includes("projectId: params.get('projectId')"), 'Project/course/class navigation must restore its layer from the URL context.');
 assert(page.includes('Lịch tháng thu nhỏ') && page.includes('calendar-view-switch'), 'Overview must include the mini calendar and switchable calendar views.');
+assert(page.includes('function OverviewHierarchy') && page.indexOf('<OverviewHierarchy') < page.indexOf('<div className="calendar-head">'), 'Project, course and class hierarchy must appear in Overview before the calendar.');
+assert(page.includes("const layerFromRoute = () => routeContext.classId ? 'detail' : 'classes'") && !page.includes("routeContext.courseId ? 'classes' : routeContext.projectId ? 'courses' : 'projects'"), 'Work navigation must open at the class list instead of project or course layers.');
 assert(page.includes("{ id: 'VSurvey', mature: false }") && page.includes("{ id: 'VEvent', mature: false }"), 'Future VSurvey and VEvent scope must remain visible without deep configuration.');
 assert(page.includes('Clone cấu hình từ') && page.includes('LỚP MẪU'), 'New classes must choose a class-template clone source.');
 assert(page.includes('+ Thêm lớp') && page.includes('Lưu lớp'), 'The add-class interaction must expose an editable form and save action.');
@@ -99,6 +101,7 @@ assert(databaseGuards.includes('GUARD_LATE_FAILURE_CHANGED_TASK') && databaseGua
 assert(css.includes('.vwork-training-operations.app-shell'), 'Training Operations CSS must be rooted at its isolated module class.');
 assert(css.includes('.account-form-actions button:disabled') && css.includes('cursor:not-allowed;opacity:.45'), 'Disabled account submission must be visually distinguishable from an actionable primary button.');
 assert(css.includes('.account-role-matrix') && css.includes('.account-role-badges'), 'The account role matrix and directory role badges must be styled.');
+assert(css.includes('min-height:350px') && css.includes('.calendar-dialog.task-preview .check-row input{width:16px;height:16px'), 'Overview calendar must be reduced by about one third and task-preview checkboxes must keep a stable popup layout.');
 assert(css.includes('.vwork-training-operations{overflow-x:clip}'), 'Horizontal clipping must not create a scroll container that breaks sticky navigation.');
 assert(css.includes('.layered-task-detail>.task-drawer{position:sticky') && css.includes('max-height:calc(100vh - 96px)') && css.includes('overflow-y:auto'), 'Desktop task details must remain visible below the sticky topbar and scroll independently.');
 assert(!/^\s*(?:body|html|:root|\.sidebar|\.topbar|button|input|select|textarea)\s*\{/m.test(css), 'Training Operations CSS must not leak generic selectors into VLearning or VTraining.');
