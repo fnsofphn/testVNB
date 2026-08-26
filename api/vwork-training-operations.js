@@ -214,29 +214,35 @@ async function loadState(auth) {
   };
 }
 
-async function loadTeamDirectory(auth) {
+async function loadVWorkAccountDirectory(auth) {
   const [rows, profiles] = await Promise.all([
     requestJson(`${auth.restUrl}/vplanning_users?select=email,full_name,title,roles,departments,owner_ids,payload&order=full_name.asc`, { headers: auth.serviceHeaders }),
-    requestJson(`${auth.restUrl}/vcontent_profiles?select=id,email,full_name,role,title,vplanning_roles,active&active=is.true`, { headers: auth.serviceHeaders }),
+    requestJson(`${auth.restUrl}/vcontent_profiles?select=id,email,full_name,role,title,vplanning_roles,active`, { headers: auth.serviceHeaders }),
   ]);
-  const activeProfiles = new Map((Array.isArray(profiles) ? profiles : []).map((item) => [normalizeEmail(item.email), item]));
+  const profilesByEmail = new Map((Array.isArray(profiles) ? profiles : []).map((item) => [normalizeEmail(item.email), item]));
   return (Array.isArray(rows) ? rows : []).map((item) => {
     const email = normalizeEmail(item.email);
-    const profile = activeProfiles.get(email);
+    const profile = profilesByEmail.get(email);
     const roles = resolveTrainingRoles(profile || { title: item.title }, item);
     const projectIds = Array.isArray(item.payload?.projectIds) ? item.payload.projectIds.map(String) : [];
     const classIds = Array.isArray(item.payload?.classIds) ? item.payload.classIds.map(String) : [];
-    return profile && roles.length ? {
+    return {
       id: email,
-      name: String(item.full_name || item.email || '').trim(),
+      name: String(item.full_name || profile?.full_name || item.email || '').trim(),
       email,
       role: roles.includes('manager') ? 'manager' : roles.includes('member') ? 'member' : roles[0],
       roles,
-      active: true,
+      active: Boolean(profile) && profile.active !== false,
+      profileLinked: Boolean(profile),
       projectIds,
       classIds,
-    } : null;
+    };
   }).filter((item) => item?.id && item?.name);
+}
+
+async function loadTeamDirectory(auth) {
+  const accounts = await loadVWorkAccountDirectory(auth);
+  return accounts.filter((item) => item.active && item.roles.length);
 }
 
 function assignmentScopeAllows(person, task) {
@@ -367,8 +373,12 @@ export default async function handler(req, res) {
     const auth = await authenticate(req, config);
     const current = await loadState(auth);
     if (req.method === 'GET') {
-      const directory = ['operations', 'admin', 'manager'].includes(auth.role) ? await loadTeamDirectory(auth) : [];
-      res.status(200).json({ ok: true, role: auth.role, availableRoles: auth.availableRoles, actor: auth.actor, directory, state: stateForRole(current.state, auth), version: current.version, updatedAt: current.updatedAt, storage: current.storage });
+      const canManageAccounts = ['operations', 'admin'].includes(auth.role);
+      const accountDirectory = canManageAccounts ? await loadVWorkAccountDirectory(auth) : [];
+      const directory = canManageAccounts
+        ? accountDirectory.filter((item) => item.active && item.roles.length)
+        : auth.role === 'manager' ? await loadTeamDirectory(auth) : [];
+      res.status(200).json({ ok: true, role: auth.role, availableRoles: auth.availableRoles, actor: auth.actor, directory, accountDirectory, state: stateForRole(current.state, auth), version: current.version, updatedAt: current.updatedAt, storage: current.storage });
       return;
     }
     if (req.method !== 'POST') {

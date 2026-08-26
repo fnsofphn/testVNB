@@ -139,6 +139,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
   const [changeRequests, setChangeRequests] = useState([]);
   const [actor, setActor] = useState(null);
   const [directory, setDirectory] = useState([]);
+  const [accountDirectory, setAccountDirectory] = useState([]);
   const activeProject = workspaceState.projects?.find((item) => item.id === routeContext.projectId)
     || workspaceState.projects?.find((item) => item.id === workspaceState.activeProjectId)
     || workspaceState.projects?.[0]
@@ -189,6 +190,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
     if (response?.role) setRole(response.role);
     if (response?.actor) setActor(response.actor);
     if (Array.isArray(response?.directory)) setDirectory(response.directory);
+    if (Array.isArray(response?.accountDirectory)) setAccountDirectory(response.accountDirectory);
     const nextInputs = Object.fromEntries(Object.keys(INPUT_META).map((key) => [key, state.inputs?.some((item) => item.key === key && item.status === 'ACTIVE') || false]));
     setInputs(nextInputs);
     setTasks(Array.isArray(state.tasks) ? state.tasks : []);
@@ -410,7 +412,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
         {role === 'content' ? <><p>WORKSPACE</p><button className={tab === 'overview' ? 'active' : ''} onClick={() => setTab('overview')}>Tổng quan dự án</button><button className={tab === 'structure' ? 'active' : ''} onClick={() => setTab('structure')}>Khóa học & lớp <b>{classes.length}</b></button><p>INPUT NỘI DUNG</p><button className={tab === 'inputs' ? 'active' : ''} onClick={() => setTab('inputs')}>Input cần cập nhật <b>{Object.entries(inputs).filter(([key, value]) => ['vlearning', 'game', 'discussion', 'assignment', 'test'].includes(key) && value).length}/5</b></button><p>CÔNG VIỆC</p><button className={tab === 'tasks' ? 'active' : ''} onClick={() => setTab('tasks')}>Việc của tôi <b>{tasks.filter((task) => !task.archivedAt).length}</b></button></> : role === 'intake' ? <><p>ĐẦU MỐI</p><button className={tab === 'inputs' ? 'active' : ''} onClick={() => setTab('inputs')}>Danh sách lớp <b>{inputs.roster ? classes.length : 0}/{classes.length}</b></button><button className={tab === 'change' ? 'active' : ''} onClick={() => setTab('change')}>Yêu cầu thay đổi</button><p>CÔNG VIỆC</p><button className={tab === 'tasks' ? 'active' : ''} onClick={() => setTab('tasks')}>Việc của tôi <b>{tasks.filter((task) => !task.archivedAt).length}</b></button></> : <>
           {!['manager', 'member'].includes(role) && <><p>WORKSPACE</p><button className={tab === 'overview' ? 'active' : ''} onClick={() => setTab('overview')}>Tổng quan dự án</button><button className={tab === 'structure' ? 'active' : ''} onClick={() => setTab('structure')}>Khóa học & lớp <b>{classes.length}</b></button><button className={tab === 'inputs' ? 'active' : ''} onClick={() => setTab('inputs')}>Input readiness <b>{readyCount}/{INPUT_TOTAL}</b></button></>}
           <p>CÔNG VIỆC</p><button aria-label={role === 'member' ? 'Việc của tôi' : 'Công việc'} className={tab === 'tasks' ? 'active' : ''} onClick={() => setTab('tasks')}>{role === 'member' ? 'Việc của tôi' : 'Công việc'} <b>{tasks.filter((task) => !task.archivedAt).length}</b></button>{role === 'manager' && <><button className={tab === 'due' ? 'active' : ''} onClick={() => setTab('due')}>Việc sắp đến hạn <b>{tasks.filter((task) => task.status !== 'DONE' && task.status !== 'CANCELLED').slice(0, 7).length}</b></button><button className={tab === 'review' ? 'active' : ''} onClick={() => setTab('review')}>Review Queue <b>{kpis.review}</b></button></>}
-          {!['manager', 'member'].includes(role) && <><p>QUẢN LÝ</p>{role === 'operations' && <button className={tab === 'accounts' ? 'active' : ''} onClick={() => setTab('accounts')}>Ekip & tài khoản <b>{directory.length}</b></button>}<button className={tab === 'change' ? 'active' : ''} onClick={() => setTab('change')}>Risk & Change</button><button className={tab === 'audit' ? 'active' : ''} onClick={() => setTab('audit')}>Audit Log</button></>}
+          {!['manager', 'member'].includes(role) && <><p>QUẢN LÝ</p>{role === 'operations' && <button className={tab === 'accounts' ? 'active' : ''} onClick={() => setTab('accounts')}>Ekip & tài khoản <b>{accountDirectory.length}</b></button>}<button className={tab === 'change' ? 'active' : ''} onClick={() => setTab('change')}>Risk & Change</button><button className={tab === 'audit' ? 'active' : ''} onClick={() => setTab('audit')}>Audit Log</button></>}
         </>}
       </nav>
       <div className="sidebar-note"><span>VẬN HÀNH ĐÀO TẠO</span><p>Store và API riêng; VTraining, VLearning chỉ được tham chiếu qua mã nguồn dữ liệu.</p><small className={`sync-indicator ${syncState}`}>{syncState === 'loading' ? 'Đang tải dữ liệu…' : syncState === 'saving' ? 'Đang lưu…' : syncState === 'synced' ? `Đã đồng bộ · v${stateVersion}` : syncState === 'seed' ? 'Chưa có dữ liệu DB · đang dùng seed' : 'Lỗi đồng bộ'}</small>{onSignOut && <button type="button" onClick={onSignOut}>Đăng xuất</button>}</div>
@@ -429,7 +431,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
         {tab === 'tasks' && <LayeredTasks role={role} tasks={tasks} classes={classes} directory={directory} directoryLoading={syncState === 'loading'} actor={actor} project={activeProject} course={activeCourse} routeContext={routeContext} onNavigate={navigateWork} selectedTask={selectedTask} setSelectedTaskId={setSelectedTaskId} updateTask={updateTask} createClassTask={createClassTask} archiveTask={archiveTask} assignTasks={assignTasks} toggleChecklist={toggleChecklist}/>}
         {tab === 'due' && <Tasks role={role} tasks={tasks} classes={classes} directory={directory} actor={actor} project={activeProject} course={activeCourse} selectedTask={selectedTask} setSelectedTaskId={setSelectedTaskId} updateTask={updateTask} assignTasks={assignTasks} toggleChecklist={toggleChecklist} view="due" onView={setTab}/>}
         {tab === 'review' && <ReviewQueue role={role} tasks={tasks} updateTask={updateTask}/>}
-        {tab === 'accounts' && <AccountsPanel directory={directory} provisionAccount={provisionAccount}/>}
+        {tab === 'accounts' && <AccountsPanel directory={accountDirectory} provisionAccount={provisionAccount}/>}
         {tab === 'change' && <ChangePanel role={role} open={changeOpen} setOpen={setChangeOpen} counts={scopeCounts} submit={submitScopeChange} requests={changeRequests} onRequest={requestChange} onApprove={approveChange} onInputUpdate={(label, type, objectKey, reason) => { const inputKey = objectKey === 'learner' ? 'roster' : objectKey === 'exercise' ? 'vlearning' : objectKey; void submitInput(inputKey, { data: { label, changeType: type, updatedAt: new Date().toISOString() }, reason: reason || `${label} · ${type}` }).then((response) => { if (response) setChangeOpen(false); }); }}/>} 
         {tab === 'audit' && <Audit entries={audit}/>} 
       </main>
@@ -575,6 +577,7 @@ function generateTemporaryPassword() {
 function AccountsPanel({ directory = [], provisionAccount }) {
   const [draft, setDraft] = useState({ fullName: '', email: '', roles: ['member'], password: generateTemporaryPassword() });
   const [editingEmail, setEditingEmail] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [busy, setBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [created, setCreated] = useState(null);
@@ -585,6 +588,12 @@ function AccountsPanel({ directory = [], provisionAccount }) {
   const rolesValid = draft.roles.length > 0;
   const valid = nameValid && emailValid && rolesValid;
   const roleLabels = Object.fromEntries(TRAINING_ROLE_OPTIONS);
+  const searchToken = normalizeSearchText(searchQuery);
+  const filteredDirectory = directory.filter((person) => {
+    if (!searchToken) return true;
+    const roleText = (person.roles || [person.role]).filter(Boolean).map((value) => roleLabels[value] || value).join(' ');
+    return normalizeSearchText(`${person.name} ${person.email || person.id} ${roleText}`).includes(searchToken);
+  });
   function resetForm() {
     setEditingEmail('');
     setShowPassword(false);
@@ -627,7 +636,7 @@ function AccountsPanel({ directory = [], provisionAccount }) {
     resetForm();
   }
   return <section className="accounts-workspace">
-    <div className="page-title accounts-title"><div><small>VWORK IDENTITY · END-TO-END</small><h2>Ekip và tài khoản đăng nhập</h2><p>Tạo đồng thời tài khoản Supabase Auth, hồ sơ PeopleOne và thành viên trong danh mục VWork để có thể giao việc thật.</p></div><span className="account-total">{directory.length} tài khoản ekip</span></div>
+    <div className="page-title accounts-title"><div><small>VWORK IDENTITY · END-TO-END</small><h2>Ekip và tài khoản đăng nhập</h2><p>Tạo đồng thời tài khoản Supabase Auth, hồ sơ PeopleOne và thành viên trong danh mục VWork để có thể giao việc thật.</p></div><span className="account-total">{directory.length} tài khoản VWork</span></div>
     <div className="accounts-grid">
       <form className="card account-create-card" onSubmit={submit}>
         <div className="account-card-head"><div><span>{editingEmail ? 'CHỈNH TÀI KHOẢN HIỆN CÓ' : 'TẠO / CẬP NHẬT TÀI KHOẢN'}</span><h3>{editingEmail ? 'Chỉnh vai trò tài khoản' : 'Thành viên và vai trò'}</h3></div><b>{editingEmail ? 'VWORK ROLE' : 'AUTH + VWORK'}</b></div>
@@ -648,8 +657,12 @@ function AccountsPanel({ directory = [], provisionAccount }) {
         {created && <div className="account-created" role="status"><b>{created.authUserCreated ? 'Đã tạo' : 'Đã cập nhật'} {created.name}</b><span>{created.email} · {(created.roles || [created.role]).map((value) => roleLabels[value] || value).join(' · ')}</span>{created.authUserCreated && <label>Mật khẩu tạm<input readOnly value={created.temporaryPassword} onFocus={(event) => event.target.select()}/></label>}<small>{created.authUserCreated ? 'Gửi thông tin này cho đúng người dùng qua kênh nội bộ an toàn.' : 'Tài khoản đăng nhập và mật khẩu cũ được giữ nguyên; role VWork đã được cập nhật.'}</small></div>}
       </form>
       <section className="card account-directory-card">
-        <div className="account-card-head"><div><span>DANH MỤC ĐỒNG BỘ</span><h3>Người có thể nhận việc</h3></div><b>{directory.length}</b></div>
-        <div className="account-directory-list">{directory.length ? directory.map((person) => <article className={editingEmail === String(person.email || person.id || '').trim().toLowerCase() ? 'is-editing' : ''} key={person.id}><span>{person.name.split(/\s+/).slice(-2).map((part) => part[0]).join('').toUpperCase()}</span><div><b>{person.name}</b><small>{person.id}</small></div><div className="account-role-badges">{(person.roles?.length ? person.roles : [person.role]).map((roleValue) => <em key={roleValue}>{roleLabels[roleValue] || roleValue}</em>)}</div><button className="account-edit-role" type="button" onClick={() => editAccount(person)} aria-label={`Chỉnh vai trò của ${person.name}`}>Chỉnh role</button></article>) : <div className="account-empty"><b>Chưa có tài khoản ekip</b><span>Tạo tài khoản đầu tiên để giao nhóm việc hoặc task.</span></div>}</div>
+        <div className="account-card-head"><div><span>DANH MỤC VWORK</span><h3>Toàn bộ tài khoản VWork</h3></div><b>{filteredDirectory.length}/{directory.length}</b></div>
+        <label className="account-directory-search"><span>Tìm tài khoản</span><input type="search" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Tìm theo tên, email hoặc vai trò…"/></label>
+        <div className="account-directory-list">{filteredDirectory.length ? filteredDirectory.map((person) => {
+          const personRoles = (person.roles?.length ? person.roles : [person.role]).filter(Boolean);
+          return <article className={editingEmail === String(person.email || person.id || '').trim().toLowerCase() ? 'is-editing' : ''} key={person.id}><span>{person.name.split(/\s+/).slice(-2).map((part) => part[0]).join('').toUpperCase()}</span><div><b>{person.name}</b><small>{person.id}</small></div><div className="account-role-badges">{personRoles.length ? personRoles.map((roleValue) => <em key={roleValue}>{roleLabels[roleValue] || roleValue}</em>) : <em>Chưa gán role</em>}{!person.profileLinked && <em className="warning">Chưa liên kết hồ sơ</em>}{person.profileLinked && person.active === false && <em className="warning">Đã khóa</em>}</div><button className="account-edit-role" type="button" onClick={() => editAccount(person)} aria-label={`Chỉnh vai trò của ${person.name}`}>Chỉnh role</button></article>;
+        }) : <div className="account-empty"><b>{directory.length ? 'Không tìm thấy tài khoản' : 'Chưa có tài khoản VWork'}</b><span>{directory.length ? 'Thử tên, email hoặc vai trò khác.' : 'Tạo tài khoản đầu tiên để quản lý và giao việc.'}</span></div>}</div>
       </section>
     </div>
     <div className="account-flow"><span>1. Tạo tài khoản</span><i>→</i><span>2. Giao nhóm cho quản lý</span><i>→</i><span>3. Quản lý giao task cho CTV</span><i>→</i><span>4. CTV đăng nhập và thực hiện</span></div>
@@ -660,6 +673,10 @@ const RoleSummaryText = {
   operations: 'Quản trị vận hành và phân công', intake: 'Đầu mối thông tin / Sale', content: 'Chuẩn bị input nội dung',
   vtraining: 'Vận hành lớp trên VTraining', manager: 'Nhận nhóm và giao việc', member: 'Thực hiện task được giao',
 };
+
+function normalizeSearchText(value) {
+  return String(value || '').trim().toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
+}
 
 function RoleSummary({ role }) { const copy = { operations: ['Giao nhóm việc cho Quản lý ekip', 'Duyệt yêu cầu trước khi tạo task'], intake: ['Chỉ nộp danh sách theo từng lớp', 'Tạo yêu cầu thay đổi, không tự tạo task'], content: ['Nộp 5 nhóm input nội dung', 'Theo dõi phiên bản độc lập'], vtraining: ['Theo dõi 03 nhóm VTraining', 'Tùy chỉnh checklist và deadline'], manager: ['Nhận nhóm việc và giao CTV', 'Xác nhận PASS / REWORK'], member: ['Thực hiện checklist chi tiết', 'Gửi yêu cầu xác nhận hoàn thành'] }[role]; return <ul className="role-summary">{copy.map((item) => <li key={item}>{item}</li>)}</ul>; }
 

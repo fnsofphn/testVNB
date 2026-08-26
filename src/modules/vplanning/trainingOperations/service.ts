@@ -10,6 +10,7 @@ type TrainingOperationsResponse = {
   availableRoles?: string[];
   actor?: { id: string; name: string; email: string; role: string };
   directory?: Array<{ id: string; name: string; role: string; roles?: string[] }>;
+  accountDirectory?: Array<{ id: string; name: string; email: string; role?: string; roles?: string[]; active?: boolean; profileLinked?: boolean }>;
   state: any;
   version: number;
   updatedAt?: string | null;

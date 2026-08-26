@@ -11,7 +11,7 @@ globalThis.fetch = async (url, options = {}) => {
   const value = String(url);
   calls.push({ url: value, method: options.method || 'GET', headers: options.headers, body: options.body });
   if (value.endsWith('/auth/v1/user')) return Response.json({ id: 'auth-operations', email: 'ops@peopleone.vn' });
-  if (value.includes('/vcontent_profiles?') && value.includes('active=is.true') && !value.includes('auth_user_id=') && !value.includes('email=eq.')) return Response.json([
+  if (value.includes('/vcontent_profiles?select=id,email,full_name') && !value.includes('auth_user_id=') && !value.includes('email=eq.')) return Response.json([
     { id: 'profile-operations', email: 'ops@peopleone.vn', full_name: 'Quản trị đa vai', role: 'training_ops_admin', active: true, auth_user_id: 'auth-operations', vplanning_roles: ['vplanning_admin'] },
     { id: 'profile-manager', email: 'manager@peopleone.vn', full_name: 'Ngọc Trần', role: 'user', active: true, vplanning_roles: ['vplanning_manager'] },
     { id: 'profile-member', email: 'member@peopleone.vn', full_name: 'Nam Nguyễn', role: 'user', active: true, vplanning_roles: ['vplanning_member'] },
@@ -77,6 +77,8 @@ assert.equal(getResponse.payload.state.tasks.length, 33);
 assert.deepEqual(getResponse.payload.directory.map((item) => [item.id, item.role]), [['ops@peopleone.vn', 'manager'], ['manager@peopleone.vn', 'manager'], ['member@peopleone.vn', 'member'], ['scoped@peopleone.vn', 'member']]);
 assert.deepEqual(getResponse.payload.directory[0].roles, ['operations', 'intake', 'content', 'vtraining', 'manager', 'member']);
 assert.equal(getResponse.payload.directory.some((item) => item.id === 'inactive@peopleone.vn'), false);
+assert.equal(getResponse.payload.accountDirectory.length, 5);
+assert.equal(getResponse.payload.accountDirectory.find((item) => item.id === 'inactive@peopleone.vn').profileLinked, false);
 
 const memberView = responseRecorder();
 await handler(request('GET', undefined, 'member'), memberView);
