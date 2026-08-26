@@ -5,7 +5,7 @@ import { resolveActiveTrainingRole, resolveTrainingRoles } from '../src/modules/
 const MAX_BODY_BYTES = parseByteLimit(process.env.VWORK_TRAINING_OPERATIONS_USER_BODY_LIMIT, 64 * 1024);
 const readLimitedBuffer = createLimitedBufferReader({ maxBytes: MAX_BODY_BYTES });
 const ACCOUNT_ROLES = {
-  operations: { profileRole: 'training_manager', profileVplanningRole: 'vplanning_director', directoryRole: 'vplanning_director', title: 'Quản lý vận hành' },
+  operations: { profileRole: 'production_manager', profileVplanningRole: 'vplanning_director', directoryRole: 'vplanning_director', title: 'Quản lý vận hành' },
   intake: { profileRole: 'client', directoryRole: 'account_manager', title: 'Đầu mối / Sale' },
   content: { profileRole: 'specialist', directoryRole: 'content_manager', title: 'Chuyên viên nội dung' },
   vtraining: { profileRole: 'specialist', directoryRole: 'vtraining', title: 'Chuyên viên vận hành VTraining' },

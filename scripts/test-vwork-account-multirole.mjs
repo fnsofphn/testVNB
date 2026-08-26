@@ -38,7 +38,7 @@ globalThis.fetch = async (url, options = {}) => {
 const req = {
   method: 'POST',
   headers: { authorization: 'Bearer requester-token', 'x-vwork-role': 'operations' },
-  body: { fullName: 'Nguyễn Thành Viên', email: 'member@peopleone.vn', password: '', roles: ['content', 'manager'], replaceRoles: true },
+  body: { fullName: 'Nguyễn Thành Viên', email: 'member@peopleone.vn', password: '', roles: ['operations', 'content'], replaceRoles: true },
   socket: { remoteAddress: '127.0.0.1' },
 };
 const result = { status: 0, payload: null };
@@ -51,14 +51,14 @@ const res = {
 try {
   await handler(req, res);
   assert.equal(result.status, 200, 'Existing Auth users must be linked instead of rejected as duplicates.');
-  assert.deepEqual(result.payload.user.roles, ['content', 'manager']);
+  assert.deepEqual(result.payload.user.roles, ['operations', 'content']);
   assert.equal(result.payload.user.authUserCreated, false);
   assert.equal(calls.filter((call) => call.url.endsWith('/auth/v1/admin/users') && call.method === 'POST').length, 0, 'Known Auth users must not be recreated.');
   const profilePatch = calls.find((call) => call.url.includes('/vcontent_profiles?id=') && call.method === 'PATCH');
   const directoryUpsert = calls.find((call) => call.url.includes('/vplanning_users?on_conflict=email') && call.method === 'POST');
-  assert.deepEqual(profilePatch.body.vplanning_roles.sort(), ['vplanning_manager']);
-  assert.equal(profilePatch.body.role, 'specialist');
-  assert.deepEqual(directoryUpsert.body.roles.sort(), ['content_manager', 'finance_viewer', 'vplanning_manager']);
+  assert.deepEqual(profilePatch.body.vplanning_roles.sort(), ['vplanning_director']);
+  assert.equal(profilePatch.body.role, 'production_manager');
+  assert.deepEqual(directoryUpsert.body.roles.sort(), ['content_manager', 'finance_viewer', 'vplanning_director']);
   assert.equal(calls.some((call) => call.body?.password), false, 'Existing-user reconciliation must not send or persist a password.');
 
   const mutationCount = calls.filter((call) => ['PATCH', 'POST'].includes(call.method) && call.url.includes('/rest/v1/')).length;

@@ -52,6 +52,8 @@ assert.deepEqual(response.payload.user, {
   email: 'member@peopleone.vn',
   name: 'Nam Nguyễn',
   role: 'member',
+  roles: ['member'],
+  authUserCreated: true,
 });
 assert.equal('password' in response.payload.user, false);
 

@@ -39,6 +39,7 @@ assert(!userApi.includes('TRAINING_OPERATIONS_PASSWORD_INVALID') && !userApi.inc
 assert(page.includes('account-role-matrix') && page.includes('TRAINING_ROLE_OPTIONS.map') && page.includes("roles: ['member']"), 'Account management must expose a multi-select matrix for all VWork roles.');
 assert(page.includes('Chỉnh role') && page.includes('replaceRoles: Boolean(editingEmail)') && userApi.includes('TRAINING_OPERATIONS_SELF_ROLE_DOWNGRADE_DENIED'), 'Existing accounts must support explicit VWork role replacement without allowing the active operator to lock themselves out.');
 assert(userApi.includes('findAuthUserByEmail') && userApi.includes('roles: requestedRoles') && userApi.includes('authUserCreated'), 'Provisioning must link an existing Auth user and persist multiple roles without resetting its password.');
+assert(userApi.includes("operations: { profileRole: 'production_manager'") && !userApi.includes("operations: { profileRole: 'training_manager'"), 'Operations account updates must use a profile role accepted by vcontent_profiles_role_check.');
 assert(page.includes('không sinh công việc ngang hàng ở cấp dự án hoặc khóa học'), 'Tasks must be generated inside classes only.');
 assert(!page.includes('LegacyCreateWizard'), 'The obsolete project/course-level task wizard must not remain in production source.');
 assert(!page.includes('MOCKUP DUYỆT') && !page.includes('Mock state'), 'Production source must not expose mockup-only labels.');
