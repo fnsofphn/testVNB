@@ -26,7 +26,7 @@ globalThis.fetch = async (url, options = {}) => {
   } else if (String(url).includes('/vcontent_profiles?') && method === 'GET') {
     payload = [{ id: 'target-profile', email: 'member@peopleone.vn', full_name: 'Tên cũ', role: 'ctv', title: 'Thành viên ekip', vplanning_roles: ['vplanning_member'], active: true, access_scope: 'self', auth_user_id: 'existing-auth' }];
   } else if (String(url).includes('/vplanning_users?') && method === 'GET') {
-    payload = [{ email: 'member@peopleone.vn', full_name: 'Tên cũ', title: 'Thành viên ekip', roles: ['vplanning_member'], departments: ['VTraining'], owner_ids: [], payload: { authUserId: 'existing-auth' } }];
+    payload = [{ email: 'member@peopleone.vn', full_name: 'Tên cũ', title: 'Thành viên ekip', roles: ['vplanning_member', 'finance_viewer'], departments: ['VTraining'], owner_ids: [], payload: { authUserId: 'existing-auth' } }];
   } else if (String(url).endsWith('/auth/v1/admin/users/existing-auth')) {
     payload = { id: 'existing-auth', email: 'member@peopleone.vn', app_metadata: {} };
   } else {
@@ -38,7 +38,7 @@ globalThis.fetch = async (url, options = {}) => {
 const req = {
   method: 'POST',
   headers: { authorization: 'Bearer requester-token', 'x-vwork-role': 'operations' },
-  body: { fullName: 'Nguyễn Thành Viên', email: 'member@peopleone.vn', password: '123456', roles: ['content', 'manager'] },
+  body: { fullName: 'Nguyễn Thành Viên', email: 'member@peopleone.vn', password: '', roles: ['content', 'manager'], replaceRoles: true },
   socket: { remoteAddress: '127.0.0.1' },
 };
 const result = { status: 0, payload: null };
@@ -56,9 +56,21 @@ try {
   assert.equal(calls.filter((call) => call.url.endsWith('/auth/v1/admin/users') && call.method === 'POST').length, 0, 'Known Auth users must not be recreated.');
   const profilePatch = calls.find((call) => call.url.includes('/vcontent_profiles?id=') && call.method === 'PATCH');
   const directoryUpsert = calls.find((call) => call.url.includes('/vplanning_users?on_conflict=email') && call.method === 'POST');
-  assert.deepEqual(profilePatch.body.vplanning_roles.sort(), ['vplanning_manager', 'vplanning_member']);
-  assert.deepEqual(directoryUpsert.body.roles.sort(), ['content_manager', 'vplanning_manager', 'vplanning_member']);
+  assert.deepEqual(profilePatch.body.vplanning_roles.sort(), ['vplanning_manager']);
+  assert.equal(profilePatch.body.role, 'specialist');
+  assert.deepEqual(directoryUpsert.body.roles.sort(), ['content_manager', 'finance_viewer', 'vplanning_manager']);
   assert.equal(calls.some((call) => call.body?.password), false, 'Existing-user reconciliation must not send or persist a password.');
+
+  const mutationCount = calls.filter((call) => ['PATCH', 'POST'].includes(call.method) && call.url.includes('/rest/v1/')).length;
+  const selfResult = { status: 0, payload: null };
+  await handler({ ...req, body: { fullName: 'Quản trị viên', email: 'admin@peopleone.vn', password: '', roles: ['member'], replaceRoles: true } }, {
+    setHeader() {},
+    status(value) { selfResult.status = value; return this; },
+    json(value) { selfResult.payload = value; return this; },
+  });
+  assert.equal(selfResult.status, 400);
+  assert.equal(selfResult.payload.code, 'TRAINING_OPERATIONS_SELF_ROLE_DOWNGRADE_DENIED');
+  assert.equal(calls.filter((call) => ['PATCH', 'POST'].includes(call.method) && call.url.includes('/rest/v1/')).length, mutationCount, 'Self-lockout rejection must happen before database mutation.');
   console.log('V-Work multi-role existing-account reconciliation passed.');
 } finally {
   globalThis.fetch = originalFetch;

@@ -37,6 +37,7 @@ assert(page.includes('Ekip & tài khoản') && page.includes('Lưu tài khoản 
 assert(page.includes('account-submit-error') && !page.includes('minLength=') && !page.includes('maxLength=') && !page.includes('passwordValid'), 'Account creation must not impose a client-side password length limit and must show Auth API failures next to the form.');
 assert(!userApi.includes('TRAINING_OPERATIONS_PASSWORD_INVALID') && !userApi.includes('password.length'), 'The account API must delegate password policy to Supabase Auth without imposing its own length limit.');
 assert(page.includes('account-role-matrix') && page.includes('TRAINING_ROLE_OPTIONS.map') && page.includes("roles: ['member']"), 'Account management must expose a multi-select matrix for all VWork roles.');
+assert(page.includes('Chỉnh role') && page.includes('replaceRoles: Boolean(editingEmail)') && userApi.includes('TRAINING_OPERATIONS_SELF_ROLE_DOWNGRADE_DENIED'), 'Existing accounts must support explicit VWork role replacement without allowing the active operator to lock themselves out.');
 assert(userApi.includes('findAuthUserByEmail') && userApi.includes('roles: requestedRoles') && userApi.includes('authUserCreated'), 'Provisioning must link an existing Auth user and persist multiple roles without resetting its password.');
 assert(page.includes('không sinh công việc ngang hàng ở cấp dự án hoặc khóa học'), 'Tasks must be generated inside classes only.');
 assert(!page.includes('LegacyCreateWizard'), 'The obsolete project/course-level task wizard must not remain in production source.');

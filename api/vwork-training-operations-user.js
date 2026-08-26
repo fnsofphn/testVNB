@@ -13,6 +13,12 @@ const ACCOUNT_ROLES = {
   member: { profileRole: 'ctv', profileVplanningRole: 'vplanning_member', directoryRole: 'vplanning_member', title: 'Thành viên ekip' },
 };
 const ACCOUNT_ROLE_VALUES = Object.freeze(Object.keys(ACCOUNT_ROLES));
+const MANAGED_ROLE_TOKENS = new Set([
+  'admin', 'training_ops_admin', 'vplanning_admin', 'training_admin', 'production_manager', 'pm',
+  'sale', 'dau_moi', 'chuyen_vien_noi_dung', 'noi_dung', 'training_instructor', 'van_hanh_vtraining',
+  'manager', 'teamlead', 'quan_ly_ekip', 'member', 'cong_tac_vien', 'vplanning_collaborator',
+  ...Object.values(ACCOUNT_ROLES).flatMap((item) => [item.profileRole, item.profileVplanningRole, item.directoryRole]).filter(Boolean),
+]);
 
 async function readJsonBody(req) {
   if (req.body && typeof req.body === 'object') {
@@ -70,6 +76,11 @@ function normalizeRole(value) {
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/^_|_$/g, '');
+}
+
+function isManagedRoleToken(value) {
+  const token = normalizeRole(value);
+  return [...MANAGED_ROLE_TOKENS].some((managed) => token === managed || token.includes(managed));
 }
 
 function canProvisionAccounts(profile, vplanningUser) {
@@ -187,6 +198,7 @@ export default async function handler(req, res) {
     provisionedEmail = email;
     const fullName = String(body.fullName || '').trim();
     const password = String(body.password || '');
+    const replaceRoles = body.replaceRoles === true;
     const requestedRoles = (Array.isArray(body.roles) ? body.roles : [body.role])
       .map((value) => String(value || '').trim().toLowerCase())
       .filter((value, index, values) => value && values.indexOf(value) === index);
@@ -203,6 +215,14 @@ export default async function handler(req, res) {
     ]);
     previousProfile = Array.isArray(profiles) ? profiles[0] || null : null;
     previousVplanningUser = Array.isArray(users) ? users[0] || null : null;
+    if (replaceRoles && !previousProfile && !previousVplanningUser) {
+      res.status(404).json({ ok: false, code: 'TRAINING_OPERATIONS_ACCOUNT_NOT_FOUND', error: 'Không tìm thấy tài khoản VWork cần chỉnh.' });
+      return;
+    }
+    if (replaceRoles && requesterEmail === email && !requestedRoles.includes('operations')) {
+      res.status(400).json({ ok: false, code: 'TRAINING_OPERATIONS_SELF_ROLE_DOWNGRADE_DENIED', error: 'Bạn không thể tự gỡ vai trò Quản lý vận hành của chính mình.' });
+      return;
+    }
 
     const knownAuthUserId = String(previousProfile?.auth_user_id || previousVplanningUser?.payload?.authUserId || '');
     let authUser = await getAuthUserById(config.supabaseUrl, serviceHeaders, knownAuthUserId);
@@ -235,13 +255,20 @@ export default async function handler(req, res) {
     const selectedRoleConfigs = requestedRoles.map((value) => ACCOUNT_ROLES[value]);
     const profileVplanningRoles = selectedRoleConfigs.map((configItem) => configItem.profileVplanningRole).filter(Boolean);
     const directoryRoles = selectedRoleConfigs.map((configItem) => configItem.directoryRole);
-    const vplanningRoles = [...new Set([...(previousProfile?.vplanning_roles || []), ...profileVplanningRoles])];
+    const retainedProfileRoles = replaceRoles
+      ? (previousProfile?.vplanning_roles || []).filter((value) => !isManagedRoleToken(value))
+      : (previousProfile?.vplanning_roles || []);
+    const retainedDirectoryRoles = replaceRoles
+      ? (previousVplanningUser?.roles || []).filter((value) => !isManagedRoleToken(value))
+      : (previousVplanningUser?.roles || []);
+    const vplanningRoles = [...new Set([...retainedProfileRoles, ...profileVplanningRoles])];
     const profilePayload = {
       email,
       full_name: fullName,
       auth_user_id: authUserId,
       active: true,
       vplanning_roles: vplanningRoles,
+      ...(replaceRoles ? { role: primaryRoleConfig.profileRole, title: primaryRoleConfig.title } : {}),
       ...(previousProfile ? {} : { id: `VWOPS_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`, role: primaryRoleConfig.profileRole, title: primaryRoleConfig.title, access_scope: 'self' }),
     };
     if (previousProfile?.id) {
@@ -263,8 +290,8 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         email,
         full_name: fullName,
-        title: previousVplanningUser?.title || primaryRoleConfig.title,
-        roles: [...new Set([...(previousVplanningUser?.roles || []), ...directoryRoles])],
+        title: replaceRoles ? primaryRoleConfig.title : previousVplanningUser?.title || primaryRoleConfig.title,
+        roles: [...new Set([...retainedDirectoryRoles, ...directoryRoles])],
         departments: previousVplanningUser?.departments || ['VTraining'],
         owner_ids: previousVplanningUser?.owner_ids || [],
         payload: { ...(previousVplanningUser?.payload || {}), source: 'vwork_training_operations', authUserId },

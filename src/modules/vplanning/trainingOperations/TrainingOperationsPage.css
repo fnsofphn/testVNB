@@ -297,4 +297,11 @@
 .vwork-training-operations .account-form-actions button:disabled{cursor:not-allowed;opacity:.45}
 .vwork-training-operations .account-validation-note{margin:7px 0 0;color:#7c5b22;font-size:9px;text-align:right}
 .vwork-training-operations .account-submit-error{margin-top:12px;padding:10px 12px;border:1px solid #e7a9b4;border-radius:7px;background:#fff3f5;color:#8d2033;font-size:10px;line-height:1.45}
+.vwork-training-operations .account-directory-list article{grid-template-columns:36px minmax(0,1fr) minmax(140px,auto) auto}
+.vwork-training-operations .account-directory-list article>.account-role-badges{display:flex}
+.vwork-training-operations .account-directory-list article.is-editing{border-color:var(--primary);background:var(--primary-soft);box-shadow:0 0 0 1px rgba(200,16,46,.06)}
+.vwork-training-operations .account-edit-role{padding:6px 8px;border-color:#d9a2ad;background:#fff;color:var(--primary);font-size:9px;white-space:nowrap}
+.vwork-training-operations .account-edit-role:hover{border-color:var(--primary);background:#fff7f8}
+.vwork-training-operations .temporary-password input:disabled,.vwork-training-operations .form-grid input:disabled{cursor:not-allowed;background:#f4f5f7;color:#667085}
 @media(max-width:620px){.vwork-training-operations .account-role-matrix>div{grid-template-columns:1fr}.vwork-training-operations .account-directory-list article{grid-template-columns:36px minmax(0,1fr)}.vwork-training-operations .account-role-badges{grid-column:2;justify-content:flex-start;max-width:none}}
+@media(max-width:760px){.vwork-training-operations .account-directory-list article{grid-template-columns:34px minmax(0,1fr)}.vwork-training-operations .account-directory-list article>.account-role-badges,.vwork-training-operations .account-edit-role{grid-column:2;justify-self:start}}

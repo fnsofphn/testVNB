@@ -574,6 +574,7 @@ function generateTemporaryPassword() {
 
 function AccountsPanel({ directory = [], provisionAccount }) {
   const [draft, setDraft] = useState({ fullName: '', email: '', roles: ['member'], password: generateTemporaryPassword() });
+  const [editingEmail, setEditingEmail] = useState('');
   const [busy, setBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [created, setCreated] = useState(null);
@@ -584,6 +585,25 @@ function AccountsPanel({ directory = [], provisionAccount }) {
   const rolesValid = draft.roles.length > 0;
   const valid = nameValid && emailValid && rolesValid;
   const roleLabels = Object.fromEntries(TRAINING_ROLE_OPTIONS);
+  function resetForm() {
+    setEditingEmail('');
+    setShowPassword(false);
+    setSubmitError('');
+    setDraft({ fullName: '', email: '', roles: ['member'], password: generateTemporaryPassword() });
+  }
+  function editAccount(person) {
+    const email = String(person.email || person.id || '').trim().toLowerCase();
+    setEditingEmail(email);
+    setCreated(null);
+    setSubmitError('');
+    setShowPassword(false);
+    setDraft({
+      fullName: String(person.name || '').trim(),
+      email,
+      roles: person.roles?.length ? [...person.roles] : [person.role].filter(Boolean),
+      password: '',
+    });
+  }
   function toggleRole(roleValue) {
     setDraft((current) => ({
       ...current,
@@ -597,39 +617,39 @@ function AccountsPanel({ directory = [], provisionAccount }) {
     if (!valid || busy) return;
     setSubmitError('');
     setBusy(true);
-    const result = await provisionAccount({ ...draft, fullName: draft.fullName.trim(), email: draft.email.trim().toLowerCase() });
+    const result = await provisionAccount({ ...draft, fullName: draft.fullName.trim(), email: draft.email.trim().toLowerCase(), replaceRoles: Boolean(editingEmail) });
     setBusy(false);
     if (!result?.user) {
       setSubmitError(result?.error || 'Không thể tạo tài khoản ekip. Vui lòng thử lại.');
       return;
     }
     setCreated({ ...result.user, temporaryPassword: draft.password });
-    setDraft({ fullName: '', email: '', roles: ['member'], password: generateTemporaryPassword() });
+    resetForm();
   }
   return <section className="accounts-workspace">
     <div className="page-title accounts-title"><div><small>VWORK IDENTITY · END-TO-END</small><h2>Ekip và tài khoản đăng nhập</h2><p>Tạo đồng thời tài khoản Supabase Auth, hồ sơ PeopleOne và thành viên trong danh mục VWork để có thể giao việc thật.</p></div><span className="account-total">{directory.length} tài khoản ekip</span></div>
     <div className="accounts-grid">
       <form className="card account-create-card" onSubmit={submit}>
-        <div className="account-card-head"><div><span>TẠO / CẬP NHẬT TÀI KHOẢN</span><h3>Thành viên và vai trò</h3></div><b>AUTH + VWORK</b></div>
+        <div className="account-card-head"><div><span>{editingEmail ? 'CHỈNH TÀI KHOẢN HIỆN CÓ' : 'TẠO / CẬP NHẬT TÀI KHOẢN'}</span><h3>{editingEmail ? 'Chỉnh vai trò tài khoản' : 'Thành viên và vai trò'}</h3></div><b>{editingEmail ? 'VWORK ROLE' : 'AUTH + VWORK'}</b></div>
         <div className="form-grid">
           <label>Họ và tên<input autoComplete="name" value={draft.fullName} aria-invalid={draft.fullName.length > 0 && !nameValid} aria-describedby="account-name-help" onChange={(event) => setDraft((current) => ({ ...current, fullName: event.target.value }))} placeholder="Nguyễn Văn A"/>{draft.fullName.length > 0 && !nameValid && <small className="account-field-error" id="account-name-help">Nhập ít nhất 2 ký tự.</small>}</label>
-          <label>Email đăng nhập<input type="email" autoComplete="email" value={draft.email} aria-invalid={draft.email.length > 0 && !emailValid} aria-describedby="account-email-help" onChange={(event) => setDraft((current) => ({ ...current, email: event.target.value }))} placeholder="ten@peopleone.com.vn"/>{draft.email.length > 0 && !emailValid && <small className="account-field-error" id="account-email-help">Email chưa đúng định dạng.</small>}</label>
-          <label>Mật khẩu tạm <small>(chỉ tài khoản mới)</small><div className="temporary-password"><input type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={draft.password} onChange={(event) => setDraft((current) => ({ ...current, password: event.target.value }))}/><button type="button" onClick={() => setShowPassword((value) => !value)}>{showPassword ? 'Ẩn' : 'Hiện'}</button></div>{existingDirectoryAccount && <small className="account-field-help">Email đã có tài khoản; mật khẩu hiện tại sẽ được giữ nguyên.</small>}</label>
+          <label>Email đăng nhập<input type="email" autoComplete="email" value={draft.email} disabled={Boolean(editingEmail)} aria-invalid={draft.email.length > 0 && !emailValid} aria-describedby="account-email-help" onChange={(event) => setDraft((current) => ({ ...current, email: event.target.value }))} placeholder="ten@peopleone.com.vn"/>{draft.email.length > 0 && !emailValid && <small className="account-field-error" id="account-email-help">Email chưa đúng định dạng.</small>}</label>
+          <label>Mật khẩu tạm <small>(chỉ tài khoản mới)</small><div className="temporary-password"><input type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={draft.password} disabled={Boolean(editingEmail)} placeholder={editingEmail ? 'Giữ nguyên mật khẩu hiện tại' : ''} onChange={(event) => setDraft((current) => ({ ...current, password: event.target.value }))}/><button type="button" disabled={Boolean(editingEmail)} onClick={() => setShowPassword((value) => !value)}>{showPassword ? 'Ẩn' : 'Hiện'}</button></div>{existingDirectoryAccount && <small className="account-field-help">Email đã có tài khoản; mật khẩu hiện tại sẽ được giữ nguyên.</small>}</label>
         </div>
         <fieldset className="account-role-matrix" aria-describedby="account-role-help">
           <legend>Ma trận vai trò <span>Chọn một hoặc nhiều</span></legend>
           <div>{TRAINING_ROLE_OPTIONS.map(([roleValue, label]) => <label className={draft.roles.includes(roleValue) ? 'selected' : ''} key={roleValue}><input type="checkbox" checked={draft.roles.includes(roleValue)} onChange={() => toggleRole(roleValue)}/><span><b>{label}</b><small>{RoleSummaryText[roleValue]}</small></span></label>)}</div>
           <small className={rolesValid ? 'account-field-help' : 'account-field-error'} id="account-role-help">{rolesValid ? `Đã chọn ${draft.roles.length} vai trò.` : 'Phải chọn ít nhất một vai trò.'}</small>
         </fieldset>
-        <div className="account-form-actions"><button type="button" onClick={() => setDraft((current) => ({ ...current, password: generateTemporaryPassword() }))}>Tạo mật khẩu khác</button><button className="primary" type="submit" disabled={!valid || busy}>{busy ? 'Đang lưu…' : 'Lưu tài khoản và role'}</button></div>
+        <div className="account-form-actions">{editingEmail ? <button type="button" onClick={resetForm}>Hủy chỉnh sửa</button> : <button type="button" onClick={() => setDraft((current) => ({ ...current, password: generateTemporaryPassword() }))}>Tạo mật khẩu khác</button>}<button className="primary" type="submit" disabled={!valid || busy}>{busy ? 'Đang lưu…' : editingEmail ? 'Cập nhật role' : 'Lưu tài khoản và role'}</button></div>
         {!valid && <p className="account-validation-note">Điền đủ họ tên, email hợp lệ và chọn ít nhất một vai trò.</p>}
         {submitError && <div className="account-submit-error" role="alert">{submitError}</div>}
-        <p className="account-security-note">Nếu email đã có trong Supabase Auth, hệ thống chỉ liên kết và bổ sung role, không đổi mật khẩu hiện tại.</p>
-        {created && <div className="account-created" role="status"><b>{created.authUserCreated ? 'Đã tạo' : 'Đã cập nhật'} {created.name}</b><span>{created.email} · {(created.roles || [created.role]).map((value) => roleLabels[value] || value).join(' · ')}</span>{created.authUserCreated && <label>Mật khẩu tạm<input readOnly value={created.temporaryPassword} onFocus={(event) => event.target.select()}/></label>}<small>{created.authUserCreated ? 'Gửi thông tin này cho đúng người dùng qua kênh nội bộ an toàn.' : 'Tài khoản đăng nhập cũ được giữ nguyên; các role đã được bổ sung vào VWork.'}</small></div>}
+        <p className="account-security-note">Khi chỉnh tài khoản hiện có, các role VWork được thay bằng lựa chọn mới; tài khoản đăng nhập và mật khẩu không thay đổi.</p>
+        {created && <div className="account-created" role="status"><b>{created.authUserCreated ? 'Đã tạo' : 'Đã cập nhật'} {created.name}</b><span>{created.email} · {(created.roles || [created.role]).map((value) => roleLabels[value] || value).join(' · ')}</span>{created.authUserCreated && <label>Mật khẩu tạm<input readOnly value={created.temporaryPassword} onFocus={(event) => event.target.select()}/></label>}<small>{created.authUserCreated ? 'Gửi thông tin này cho đúng người dùng qua kênh nội bộ an toàn.' : 'Tài khoản đăng nhập và mật khẩu cũ được giữ nguyên; role VWork đã được cập nhật.'}</small></div>}
       </form>
       <section className="card account-directory-card">
         <div className="account-card-head"><div><span>DANH MỤC ĐỒNG BỘ</span><h3>Người có thể nhận việc</h3></div><b>{directory.length}</b></div>
-        <div className="account-directory-list">{directory.length ? directory.map((person) => <article key={person.id}><span>{person.name.split(/\s+/).slice(-2).map((part) => part[0]).join('').toUpperCase()}</span><div><b>{person.name}</b><small>{person.id}</small></div><div className="account-role-badges">{(person.roles?.length ? person.roles : [person.role]).map((roleValue) => <em key={roleValue}>{roleLabels[roleValue] || roleValue}</em>)}</div></article>) : <div className="account-empty"><b>Chưa có tài khoản ekip</b><span>Tạo tài khoản đầu tiên để giao nhóm việc hoặc task.</span></div>}</div>
+        <div className="account-directory-list">{directory.length ? directory.map((person) => <article className={editingEmail === String(person.email || person.id || '').trim().toLowerCase() ? 'is-editing' : ''} key={person.id}><span>{person.name.split(/\s+/).slice(-2).map((part) => part[0]).join('').toUpperCase()}</span><div><b>{person.name}</b><small>{person.id}</small></div><div className="account-role-badges">{(person.roles?.length ? person.roles : [person.role]).map((roleValue) => <em key={roleValue}>{roleLabels[roleValue] || roleValue}</em>)}</div><button className="account-edit-role" type="button" onClick={() => editAccount(person)} aria-label={`Chỉnh vai trò của ${person.name}`}>Chỉnh role</button></article>) : <div className="account-empty"><b>Chưa có tài khoản ekip</b><span>Tạo tài khoản đầu tiên để giao nhóm việc hoặc task.</span></div>}</div>
       </section>
     </div>
     <div className="account-flow"><span>1. Tạo tài khoản</span><i>→</i><span>2. Giao nhóm cho quản lý</span><i>→</i><span>3. Quản lý giao task cho CTV</span><i>→</i><span>4. CTV đăng nhập và thực hiện</span></div>

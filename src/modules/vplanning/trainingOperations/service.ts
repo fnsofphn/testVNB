@@ -68,7 +68,7 @@ export async function executeTrainingOperationsCommand(command: TrainingOperatio
   }, activeRole);
 }
 
-export async function createTrainingOperationsAccount(input: { fullName: string; email: string; password: string; roles: string[] }, activeRole?: string) {
+export async function createTrainingOperationsAccount(input: { fullName: string; email: string; password: string; roles: string[]; replaceRoles?: boolean }, activeRole?: string) {
   return requestApi('/api/vwork-training-operations-user', {
     method: 'POST',
     body: JSON.stringify(input),
