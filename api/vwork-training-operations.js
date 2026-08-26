@@ -217,12 +217,14 @@ async function loadState(auth) {
 async function loadVWorkAccountDirectory(auth) {
   const [rows, profiles] = await Promise.all([
     requestJson(`${auth.restUrl}/vplanning_users?select=email,full_name,title,roles,departments,owner_ids,payload&order=full_name.asc`, { headers: auth.serviceHeaders }),
-    requestJson(`${auth.restUrl}/vcontent_profiles?select=id,email,full_name,role,title,vplanning_roles,active`, { headers: auth.serviceHeaders }),
+    requestJson(`${auth.restUrl}/vcontent_profiles?select=id,email,full_name,role,title,vplanning_roles,active,auth_user_id`, { headers: auth.serviceHeaders }),
   ]);
   const profilesByEmail = new Map((Array.isArray(profiles) ? profiles : []).map((item) => [normalizeEmail(item.email), item]));
+  const profilesByAuthUserId = new Map((Array.isArray(profiles) ? profiles : []).filter((item) => item.auth_user_id).map((item) => [String(item.auth_user_id), item]));
   return (Array.isArray(rows) ? rows : []).map((item) => {
     const email = normalizeEmail(item.email);
-    const profile = profilesByEmail.get(email);
+    const authUserId = String(item.payload?.authUserId || '');
+    const profile = (authUserId && profilesByAuthUserId.get(authUserId)) || profilesByEmail.get(email);
     const roles = resolveTrainingRoles(profile || { title: item.title }, item);
     const projectIds = Array.isArray(item.payload?.projectIds) ? item.payload.projectIds.map(String) : [];
     const classIds = Array.isArray(item.payload?.classIds) ? item.payload.classIds.map(String) : [];
