@@ -9,7 +9,7 @@ type TrainingOperationsResponse = {
   role: string;
   availableRoles?: string[];
   actor?: { id: string; name: string; email: string; role: string };
-  directory?: Array<{ id: string; name: string; role: 'manager' | 'member'; roles?: Array<'manager' | 'member'> }>;
+  directory?: Array<{ id: string; name: string; role: string; roles?: string[] }>;
   state: any;
   version: number;
   updatedAt?: string | null;
@@ -68,11 +68,11 @@ export async function executeTrainingOperationsCommand(command: TrainingOperatio
   }, activeRole);
 }
 
-export async function createTrainingOperationsAccount(input: { fullName: string; email: string; password: string; role: 'manager' | 'member' }, activeRole?: string) {
+export async function createTrainingOperationsAccount(input: { fullName: string; email: string; password: string; roles: string[] }, activeRole?: string) {
   return requestApi('/api/vwork-training-operations-user', {
     method: 'POST',
     body: JSON.stringify(input),
-  }, activeRole) as Promise<{ ok: true; user: { id: string; authUserId: string; email: string; name: string; role: 'manager' | 'member' } }>;
+  }, activeRole) as Promise<{ ok: true; user: { id: string; authUserId: string; email: string; name: string; role: string; roles: string[]; authUserCreated: boolean } }>;
 }
 
 async function uploadFileToSignedUrl(signedUrl: string, file: File) {

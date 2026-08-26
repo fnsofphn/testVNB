@@ -5,9 +5,14 @@ import { resolveActiveTrainingRole, resolveTrainingRoles } from '../src/modules/
 const MAX_BODY_BYTES = parseByteLimit(process.env.VWORK_TRAINING_OPERATIONS_USER_BODY_LIMIT, 64 * 1024);
 const readLimitedBuffer = createLimitedBufferReader({ maxBytes: MAX_BODY_BYTES });
 const ACCOUNT_ROLES = {
-  manager: { profileRole: 'ctv', vplanningRole: 'vplanning_manager', title: 'Quản lý ekip' },
-  member: { profileRole: 'ctv', vplanningRole: 'vplanning_member', title: 'Thành viên ekip' },
+  operations: { profileRole: 'training_manager', profileVplanningRole: 'vplanning_director', directoryRole: 'vplanning_director', title: 'Quản lý vận hành' },
+  intake: { profileRole: 'client', directoryRole: 'account_manager', title: 'Đầu mối / Sale' },
+  content: { profileRole: 'specialist', directoryRole: 'content_manager', title: 'Chuyên viên nội dung' },
+  vtraining: { profileRole: 'specialist', directoryRole: 'vtraining', title: 'Chuyên viên vận hành VTraining' },
+  manager: { profileRole: 'ctv', profileVplanningRole: 'vplanning_manager', directoryRole: 'vplanning_manager', title: 'Quản lý ekip' },
+  member: { profileRole: 'ctv', profileVplanningRole: 'vplanning_member', directoryRole: 'vplanning_member', title: 'Thành viên ekip' },
 };
+const ACCOUNT_ROLE_VALUES = Object.freeze(Object.keys(ACCOUNT_ROLES));
 
 async function readJsonBody(req) {
   if (req.body && typeof req.body === 'object') {
@@ -93,6 +98,29 @@ async function restoreRow(restUrl, serviceHeaders, table, key, previous) {
   });
 }
 
+async function getAuthUserById(supabaseUrl, serviceHeaders, userId) {
+  if (!userId) return null;
+  try {
+    const result = await requestJson(`${supabaseUrl}/auth/v1/admin/users/${encodeURIComponent(userId)}`, { headers: serviceHeaders });
+    return result?.user || result || null;
+  } catch (error) {
+    if (error?.status === 404) return null;
+    throw error;
+  }
+}
+
+async function findAuthUserByEmail(supabaseUrl, serviceHeaders, email) {
+  const perPage = 1000;
+  for (let page = 1; page <= 100; page += 1) {
+    const result = await requestJson(`${supabaseUrl}/auth/v1/admin/users?page=${page}&per_page=${perPage}`, { headers: serviceHeaders });
+    const users = Array.isArray(result?.users) ? result.users : [];
+    const match = users.find((user) => normalizeEmail(user?.email) === email);
+    if (match) return match;
+    if (users.length < perPage || (Number(result?.last_page) > 0 && page >= Number(result.last_page))) return null;
+  }
+  return null;
+}
+
 export default async function handler(req, res) {
   if (process.env.VERCEL_ENV === 'production' && process.env.VWORK_TRAINING_OPERATIONS_ENABLED !== 'true') {
     res.status(404).json({ ok: false, code: 'TRAINING_OPERATIONS_DISABLED', error: 'VWork Training Operations is not enabled.' });
@@ -116,11 +144,13 @@ export default async function handler(req, res) {
   }
 
   let createdAuthUserId = '';
+  let authUserId = '';
   let provisionedEmail = '';
   let previousProfile = null;
   let previousVplanningUser = null;
   let profileWasCreated = false;
   let vplanningUserWasCreated = false;
+  let databaseWasMutated = false;
   try {
     const authHeader = String(req.headers.authorization || '');
     const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
@@ -157,17 +187,16 @@ export default async function handler(req, res) {
     provisionedEmail = email;
     const fullName = String(body.fullName || '').trim();
     const password = String(body.password || '');
-    const accountRole = String(body.role || '').trim().toLowerCase();
-    const roleConfig = ACCOUNT_ROLES[accountRole];
-    if (!/^\S+@\S+\.\S+$/.test(email) || fullName.length < 2 || !roleConfig) {
-      res.status(400).json({ ok: false, code: 'TRAINING_OPERATIONS_ACCOUNT_INVALID', error: 'Họ tên, email hợp lệ và vai trò ekip là bắt buộc.' });
+    const requestedRoles = (Array.isArray(body.roles) ? body.roles : [body.role])
+      .map((value) => String(value || '').trim().toLowerCase())
+      .filter((value, index, values) => value && values.indexOf(value) === index);
+    const invalidRoles = requestedRoles.filter((value) => !ACCOUNT_ROLE_VALUES.includes(value));
+    const primaryRole = requestedRoles[0];
+    const primaryRoleConfig = ACCOUNT_ROLES[primaryRole];
+    if (!/^\S+@\S+\.\S+$/.test(email) || fullName.length < 2 || !primaryRoleConfig || invalidRoles.length) {
+      res.status(400).json({ ok: false, code: 'TRAINING_OPERATIONS_ACCOUNT_INVALID', error: 'Họ tên, email hợp lệ và ít nhất một vai trò VWork hợp lệ là bắt buộc.' });
       return;
     }
-    if (password.length < 8 || password.length > 128) {
-      res.status(400).json({ ok: false, code: 'TRAINING_OPERATIONS_PASSWORD_INVALID', error: 'Mật khẩu tạm phải có từ 8 đến 128 ký tự.' });
-      return;
-    }
-
     const [profiles, users] = await Promise.all([
       requestJson(`${restUrl}/vcontent_profiles?select=id,email,full_name,role,title,vplanning_roles,active,access_scope,auth_user_id&email=eq.${encodeURIComponent(email)}&limit=1`, { headers: serviceHeaders }),
       requestJson(`${restUrl}/vplanning_users?select=email,full_name,title,roles,departments,owner_ids,payload&email=eq.${encodeURIComponent(email)}&limit=1`, { headers: serviceHeaders }),
@@ -175,28 +204,52 @@ export default async function handler(req, res) {
     previousProfile = Array.isArray(profiles) ? profiles[0] || null : null;
     previousVplanningUser = Array.isArray(users) ? users[0] || null : null;
 
-    const created = await requestJson(`${config.supabaseUrl}/auth/v1/admin/users`, {
-      method: 'POST',
-      headers: serviceHeaders,
-      body: JSON.stringify({
-        email,
-        password,
-        email_confirm: true,
-        user_metadata: { full_name: fullName },
-        app_metadata: { product: 'vwork', module: 'training_operations', role: accountRole },
-      }),
-    });
-    createdAuthUserId = String(created?.id || created?.user?.id || '');
-    if (!createdAuthUserId) throw new Error('Supabase Auth did not return a user id.');
+    const knownAuthUserId = String(previousProfile?.auth_user_id || previousVplanningUser?.payload?.authUserId || '');
+    let authUser = await getAuthUserById(config.supabaseUrl, serviceHeaders, knownAuthUserId);
+    if (authUser && normalizeEmail(authUser.email) !== email) authUser = null;
+    if (!authUser && (password.length < 8 || password.length > 128)) {
+      authUser = await findAuthUserByEmail(config.supabaseUrl, serviceHeaders, email);
+      if (!authUser) {
+        res.status(400).json({ ok: false, code: 'TRAINING_OPERATIONS_PASSWORD_INVALID', error: 'Tài khoản mới cần mật khẩu tạm từ 8 đến 128 ký tự.' });
+        return;
+      }
+    }
+    if (!authUser) {
+      try {
+        const created = await requestJson(`${config.supabaseUrl}/auth/v1/admin/users`, {
+          method: 'POST',
+          headers: serviceHeaders,
+          body: JSON.stringify({
+            email,
+            password,
+            email_confirm: true,
+            user_metadata: { full_name: fullName },
+            app_metadata: { product: 'vwork', module: 'training_operations', roles: requestedRoles },
+          }),
+        });
+        authUser = created?.user || created || null;
+        createdAuthUserId = String(authUser?.id || '');
+      } catch (error) {
+        const exists = /already.*registered|user already|already exists/i.test(String(error?.message || error));
+        if (!exists) throw error;
+        authUser = await findAuthUserByEmail(config.supabaseUrl, serviceHeaders, email);
+        if (!authUser) throw error;
+      }
+    }
+    authUserId = String(authUser?.id || '');
+    if (!authUserId) throw new Error('Supabase Auth did not return a user id.');
 
-    const vplanningRoles = [...new Set([...(previousProfile?.vplanning_roles || []), roleConfig.vplanningRole])];
+    const selectedRoleConfigs = requestedRoles.map((value) => ACCOUNT_ROLES[value]);
+    const profileVplanningRoles = selectedRoleConfigs.map((configItem) => configItem.profileVplanningRole).filter(Boolean);
+    const directoryRoles = selectedRoleConfigs.map((configItem) => configItem.directoryRole);
+    const vplanningRoles = [...new Set([...(previousProfile?.vplanning_roles || []), ...profileVplanningRoles])];
     const profilePayload = {
       email,
       full_name: fullName,
-      auth_user_id: createdAuthUserId,
+      auth_user_id: authUserId,
       active: true,
       vplanning_roles: vplanningRoles,
-      ...(previousProfile ? {} : { id: `VWOPS_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`, role: roleConfig.profileRole, title: roleConfig.title, access_scope: 'self' }),
+      ...(previousProfile ? {} : { id: `VWOPS_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`, role: primaryRoleConfig.profileRole, title: primaryRoleConfig.title, access_scope: 'self' }),
     };
     if (previousProfile?.id) {
       await requestJson(`${restUrl}/vcontent_profiles?id=eq.${encodeURIComponent(previousProfile.id)}`, {
@@ -208,6 +261,7 @@ export default async function handler(req, res) {
         method: 'POST', headers: { ...serviceHeaders, Prefer: 'return=minimal' }, body: JSON.stringify(profilePayload),
       });
     }
+    databaseWasMutated = true;
 
     vplanningUserWasCreated = !previousVplanningUser;
     await requestJson(`${restUrl}/vplanning_users?on_conflict=email`, {
@@ -216,17 +270,20 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         email,
         full_name: fullName,
-        title: roleConfig.title,
-        roles: [...new Set([...(previousVplanningUser?.roles || []), roleConfig.vplanningRole])],
+        title: previousVplanningUser?.title || primaryRoleConfig.title,
+        roles: [...new Set([...(previousVplanningUser?.roles || []), ...directoryRoles])],
         departments: previousVplanningUser?.departments || ['VTraining'],
         owner_ids: previousVplanningUser?.owner_ids || [],
-        payload: { ...(previousVplanningUser?.payload || {}), source: 'vwork_training_operations', authUserId: createdAuthUserId },
+        payload: { ...(previousVplanningUser?.payload || {}), source: 'vwork_training_operations', authUserId },
       }),
     });
 
-    res.status(201).json({ ok: true, user: { id: email, authUserId: createdAuthUserId, email, name: fullName, role: accountRole } });
+    res.status(createdAuthUserId ? 201 : 200).json({
+      ok: true,
+      user: { id: email, authUserId, email, name: fullName, role: primaryRole, roles: requestedRoles, authUserCreated: Boolean(createdAuthUserId) },
+    });
   } catch (error) {
-    if (createdAuthUserId) {
+    if (databaseWasMutated || createdAuthUserId) {
       const restUrl = `${config.supabaseUrl}/rest/v1`;
       const serviceHeaders = buildHeaders(config.serviceRoleKey, `Bearer ${config.serviceRoleKey}`);
       try {
@@ -240,7 +297,7 @@ export default async function handler(req, res) {
         } else if (previousVplanningUser) {
           await restoreRow(restUrl, serviceHeaders, 'vplanning_users', 'email', previousVplanningUser);
         }
-        await requestJson(`${config.supabaseUrl}/auth/v1/admin/users/${encodeURIComponent(createdAuthUserId)}`, { method: 'DELETE', headers: serviceHeaders });
+        if (createdAuthUserId) await requestJson(`${config.supabaseUrl}/auth/v1/admin/users/${encodeURIComponent(createdAuthUserId)}`, { method: 'DELETE', headers: serviceHeaders });
       } catch {
         // Preserve the original provisioning error; reconciliation is reported below.
       }

@@ -33,7 +33,10 @@ assert(page.includes("{ id: 'VSurvey', mature: false }") && page.includes("{ id:
 assert(page.includes('Clone cấu hình từ') && page.includes('LỚP MẪU'), 'New classes must choose a class-template clone source.');
 assert(page.includes('+ Thêm lớp') && page.includes('Lưu lớp'), 'The add-class interaction must expose an editable form and save action.');
 assert(page.includes('removeDraftClass') && page.includes('Xóa lớp'), 'The create flow must support removing draft classes while preserving at least one class.');
-assert(page.includes('Ekip & tài khoản') && page.includes('Tạo tài khoản thật'), 'Operations must be able to provision real team login accounts from the module.');
+assert(page.includes('Ekip & tài khoản') && page.includes('Lưu tài khoản và role'), 'Operations must be able to provision or update real team login accounts from the module.');
+assert(page.includes('Tài khoản mới cần mật khẩu 8–128 ký tự') && page.includes('account-submit-error'), 'Account creation must explain password validation and show API failures next to the form.');
+assert(page.includes('account-role-matrix') && page.includes('TRAINING_ROLE_OPTIONS.map') && page.includes("roles: ['member']"), 'Account management must expose a multi-select matrix for all VWork roles.');
+assert(userApi.includes('findAuthUserByEmail') && userApi.includes('roles: requestedRoles') && userApi.includes('authUserCreated'), 'Provisioning must link an existing Auth user and persist multiple roles without resetting its password.');
 assert(page.includes('không sinh công việc ngang hàng ở cấp dự án hoặc khóa học'), 'Tasks must be generated inside classes only.');
 assert(!page.includes('LegacyCreateWizard'), 'The obsolete project/course-level task wizard must not remain in production source.');
 assert(!page.includes('MOCKUP DUYỆT') && !page.includes('Mock state'), 'Production source must not expose mockup-only labels.');
@@ -89,6 +92,8 @@ assert(databaseGuards.includes('GUARD_STALE_CLIENT_ACCEPTED') && databaseGuards.
 assert(databaseGuards.includes('GUARD_LATE_FAILURE_CHANGED_TASK') && databaseGuards.trimEnd().endsWith('rollback;'), 'Database guard smoke must prove transaction rollback without leaving test rows.');
 
 assert(css.includes('.vwork-training-operations.app-shell'), 'Training Operations CSS must be rooted at its isolated module class.');
+assert(css.includes('.account-form-actions button:disabled') && css.includes('cursor:not-allowed;opacity:.45'), 'Disabled account submission must be visually distinguishable from an actionable primary button.');
+assert(css.includes('.account-role-matrix') && css.includes('.account-role-badges'), 'The account role matrix and directory role badges must be styled.');
 assert(css.includes('.vwork-training-operations{overflow-x:clip}'), 'Horizontal clipping must not create a scroll container that breaks sticky navigation.');
 assert(css.includes('.layered-task-detail>.task-drawer{position:sticky') && css.includes('max-height:calc(100vh - 96px)') && css.includes('overflow-y:auto'), 'Desktop task details must remain visible below the sticky topbar and scroll independently.');
 assert(!/^\s*(?:body|html|:root|\.sidebar|\.topbar|button|input|select|textarea)\s*\{/m.test(css), 'Training Operations CSS must not leak generic selectors into VLearning or VTraining.');

@@ -233,12 +233,13 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
       const response = await createTrainingOperationsAccount(draft, role);
       await loadWorkspace({ quiet: true });
       setSyncState('synced');
-      notify(`Đã tạo tài khoản đăng nhập cho ${response.user.name}. Người dùng có thể đăng nhập và nhận việc ngay.`);
-      return response.user;
+      notify(`${response.user.authUserCreated ? 'Đã tạo tài khoản đăng nhập' : 'Đã cập nhật quyền VWork'} cho ${response.user.name}.`);
+      return { user: response.user, error: '' };
     } catch (error) {
+      const message = error.message || 'Không thể tạo tài khoản ekip.';
       setSyncState('error');
-      setSyncError(error.message || 'Không thể tạo tài khoản ekip.');
-      return null;
+      setSyncError(message);
+      return { user: null, error: message };
     }
   }
 
@@ -572,44 +573,74 @@ function generateTemporaryPassword() {
 }
 
 function AccountsPanel({ directory = [], provisionAccount }) {
-  const [draft, setDraft] = useState({ fullName: '', email: '', role: 'member', password: generateTemporaryPassword() });
+  const [draft, setDraft] = useState({ fullName: '', email: '', roles: ['member'], password: generateTemporaryPassword() });
   const [busy, setBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [created, setCreated] = useState(null);
-  const valid = draft.fullName.trim().length >= 2 && /^\S+@\S+\.\S+$/.test(draft.email.trim()) && draft.password.length >= 8;
+  const [submitError, setSubmitError] = useState('');
+  const nameValid = draft.fullName.trim().length >= 2;
+  const emailValid = /^\S+@\S+\.\S+$/.test(draft.email.trim());
+  const passwordValid = draft.password.length >= 8 && draft.password.length <= 128;
+  const existingDirectoryAccount = directory.some((person) => String(person.email || person.id || '').trim().toLowerCase() === draft.email.trim().toLowerCase());
+  const rolesValid = draft.roles.length > 0;
+  const valid = nameValid && emailValid && (existingDirectoryAccount || passwordValid) && rolesValid;
+  const roleLabels = Object.fromEntries(TRAINING_ROLE_OPTIONS);
+  function toggleRole(roleValue) {
+    setDraft((current) => ({
+      ...current,
+      roles: current.roles.includes(roleValue)
+        ? current.roles.filter((value) => value !== roleValue)
+        : [...current.roles, roleValue],
+    }));
+  }
   async function submit(event) {
     event.preventDefault();
     if (!valid || busy) return;
+    setSubmitError('');
     setBusy(true);
-    const user = await provisionAccount({ ...draft, fullName: draft.fullName.trim(), email: draft.email.trim().toLowerCase() });
+    const result = await provisionAccount({ ...draft, fullName: draft.fullName.trim(), email: draft.email.trim().toLowerCase() });
     setBusy(false);
-    if (!user) return;
-    setCreated({ ...user, temporaryPassword: draft.password });
-    setDraft({ fullName: '', email: '', role: 'member', password: generateTemporaryPassword() });
+    if (!result?.user) {
+      setSubmitError(result?.error || 'Không thể tạo tài khoản ekip. Vui lòng thử lại.');
+      return;
+    }
+    setCreated({ ...result.user, temporaryPassword: draft.password });
+    setDraft({ fullName: '', email: '', roles: ['member'], password: generateTemporaryPassword() });
   }
   return <section className="accounts-workspace">
     <div className="page-title accounts-title"><div><small>VWORK IDENTITY · END-TO-END</small><h2>Ekip và tài khoản đăng nhập</h2><p>Tạo đồng thời tài khoản Supabase Auth, hồ sơ PeopleOne và thành viên trong danh mục VWork để có thể giao việc thật.</p></div><span className="account-total">{directory.length} tài khoản ekip</span></div>
     <div className="accounts-grid">
       <form className="card account-create-card" onSubmit={submit}>
-        <div className="account-card-head"><div><span>TẠO TÀI KHOẢN</span><h3>Thành viên mới</h3></div><b>AUTH + VWORK</b></div>
+        <div className="account-card-head"><div><span>TẠO / CẬP NHẬT TÀI KHOẢN</span><h3>Thành viên và vai trò</h3></div><b>AUTH + VWORK</b></div>
         <div className="form-grid">
-          <label>Họ và tên<input autoComplete="name" value={draft.fullName} onChange={(event) => setDraft((current) => ({ ...current, fullName: event.target.value }))} placeholder="Nguyễn Văn A"/></label>
-          <label>Email đăng nhập<input type="email" autoComplete="email" value={draft.email} onChange={(event) => setDraft((current) => ({ ...current, email: event.target.value }))} placeholder="ten@peopleone.com.vn"/></label>
-          <label>Vai trò<select value={draft.role} onChange={(event) => setDraft((current) => ({ ...current, role: event.target.value }))}><option value="member">Thành viên ekip / CTV</option><option value="manager">Quản lý ekip</option></select></label>
-          <label>Mật khẩu tạm<div className="temporary-password"><input type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={draft.password} onChange={(event) => setDraft((current) => ({ ...current, password: event.target.value }))}/><button type="button" onClick={() => setShowPassword((value) => !value)}>{showPassword ? 'Ẩn' : 'Hiện'}</button></div></label>
+          <label>Họ và tên<input autoComplete="name" value={draft.fullName} aria-invalid={draft.fullName.length > 0 && !nameValid} aria-describedby="account-name-help" onChange={(event) => setDraft((current) => ({ ...current, fullName: event.target.value }))} placeholder="Nguyễn Văn A"/>{draft.fullName.length > 0 && !nameValid && <small className="account-field-error" id="account-name-help">Nhập ít nhất 2 ký tự.</small>}</label>
+          <label>Email đăng nhập<input type="email" autoComplete="email" value={draft.email} aria-invalid={draft.email.length > 0 && !emailValid} aria-describedby="account-email-help" onChange={(event) => setDraft((current) => ({ ...current, email: event.target.value }))} placeholder="ten@peopleone.com.vn"/>{draft.email.length > 0 && !emailValid && <small className="account-field-error" id="account-email-help">Email chưa đúng định dạng.</small>}</label>
+          <label>Mật khẩu tạm <small>(chỉ tài khoản mới)</small><div className="temporary-password"><input type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={draft.password} minLength={existingDirectoryAccount ? undefined : 8} maxLength={128} aria-invalid={!existingDirectoryAccount && !passwordValid} aria-describedby="account-password-help" onChange={(event) => setDraft((current) => ({ ...current, password: event.target.value }))}/><button type="button" onClick={() => setShowPassword((value) => !value)}>{showPassword ? 'Ẩn' : 'Hiện'}</button></div><small className={existingDirectoryAccount || passwordValid ? 'account-field-help' : 'account-field-error'} id="account-password-help">{existingDirectoryAccount ? 'Email đã có tài khoản; mật khẩu hiện tại sẽ được giữ nguyên.' : passwordValid ? 'Mật khẩu hợp lệ (8–128 ký tự).' : `Tài khoản mới cần mật khẩu 8–128 ký tự (hiện có ${draft.password.length}).`}</small></label>
         </div>
-        <div className="account-form-actions"><button type="button" onClick={() => setDraft((current) => ({ ...current, password: generateTemporaryPassword() }))}>Tạo mật khẩu khác</button><button className="primary" type="submit" disabled={!valid || busy}>{busy ? 'Đang tạo…' : 'Tạo tài khoản thật'}</button></div>
-        <p className="account-security-note">Mật khẩu chỉ hiển thị lại một lần sau khi tạo. Không lưu mật khẩu trong dữ liệu VWork.</p>
-        {created && <div className="account-created" role="status"><b>Đã tạo {created.name}</b><span>{created.email} · {created.role === 'manager' ? 'Quản lý ekip' : 'Thành viên ekip'}</span><label>Mật khẩu tạm<input readOnly value={created.temporaryPassword} onFocus={(event) => event.target.select()}/></label><small>Gửi thông tin này cho đúng người dùng qua kênh nội bộ an toàn.</small></div>}
+        <fieldset className="account-role-matrix" aria-describedby="account-role-help">
+          <legend>Ma trận vai trò <span>Chọn một hoặc nhiều</span></legend>
+          <div>{TRAINING_ROLE_OPTIONS.map(([roleValue, label]) => <label className={draft.roles.includes(roleValue) ? 'selected' : ''} key={roleValue}><input type="checkbox" checked={draft.roles.includes(roleValue)} onChange={() => toggleRole(roleValue)}/><span><b>{label}</b><small>{RoleSummaryText[roleValue]}</small></span></label>)}</div>
+          <small className={rolesValid ? 'account-field-help' : 'account-field-error'} id="account-role-help">{rolesValid ? `Đã chọn ${draft.roles.length} vai trò.` : 'Phải chọn ít nhất một vai trò.'}</small>
+        </fieldset>
+        <div className="account-form-actions"><button type="button" onClick={() => setDraft((current) => ({ ...current, password: generateTemporaryPassword() }))}>Tạo mật khẩu khác</button><button className="primary" type="submit" disabled={!valid || busy}>{busy ? 'Đang lưu…' : 'Lưu tài khoản và role'}</button></div>
+        {!valid && <p className="account-validation-note">Điền đủ họ tên, email hợp lệ, chọn ít nhất một vai trò và dùng mật khẩu từ 8 ký tự nếu tạo tài khoản mới.</p>}
+        {submitError && <div className="account-submit-error" role="alert">{submitError}</div>}
+        <p className="account-security-note">Nếu email đã có trong Supabase Auth, hệ thống chỉ liên kết và bổ sung role, không đổi mật khẩu hiện tại.</p>
+        {created && <div className="account-created" role="status"><b>{created.authUserCreated ? 'Đã tạo' : 'Đã cập nhật'} {created.name}</b><span>{created.email} · {(created.roles || [created.role]).map((value) => roleLabels[value] || value).join(' · ')}</span>{created.authUserCreated && <label>Mật khẩu tạm<input readOnly value={created.temporaryPassword} onFocus={(event) => event.target.select()}/></label>}<small>{created.authUserCreated ? 'Gửi thông tin này cho đúng người dùng qua kênh nội bộ an toàn.' : 'Tài khoản đăng nhập cũ được giữ nguyên; các role đã được bổ sung vào VWork.'}</small></div>}
       </form>
       <section className="card account-directory-card">
         <div className="account-card-head"><div><span>DANH MỤC ĐỒNG BỘ</span><h3>Người có thể nhận việc</h3></div><b>{directory.length}</b></div>
-        <div className="account-directory-list">{directory.length ? directory.map((person) => <article key={person.id}><span>{person.name.split(/\s+/).slice(-2).map((part) => part[0]).join('').toUpperCase()}</span><div><b>{person.name}</b><small>{person.id}</small></div><em>{person.role === 'manager' ? 'Quản lý ekip' : 'Thành viên ekip'}</em></article>) : <div className="account-empty"><b>Chưa có tài khoản ekip</b><span>Tạo tài khoản đầu tiên để giao nhóm việc hoặc task.</span></div>}</div>
+        <div className="account-directory-list">{directory.length ? directory.map((person) => <article key={person.id}><span>{person.name.split(/\s+/).slice(-2).map((part) => part[0]).join('').toUpperCase()}</span><div><b>{person.name}</b><small>{person.id}</small></div><div className="account-role-badges">{(person.roles?.length ? person.roles : [person.role]).map((roleValue) => <em key={roleValue}>{roleLabels[roleValue] || roleValue}</em>)}</div></article>) : <div className="account-empty"><b>Chưa có tài khoản ekip</b><span>Tạo tài khoản đầu tiên để giao nhóm việc hoặc task.</span></div>}</div>
       </section>
     </div>
     <div className="account-flow"><span>1. Tạo tài khoản</span><i>→</i><span>2. Giao nhóm cho quản lý</span><i>→</i><span>3. Quản lý giao task cho CTV</span><i>→</i><span>4. CTV đăng nhập và thực hiện</span></div>
   </section>;
 }
+
+const RoleSummaryText = {
+  operations: 'Quản trị vận hành và phân công', intake: 'Đầu mối thông tin / Sale', content: 'Chuẩn bị input nội dung',
+  vtraining: 'Vận hành lớp trên VTraining', manager: 'Nhận nhóm và giao việc', member: 'Thực hiện task được giao',
+};
 
 function RoleSummary({ role }) { const copy = { operations: ['Giao nhóm việc cho Quản lý ekip', 'Duyệt yêu cầu trước khi tạo task'], intake: ['Chỉ nộp danh sách theo từng lớp', 'Tạo yêu cầu thay đổi, không tự tạo task'], content: ['Nộp 5 nhóm input nội dung', 'Theo dõi phiên bản độc lập'], vtraining: ['Theo dõi 03 nhóm VTraining', 'Tùy chỉnh checklist và deadline'], manager: ['Nhận nhóm việc và giao CTV', 'Xác nhận PASS / REWORK'], member: ['Thực hiện checklist chi tiết', 'Gửi yêu cầu xác nhận hoàn thành'] }[role]; return <ul className="role-summary">{copy.map((item) => <li key={item}>{item}</li>)}</ul>; }
 
