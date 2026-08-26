@@ -232,7 +232,7 @@
 @media(max-width:760px){.vwork-training-operations .class-list article{grid-template-columns:1fr}.vwork-training-operations .class-list .remove-class{justify-self:start}}
 
 /* VWork feedback: variable input, inline task configuration and directory picker. */
-.vwork-training-operations{overflow-x:hidden}
+.vwork-training-operations{overflow-x:clip}
 .vwork-training-operations .sidebar{background:var(--sidebar)}
 .vwork-training-operations .sidebar nav button.active{box-shadow:inset 3px 0 var(--primary)}
 .vwork-training-operations .game-content-fields{grid-column:1/-1;display:grid;gap:10px;margin:0;padding:14px;border:1px solid var(--border);border-radius:9px}
@@ -248,6 +248,7 @@
 .vwork-training-operations .task-create-actions{justify-content:flex-end;margin-top:12px}
 .vwork-training-operations .drawer-head-actions{align-items:flex-start}
 .vwork-training-operations .drawer-head-actions>button{border:0;background:transparent;font-size:20px;line-height:1;padding:2px 5px}
+.vwork-training-operations .task-drawer{scrollbar-gutter:stable}
 .vwork-training-operations .assignee-trigger{display:flex;width:100%;align-items:center;justify-content:space-between;gap:8px;text-align:left}
 .vwork-training-operations .task-config-section{background:#fbf8f9}
 .vwork-training-operations .task-config-section .danger-action{border-color:#db9aa7;color:#9b1830;background:#fff}
@@ -265,6 +266,10 @@
 .vwork-training-operations .assignee-person em{color:#6c5360;font-size:9px;font-style:normal;text-align:right}
 .vwork-training-operations .assignment-state{padding:24px;border:1px dashed var(--border);border-radius:8px;color:var(--muted);font-size:11px;text-align:center}
 .vwork-training-operations .assignment-dialog>.modal-actions{padding:0 24px 20px}
+
+@media(min-width:1401px){
+  .vwork-training-operations .layered-task-detail>.task-drawer{position:sticky;top:80px;align-self:start;max-height:calc(100vh - 96px);overflow-y:auto;overscroll-behavior:contain}
+}
 
 @media(max-width:760px){
   .vwork-training-operations .sidebar{padding:14px}

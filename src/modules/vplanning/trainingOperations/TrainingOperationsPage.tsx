@@ -339,7 +339,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
       }, message || `Đã cập nhật cấu hình ${id}.`);
     }
     setTasks((current) => current.map((item) => item.id === id ? { ...item, ...patch } : item));
-    if (message && role === 'manager') {
+    if (message && ['manager', 'operations'].includes(role)) {
       const next = { ...task, ...patch };
       return runCommand('ASSIGN_TASKS', { taskIds: [id], assigneeId: next.assigneeId || next.assignee, assigneeName: next.assignee, reviewerId: next.reviewerId || next.reviewer, reviewerName: next.reviewer, priority: next.priority || 'Normal', deadline: next.plannedDeadline || null, deadlineOverrideReason: next.deadlineOverrideReason || '', requireSeparation: true }, message);
     }

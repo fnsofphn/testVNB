@@ -55,6 +55,7 @@ assert(userApi.includes('/auth/v1/admin/users') && userApi.includes('/vcontent_p
 assert(userApi.includes('TRAINING_OPERATIONS_ACCOUNT_PERMISSION_DENIED') && userApi.includes('rollbackAttempted'), 'Account provisioning must enforce server authorization and attempt compensation after partial failure.');
 assert(api.includes('loadTeamDirectory(auth)') && api.includes('activeProfiles') && api.includes("roles.includes('manager') ? 'manager' : roles.includes('member') ? 'member' : roles[0]"), 'Assignment options must preserve active multi-role identities from the VWork directory.');
 assert(page.includes('Bạn muốn giao việc cho ai?') && page.includes('vwork-recent-assignees') && page.includes('Tìm theo tên hoặc email'), 'Assignment must use a searchable directory popup with recent accounts.');
+assert(page.includes("message && ['manager', 'operations'].includes(role)"), 'Manager and operations assignment actions must both persist through the server command boundary.');
 assert(api.includes('normalizeAssignmentCommand') && api.includes('TRAINING_OPERATIONS_ASSIGNMENT_SCOPE_DENIED'), 'Assignment identity and project/class scope must be validated on the server.');
 assert(page.includes('game_contents') && page.includes('GameContentFields'), 'D05 must render and persist one content/link field per configured game.');
 assert(domain.includes("case 'CREATE_CLASS_TASK'") && domain.includes("case 'ARCHIVE_TASK'"), 'Class task creation and soft archive must be enforced in the domain.');
@@ -88,6 +89,8 @@ assert(databaseGuards.includes('GUARD_STALE_CLIENT_ACCEPTED') && databaseGuards.
 assert(databaseGuards.includes('GUARD_LATE_FAILURE_CHANGED_TASK') && databaseGuards.trimEnd().endsWith('rollback;'), 'Database guard smoke must prove transaction rollback without leaving test rows.');
 
 assert(css.includes('.vwork-training-operations.app-shell'), 'Training Operations CSS must be rooted at its isolated module class.');
+assert(css.includes('.vwork-training-operations{overflow-x:clip}'), 'Horizontal clipping must not create a scroll container that breaks sticky navigation.');
+assert(css.includes('.layered-task-detail>.task-drawer{position:sticky') && css.includes('max-height:calc(100vh - 96px)') && css.includes('overflow-y:auto'), 'Desktop task details must remain visible below the sticky topbar and scroll independently.');
 assert(!/^\s*(?:body|html|:root|\.sidebar|\.topbar|button|input|select|textarea)\s*\{/m.test(css), 'Training Operations CSS must not leak generic selectors into VLearning or VTraining.');
 
 console.log('V-Work Training Operations architecture checks passed.');

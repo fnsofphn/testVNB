@@ -263,6 +263,12 @@ async function normalizeAssignmentCommand(auth, state, command) {
     error.code = 'TRAINING_OPERATIONS_REVIEWER_INVALID';
     throw error;
   }
+  if (payload.requireSeparation && assignee.id === reviewer.id) {
+    const error = new Error('Người thực hiện và người duyệt phải khác nhau.');
+    error.status = 400;
+    error.code = 'TRAINING_OPERATIONS_SEPARATION_REQUIRED';
+    throw error;
+  }
   const taskIds = Array.isArray(payload.taskIds) ? payload.taskIds : [payload.taskId];
   const tasks = taskIds.map((taskId) => state.tasks.find((item) => item.id === taskId));
   if (tasks.some((item) => !item)) {
