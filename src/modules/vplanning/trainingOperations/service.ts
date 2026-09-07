@@ -1,6 +1,4 @@
-import * as XLSX from 'xlsx';
 import { supabase } from '@/lib/supabaseClient';
-import { validateRosterRows } from './validation.js';
 
 export type TrainingOperationsCommand = { type: string; payload?: Record<string, unknown> };
 
@@ -105,13 +103,4 @@ export async function getTrainingOperationsFileUrl(path: string, fileName?: stri
   }, activeRole);
   if (!payload?.download?.signedUrl) throw new Error('Server did not return a signed download URL.');
   return payload.download.signedUrl as string;
-}
-
-export async function validateRosterWorkbook(file: File, expectedClassCodes: string[]) {
-  const arrayBuffer = await file.arrayBuffer();
-  const workbook = XLSX.read(arrayBuffer, { type: 'array', cellDates: false });
-  const sheetName = workbook.SheetNames[0];
-  if (!sheetName) return validateRosterRows([], expectedClassCodes);
-  const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets[sheetName], { defval: '' });
-  return validateRosterRows(rows, expectedClassCodes);
 }

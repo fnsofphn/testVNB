@@ -50,8 +50,13 @@ assert(!page.includes('LegacyCreateWizard'), 'The obsolete project/course-level 
 assert(!page.includes('MOCKUP DUYỆT') && !page.includes('Mock state'), 'Production source must not expose mockup-only labels.');
 assert(page.includes("runCommand('ASSIGN_GROUP_MANAGER'"), 'Group manager assignment must not be implemented as CTV assignment.');
 assert(page.includes("content: ['vlearning', 'game', 'discussion', 'assignment', 'test']"), 'Content workspace must expose D04-D08 exactly.');
-assert(!page.includes('validateRosterWorkbook') && page.includes('Chọn file danh sách<input type="file" onChange='), 'D03 must accept the uploaded source file without enforcing a roster template or business file format.');
-assert(page.includes('Không kiểm duyệt định dạng hoặc cấu trúc dữ liệu nghiệp vụ.'), 'D03 upload must explain that business-format validation is not applied.');
+assert(!page.includes('validateRosterWorkbook') && !service.includes('validateRosterWorkbook') && page.includes('Chọn file danh sách') && page.includes('input type="file"'), 'D03 must accept the uploaded source file without enforcing a roster template or business file format.');
+assert(page.includes('không kiểm duyệt format') && page.includes('không đọc cấu trúc để suy đoán lớp'), 'D03 upload must explain that business-format validation and class inference are not applied.');
+assert(page.includes('training-context-bar') && page.includes('Ngữ cảnh dự án khóa học lớp'), 'FB2 must use one Project → Course → Class context bar.');
+assert(page.includes('WorkActionInbox') && page.includes('Theo dõi') && page.includes('Nghiệm thu'), 'Course managers must receive one action inbox with Tracking and Acceptance tabs.');
+assert(page.includes('CourseControlPanel') && page.includes("runCommand('ASSIGN_COURSE_ROLE'") && page.includes("runCommand('UPDATE_COURSE_STATUS'"), 'Course team and lifecycle controls must persist through the isolated domain.');
+assert(domain.includes('schemaVersion = 2') && domain.includes("scopeLevel: 'course'") && domain.includes("scopeLevel: 'class'"), 'FB2 state must distinguish course and class inputs in schema v2.');
+assert(api.includes('normalizeTrainingOperationsState') && api.includes('scopedCourseIds'), 'The API must normalize legacy state and scope non-global users by course membership.');
 assert(page.includes('const baseTasks = tasks;') && page.includes('const baseVisible = tasks;'), 'Member task lists must trust the server-scoped result instead of filtering a hard-coded mock identity.');
 assert(!page.includes("task.assignee === 'Nam Nguyễn'") && !page.includes('<option>Nam Nguyễn</option>'), 'Production assignment UI must not depend on mock people names.');
 for (const field of ['content_name', 'eln_structure', 'game_content', 'play_limit', 'topic_content', 'group_reference', 'assignment_brief', 'rubric_pass_score', 'question_bank', 'test_rule', 'material_name_type', 'class_ids', 'visible_from', 'visible_to']) {
