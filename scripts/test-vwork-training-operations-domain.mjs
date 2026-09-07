@@ -4,7 +4,6 @@ import {
   createInitialTrainingOperationsState,
   summarizeTrainingOperationsState,
 } from '../src/modules/vplanning/trainingOperations/domain.js';
-import { validateRosterRows } from '../src/modules/vplanning/trainingOperations/validation.js';
 
 const clock = { value: Date.parse('2026-08-25T01:00:00.000Z') };
 const context = (role, name) => ({ role, actor: { id: `${role}-01`, email: `${role}@peopleone.vn`, name, role }, now: new Date(clock.value += 1000).toISOString() });
@@ -26,19 +25,13 @@ assert.equal(state.activeProjectId, 'ALPHA-2026');
 assert.equal(state.tasks.filter((item) => item.projectId === 'ALPHA-2026').length, 11);
 assert.ok(state.tasks.filter((item) => item.projectId === 'ALPHA-2026').every((item) => item.scopeLevel === 'class' && item.status === 'WAITING_INPUT'));
 
-// File validation used by UC02.
-const rosterValidation = validateRosterRows([
-  { 'Mã lớp': 'ALPHA01', 'Mã nhóm': 'G01', Email: 'a@alpha.vn', 'Họ tên': 'Học viên A' },
-  { 'Mã lớp': 'ALPHA01', 'Mã nhóm': 'G02', Email: 'b@alpha.vn', 'Họ tên': 'Học viên B' },
-], ['ALPHA01']);
-assert.equal(rosterValidation.valid, true);
-assert.equal(rosterValidation.summary.rowCount, 2);
-assert.deepEqual(rosterValidation.data.groups.map((item) => item.code), ['G01', 'G02']);
-assert.equal(validateRosterRows([{ Email: 'a@alpha.vn' }], ['ALPHA01']).valid, false);
-
-// UC02 — shared class/learner input.
-state = command(state, 'SUBMIT_INPUT', { projectId: 'ALPHA-2026', inputKey: 'roster', sourceStepCode: 'UC02-B04', data: rosterValidation.data, validation: rosterValidation, files: [{ name: 'alpha-roster.xlsx', fileUrl: 'https://files.example/alpha-roster.xlsx' }] }, 'intake', 'Đầu mối Alpha');
+// UC02 — D03 accepts the user's source file without validating its business format.
+state = command(state, 'SUBMIT_INPUT', { projectId: 'ALPHA-2026', inputKey: 'roster', sourceStepCode: 'UC02-B04', data: {}, validation: { valid: false, errors: ['Client could not parse this format.'] }, files: [{ name: 'alpha-roster-notes.txt', fileUrl: 'https://files.example/alpha-roster-notes.txt' }] }, 'intake', 'Đầu mối Alpha');
 assert.equal(state.inputs.find((item) => item.id === 'ALPHA-2026:D03').activeVersion, 1);
+assert.throws(
+  () => command(createInitialTrainingOperationsState(), 'SUBMIT_INPUT', { projectId: 'EVNSPC-2026', inputKey: 'roster', data: {} }, 'intake', 'Đầu mối Alpha'),
+  (error) => error?.code === 'INPUT_VALIDATION_FAILED' && error?.details?.errors?.includes('Cần đính kèm file danh sách học viên.'),
+);
 
 // UC03–UC07 — versioned content inputs D04–D08.
 const contentInputs = {

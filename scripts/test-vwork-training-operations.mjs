@@ -50,6 +50,8 @@ assert(!page.includes('LegacyCreateWizard'), 'The obsolete project/course-level 
 assert(!page.includes('MOCKUP DUYỆT') && !page.includes('Mock state'), 'Production source must not expose mockup-only labels.');
 assert(page.includes("runCommand('ASSIGN_GROUP_MANAGER'"), 'Group manager assignment must not be implemented as CTV assignment.');
 assert(page.includes("content: ['vlearning', 'game', 'discussion', 'assignment', 'test']"), 'Content workspace must expose D04-D08 exactly.');
+assert(!page.includes('validateRosterWorkbook') && page.includes('Chọn file danh sách<input type="file" onChange='), 'D03 must accept the uploaded source file without enforcing a roster template or business file format.');
+assert(page.includes('Không kiểm duyệt định dạng hoặc cấu trúc dữ liệu nghiệp vụ.'), 'D03 upload must explain that business-format validation is not applied.');
 assert(page.includes('const baseTasks = tasks;') && page.includes('const baseVisible = tasks;'), 'Member task lists must trust the server-scoped result instead of filtering a hard-coded mock identity.');
 assert(!page.includes("task.assignee === 'Nam Nguyễn'") && !page.includes('<option>Nam Nguyễn</option>'), 'Production assignment UI must not depend on mock people names.');
 for (const field of ['content_name', 'eln_structure', 'game_content', 'play_limit', 'topic_content', 'group_reference', 'assignment_brief', 'rubric_pass_score', 'question_bank', 'test_rule', 'material_name_type', 'class_ids', 'visible_from', 'visible_to']) {

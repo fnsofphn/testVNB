@@ -306,12 +306,7 @@ function validateInputPayload(input, payload, state) {
   const files = Array.isArray(payload?.files) ? payload.files : [];
   const errors = [];
   if (input.dataCode === 'D03') {
-    const classRows = Array.isArray(data.classes) ? data.classes : [];
-    const learnerRows = Array.isArray(data.learners) ? data.learners : [];
-    const expected = state.projects.find((item) => item.id === input.projectId)?.classCount || 0;
-    if (classRows.length && classRows.length !== expected) errors.push(`Số lớp hợp lệ (${classRows.length}) không khớp số lớp dự kiến (${expected}).`);
-    if (!classRows.length && !files.length) errors.push('Cần file hoặc danh sách lớp hợp lệ.');
-    if (learnerRows.some((row) => !String(row.email || row.learnerCode || '').trim() || !String(row.classCode || '').trim())) errors.push('Học viên phải có email/mã học viên và mã lớp đích.');
+    if (!files.length) errors.push('Cần đính kèm file danh sách học viên.');
   } else if (input.dataCode === 'D04') {
     for (const key of ['content_name', 'eln_count', 'eln_structure']) if (!String(data[key] ?? '').trim()) errors.push(`D04 thiếu ${key}.`);
   } else if (input.dataCode === 'D05') {
@@ -348,7 +343,7 @@ function validateInputPayload(input, payload, state) {
   } else if (!Object.keys(data).length && !files.length) {
     errors.push(`Cần nhập dữ liệu hoặc đính kèm file cho ${input.dataCode}.`);
   }
-  if (payload?.validation?.errors?.length) errors.push(...payload.validation.errors.map(String));
+  if (input.dataCode !== 'D03' && payload?.validation?.errors?.length) errors.push(...payload.validation.errors.map(String));
   if (errors.length) throw domainError('INPUT_VALIDATION_FAILED', 'Input chưa hợp lệ.', { errors });
   return { data, files, validation: { valid: true, errors: [], warnings: payload?.validation?.warnings || [] } };
 }

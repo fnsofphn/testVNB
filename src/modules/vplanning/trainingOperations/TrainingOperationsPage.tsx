@@ -14,7 +14,6 @@ import {
   fetchTrainingOperationsState,
   getTrainingOperationsFileUrl,
   uploadTrainingOperationsFile,
-  validateRosterWorkbook,
 } from './service';
 import { TRAINING_ROLE_OPTIONS } from './roles.js';
 
@@ -292,14 +291,6 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
     let data = draft.data || {};
     let files = [];
     if (draft.file) {
-      if (key === 'roster') {
-        validation = await validateRosterWorkbook(draft.file, classes.map((item) => item.code));
-        if (!validation.valid) {
-          setSyncError(validation.errors.join(' '));
-          return null;
-        }
-        data = validation.data;
-      }
       setSyncState('saving');
       try {
         files = [await uploadTrainingOperationsFile(draft.file, inputRecord?.id || `${activeProject.id}:${INPUT_META[key][0]}`, key, role)];
@@ -903,19 +894,22 @@ function GameContentFields({ count, values, onCount, onChange }) {
 function SaleRosterInputs({ classes, uploaded, uploadStep, setUploadStep, submit }) {
   const [file, setFile] = useState(null);
   const [validation, setValidation] = useState(null);
-  const [validating, setValidating] = useState(false);
   const [confirming, setConfirming] = useState(false);
-  async function readFile(nextFile) {
+  function readFile(nextFile) {
     if (!nextFile) return;
     setFile(nextFile);
-    setValidation(null);
-    setUploadStep(1);
-    setValidating(true);
-    try {
-      const result = await validateRosterWorkbook(nextFile, classes.map((item) => item.code));
-      setValidation(result);
-      setUploadStep(result.valid ? 2 : 1);
-    } finally { setValidating(false); }
+    setValidation({
+      valid: true,
+      errors: [],
+      warnings: [],
+      data: {
+        importMode: 'unvalidated_file',
+        fileName: nextFile.name,
+        fileSize: nextFile.size,
+        contentType: nextFile.type || 'application/octet-stream',
+      },
+    });
+    setUploadStep(2);
   }
   function resetFile() { setFile(null); setValidation(null); setUploadStep(0); }
   async function confirmFile() {
@@ -926,15 +920,14 @@ function SaleRosterInputs({ classes, uploaded, uploadStep, setUploadStep, submit
     if (response) setUploadStep(3);
   }
   return <section className="card full">
-    <div className="page-title"><div><small>SALE INPUT WORKSPACE · FEEDBACK V4</small><h2>Danh sách học viên theo lớp</h2><p>Hệ thống đọc dữ liệu ngay sau khi chọn file; người dùng chỉ cần kiểm tra trạng thái và xác nhận.</p></div><span className="permission-note">PHẠM VI SALE</span></div>
+    <div className="page-title"><div><small>SALE INPUT WORKSPACE · FEEDBACK V4</small><h2>Danh sách học viên theo lớp</h2><p>Tải file danh sách hiện có; hệ thống lưu nguyên file và không yêu cầu theo mẫu cố định.</p></div><span className="permission-note">PHẠM VI SALE</span></div>
     <div className="sale-roster-grid">{classes.map((classItem, index) => <article className={uploaded && index === 0 ? 'input-card valid' : 'input-card'} key={classItem.code}>
       <div><span>{classItem.code}</span><b>{uploaded && index === 0 ? 'Đã cập nhật · V1' : 'CHƯA CÓ'}</b></div><h3>{classItem.name}</h3><p>Khai giảng: {formatDate(classItem.startDate)}</p>
-      <div className="input-source"><small>Dữ liệu được phép cập nhật</small><strong>Danh sách học viên · Excel/CSV</strong></div>
+      <div className="input-source"><small>Dữ liệu được phép cập nhật</small><strong>File danh sách học viên · không yêu cầu mẫu cố định</strong></div>
       {index === 0 && !uploaded ? <div className="upload-flow">
         <div className="mini-steps"><span className="active">Tải file</span><span className={uploadStep >= 1 ? 'active' : ''}>Đã cập nhật</span><span className={uploadStep >= 2 ? 'active' : ''}>Xác nhận</span></div>
-        {!file ? <label className="file-field">Chọn file danh sách<input type="file" accept=".xlsx,.xls,.csv" onChange={(event) => void readFile(event.target.files?.[0])}/></label> : <div className="file-summary"><div><b>{file.name}</b><small>{validating ? 'Đang đọc dữ liệu…' : validation?.valid ? `Đã cập nhật · ${validation.summary?.rowCount || 0} học viên` : validation ? 'Không đọc được dữ liệu nghiệp vụ' : 'Đang chuẩn bị'}</small></div><button onClick={resetFile}>Thay file</button></div>}
-        {validation?.errors?.length > 0 && <ul className="validation-errors">{validation.errors.slice(0, 8).map((error) => <li key={error}>{error}</li>)}</ul>}
-        {file && validation?.valid && <><div className="roster-preview"><b>Sẵn sàng xác nhận</b><span>{validation.summary?.rowCount || 0} học viên · {validation.summary?.classCount || 0} lớp · 00 bản ghi lỗi</span><small>Có thể thay file trước khi xác nhận.</small></div><button className="primary" disabled={confirming} onClick={() => void confirmFile()}>{confirming ? 'Đang tải lên…' : 'Xác nhận danh sách lớp'}</button></>}
+        {!file ? <label className="file-field">Chọn file danh sách<input type="file" onChange={(event) => readFile(event.target.files?.[0])}/></label> : <div className="file-summary"><div><b>{file.name}</b><small>Đã chọn · sẵn sàng xác nhận</small></div><button onClick={resetFile}>Thay file</button></div>}
+        {file && validation?.valid && <><div className="roster-preview"><b>Sẵn sàng xác nhận</b><span>Không kiểm duyệt định dạng hoặc cấu trúc dữ liệu nghiệp vụ.</span><small>Có thể thay file trước khi xác nhận.</small></div><button className="primary" disabled={confirming} onClick={() => void confirmFile()}>{confirming ? 'Đang tải lên…' : 'Xác nhận danh sách lớp'}</button></>}
       </div> : <button disabled={uploaded && index === 0}>Tải danh sách lớp</button>}
     </article>)}</div>
   </section>;
