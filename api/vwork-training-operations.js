@@ -159,23 +159,46 @@ function redactInput(input) {
   };
 }
 
-function stateForRole(state, auth) {
+function courseInputProgress(state) {
+  return state.courses.map((course) => {
+    const records = state.inputs.filter((item) => item.courseId === course.id && item.required !== false);
+    const requiredCodes = [...new Set(records.map((item) => item.dataCode))];
+    const ready = requiredCodes.filter((code) => {
+      const codeRecords = records.filter((item) => item.dataCode === code);
+      return codeRecords.length > 0 && codeRecords.every((item) => item.status === 'ACTIVE');
+    }).length;
+    return { courseId: course.id, ready, total: requiredCodes.length, classCount: state.classes.filter((item) => item.courseId === course.id).length };
+  });
+}
+
+export function stateForRole(state, auth) {
   const output = normalizeTrainingOperationsState(state);
   const role = auth.role;
-  const isAssigned = (item) => [auth.actor.id, auth.actor.email, auth.actor.name].includes(item.assigneeId)
-    || [auth.actor.email, auth.actor.name].includes(item.assignee);
-  if (['admin', 'operations'].includes(role)) return output;
+  output.courseInputProgress = courseInputProgress(output);
   const actorTokens = new Set([auth.actor.id, auth.actor.email, auth.actor.name].map((item) => String(item || '').trim().toLowerCase()).filter(Boolean));
+  const matchesActor = (...values) => values.some((value) => actorTokens.has(String(value || '').trim().toLowerCase()));
+  const isAssigned = (item) => matchesActor(item.assigneeId, item.assignee);
+  if (['admin', 'operations'].includes(role)) return output;
   const scopedCourseIds = new Set(output.teamAssignments.filter((item) => item.status !== 'ARCHIVED'
+    && item.role === role
     && [item.accountId, item.accountEmail, item.accountName].some((value) => actorTokens.has(String(value || '').trim().toLowerCase())))
     .map((item) => item.courseId));
-  if (scopedCourseIds.size) {
-    output.courses = output.courses.filter((item) => scopedCourseIds.has(item.id));
-    output.classes = output.classes.filter((item) => scopedCourseIds.has(item.courseId));
-    output.inputs = output.inputs.filter((item) => scopedCourseIds.has(item.courseId));
-    output.tasks = output.tasks.filter((item) => scopedCourseIds.has(item.courseId));
-    output.changeRequests = output.changeRequests.filter((item) => (item.affectedCourseIds || [item.courseId]).some((id) => scopedCourseIds.has(id)));
-  }
+  if (role === 'member') output.tasks.filter(isAssigned).forEach((item) => scopedCourseIds.add(item.courseId));
+  if (role === 'manager') output.tasks.filter((item) => matchesActor(item.managerId, item.manager, item.reviewerId, item.reviewer)).forEach((item) => scopedCourseIds.add(item.courseId));
+  output.courses = output.courses.filter((item) => scopedCourseIds.has(item.id));
+  const scopedProjectIds = new Set(output.courses.map((item) => item.projectId));
+  output.projects = output.projects.filter((item) => scopedProjectIds.has(item.id));
+  output.classes = output.classes.filter((item) => scopedCourseIds.has(item.courseId));
+  output.scopes = output.scopes.filter((item) => scopedCourseIds.has(item.courseId));
+  output.inputs = output.inputs.filter((item) => scopedCourseIds.has(item.courseId));
+  output.tasks = output.tasks.filter((item) => scopedCourseIds.has(item.courseId));
+  output.teamAssignments = output.teamAssignments.filter((item) => scopedCourseIds.has(item.courseId));
+  output.courseInputProgress = output.courseInputProgress.filter((item) => scopedCourseIds.has(item.courseId));
+  output.changeRequests = output.changeRequests.filter((item) => (item.affectedCourseIds || [item.courseId]).some((id) => scopedCourseIds.has(id)));
+  output.notifications = output.notifications.filter((item) => (item.recipients || []).some((value) => [role, ...actorTokens].includes(String(value || '').trim().toLowerCase())));
+  const scopedEntityIds = new Set([...scopedCourseIds, ...scopedProjectIds, ...output.classes.map((item) => item.id), ...output.tasks.map((item) => item.id), ...output.inputs.map((item) => item.id)]);
+  output.auditEvents = output.auditEvents.filter((item) => matchesActor(item.actor?.id, item.actor?.email, item.actor?.name) || scopedEntityIds.has(item.entityId));
+  output.activeProjectId = output.projects.some((item) => item.id === output.activeProjectId) ? output.activeProjectId : output.projects[0]?.id || null;
   if (role === 'intake') {
     output.inputs = output.inputs.filter((item) => item.ownerRole === 'intake');
     output.tasks = output.tasks.filter(isAssigned);
@@ -193,7 +216,7 @@ function stateForRole(state, auth) {
   }
   if (role === 'vtraining') {
     output.inputs = output.inputs.filter((item) => item.ownerRole === 'vtraining');
-    output.tasks = output.tasks.filter((item) => ['material', 'roster'].includes(item.input) || isAssigned(item));
+    output.tasks = output.tasks.filter(isAssigned);
     output.changeRequests = [];
     return output;
   }

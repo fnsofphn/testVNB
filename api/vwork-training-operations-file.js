@@ -19,7 +19,7 @@ const DOCUMENT_ACCESS = Object.freeze({
   discussion: { upload: ['content'], download: ['content'] },
   assignment: { upload: ['content'], download: ['content'] },
   test: { upload: ['content'], download: ['content'] },
-  material: { upload: ['vtraining'], download: ['vtraining'] },
+  material: { upload: ['content'], download: ['content', 'vtraining'] },
   evidence: { upload: ['member'], download: ['member', 'manager'] },
 });
 
