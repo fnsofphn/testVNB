@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { CopyPlus, MoreVertical, Plus, X } from 'lucide-react';
 import './TrainingOperationsPage.css';
 import {
   TRAINING_DEFAULT_CLASSES,
@@ -383,14 +384,10 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
     if (status === 'ARCHIVED' && !window.confirm(`Lưu trữ khóa ${activeCourse?.code}? Khóa sẽ được ẩn khỏi bộ lọc đang hoạt động; lịch sử vẫn được giữ lại.`)) return null;
     return runCommand('UPDATE_COURSE_STATUS', { courseId: activeCourse?.id, status, reason: status === 'ARCHIVED' ? 'Người dùng xác nhận lưu trữ khóa học.' : '' }, `Khóa học đã chuyển sang ${status}.`);
   }
-  async function recommendCourseTemplate(recommendation) {
-    return runCommand('UPDATE_COURSE_TEMPLATE', { courseId: activeCourse?.id, recommendation }, 'Đã ghi nhận cải tiến cho template của khóa kế tiếp.');
-  }
-  async function copyCourseConfig(sourceCourseId) {
-    return runCommand('COPY_COURSE_CONFIG', { sourceCourseId, targetCourseId: activeCourse?.id }, 'Đã sao chép cấu hình và tách liên kết với khóa nguồn.');
-  }
   async function createCourse(draft) {
-    return runCommand('CREATE_COURSE', { projectId: activeProject?.id, ...draft }, 'Đã tạo khóa học mới trong dự án hiện tại.');
+    const response = await runCommand('CREATE_COURSE', { projectId: activeProject?.id, ...draft }, draft.copyFromCourseId ? 'Đã nhân bản cấu hình sang khóa học mới.' : 'Đã tạo khóa học mới trong dự án hiện tại.');
+    if (response) writeRoute('structure', { projectId: activeProject?.id, courseId: draft.course?.id, classId: '', taskId: '' });
+    return response;
   }
   async function archiveTask(taskId) {
     const task = tasks.find((item) => item.id === taskId);
@@ -483,7 +480,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
             }}
           />
         )}
-        {tab === 'structure' && <><CourseControlPanel role={role} project={activeProject} course={activeCourse} courses={(workspaceState.courses || []).filter((item) => item.projectId === activeProject?.id)} directory={accountDirectory.length ? accountDirectory : directory} assignments={workspaceState.teamAssignments || []} assignCourseRole={assignCourseRole} updateCourseStatus={updateCourseStatus} recommendCourseTemplate={recommendCourseTemplate} copyCourseConfig={copyCourseConfig} createCourse={createCourse}/><StructureWorkspace role={role} tasks={tasks} classes={classes} project={activeProject} course={activeCourse} updateTask={updateTask} workflowClass={workflowClass} setWorkflowClass={setWorkflowClass}/></>}
+        {tab === 'structure' && <><CourseControlPanel role={role} project={activeProject} course={activeCourse} directory={accountDirectory.length ? accountDirectory : directory} assignments={workspaceState.teamAssignments || []} assignCourseRole={assignCourseRole} updateCourseStatus={updateCourseStatus} createCourse={createCourse}/><StructureWorkspace role={role} tasks={tasks} classes={classes} project={activeProject} course={activeCourse} updateTask={updateTask} workflowClass={workflowClass} setWorkflowClass={setWorkflowClass}/></>}
         {tab === 'inputs' && <Inputs role={role} activeCourse={activeCourse} courses={projectCourses} inputs={inputs} inputRecords={projectInputs} courseInputProgress={workspaceState.courseInputProgress || []} tasks={tasks} classes={projectClasses} uploadStep={uploadStep} setUploadStep={setUploadStep} submitInput={submitInput} onSelectCourse={(courseId) => writeRoute('inputs', { projectId: activeProject?.id, courseId, classId: '', taskId: '' })}/>}
         {tab === 'tasks' && <LayeredTasks role={role} tasks={tasks} classes={classes} directory={directory} directoryLoading={syncState === 'loading'} actor={actor} project={activeProject} course={activeCourse} routeContext={routeContext} onNavigate={navigateWork} selectedTask={selectedTask} setSelectedTaskId={setSelectedTaskId} updateTask={updateTask} createClassTask={createClassTask} archiveTask={archiveTask} assignTasks={assignTasks} toggleChecklist={toggleChecklist}/>}
         {['due', 'review'].includes(tab) && <WorkActionInbox role={role} tasks={tasks} classes={classes} directory={directory} actor={actor} project={activeProject} course={activeCourse} selectedTask={selectedTask} setSelectedTaskId={setSelectedTaskId} updateTask={updateTask} assignTasks={assignTasks} toggleChecklist={toggleChecklist} initialTab={tab === 'review' ? 'acceptance' : 'tracking'}/>}
@@ -764,26 +761,54 @@ function normalizeSearchText(value) {
 
 function RoleSummary({ role }) { const copy = { operations: ['Giao nhóm việc cho Quản lý ekip', 'Duyệt yêu cầu trước khi tạo task'], intake: ['Chỉ nộp danh sách theo từng lớp', 'Tạo yêu cầu thay đổi, không tự tạo task'], content: ['Nộp 5 nhóm input nội dung', 'Theo dõi phiên bản độc lập'], vtraining: ['Theo dõi 03 nhóm VTraining', 'Tùy chỉnh checklist và deadline'], manager: ['Nhận nhóm việc và giao CTV', 'Xác nhận PASS / REWORK'], member: ['Thực hiện checklist chi tiết', 'Gửi yêu cầu xác nhận hoàn thành'] }[role]; return <ul className="role-summary">{copy.map((item) => <li key={item}>{item}</li>)}</ul>; }
 
-function CourseControlPanel({ role, project, course, courses, directory, assignments, assignCourseRole, updateCourseStatus, recommendCourseTemplate, copyCourseConfig, createCourse }) {
+function CourseControlPanel({ role, project, course, directory, assignments, assignCourseRole, updateCourseStatus, createCourse }) {
+  const emptyCourseDraft = { code: '', name: '', classCode: 'L01', className: 'Lớp 01', startDate: '', endDate: '' };
   const [accountId, setAccountId] = useState('');
   const [courseRole, setCourseRole] = useState('member');
-  const [recommendation, setRecommendation] = useState('');
-  const [sourceCourseId, setSourceCourseId] = useState('');
-  const [showNewCourse, setShowNewCourse] = useState(false);
-  const [newCourse, setNewCourse] = useState({ code: '', name: '', classCode: 'L01', className: 'Lớp 01', startDate: '', endDate: '' });
+  const [showAdminMenu, setShowAdminMenu] = useState(false);
+  const [createMode, setCreateMode] = useState('');
+  const [newCourse, setNewCourse] = useState(emptyCourseDraft);
   const courseAssignments = assignments.filter((item) => item.courseId === course?.id && item.status !== 'ARCHIVED');
   const canOperate = ['operations', 'admin'].includes(role);
   const canManage = canOperate || role === 'manager';
-  async function addCourse() {
-    const response = await createCourse({ course: { id: newCourse.code, code: newCourse.code, name: newCourse.name, systems: ['VTraining', 'VLearning'], activities: ['VTRAINING', 'VLEARNING'] }, classes: [{ id: newCourse.classCode, name: newCourse.className, startDate: newCourse.startDate, endDate: newCourse.endDate }], scope: { selectedContents: ['VTRAINING', 'VLEARNING'], instanceCount: { VLEARNING: 1, MATERIAL: 1 } } });
-    if (response) setShowNewCourse(false);
+
+  function openCreateCourse(mode) {
+    setCreateMode(mode);
+    setNewCourse(mode === 'duplicate' ? {
+      code: `${course?.code || 'KHOA'}-COPY`,
+      name: `${course?.name || 'Khóa học'} · Bản sao`,
+      classCode: 'L01',
+      className: `Lớp 01 · ${course?.name || 'Khóa học mới'}`,
+      startDate: course?.startDate || '',
+      endDate: course?.endDate || '',
+    } : emptyCourseDraft);
   }
-  return <section className="card full course-control-panel"><div className="page-title"><div><small>ĐƠN VỊ VẬN HÀNH · KHÓA HỌC</small><h2>{course?.code} · {course?.name}</h2><p>Cấu hình, ekip, vòng đời và cải tiến template được giới hạn trong khóa đang chọn.</p></div><span className={`badge ${course?.status}`}>{course?.status || 'DECLARED'}</span></div>
-    <div className="course-control-grid"><article><h3>Ekip khóa học</h3>{courseAssignments.length ? courseAssignments.map((item) => <div className="course-team-row" key={item.id}><b>{item.accountName}</b><span>{item.role}</span></div>) : <p>Chưa có phân công theo khóa.</p>}{canOperate && <div className="inline-controls"><select value={accountId} onChange={(event) => setAccountId(event.target.value)}><option value="">Chọn tài khoản</option>{directory.map((item) => <option value={item.id} key={item.id}>{item.name}</option>)}</select><select value={courseRole} onChange={(event) => setCourseRole(event.target.value)}>{['manager', 'member', 'intake', 'content', 'vtraining'].map((item) => <option value={item} key={item}>{item}</option>)}</select><button disabled={!accountId} onClick={() => { const person = directory.find((item) => item.id === accountId); if (person) void assignCourseRole({ accountId: person.id, accountName: person.name, accountEmail: person.email, role: courseRole }); }}>Gán vai trò</button></div>}</article>
-      <article><h3>Vòng đời khóa</h3><p>Declared → Active → Ended → Archived. Khóa lưu trữ không xuất hiện trong bộ lọc đang hoạt động.</p><div className="inline-controls">{['DECLARED', 'PREPARING'].includes(course?.status) && <button disabled={!canManage} onClick={() => void updateCourseStatus('ACTIVE')}>Kích hoạt</button>}{course?.status === 'ACTIVE' && <button disabled={!canManage} onClick={() => void updateCourseStatus('ENDED')}>Kết thúc khóa</button>}{['DECLARED', 'PREPARING', 'ENDED'].includes(course?.status) && <button disabled={!canManage} onClick={() => void updateCourseStatus('ARCHIVED')}>Lưu trữ</button>}</div></article>
-      <article><h3>Sao chép cấu hình</h3><p>Bản sao độc lập; thay đổi khóa nguồn sau đó không lan sang khóa này.</p><div className="inline-controls"><select value={sourceCourseId} onChange={(event) => setSourceCourseId(event.target.value)}><option value="">Chọn khóa nguồn</option>{courses.filter((item) => item.id !== course?.id).map((item) => <option value={item.id} key={item.id}>{item.code} · {item.name}</option>)}</select><button disabled={!canOperate || !sourceCourseId} onClick={() => void copyCourseConfig(sourceCourseId)}>Sao chép</button></div></article>
-      <article><h3>Retrospective → template kế tiếp</h3><textarea value={recommendation} onChange={(event) => setRecommendation(event.target.value)} placeholder="Ghi nhận điểm cần cải tiến sau khóa..."/><button disabled={!canManage || !recommendation.trim()} onClick={() => { void recommendCourseTemplate(recommendation.trim()); setRecommendation(''); }}>Lưu khuyến nghị</button></article></div>
-    {canOperate && <div className="course-create"><button onClick={() => setShowNewCourse((value) => !value)}>+ Thêm khóa học vào {project?.code}</button>{showNewCourse && <div className="course-create-form"><input placeholder="Mã khóa" value={newCourse.code} onChange={(event) => setNewCourse((current) => ({ ...current, code: event.target.value }))}/><input placeholder="Tên khóa" value={newCourse.name} onChange={(event) => setNewCourse((current) => ({ ...current, name: event.target.value }))}/><input placeholder="Mã lớp đầu tiên" value={newCourse.classCode} onChange={(event) => setNewCourse((current) => ({ ...current, classCode: event.target.value }))}/><input placeholder="Tên lớp" value={newCourse.className} onChange={(event) => setNewCourse((current) => ({ ...current, className: event.target.value }))}/><input type="date" value={newCourse.startDate} onChange={(event) => setNewCourse((current) => ({ ...current, startDate: event.target.value }))}/><input type="date" value={newCourse.endDate} onChange={(event) => setNewCourse((current) => ({ ...current, endDate: event.target.value }))}/><button className="primary" disabled={!newCourse.code.trim() || !newCourse.name.trim() || !newCourse.startDate || !newCourse.endDate} onClick={() => void addCourse()}>Tạo khóa</button></div>}</div>}
+
+  async function addCourse() {
+    const duplicate = createMode === 'duplicate';
+    const selectedContents = duplicate ? [...(course?.activities || [])] : ['VTRAINING', 'VLEARNING'];
+    const systems = duplicate ? [...(course?.systems || [])] : ['VTraining', 'VLearning'];
+    const response = await createCourse({
+      copyFromCourseId: duplicate ? course?.id : undefined,
+      course: { id: newCourse.code, code: newCourse.code, name: newCourse.name, systems, activities: selectedContents, contentVersion: duplicate ? course?.contentVersion : undefined },
+      classes: [{ id: newCourse.classCode, name: newCourse.className, startDate: newCourse.startDate, endDate: newCourse.endDate }],
+      scope: { selectedContents, instanceCount: duplicate ? undefined : { VLEARNING: 1, MATERIAL: 1 } },
+    });
+    if (response) setCreateMode('');
+  }
+
+  async function changeCourseStatus(status) {
+    setShowAdminMenu(false);
+    await updateCourseStatus(status);
+  }
+
+  return <section className="card full course-control-panel">
+    <div className="page-title course-control-head">
+      <div><small>ĐƠN VỊ VẬN HÀNH · KHÓA HỌC</small><h2>{course?.code} · {course?.name}</h2><p>Quản lý ekip và cấu trúc của khóa học đang chọn.</p></div>
+      <div className="course-head-actions"><span className={`badge ${course?.status}`}>{course?.status || 'DECLARED'}</span>{canManage && <div className="course-admin"><button type="button" className="course-icon-action" title="Quản trị khóa" aria-label="Mở menu quản trị khóa" aria-expanded={showAdminMenu} onClick={() => setShowAdminMenu((value) => !value)}><MoreVertical size={18} strokeWidth={1.9}/></button>{showAdminMenu && <div className="course-admin-menu" role="menu" aria-label="Quản trị vòng đời khóa">{['DECLARED', 'PREPARING'].includes(course?.status) && <button type="button" role="menuitem" onClick={() => void changeCourseStatus('ACTIVE')}>Kích hoạt khóa</button>}{course?.status === 'ACTIVE' && <button type="button" role="menuitem" onClick={() => void changeCourseStatus('ENDED')}>Kết thúc khóa</button>}{['DECLARED', 'PREPARING', 'ENDED'].includes(course?.status) && <button type="button" className="danger" role="menuitem" onClick={() => void changeCourseStatus('ARCHIVED')}>Lưu trữ khóa</button>}</div>}</div>}</div>
+    </div>
+    <div className="course-control-grid single"><article><h3>Ekip khóa học</h3>{courseAssignments.length ? courseAssignments.map((item) => <div className="course-team-row" key={item.id}><b>{item.accountName}</b><span>{TRAINING_ROLE_OPTIONS.find(([value]) => value === item.role)?.[1] || item.role}</span></div>) : <p>Chưa có phân công theo khóa.</p>}{canOperate && <div className="inline-controls"><select value={accountId} onChange={(event) => setAccountId(event.target.value)}><option value="">Chọn tài khoản</option>{directory.map((item) => <option value={item.id} key={item.id}>{item.name}</option>)}</select><select value={courseRole} onChange={(event) => setCourseRole(event.target.value)}>{TRAINING_ROLE_OPTIONS.filter(([value]) => value !== 'operations').map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select><button disabled={!accountId} onClick={() => { const person = directory.find((item) => item.id === accountId); if (person) void assignCourseRole({ accountId: person.id, accountName: person.name, accountEmail: person.email, role: courseRole }); }}>Gán vai trò</button></div>}</article></div>
+    {canOperate && <div className="course-create"><div className="course-create-actions"><button type="button" onClick={() => openCreateCourse('new')}><Plus size={16} strokeWidth={1.9}/>Thêm khóa học</button><button type="button" className="course-icon-action" title="Nhân bản khóa" aria-label={`Nhân bản khóa ${course?.code || ''}`} onClick={() => openCreateCourse('duplicate')}><CopyPlus size={16} strokeWidth={1.9}/></button></div>{createMode && <div className="course-create-form"><div className="course-create-form-head"><div><b>{createMode === 'duplicate' ? 'Nhân bản khóa học' : 'Thêm khóa học'}</b>{createMode === 'duplicate' && <small>Sao chép cấu hình từ {course?.code}; dữ liệu vận hành và lịch sử không được sao chép.</small>}</div><button type="button" className="course-icon-action" aria-label="Đóng form tạo khóa" onClick={() => setCreateMode('')}><X size={16} strokeWidth={1.9}/></button></div><label>Mã khóa<input placeholder="Ví dụ QL01B" value={newCourse.code} onChange={(event) => setNewCourse((current) => ({ ...current, code: event.target.value }))}/></label><label>Tên khóa<input placeholder="Tên khóa học" value={newCourse.name} onChange={(event) => setNewCourse((current) => ({ ...current, name: event.target.value }))}/></label><label>Mã lớp đầu tiên<input placeholder="L01" value={newCourse.classCode} onChange={(event) => setNewCourse((current) => ({ ...current, classCode: event.target.value }))}/></label><label>Tên lớp<input placeholder="Lớp 01" value={newCourse.className} onChange={(event) => setNewCourse((current) => ({ ...current, className: event.target.value }))}/></label><label>Ngày bắt đầu<input type="date" value={newCourse.startDate} onChange={(event) => setNewCourse((current) => ({ ...current, startDate: event.target.value }))}/></label><label>Ngày kết thúc<input type="date" value={newCourse.endDate} onChange={(event) => setNewCourse((current) => ({ ...current, endDate: event.target.value }))}/></label><div className="course-create-submit"><button type="button" onClick={() => setCreateMode('')}>Hủy</button><button type="button" className="primary" disabled={!newCourse.code.trim() || !newCourse.name.trim() || !newCourse.classCode.trim() || !newCourse.className.trim() || !newCourse.startDate || !newCourse.endDate || newCourse.endDate < newCourse.startDate} onClick={() => void addCourse()}>{createMode === 'duplicate' ? 'Nhân bản khóa' : 'Tạo khóa'}</button></div></div>}</div>}
   </section>;
 }
 

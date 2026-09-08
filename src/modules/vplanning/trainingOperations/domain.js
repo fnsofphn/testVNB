@@ -637,9 +637,21 @@ function createCourse(state, payload, context) {
   const course = payload.course || {};
   const courseId = requiredText(course.id || course.code, 'Mã khóa học').toUpperCase();
   if (state.courses.some((item) => item.id === courseId)) throw domainError('DUPLICATE_COURSE', 'Mã khóa học đã tồn tại.');
+  const sourceCourse = payload.copyFromCourseId ? state.courses.find((item) => item.id === payload.copyFromCourseId && item.projectId === project.id) : null;
+  if (payload.copyFromCourseId && !sourceCourse) throw domainError('NOT_FOUND', 'Không tìm thấy khóa nguồn trong cùng dự án để nhân bản.');
   const classRows = Array.isArray(payload.classes) ? payload.classes : [];
   if (!classRows.length) throw domainError('VALIDATION_ERROR', 'Khóa học cần ít nhất một lớp.');
-  const selectedContents = [...new Set((payload.scope?.selectedContents || course.activities || []).map((item) => String(item).toUpperCase()))];
+  const sourceScope = sourceCourse ? courseScope(state, sourceCourse.id) : null;
+  const selectedContents = [...new Set((sourceCourse?.activities || payload.scope?.selectedContents || course.activities || []).map((item) => String(item).toUpperCase()))];
+  const systems = clone(sourceCourse?.systems || course.systems || []);
+  const sourceClassId = sourceCourse ? state.classes.find((item) => item.courseId === sourceCourse.id)?.id : null;
+  const sourceTaskTemplates = sourceCourse ? state.tasks.filter((item) => item.classId === sourceClassId).map((item) => ({
+    code: item.templateId,
+    title: item.title,
+    dueOffset: item.dueOffset,
+    enabled: item.status !== 'CANCELLED',
+    checklist: clone(item.checklistItems || []),
+  })) : payload.taskTemplates;
   const classes = classRows.map((item, index) => {
     const classId = scopedClassCode(courseId, item.id || item.code || `L${index + 1}`);
     if (state.classes.some((existing) => existing.id === classId)) throw domainError('DUPLICATE_CLASS', `Mã lớp ${classId} đã tồn tại.`);
@@ -649,15 +661,15 @@ function createCourse(state, payload, context) {
     return { id: classId, code: classId, projectId: project.id, courseId, name: requiredText(item.name, `Tên lớp ${index + 1}`), startDate, endDate, cloneFrom: item.cloneFrom || 'CLASS_TEMPLATE', status: 'PREPARING', createdAt: timestamp, updatedAt: timestamp };
   });
   if (new Set(classes.map((item) => item.id)).size !== classes.length) throw domainError('DUPLICATE_CLASS', 'Mã lớp trong khóa học không được trùng nhau.');
-  const scope = { projectId: project.id, courseId, version: 1, selectedContents, instanceCount: clone(payload.scope?.instanceCount || {}), createdAt: timestamp };
-  state.courses.push({ id: courseId, code: courseId, projectId: project.id, name: requiredText(course.name, 'Tên khóa học'), systems: clone(course.systems || []), activities: selectedContents, contentVersion: course.contentVersion || 'v1', status: 'DECLARED', startDate: classes.map((item) => item.startDate).sort()[0], endDate: classes.map((item) => item.endDate).sort().at(-1), templateVersion: 1, templateRecommendations: [], createdAt: timestamp, updatedAt: timestamp });
+  const scope = { projectId: project.id, courseId, version: 1, selectedContents, instanceCount: clone(sourceScope?.instanceCount || payload.scope?.instanceCount || {}), createdAt: timestamp };
+  state.courses.push({ id: courseId, code: courseId, projectId: project.id, name: requiredText(course.name, 'Tên khóa học'), systems, activities: selectedContents, contentVersion: sourceCourse?.contentVersion || course.contentVersion || 'v1', status: 'DECLARED', startDate: classes.map((item) => item.startDate).sort()[0], endDate: classes.map((item) => item.endDate).sort().at(-1), templateVersion: Number(sourceCourse?.templateVersion || 1), templateRecommendations: [], copiedFromCourseId: sourceCourse?.id || null, copiedAt: sourceCourse ? timestamp : null, createdAt: timestamp, updatedAt: timestamp });
   state.classes.push(...classes);
   state.scopes.push(scope);
   state.inputs.push(...createInputRecords(project.id, courseId, scope, classes, timestamp));
-  state.tasks.push(...classes.flatMap((item, index) => createTasksForClass(project.id, courseId, item, index, timestamp, selectedContents, payload.taskTemplates)));
+  state.tasks.push(...classes.flatMap((item, index) => createTasksForClass(project.id, courseId, item, index, timestamp, selectedContents, sourceTaskTemplates)));
   project.classCount = state.classes.filter((item) => item.projectId === project.id).length;
   project.updatedAt = timestamp;
-  appendAudit(state, auditEvent('COURSE_CREATED', `Tạo khóa ${courseId} với ${classes.length} lớp trong dự án ${project.id}.`, context, 'course', courseId));
+  appendAudit(state, auditEvent(sourceCourse ? 'COURSE_DUPLICATED' : 'COURSE_CREATED', `${sourceCourse ? `Nhân bản cấu hình khóa ${sourceCourse.id} thành` : 'Tạo khóa'} ${courseId} với ${classes.length} lớp trong dự án ${project.id}.`, context, 'course', courseId, sourceCourse ? { sourceCourseId: sourceCourse.id } : {}));
 }
 
 function createProjectBundle(state, payload, context) {

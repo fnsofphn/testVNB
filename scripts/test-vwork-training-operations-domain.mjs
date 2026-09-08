@@ -223,4 +223,20 @@ assert.throws(() => command(atomicBase, 'CREATE_PROJECT_BUNDLE', {
 }, 'operations', 'Quản lý vận hành'), /ít nhất một lớp/);
 assert.equal(atomicBase.projects.some((item) => item.id === 'ATOMIC-2026'), false);
 
+// Course duplication creates a new course while copying configuration only.
+let duplicateState = createInitialTrainingOperationsState({ now: '2026-08-25T00:00:00.000Z' });
+duplicateState = command(duplicateState, 'UPDATE_TASK_CONFIG', { taskId: 'CX-FOUNDATION-TNKH01-T-101', dueOffset: 5, checklistItems: ['Tiêu chí cấu hình riêng'] }, 'vtraining', 'Chuyên viên VTraining');
+duplicateState = command(duplicateState, 'CREATE_COURSE', {
+  projectId: 'EVNSPC-2026',
+  copyFromCourseId: 'CX-FOUNDATION',
+  course: { id: 'CX-FOUNDATION-COPY', name: 'Trải nghiệm khách hàng · Bản sao' },
+  classes: [{ id: 'L01', name: 'Lớp 01 · Bản sao', startDate: '2026-11-01', endDate: '2026-11-03' }],
+}, 'operations', 'Quản lý vận hành');
+const duplicatedCourse = duplicateState.courses.find((item) => item.id === 'CX-FOUNDATION-COPY');
+const duplicatedTask = duplicateState.tasks.find((item) => item.id === 'CX-FOUNDATION-COPY-L01-T-101');
+assert.equal(duplicatedCourse.copiedFromCourseId, 'CX-FOUNDATION');
+assert.equal(duplicatedTask.dueOffset, 5);
+assert.deepEqual(duplicatedTask.checklistItems, ['Tiêu chí cấu hình riêng']);
+assert.ok(duplicateState.auditEvents.some((item) => item.type === 'COURSE_DUPLICATED' && item.entityId === 'CX-FOUNDATION-COPY'));
+
 console.log('V-Work Training Operations domain UC01-UC16 and FB2 course model passed.');
