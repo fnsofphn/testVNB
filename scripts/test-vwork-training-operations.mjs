@@ -6,6 +6,7 @@ const assert = (condition, message) => {
 };
 
 const app = read('src/App.tsx');
+const loginPage = read('src/pages/LoginPage.tsx');
 const shell = read('src/modules/vplanning/VPlanningNativePage.tsx');
 const page = read('src/modules/vplanning/trainingOperations/TrainingOperationsPage.tsx');
 const css = read('src/modules/vplanning/trainingOperations/TrainingOperationsPage.css');
@@ -37,7 +38,7 @@ assert(page.includes("{ id: 'VSurvey', mature: false }") && page.includes("{ id:
 assert(page.includes('Clone cấu hình từ') && page.includes('LỚP MẪU'), 'New classes must choose a class-template clone source.');
 assert(page.includes('+ Thêm lớp') && page.includes('Lưu lớp'), 'The add-class interaction must expose an editable form and save action.');
 assert(page.includes('removeDraftClass') && page.includes('Xóa lớp'), 'The create flow must support removing draft classes while preserving at least one class.');
-assert(page.includes('Ekip & tài khoản') && page.includes('Lưu tài khoản và role'), 'Operations must be able to provision or update real team login accounts from the module.');
+assert(page.includes('Ekip & tài khoản') && page.includes('Lưu tài khoản và quyền đăng nhập'), 'Operations must be able to provision or update real team login accounts from the module.');
 assert(page.includes('account-submit-error') && !page.includes('minLength=') && !page.includes('maxLength=') && !page.includes('passwordValid'), 'Account creation must not impose a client-side password length limit and must show Auth API failures next to the form.');
 assert(!userApi.includes('TRAINING_OPERATIONS_PASSWORD_INVALID') && !userApi.includes('password.length'), 'The account API must delegate password policy to Supabase Auth without imposing its own length limit.');
 assert(page.includes('account-role-matrix') && page.includes('TRAINING_ROLE_OPTIONS.map') && page.includes("roles: ['member']"), 'Account management must expose a multi-select matrix for all VWork roles.');
@@ -46,6 +47,8 @@ assert(page.includes('Toàn bộ tài khoản VWork') && page.includes('Tìm the
 assert(api.includes('const fullDirectory = canAssignTasks ? await loadVWorkAccountDirectory(auth) : []') && api.includes('fullDirectory.filter((item) => item.assignable)'), 'Managers and operations must receive VWork accounts that can receive tasks.');
 assert(api.includes('profilesByAuthUserId') && api.includes("item.payload?.authUserId") && api.includes('profilesByEmail.get(email)'), 'VWork accounts must link to PeopleOne profiles by stable Auth user id before falling back to email.');
 assert(userApi.includes('findAuthUserByEmail') && userApi.includes('roles: requestedRoles') && userApi.includes('authUserCreated'), 'Provisioning must link an existing Auth user and persist multiple roles without resetting its password.');
+assert(page.includes('restoreLoginAccess: true') && userApi.includes("ban_duration: 'none'") && userApi.includes('loginAccessRestored'), 'Explicit account reconciliation must keep Auth login status aligned with active VWork access.');
+assert(loginPage.includes("normalized.includes('user is banned')") && loginPage.includes('Tài khoản đang bị khóa đăng nhập'), 'Banned Auth accounts must receive an actionable Vietnamese login message instead of a raw provider error.');
 assert(userApi.includes("operations: { profileRole: 'production_manager'") && !userApi.includes("operations: { profileRole: 'training_manager'"), 'Operations account updates must use a profile role accepted by vcontent_profiles_role_check.');
 assert(userApi.includes("profileVplanningRole: 'vplanning_intake'") && userApi.includes("profileVplanningRole: 'vplanning_content'") && userApi.includes("profileVplanningRole: 'vplanning_vtraining'"), 'New scoped Training Operations accounts must persist an explicit module access marker.');
 assert(page.includes('không sinh công việc ngang hàng ở cấp dự án hoặc khóa học'), 'Tasks must be generated inside classes only.');

@@ -285,6 +285,9 @@ function getLoginErrorMessage(error: unknown) {
   if (normalized.includes('invalid login credentials') || normalized.includes('invalid credentials')) {
     return 'Sai email hoặc mật khẩu. Vui lòng kiểm tra lại.';
   }
+  if (normalized.includes('user is banned') || normalized.includes('user banned')) {
+    return 'Tài khoản đang bị khóa đăng nhập. Vui lòng liên hệ quản trị viên VWork để được mở lại.';
+  }
 
   return error.message || fallback;
 }

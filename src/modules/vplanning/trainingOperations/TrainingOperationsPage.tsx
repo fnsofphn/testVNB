@@ -741,7 +741,7 @@ function AccountsPanel({ directory = [], provisionAccount }) {
     if (!valid || busy) return;
     setSubmitError('');
     setBusy(true);
-    const result = await provisionAccount({ ...draft, fullName: draft.fullName.trim(), email: draft.email.trim().toLowerCase(), replaceRoles: Boolean(editingEmail) });
+    const result = await provisionAccount({ ...draft, fullName: draft.fullName.trim(), email: draft.email.trim().toLowerCase(), replaceRoles: Boolean(editingEmail), restoreLoginAccess: true });
     setBusy(false);
     if (!result?.user) {
       setSubmitError(result?.error || 'Không thể tạo tài khoản ekip. Vui lòng thử lại.');
@@ -765,11 +765,11 @@ function AccountsPanel({ directory = [], provisionAccount }) {
           <div>{TRAINING_ROLE_OPTIONS.map(([roleValue, label]) => <label className={draft.roles.includes(roleValue) ? 'selected' : ''} key={roleValue}><input type="checkbox" checked={draft.roles.includes(roleValue)} onChange={() => toggleRole(roleValue)}/><span><b>{label}</b><small>{RoleSummaryText[roleValue]}</small></span></label>)}</div>
           <small className={rolesValid ? 'account-field-help' : 'account-field-error'} id="account-role-help">{rolesValid ? `Đã chọn ${draft.roles.length} vai trò.` : 'Phải chọn ít nhất một vai trò.'}</small>
         </fieldset>
-        <div className="account-form-actions">{editingEmail ? <button type="button" onClick={resetForm}>Hủy chỉnh sửa</button> : <button type="button" onClick={() => setDraft((current) => ({ ...current, password: generateTemporaryPassword() }))}>Tạo mật khẩu khác</button>}<button className="primary" type="submit" disabled={!valid || busy}>{busy ? 'Đang lưu…' : editingEmail ? 'Cập nhật role' : 'Lưu tài khoản và role'}</button></div>
+        <div className="account-form-actions">{editingEmail ? <button type="button" onClick={resetForm}>Hủy chỉnh sửa</button> : <button type="button" onClick={() => setDraft((current) => ({ ...current, password: generateTemporaryPassword() }))}>Tạo mật khẩu khác</button>}<button className="primary" type="submit" disabled={!valid || busy}>{busy ? 'Đang lưu…' : editingEmail ? 'Cập nhật quyền & mở đăng nhập' : 'Lưu tài khoản và quyền đăng nhập'}</button></div>
         {!valid && <p className="account-validation-note">Điền đủ họ tên, email hợp lệ và chọn ít nhất một vai trò.</p>}
         {submitError && <div className="account-submit-error" role="alert">{submitError}</div>}
-        <p className="account-security-note">Khi chỉnh tài khoản hiện có, các role VWork được thay bằng lựa chọn mới; tài khoản đăng nhập và mật khẩu không thay đổi.</p>
-        {created && <div className="account-created" role="status"><b>{created.authUserCreated ? 'Đã tạo' : 'Đã cập nhật'} {created.name}</b><span>{created.email} · {(created.roles || [created.role]).map((value) => roleLabels[value] || value).join(' · ')}</span>{created.authUserCreated && <label>Mật khẩu tạm<input readOnly value={created.temporaryPassword} onFocus={(event) => event.target.select()}/></label>}<small>{created.authUserCreated ? 'Gửi thông tin này cho đúng người dùng qua kênh nội bộ an toàn.' : 'Tài khoản đăng nhập và mật khẩu cũ được giữ nguyên; role VWork đã được cập nhật.'}</small></div>}
+        <p className="account-security-note">Khi lưu, hệ thống đồng bộ hồ sơ PeopleOne, role VWork và mở lại đăng nhập nếu tài khoản Auth đang bị khóa; mật khẩu hiện tại không thay đổi.</p>
+        {created && <div className="account-created" role="status"><b>{created.authUserCreated ? 'Đã tạo' : 'Đã cập nhật'} {created.name}</b><span>{created.email} · {(created.roles || [created.role]).map((value) => roleLabels[value] || value).join(' · ')}</span>{created.authUserCreated && <label>Mật khẩu tạm<input readOnly value={created.temporaryPassword} onFocus={(event) => event.target.select()}/></label>}<small>{created.authUserCreated ? 'Gửi thông tin này cho đúng người dùng qua kênh nội bộ an toàn.' : created.loginAccessRestored ? 'Đã cập nhật role và mở lại quyền đăng nhập; mật khẩu cũ được giữ nguyên.' : 'Tài khoản đăng nhập đang hoạt động; role VWork đã được cập nhật và mật khẩu cũ được giữ nguyên.'}</small></div>}
       </form>
       <section className="card account-directory-card">
         <div className="account-card-head"><div><span>DANH MỤC VWORK</span><h3>Toàn bộ tài khoản VWork</h3></div><b>{filteredDirectory.length}/{directory.length}</b></div>

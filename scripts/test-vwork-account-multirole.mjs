@@ -28,7 +28,7 @@ globalThis.fetch = async (url, options = {}) => {
   } else if (String(url).includes('/vplanning_users?') && method === 'GET') {
     payload = [{ email: 'member@peopleone.vn', full_name: 'Tên cũ', title: 'Thành viên ekip', roles: ['vplanning_member', 'finance_viewer'], departments: ['VTraining'], owner_ids: [], payload: { authUserId: 'existing-auth' } }];
   } else if (String(url).endsWith('/auth/v1/admin/users/existing-auth')) {
-    payload = { id: 'existing-auth', email: 'member@peopleone.vn', app_metadata: {} };
+    payload = { id: 'existing-auth', email: 'member@peopleone.vn', app_metadata: {}, banned_until: '2099-01-01T00:00:00.000Z' };
   } else {
     payload = [];
   }
@@ -38,7 +38,7 @@ globalThis.fetch = async (url, options = {}) => {
 const req = {
   method: 'POST',
   headers: { authorization: 'Bearer requester-token', 'x-vwork-role': 'operations' },
-  body: { fullName: 'Nguyễn Thành Viên', email: 'member@peopleone.vn', password: '', roles: ['operations', 'content'], replaceRoles: true },
+  body: { fullName: 'Nguyễn Thành Viên', email: 'member@peopleone.vn', password: '', roles: ['operations', 'content'], replaceRoles: true, restoreLoginAccess: true },
   socket: { remoteAddress: '127.0.0.1' },
 };
 const result = { status: 0, payload: null };
@@ -53,13 +53,16 @@ try {
   assert.equal(result.status, 200, 'Existing Auth users must be linked instead of rejected as duplicates.');
   assert.deepEqual(result.payload.user.roles, ['operations', 'content']);
   assert.equal(result.payload.user.authUserCreated, false);
+  assert.equal(result.payload.user.loginAccessRestored, true);
   assert.equal(calls.filter((call) => call.url.endsWith('/auth/v1/admin/users') && call.method === 'POST').length, 0, 'Known Auth users must not be recreated.');
   const profilePatch = calls.find((call) => call.url.includes('/vcontent_profiles?id=') && call.method === 'PATCH');
   const directoryUpsert = calls.find((call) => call.url.includes('/vplanning_users?on_conflict=email') && call.method === 'POST');
-  assert.deepEqual(profilePatch.body.vplanning_roles.sort(), ['vplanning_director']);
+  assert.deepEqual(profilePatch.body.vplanning_roles.sort(), ['vplanning_content', 'vplanning_director']);
   assert.equal(profilePatch.body.role, 'production_manager');
   assert.deepEqual(directoryUpsert.body.roles.sort(), ['content_manager', 'finance_viewer', 'vplanning_director']);
   assert.equal(calls.some((call) => call.body?.password), false, 'Existing-user reconciliation must not send or persist a password.');
+  const authRestore = calls.find((call) => call.url.endsWith('/auth/v1/admin/users/existing-auth') && call.method === 'PUT');
+  assert.deepEqual(authRestore?.body, { ban_duration: 'none' }, 'Explicit account reconciliation must lift an existing Auth ban.');
 
   const mutationCount = calls.filter((call) => ['PATCH', 'POST'].includes(call.method) && call.url.includes('/rest/v1/')).length;
   const selfResult = { status: 0, payload: null };

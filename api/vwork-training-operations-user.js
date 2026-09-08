@@ -68,6 +68,11 @@ function normalizeEmail(value) {
   return String(value || '').trim().toLowerCase();
 }
 
+function isAuthUserBanned(user, now = Date.now()) {
+  const bannedUntil = Date.parse(String(user?.banned_until || ''));
+  return Number.isFinite(bannedUntil) && bannedUntil > now;
+}
+
 function normalizeRole(value) {
   return String(value || '')
     .trim()
@@ -199,6 +204,7 @@ export default async function handler(req, res) {
     const fullName = String(body.fullName || '').trim();
     const password = String(body.password || '');
     const replaceRoles = body.replaceRoles === true;
+    const restoreLoginAccess = body.restoreLoginAccess === true;
     const requestedRoles = (Array.isArray(body.roles) ? body.roles : [body.role])
       .map((value) => String(value || '').trim().toLowerCase())
       .filter((value, index, values) => value && values.indexOf(value) === index);
@@ -298,9 +304,18 @@ export default async function handler(req, res) {
       }),
     });
 
+    const loginAccessRestored = restoreLoginAccess && isAuthUserBanned(authUser);
+    if (loginAccessRestored) {
+      await requestJson(`${config.supabaseUrl}/auth/v1/admin/users/${encodeURIComponent(authUserId)}`, {
+        method: 'PUT',
+        headers: serviceHeaders,
+        body: JSON.stringify({ ban_duration: 'none' }),
+      });
+    }
+
     res.status(createdAuthUserId ? 201 : 200).json({
       ok: true,
-      user: { id: email, authUserId, email, name: fullName, role: primaryRole, roles: requestedRoles, authUserCreated: Boolean(createdAuthUserId) },
+      user: { id: email, authUserId, email, name: fullName, role: primaryRole, roles: requestedRoles, authUserCreated: Boolean(createdAuthUserId), loginAccessRestored },
     });
   } catch (error) {
     if (databaseWasMutated || createdAuthUserId) {

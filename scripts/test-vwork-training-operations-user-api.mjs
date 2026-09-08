@@ -54,6 +54,7 @@ assert.deepEqual(response.payload.user, {
   role: 'member',
   roles: ['member'],
   authUserCreated: true,
+  loginAccessRestored: false,
 });
 assert.equal('password' in response.payload.user, false);
 
