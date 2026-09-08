@@ -47,7 +47,7 @@ globalThis.fetch = async (url, options = {}) => {
   throw new Error(`Unexpected fetch: ${options.method || 'GET'} ${value}`);
 };
 
-const { default: handler } = await import('../api/vwork-training-operations.js');
+const { default: handler, stateForRole } = await import('../api/vwork-training-operations.js');
 
 function responseRecorder() {
   return {
@@ -91,12 +91,20 @@ await handler(request('GET', undefined, 'manager'), managerView);
 assert.equal(managerView.statusCode, 200);
 assert.equal(managerView.payload.directory.length, 6);
 assert.equal(managerView.payload.accountDirectory.length, 0);
+assert.equal(managerView.payload.state.projects.length, 0);
+assert.equal(managerView.payload.state.tasks.length, 0);
 
 const memberView = responseRecorder();
 await handler(request('GET', undefined, 'member'), memberView);
 assert.equal(memberView.statusCode, 200);
 assert.equal(memberView.payload.role, 'member');
 assert.equal(memberView.payload.state.tasks.length, 0);
+
+const assignedManagerState = structuredClone(getResponse.payload.state);
+assignedManagerState.teamAssignments.push({ courseId: 'CX-FOUNDATION', projectId: 'EVNSPC-2026', role: 'manager', accountId: 'profile-operations', status: 'ACTIVE' });
+const assignedManagerView = stateForRole(assignedManagerState, { role: 'manager', actor: { id: 'profile-operations', email: 'ops@peopleone.vn', name: 'Quản trị đa vai' } });
+assert.equal(assignedManagerView.courses.length, 1);
+assert.equal(assignedManagerView.courseInputProgress[0].total, 7);
 
 const invalidRole = responseRecorder();
 await handler(request('GET', undefined, 'director'), invalidRole);

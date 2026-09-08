@@ -20,7 +20,7 @@ const legacyState = structuredClone(state);
 legacyState.schemaVersion = 1;
 legacyState.inputs = [{ id: 'EVNSPC-2026:D03', projectId: 'EVNSPC-2026', key: 'roster', dataCode: 'D03', title: 'Lớp & học viên', ownerRole: 'intake', required: true, status: 'ACTIVE', activeVersion: 1, versions: [{ id: 'EVNSPC-2026:D03:v1', version: 1, status: 'ACTIVE', files: [{ name: 'legacy.xlsx' }] }] }];
 const normalizedLegacy = normalizeTrainingOperationsState(legacyState, { now: '2026-08-25T00:00:00.000Z' });
-assert.equal(normalizedLegacy.schemaVersion, 2);
+assert.equal(normalizedLegacy.schemaVersion, 3);
 assert.ok(normalizedLegacy.inputs.filter((item) => item.dataCode === 'D03').every((item) => item.status === 'MISSING'));
 assert.equal(normalizedLegacy.legacyUnscopedInputs[0].id, 'EVNSPC-2026:D03');
 
@@ -73,10 +73,18 @@ for (const gameCount of [0, 1, 2, 3]) {
   assert.deepEqual(savedData.game_contents, gameContents);
 }
 
-// UC08 — VTraining material assignment D09.
-state = command(state, 'SUBMIT_INPUT', { projectId: 'ALPHA-2026', courseId: 'ALPHA-CX', inputKey: 'material', sourceStepCode: 'UC08-B04', data: { class_ids: ['ALPHA-CX-ALPHA01'], visible_from: '2026-10-10', visible_to: '2026-10-12', material_name_type: 'Hướng dẫn PDF' }, files: [{ name: 'guide.pdf', fileUrl: 'https://files.example/guide.pdf' }] }, 'vtraining', 'VTraining Ops');
+// UC08 — Content supplies the source material; VTraining executes T-109.
+state = command(state, 'SUBMIT_INPUT', { projectId: 'ALPHA-2026', courseId: 'ALPHA-CX', inputKey: 'material', sourceStepCode: 'UC08-B04', data: { class_ids: ['ALPHA-CX-ALPHA01'], visible_from: '2026-10-10', visible_to: '2026-10-12', material_name_type: 'Hướng dẫn PDF' }, files: [{ name: 'guide.pdf', fileUrl: 'https://files.example/guide.pdf' }] }, 'content', 'Chuyên viên nội dung');
 assert.equal(state.inputs.find((item) => item.id === 'ALPHA-CX:D09').activeVersion, 1);
 assert.equal(state.inputs.find((item) => item.id === 'ALPHA-CX:D09').versions[0].sourceStepCode, 'UC08-B04');
+
+// Live publishing cannot start merely because its own input exists: setup tasks must finish first.
+const assignedLivePublishId = 'ALPHA-CX-ALPHA01-T-110';
+state = command(state, 'ASSIGN_TASKS', { taskIds: [assignedLivePublishId], assigneeId: 'member-01', assigneeName: 'Nam Nguyễn', reviewerId: 'manager-01', reviewerName: 'Ngọc Trần', priority: 'Normal', requireSeparation: true }, 'manager', 'Ngọc Trần');
+const assignedLivePublish = state.tasks.find((item) => item.id === assignedLivePublishId);
+assert.equal(assignedLivePublish.status, 'WAITING_INPUT');
+assert.equal(assignedLivePublish.waitingReason, 'DEPENDENCY');
+assert.ok(assignedLivePublish.blockingTaskIds.length > 0);
 
 // UC09 + UC10 — generated task dependencies and assignment.
 const discussionTaskId = 'ALPHA-CX-ALPHA01-T-104';
@@ -112,6 +120,9 @@ state = command(state, 'SUBMIT_REVIEW', { taskId: discussionTaskId }, 'member', 
 state = command(state, 'REVIEW_TASK', { taskId: discussionTaskId, result: 'PASS', comment: 'Đạt.' }, 'manager', 'Ngọc Trần');
 assert.equal(state.tasks.find((item) => item.id === discussionTaskId).status, 'DONE');
 assert.equal(state.tasks.find((item) => item.id === discussionTaskId).progress, 100);
+const livePublishTask = state.tasks.find((item) => item.id === 'ALPHA-CX-ALPHA01-T-110');
+assert.ok(livePublishTask.dependsOnTaskIds.some((id) => id.endsWith('T-109')));
+assert.equal(livePublishTask.status, 'WAITING_INPUT');
 
 // UC15 — new input version, diff and affected-task decision.
 state = command(state, 'SUBMIT_INPUT_VERSION', { projectId: 'ALPHA-2026', inputKey: 'game', sourceStepCode: 'UC15-B03', data: { game_count: 2, game_contents: ['Tình huống Alpha v2', 'Tình huống Alpha bổ sung'], play_limit: 3, schedule: '2026-10-10' }, reason: 'Khách hàng cập nhật nội dung game.', effectiveAt: '2026-09-20T00:00:00.000Z' }, 'content', 'Chuyên viên nội dung');
@@ -166,6 +177,9 @@ assert.ok(fb2State.classes.some((item) => item.id === 'CX-ADVANCED-L01'));
 assert.ok(fb2State.tasks.filter((item) => item.courseId === 'CX-ADVANCED').every((item) => item.id.startsWith('CX-ADVANCED-L01-')));
 fb2State = command(fb2State, 'ASSIGN_COURSE_ROLE', { courseId: 'CX-ADVANCED', role: 'manager', accountId: 'manager-01', accountName: 'Ngọc Trần' }, 'operations', 'Quản lý vận hành');
 assert.ok(fb2State.teamAssignments.some((item) => item.courseId === 'CX-ADVANCED' && item.role === 'manager' && item.accountId === 'manager-01'));
+fb2State = command(fb2State, 'ASSIGN_COURSE_ROLE', { courseId: 'CX-ADVANCED', role: 'member', accountId: 'member-01', accountName: 'Nam Nguyễn' }, 'operations', 'Quản lý vận hành');
+assert.ok(fb2State.teamAssignments.some((item) => item.courseId === 'CX-ADVANCED' && item.role === 'member' && item.accountId === 'member-01'));
+assert.ok(fb2State.tasks.filter((item) => item.courseId === 'CX-ADVANCED').every((item) => !item.assigneeId));
 fb2State = commandAs(fb2State, 'UPDATE_COURSE_STATUS', { courseId: 'CX-ADVANCED', status: 'ACTIVE' }, 'manager', 'manager-01', 'Ngọc Trần');
 assert.equal(fb2State.courses.find((item) => item.id === 'CX-ADVANCED').status, 'ACTIVE');
 fb2State = command(fb2State, 'COPY_COURSE_CONFIG', { sourceCourseId: 'CX-FOUNDATION', targetCourseId: 'CX-ADVANCED' }, 'operations', 'Quản lý vận hành');
@@ -182,5 +196,31 @@ assert.equal(fb2Request.approvalLevel, 'OPERATIONS');
 assert.throws(() => commandAs(fb2State, 'APPROVE_SCOPE_CHANGE', { changeRequestId: fb2Request.id }, 'manager', 'manager-01', 'Ngọc Trần'), /Quản lý vận hành/);
 fb2State = command(fb2State, 'APPROVE_SCOPE_CHANGE', { changeRequestId: fb2Request.id }, 'operations', 'Quản lý vận hành');
 assert.equal(fb2State.changeRequests.at(-1).status, 'APPROVED');
+
+// Multi-course creation is one domain command, so a failure cannot persist a partial project.
+let bundleState = createInitialTrainingOperationsState({ now: '2026-08-25T00:00:00.000Z' });
+bundleState = command(bundleState, 'CREATE_PROJECT_BUNDLE', {
+  project: { id: 'BUNDLE-2026', name: 'Dự án nhiều khóa', customerName: 'EVN', startDate: '2026-11-01', deadline: '2026-12-31', classCount: 1 },
+  course: { id: 'QL01A', name: 'QL01A', systems: ['VTraining'] },
+  classes: [{ id: 'L01', name: 'Lớp QL01A', startDate: '2026-11-01', endDate: '2026-11-02' }],
+  scope: { selectedContents: ['VTRAINING'] },
+  additionalCourses: [{
+    course: { id: 'QL01B', name: 'QL01B', systems: ['VTraining'] },
+    classes: [{ id: 'L01', name: 'Lớp QL01B', startDate: '2026-11-08', endDate: '2026-11-09' }],
+    scope: { selectedContents: ['VTRAINING'] },
+  }],
+}, 'operations', 'Quản lý vận hành');
+assert.equal(bundleState.courses.filter((item) => item.projectId === 'BUNDLE-2026').length, 2);
+assert.ok(bundleState.auditEvents.some((item) => item.type === 'PROJECT_BUNDLE_CREATED'));
+
+const atomicBase = createInitialTrainingOperationsState({ now: '2026-08-25T00:00:00.000Z' });
+assert.throws(() => command(atomicBase, 'CREATE_PROJECT_BUNDLE', {
+  project: { id: 'ATOMIC-2026', name: 'Kiểm tra atomic', customerName: 'EVN', startDate: '2026-11-01', deadline: '2026-12-31', classCount: 1 },
+  course: { id: 'ATOMIC-A', name: 'Khóa hợp lệ', systems: ['VTraining'] },
+  classes: [{ id: 'L01', name: 'Lớp hợp lệ', startDate: '2026-11-01', endDate: '2026-11-02' }],
+  scope: { selectedContents: ['VTRAINING'] },
+  additionalCourses: [{ course: { id: 'ATOMIC-B', name: 'Khóa lỗi', systems: ['VTraining'] }, classes: [], scope: { selectedContents: ['VTRAINING'] } }],
+}, 'operations', 'Quản lý vận hành'), /ít nhất một lớp/);
+assert.equal(atomicBase.projects.some((item) => item.id === 'ATOMIC-2026'), false);
 
 console.log('V-Work Training Operations domain UC01-UC16 and FB2 course model passed.');

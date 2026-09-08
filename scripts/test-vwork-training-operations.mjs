@@ -49,18 +49,23 @@ assert(page.includes('không sinh công việc ngang hàng ở cấp dự án ho
 assert(!page.includes('LegacyCreateWizard'), 'The obsolete project/course-level task wizard must not remain in production source.');
 assert(!page.includes('MOCKUP DUYỆT') && !page.includes('Mock state'), 'Production source must not expose mockup-only labels.');
 assert(page.includes("runCommand('ASSIGN_GROUP_MANAGER'"), 'Group manager assignment must not be implemented as CTV assignment.');
-assert(page.includes("content: ['vlearning', 'game', 'discussion', 'assignment', 'test']"), 'Content workspace must expose D04-D08 exactly.');
+assert(page.includes("content: ['vlearning', 'game', 'discussion', 'assignment', 'test', 'material']"), 'Content workspace must expose D04-D09 source inputs.');
 assert(!page.includes('validateRosterWorkbook') && !service.includes('validateRosterWorkbook') && page.includes('Chọn file danh sách') && page.includes('input type="file"'), 'D03 must accept the uploaded source file without enforcing a roster template or business file format.');
 assert(page.includes('không kiểm duyệt format') && page.includes('không đọc cấu trúc để suy đoán lớp'), 'D03 upload must explain that business-format validation and class inference are not applied.');
 assert(page.includes('training-context-bar') && page.includes('Ngữ cảnh dự án khóa học lớp'), 'FB2 must use one Project → Course → Class context bar.');
 assert(page.includes('WorkActionInbox') && page.includes('Theo dõi') && page.includes('Nghiệm thu'), 'Course managers must receive one action inbox with Tracking and Acceptance tabs.');
 assert(page.includes('CourseControlPanel') && page.includes("runCommand('ASSIGN_COURSE_ROLE'") && page.includes("runCommand('UPDATE_COURSE_STATUS'"), 'Course team and lifecycle controls must persist through the isolated domain.');
-assert(page.includes('Input readiness theo từng khóa') && page.includes('getCourseInputProgress') && page.includes('tài liệu đã có'), 'Input readiness must start with a course list and show the 0/7-style progress for each course.');
+assert(page.includes('Input readiness theo từng khóa') && page.includes('getCourseInputProgress') && page.includes('đầu vào sẵn sàng'), 'Input readiness must start with a course list and show server-aggregated progress for each course.');
 assert(page.includes('sale-course-list') && page.includes('Lịch lớp') && page.includes('danh sách đã có'), 'The Sale upload queue must group class schedules and roster progress by course.');
 assert(page.includes("role === 'intake' ? <><p>ĐẦU MỐI / SALE</p><button className={tab === 'inputs' ? 'active' : ''}") && page.includes('Việc của tôi · cập nhật danh sách lớp'), 'Sale Việc của tôi must open the roster upload workspace instead of an empty class-task page.');
-assert(page.includes('additionalCourses') && page.includes("runCommand('CREATE_COURSE'") && page.includes('+ Thêm khóa'), 'The create wizard must persist more than one course inside a project.');
-assert(domain.includes('schemaVersion = 2') && domain.includes("scopeLevel: 'course'") && domain.includes("scopeLevel: 'class'"), 'FB2 state must distinguish course and class inputs in schema v2.');
+assert(page.includes('additionalCourses') && page.includes("runCommand('CREATE_PROJECT_BUNDLE'") && page.includes('+ Thêm khóa'), 'The create wizard must persist multiple courses atomically inside a project.');
+assert(page.includes('enabledTaskIds') && page.includes('taskDueOffsets') && page.includes('taskTemplates: taskTemplates.map'), 'Wizard task enablement, deadline offsets and checklist edits must be persisted into the atomic project payload.');
+assert(domain.includes('schemaVersion = 3') && domain.includes("scopeLevel: 'course'") && domain.includes("scopeLevel: 'class'"), 'FB2 state must distinguish course and class inputs in schema v3.');
 assert(api.includes('normalizeTrainingOperationsState') && api.includes('scopedCourseIds'), 'The API must normalize legacy state and scope non-global users by course membership.');
+assert(api.includes("item.role === role") && api.includes("output.projects = output.projects.filter"), 'Non-global roles must fail closed when no matching course assignment exists.');
+assert(domain.includes("ownerRole: 'content'") && page.includes("vtraining: []"), 'D09 source ownership must stay with Content; VTraining receives execution tasks instead of a duplicate input workspace.');
+assert(fileApi.includes("material: { upload: ['content'], download: ['content', 'vtraining'] }"), 'D09 file access must allow Content to upload and VTraining to consume the approved source.');
+assert(domain.includes('dependsOnTaskIds') && domain.includes("dependsOnGroups: ['setup']"), 'Live tasks must wait for setup task dependencies.');
 assert(page.includes('const baseTasks = tasks;') && page.includes('const baseVisible = tasks;'), 'Member task lists must trust the server-scoped result instead of filtering a hard-coded mock identity.');
 assert(!page.includes("task.assignee === 'Nam Nguyễn'") && !page.includes('<option>Nam Nguyễn</option>'), 'Production assignment UI must not depend on mock people names.');
 for (const field of ['content_name', 'eln_structure', 'game_content', 'play_limit', 'topic_content', 'group_reference', 'assignment_brief', 'rubric_pass_score', 'question_bank', 'test_rule', 'material_name_type', 'class_ids', 'visible_from', 'visible_to']) {

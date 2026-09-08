@@ -7,7 +7,7 @@ export const TRAINING_INPUT_DEFINITIONS = Object.freeze({
   discussion: { code: 'D06', title: 'Thảo luận', ownerRole: 'content', scopeLevel: 'course', activity: 'DISCUSSION' },
   assignment: { code: 'D07', title: 'Thu hoạch', ownerRole: 'content', scopeLevel: 'course', activity: 'ASSIGNMENT' },
   test: { code: 'D08', title: 'Kiểm tra', ownerRole: 'content', scopeLevel: 'course', activity: 'TEST' },
-  material: { code: 'D09', title: 'Tài liệu VTraining', ownerRole: 'vtraining', scopeLevel: 'course', activity: 'VTRAINING' },
+  material: { code: 'D09', title: 'Nguồn tài liệu VTraining', ownerRole: 'content', scopeLevel: 'course', activity: 'VTRAINING' },
 });
 
 export const TRAINING_COURSE_ROLES = Object.freeze(['intake', 'content', 'vtraining', 'manager', 'member']);
@@ -27,8 +27,8 @@ export const TRAINING_TASK_TEMPLATES = Object.freeze([
   { group: 'setup', code: 'T-107', title: 'Khởi tạo Ứng dụng học tập số / Gamification', inputKey: 'game', dueOffset: 2, checklist: ['Khởi tạo đúng ứng dụng học tập số', 'Tài khoản test làm thử thành công', 'Màn ranking có kết quả và reset được', 'Tài khoản học viên thấy bài', 'Đóng phát hành sau khi test'] },
   { group: 'setup', code: 'T-108', title: 'Khởi tạo bài tập VLearning', inputKey: 'vlearning', dueOffset: 2, checklist: ['Khởi tạo đúng bài tập', 'Tài khoản test làm được và thấy kết quả', 'Tài khoản học viên thấy bài trong lớp'] },
   { group: 'setup', code: 'T-109', title: 'Khởi tạo tài liệu', inputKey: 'material', dueOffset: 2, checklist: ['Khởi tạo đúng tài liệu', 'Tài khoản học viên thấy tài liệu', 'Tải thử tài liệu thành công'] },
-  { group: 'live', code: 'T-110', title: 'Mở phát hành các hoạt động', inputKey: 'roster', dueOffset: 0, checklist: ['Phát hành Thảo luận', 'Phát hành Ứng dụng học tập số', 'Phát hành Kiểm tra và Thu hoạch', 'Tài khoản học viên thấy các bài'] },
-  { group: 'live', code: 'T-111', title: 'Xem kết quả các hoạt động', inputKey: 'roster', dueOffset: 0, checklist: ['Xem kết quả Thảo luận', 'Xem kết quả Ứng dụng học tập số', 'Xem kết quả Kiểm tra', 'Xem kết quả Thu hoạch'] },
+  { group: 'live', code: 'T-110', title: 'Mở phát hành các hoạt động', inputKey: 'roster', dueOffset: 0, dependsOnGroups: ['setup'], checklist: ['Phát hành Thảo luận', 'Phát hành Ứng dụng học tập số', 'Phát hành Kiểm tra và Thu hoạch', 'Tài khoản học viên thấy các bài'] },
+  { group: 'live', code: 'T-111', title: 'Xem kết quả các hoạt động', inputKey: 'roster', dueOffset: 0, dependsOnTemplates: ['T-110'], checklist: ['Xem kết quả Thảo luận', 'Xem kết quả Ứng dụng học tập số', 'Xem kết quả Kiểm tra', 'Xem kết quả Thu hoạch'] },
 ]);
 
 export const TRAINING_DEFAULT_CLASSES = Object.freeze([
@@ -39,6 +39,7 @@ export const TRAINING_DEFAULT_CLASSES = Object.freeze([
 
 const COMMAND_ROLES = Object.freeze({
   CREATE_PROJECT: ['operations', 'admin'],
+  CREATE_PROJECT_BUNDLE: ['operations', 'admin'],
   CREATE_COURSE: ['operations', 'admin'],
   COPY_COURSE_CONFIG: ['operations', 'admin'],
   ASSIGN_COURSE_ROLE: ['operations', 'admin'],
@@ -172,10 +173,31 @@ function taskRequiredInputs(template) {
   return code === 'D03' ? ['D03'] : ['D03', code];
 }
 
-function createTasksForClass(projectId, courseId, classItem, classIndex, timestamp, selectedContents = []) {
+function normalizeTaskTemplates(overrides) {
+  if (!Array.isArray(overrides)) return TRAINING_TASK_TEMPLATES;
+  const byCode = new Map(overrides.map((item) => [String(item?.code || '').toUpperCase(), item]));
+  return TRAINING_TASK_TEMPLATES.flatMap((template) => {
+    const override = byCode.get(template.code);
+    if (override?.enabled === false) return [];
+    if (!override) return [template];
+    const checklist = Array.isArray(override.checklist)
+      ? override.checklist.map((item) => String(item || '').trim()).filter(Boolean)
+      : template.checklist;
+    if (!checklist.length) throw domainError('VALIDATION_ERROR', `${template.code} cần ít nhất một tiêu chí checklist.`);
+    return [{
+      ...template,
+      title: String(override.title || template.title).trim() || template.title,
+      dueOffset: Math.max(0, Number(override.dueOffset ?? template.dueOffset) || 0),
+      checklist,
+    }];
+  });
+}
+
+function createTasksForClass(projectId, courseId, classItem, classIndex, timestamp, selectedContents = [], templateOverrides) {
   const requiredCodes = new Set(selectedInputCodes({ selectedContents }));
-  const templates = TRAINING_TASK_TEMPLATES.filter((template) => template.inputKey === 'roster' || requiredCodes.has(TRAINING_INPUT_DEFINITIONS[template.inputKey]?.code));
+  const templates = normalizeTaskTemplates(templateOverrides).filter((template) => template.inputKey === 'roster' || requiredCodes.has(TRAINING_INPUT_DEFINITIONS[template.inputKey]?.code));
   const taskScopePrefix = String(classItem.code).startsWith(`${courseId}-`) ? classItem.code : `${courseId}-${classItem.code}`;
+  const taskIdByTemplate = new Map(templates.map((template) => [template.code, `${taskScopePrefix}-${template.code}`]));
   return templates.map((template, templateIndex) => ({
     id: `${taskScopePrefix}-${template.code}`,
     projectId,
@@ -192,16 +214,20 @@ function createTasksForClass(projectId, courseId, classItem, classIndex, timesta
     input: template.inputKey,
     requiredInputCodes: taskRequiredInputs(template),
     requiredInputVersions: {},
+    dependsOnTaskIds: templates.filter((candidate) => template.dependsOnGroups?.includes(candidate.group)).map((candidate) => taskIdByTemplate.get(candidate.code))
+      .concat((template.dependsOnTemplates || []).map((code) => taskIdByTemplate.get(code)).filter(Boolean)),
+    blockingInputCodes: taskRequiredInputs(template),
+    blockingTaskIds: [],
     dueOffset: template.dueOffset,
     dueDirection: 'BEFORE',
     anchorType: 'CLASS_START',
     deadlineStatus: 'INACTIVE',
     slaStartedAt: null,
     status: 'WAITING_INPUT',
-    manager: 'Ngọc Trần',
+    manager: 'Chưa giao',
     assignee: 'Chưa giao',
     assigneeId: null,
-    reviewer: 'Ngọc Trần',
+    reviewer: 'Chưa giao',
     reviewerId: null,
     priority: 'Normal',
     checklistItems: [...template.checklist],
@@ -267,7 +293,7 @@ export function createInitialTrainingOperationsState(context = {}) {
   const classes = TRAINING_DEFAULT_CLASSES.map((item) => ({ ...item, projectId }));
   const tasks = classes.flatMap((classItem, index) => createTasksForClass(projectId, courseId, classItem, index, timestamp, scope.selectedContents));
   const state = {
-    schemaVersion: 2,
+    schemaVersion: 3,
     activeProjectId: projectId,
     projects: [{ id: projectId, code: projectId, name: 'Đào tạo Trải nghiệm khách hàng EVNSPC 2026', customerId: 'EVNSPC', customerName: 'EVNSPC', startDate: '2026-09-01', deadline: '2026-09-30', classCount: 3, teamId: 'VTRAINING-SOUTH', status: 'PREPARING', scopeVersion: 1, createdAt: timestamp, updatedAt: timestamp }],
     courses: [{ id: courseId, projectId, code: courseId, name: 'Trải nghiệm khách hàng', systems: ['VTraining', 'VLearning'], activities: scope.selectedContents, contentVersion: '2026-v1', status: 'DECLARED', startDate: classes.map((item) => item.startDate).sort()[0], endDate: classes.map((item) => item.endDate).sort().at(-1), templateVersion: 1, templateRecommendations: [], createdAt: timestamp, updatedAt: timestamp }],
@@ -358,14 +384,25 @@ export function normalizeTrainingOperationsState(currentState, context = {}) {
     state.inputs = rebuilt;
     state.legacyUnscopedInputs = clone(legacyInputs.filter((legacy) => !rebuilt.some((item) => item.id === legacy.id || item.versions?.some((version) => legacy.versions?.some((legacyVersion) => legacyVersion.id === version.id)))));
   }
+  state.inputs = state.inputs.map((input) => {
+    const definition = inputDefinitionByCode(input.dataCode)?.[1];
+    return definition ? { ...input, title: definition.title, ownerRole: definition.ownerRole } : input;
+  });
   state.tasks = state.tasks.map((task) => ({
     ...task,
     scopeLevel: task.scopeLevel || 'class',
+    dependsOnTaskIds: Array.isArray(task.dependsOnTaskIds) ? task.dependsOnTaskIds : task.templateId === 'T-110'
+      ? state.tasks.filter((item) => item.classId === task.classId && item.group === 'setup' && item.status !== 'CANCELLED').map((item) => item.id)
+      : task.templateId === 'T-111'
+        ? state.tasks.filter((item) => item.classId === task.classId && item.templateId === 'T-110').map((item) => item.id)
+        : [],
+    blockingInputCodes: Array.isArray(task.blockingInputCodes) ? task.blockingInputCodes : clone(task.requiredInputCodes || []),
+    blockingTaskIds: Array.isArray(task.blockingTaskIds) ? task.blockingTaskIds : [],
     checklistEvidence: Array.isArray(task.checklistEvidence)
       ? task.checklistItems.map((_, index) => clone(task.checklistEvidence[index] || []))
       : task.checklistItems.map(() => []),
   }));
-  state.schemaVersion = 2;
+  state.schemaVersion = 3;
   return state;
 }
 
@@ -477,12 +514,20 @@ function refreshTaskReadiness(state, projectId, timestamp) {
     const inputs = state.inputs.filter((item) => item.projectId === projectId && item.status === 'ACTIVE'
       && (item.scopeLevel === 'course' ? item.courseId === task.courseId : item.classId === task.classId));
     const versions = Object.fromEntries(inputs.map((item) => [item.dataCode, item.activeVersion]));
-    const readyInputs = task.requiredInputCodes.every((code) => Number(versions[code] || 0) > 0);
-    const assigned = Boolean(task.assigneeId || (task.assignee && task.assignee !== 'Chưa giao')) && Boolean(task.reviewerId || task.reviewer);
+    const blockingInputCodes = task.requiredInputCodes.filter((code) => Number(versions[code] || 0) <= 0);
+    const blockingTaskIds = (task.dependsOnTaskIds || []).filter((id) => {
+      const dependency = state.tasks.find((item) => item.id === id);
+      return dependency && !['DONE', 'CANCELLED'].includes(dependency.status);
+    });
+    const assigned = Boolean(task.assigneeId) && Boolean(task.reviewerId);
     task.requiredInputVersions = Object.fromEntries(task.requiredInputCodes.filter((code) => versions[code]).map((code) => [code, versions[code]]));
-    task.status = readyInputs && assigned ? 'READY' : 'WAITING_INPUT';
-    task.deadlineStatus = readyInputs && assigned ? 'ACTIVE' : 'INACTIVE';
-    task.slaStartedAt = readyInputs && assigned ? (task.slaStartedAt || timestamp) : null;
+    task.blockingInputCodes = blockingInputCodes;
+    task.blockingTaskIds = blockingTaskIds;
+    task.waitingReason = blockingInputCodes.length ? 'INPUT' : !assigned ? 'ASSIGNMENT' : blockingTaskIds.length ? 'DEPENDENCY' : null;
+    const ready = !blockingInputCodes.length && assigned && !blockingTaskIds.length;
+    task.status = ready ? 'READY' : 'WAITING_INPUT';
+    task.deadlineStatus = ready ? 'ACTIVE' : 'INACTIVE';
+    task.slaStartedAt = ready ? (task.slaStartedAt || timestamp) : null;
     task.updatedAt = timestamp;
   });
 }
@@ -575,12 +620,13 @@ function createProject(state, payload, context) {
     if (classEnd < classStart) throw domainError('VALIDATION_ERROR', `Ngày kết thúc lớp ${classId} không hợp lệ.`);
     return { id: classId, code: classId, projectId, courseId, name: requiredText(item.name, `Tên lớp ${index + 1}`), startDate: classStart, endDate: classEnd, cloneFrom: item.cloneFrom || 'CLASS_TEMPLATE', status: 'PREPARING', createdAt: timestamp, updatedAt: timestamp };
   });
+  if (new Set(normalizedClasses.map((item) => item.id)).size !== normalizedClasses.length) throw domainError('DUPLICATE_CLASS', 'Mã lớp trong khóa học không được trùng nhau.');
   state.projects.push({ id: projectId, code: projectId, name, customerId, customerName: project.customerName || customerId, startDate, deadline, classCount, teamId: project.teamId || '', status: 'PREPARING', scopeVersion: 1, createdAt: timestamp, updatedAt: timestamp });
   state.courses.push({ id: courseId, projectId, code: courseId, name: requiredText(course.name, 'Tên khóa học'), systems, activities: selectedContents, contentVersion: course.contentVersion || 'v1', status: 'DECLARED', startDate: normalizedClasses.map((item) => item.startDate).sort()[0], endDate: normalizedClasses.map((item) => item.endDate).sort().at(-1), templateVersion: 1, templateRecommendations: [], createdAt: timestamp, updatedAt: timestamp });
   state.classes.push(...normalizedClasses);
   state.scopes.push(scope);
   state.inputs.push(...createInputRecords(projectId, courseId, scope, normalizedClasses, timestamp));
-  state.tasks.push(...normalizedClasses.flatMap((item, index) => createTasksForClass(projectId, courseId, item, index, timestamp, selectedContents)));
+  state.tasks.push(...normalizedClasses.flatMap((item, index) => createTasksForClass(projectId, courseId, item, index, timestamp, selectedContents, payload.taskTemplates)));
   state.activeProjectId = projectId;
   appendAudit(state, auditEvent('PROJECT_CREATED', `Tạo dự án ${projectId}, khóa học ${courseId} và ${classCount} lớp; sinh công việc cấp lớp ở trạng thái Chờ input.`, context, 'project', projectId, { courseId, classCount, scopeVersion: 1 }));
 }
@@ -602,15 +648,23 @@ function createCourse(state, payload, context) {
     if (endDate < startDate) throw domainError('VALIDATION_ERROR', `Ngày kết thúc lớp ${classId} không hợp lệ.`);
     return { id: classId, code: classId, projectId: project.id, courseId, name: requiredText(item.name, `Tên lớp ${index + 1}`), startDate, endDate, cloneFrom: item.cloneFrom || 'CLASS_TEMPLATE', status: 'PREPARING', createdAt: timestamp, updatedAt: timestamp };
   });
+  if (new Set(classes.map((item) => item.id)).size !== classes.length) throw domainError('DUPLICATE_CLASS', 'Mã lớp trong khóa học không được trùng nhau.');
   const scope = { projectId: project.id, courseId, version: 1, selectedContents, instanceCount: clone(payload.scope?.instanceCount || {}), createdAt: timestamp };
   state.courses.push({ id: courseId, code: courseId, projectId: project.id, name: requiredText(course.name, 'Tên khóa học'), systems: clone(course.systems || []), activities: selectedContents, contentVersion: course.contentVersion || 'v1', status: 'DECLARED', startDate: classes.map((item) => item.startDate).sort()[0], endDate: classes.map((item) => item.endDate).sort().at(-1), templateVersion: 1, templateRecommendations: [], createdAt: timestamp, updatedAt: timestamp });
   state.classes.push(...classes);
   state.scopes.push(scope);
   state.inputs.push(...createInputRecords(project.id, courseId, scope, classes, timestamp));
-  state.tasks.push(...classes.flatMap((item, index) => createTasksForClass(project.id, courseId, item, index, timestamp, selectedContents)));
+  state.tasks.push(...classes.flatMap((item, index) => createTasksForClass(project.id, courseId, item, index, timestamp, selectedContents, payload.taskTemplates)));
   project.classCount = state.classes.filter((item) => item.projectId === project.id).length;
   project.updatedAt = timestamp;
   appendAudit(state, auditEvent('COURSE_CREATED', `Tạo khóa ${courseId} với ${classes.length} lớp trong dự án ${project.id}.`, context, 'course', courseId));
+}
+
+function createProjectBundle(state, payload, context) {
+  const additionalCourses = Array.isArray(payload.additionalCourses) ? payload.additionalCourses : [];
+  createProject(state, payload, context);
+  additionalCourses.forEach((coursePayload) => createCourse(state, { projectId: payload.project?.id || payload.project?.code, ...coursePayload }, context));
+  appendAudit(state, auditEvent('PROJECT_BUNDLE_CREATED', `Hoàn tất khởi tạo dự án và ${additionalCourses.length + 1} khóa học trong một giao dịch.`, context, 'project', payload.project?.id || payload.project?.code, { courseCount: additionalCourses.length + 1 }));
 }
 
 function copyCourseConfig(state, payload, context) {
@@ -756,6 +810,7 @@ function archiveTask(state, payload, context) {
   task.archivedBy = actorFrom(context);
   task.archiveReason = requiredText(payload.reason, 'Lý do xóa');
   task.updatedAt = timestamp;
+  refreshTaskReadiness(state, task.projectId, timestamp);
   appendAudit(state, auditEvent('TASK_ARCHIVED', `Đã lưu trữ ${task.id}; lịch sử và audit được giữ nguyên.`, context, 'task', task.id, { reason: task.archiveReason }));
 }
 
@@ -854,9 +909,6 @@ function assignCourseRole(state, payload, context) {
       task.managerId = accountId;
       task.reviewer = assignment.accountName;
       task.reviewerId = accountId;
-    } else if (role === 'member') {
-      task.assignee = assignment.accountName;
-      task.assigneeId = accountId;
     }
     task.updatedAt = timestamp;
   });
@@ -869,8 +921,9 @@ function updateCourseStatus(state, payload, context) {
   if (!course) throw domainError('NOT_FOUND', 'Không tìm thấy khóa học.');
   assertCourseManager(state, course.id, context);
   const next = requiredText(payload.status, 'Trạng thái khóa').toUpperCase();
+  const previousStatus = course.status || 'DECLARED';
   const transitions = { DECLARED: ['ACTIVE', 'ARCHIVED'], PREPARING: ['ACTIVE', 'ARCHIVED'], ACTIVE: ['ENDED'], ENDED: ['ARCHIVED'], ARCHIVED: [] };
-  if (!transitions[course.status || 'DECLARED']?.includes(next)) throw domainError('INVALID_TRANSITION', `Không thể chuyển khóa từ ${course.status} sang ${next}.`);
+  if (!transitions[previousStatus]?.includes(next)) throw domainError('INVALID_TRANSITION', `Không thể chuyển khóa từ ${course.status} sang ${next}.`);
   if (next === 'ENDED') {
     const unfinished = state.tasks.filter((item) => item.courseId === course.id && !['DONE', 'CANCELLED'].includes(item.status));
     if (unfinished.length) throw domainError('COURSE_NOT_READY_TO_CLOSE', `Còn ${unfinished.length} công việc chưa hoàn thành.`, { taskIds: unfinished.map((item) => item.id) });
@@ -878,7 +931,7 @@ function updateCourseStatus(state, payload, context) {
   course.status = next;
   course.updatedAt = nowIso(context);
   if (next === 'ARCHIVED') course.archivedAt = course.updatedAt;
-  appendAudit(state, auditEvent('COURSE_STATUS_UPDATED', `Khóa ${course.code} chuyển sang ${next}.`, context, 'course', course.id));
+  appendAudit(state, auditEvent('COURSE_STATUS_UPDATED', `Khóa ${course.code} chuyển sang ${next}.`, context, 'course', course.id, { from: previousStatus, to: next, reason: String(payload.reason || '').trim() }));
 }
 
 function updateClassStatus(state, payload, context) {
@@ -994,6 +1047,7 @@ function reviewTask(state, payload, context) {
   task.completedAt = result === 'PASS' ? timestamp : null;
   if (result === 'REWORK') task.rework += 1;
   task.updatedAt = timestamp;
+  refreshTaskReadiness(state, task.projectId, timestamp);
   appendNotification(state, { createdAt: timestamp, kind: result === 'PASS' ? 'TASK_APPROVED' : 'TASK_REWORK', title: `${task.id}: ${result === 'PASS' ? 'Đạt' : 'Cần làm lại'}`, body: comment || 'Kết quả đã được xác nhận.', entityType: 'task', entityId: task.id, recipients: [task.assigneeId || task.assignee] });
   appendAudit(state, auditEvent(result === 'PASS' ? 'TASK_APPROVED' : 'TASK_RETURNED', `${task.id} ${result === 'PASS' ? 'hoàn thành 100%' : `được mở lại lần ${task.rework}`}.`, context, 'task', task.id, { result, comment }));
 }
@@ -1137,6 +1191,7 @@ export function applyTrainingOperationsCommand(currentState, command, context = 
   const payload = command?.payload || {};
   switch (type) {
     case 'CREATE_PROJECT': createProject(state, payload, { ...context, role }); break;
+    case 'CREATE_PROJECT_BUNDLE': createProjectBundle(state, payload, { ...context, role }); break;
     case 'CREATE_COURSE': createCourse(state, payload, { ...context, role }); break;
     case 'COPY_COURSE_CONFIG': copyCourseConfig(state, payload, { ...context, role }); break;
     case 'ASSIGN_COURSE_ROLE': assignCourseRole(state, payload, { ...context, role }); break;
@@ -1161,7 +1216,7 @@ export function applyTrainingOperationsCommand(currentState, command, context = 
     case 'APPROVE_SCOPE_CHANGE': approveScopeChange(state, payload, { ...context, role }); break;
     default: throw domainError('UNKNOWN_COMMAND', `Lệnh ${type} chưa được hỗ trợ.`);
   }
-  state.schemaVersion = 2;
+  state.schemaVersion = 3;
   return state;
 }
 
