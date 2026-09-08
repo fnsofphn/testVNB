@@ -5,6 +5,7 @@ import {
   applyTrainingOperationsCommand,
   assertTrainingOperationsCommandRole,
   createInitialTrainingOperationsState,
+  normalizeTrainingOperationsState,
   summarizeTrainingOperationsState,
 } from '../src/modules/vplanning/trainingOperations/domain.js';
 import {
@@ -159,11 +160,22 @@ function redactInput(input) {
 }
 
 function stateForRole(state, auth) {
-  const output = structuredClone(state);
+  const output = normalizeTrainingOperationsState(state);
   const role = auth.role;
   const isAssigned = (item) => [auth.actor.id, auth.actor.email, auth.actor.name].includes(item.assigneeId)
     || [auth.actor.email, auth.actor.name].includes(item.assignee);
   if (['admin', 'operations'].includes(role)) return output;
+  const actorTokens = new Set([auth.actor.id, auth.actor.email, auth.actor.name].map((item) => String(item || '').trim().toLowerCase()).filter(Boolean));
+  const scopedCourseIds = new Set(output.teamAssignments.filter((item) => item.status !== 'ARCHIVED'
+    && [item.accountId, item.accountEmail, item.accountName].some((value) => actorTokens.has(String(value || '').trim().toLowerCase())))
+    .map((item) => item.courseId));
+  if (scopedCourseIds.size) {
+    output.courses = output.courses.filter((item) => scopedCourseIds.has(item.id));
+    output.classes = output.classes.filter((item) => scopedCourseIds.has(item.courseId));
+    output.inputs = output.inputs.filter((item) => scopedCourseIds.has(item.courseId));
+    output.tasks = output.tasks.filter((item) => scopedCourseIds.has(item.courseId));
+    output.changeRequests = output.changeRequests.filter((item) => (item.affectedCourseIds || [item.courseId]).some((id) => scopedCourseIds.has(id)));
+  }
   if (role === 'intake') {
     output.inputs = output.inputs.filter((item) => item.ownerRole === 'intake');
     output.tasks = output.tasks.filter(isAssigned);
@@ -213,7 +225,7 @@ async function loadState(auth) {
     happenedAt: item.happened_at,
   }));
   return {
-    state: { ...(row.payload || {}), activeProjectId: row.active_project_id || row.payload?.activeProjectId || null, tasks, auditEvents },
+    state: normalizeTrainingOperationsState({ ...(row.payload || {}), activeProjectId: row.active_project_id || row.payload?.activeProjectId || null, tasks, auditEvents }),
     version: Number(row.version || 0), updatedAt: row.updated_at || null, storage: 'database',
   };
 }
@@ -232,6 +244,7 @@ async function loadVWorkAccountDirectory(auth) {
     const roles = resolveTrainingRoles(profile || { title: item.title }, item);
     const projectIds = Array.isArray(item.payload?.projectIds) ? item.payload.projectIds.map(String) : [];
     const classIds = Array.isArray(item.payload?.classIds) ? item.payload.classIds.map(String) : [];
+    const courseIds = Array.isArray(item.payload?.courseIds) ? item.payload.courseIds.map(String) : [];
     return {
       id: email,
       name: String(item.full_name || profile?.full_name || item.email || '').trim(),
@@ -242,6 +255,7 @@ async function loadVWorkAccountDirectory(auth) {
       profileLinked: Boolean(profile),
       assignable: canReceiveVWorkTasks(roles),
       projectIds,
+      courseIds,
       classIds,
     };
   }).filter((item) => item?.id && item?.name);
@@ -254,8 +268,9 @@ async function loadTeamDirectory(auth) {
 
 function assignmentScopeAllows(person, task) {
   const projectAllowed = !person.projectIds?.length || person.projectIds.includes(String(task.projectId));
+  const courseAllowed = !person.courseIds?.length || person.courseIds.includes(String(task.courseId));
   const classAllowed = !person.classIds?.length || person.classIds.includes(String(task.classId)) || person.classIds.includes(String(task.classCode));
-  return projectAllowed && classAllowed;
+  return projectAllowed && courseAllowed && classAllowed;
 }
 
 async function normalizeAssignmentCommand(auth, state, command) {

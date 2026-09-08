@@ -55,6 +55,10 @@ assert(page.includes('không kiểm duyệt format') && page.includes('không đ
 assert(page.includes('training-context-bar') && page.includes('Ngữ cảnh dự án khóa học lớp'), 'FB2 must use one Project → Course → Class context bar.');
 assert(page.includes('WorkActionInbox') && page.includes('Theo dõi') && page.includes('Nghiệm thu'), 'Course managers must receive one action inbox with Tracking and Acceptance tabs.');
 assert(page.includes('CourseControlPanel') && page.includes("runCommand('ASSIGN_COURSE_ROLE'") && page.includes("runCommand('UPDATE_COURSE_STATUS'"), 'Course team and lifecycle controls must persist through the isolated domain.');
+assert(page.includes('Input readiness theo từng khóa') && page.includes('getCourseInputProgress') && page.includes('tài liệu đã có'), 'Input readiness must start with a course list and show the 0/7-style progress for each course.');
+assert(page.includes('sale-course-list') && page.includes('Lịch lớp') && page.includes('danh sách đã có'), 'The Sale upload queue must group class schedules and roster progress by course.');
+assert(page.includes("role === 'intake' ? <><p>ĐẦU MỐI / SALE</p><button className={tab === 'inputs' ? 'active' : ''}") && page.includes('Việc của tôi · cập nhật danh sách lớp'), 'Sale Việc của tôi must open the roster upload workspace instead of an empty class-task page.');
+assert(page.includes('additionalCourses') && page.includes("runCommand('CREATE_COURSE'") && page.includes('+ Thêm khóa'), 'The create wizard must persist more than one course inside a project.');
 assert(domain.includes('schemaVersion = 2') && domain.includes("scopeLevel: 'course'") && domain.includes("scopeLevel: 'class'"), 'FB2 state must distinguish course and class inputs in schema v2.');
 assert(api.includes('normalizeTrainingOperationsState') && api.includes('scopedCourseIds'), 'The API must normalize legacy state and scope non-global users by course membership.');
 assert(page.includes('const baseTasks = tasks;') && page.includes('const baseVisible = tasks;'), 'Member task lists must trust the server-scoped result instead of filtering a hard-coded mock identity.');
