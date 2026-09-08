@@ -374,3 +374,26 @@
 .vwork-training-operations .course-create-form label{display:grid;gap:5px;color:#596980;font-size:10px;font-weight:700}.vwork-training-operations .course-create-form label input{width:100%}
 .vwork-training-operations .course-create-submit{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px;padding-top:4px}
 @media(max-width:760px){.vwork-training-operations .course-control-head{gap:10px}.vwork-training-operations .course-head-actions{flex:none}.vwork-training-operations .course-create-actions{align-items:stretch}.vwork-training-operations .course-create-submit{flex-direction:column-reverse}.vwork-training-operations .course-create-submit button{width:100%}}
+
+/* Layered structure browser: project -> course -> class -> modal detail. */
+.vwork-training-operations .layer-page-title{align-items:flex-start}
+.vwork-training-operations .layer-head-actions{display:flex;align-items:flex-end;flex-direction:column;gap:10px}
+.vwork-training-operations .layer-add-button{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.vwork-training-operations .layer-table-head.course-layer{grid-template-columns:2fr 1.2fr .55fr .8fr 82px}
+.vwork-training-operations .layer-course-entry{display:grid;grid-template-columns:minmax(0,1fr) 82px;border-bottom:1px solid var(--border);background:#fff}
+.vwork-training-operations .layer-course-entry:last-child{border-bottom:0}
+.vwork-training-operations .layer-course-open{display:grid;grid-template-columns:2fr 1.2fr .55fr .8fr;gap:12px;align-items:center;width:100%;padding:12px 16px;border:0;border-radius:0;background:#fff;text-align:left}
+.vwork-training-operations .layer-course-open:hover,.vwork-training-operations .layer-course-open:focus-visible{background:var(--primary-soft)}
+.vwork-training-operations .layer-course-open>div{display:flex;min-width:0;flex-direction:column}.vwork-training-operations .layer-course-open b{overflow:hidden;color:#252a3d;font-size:13px;text-overflow:ellipsis;white-space:nowrap}.vwork-training-operations .layer-course-open small{margin-top:4px;color:var(--muted);font-size:9px}.vwork-training-operations .layer-course-open>span{color:#556076;font-size:11px}.vwork-training-operations .layer-course-open em{justify-self:start;padding:5px 8px;border-radius:11px;background:var(--primary-soft);color:#8b172c;font-size:9px;font-style:normal}
+.vwork-training-operations .layer-row-actions{display:flex;align-items:center;justify-content:center;gap:5px;padding:8px;border-left:1px solid var(--border)}
+.vwork-training-operations .layer-row-actions button{display:grid;place-items:center;width:31px;height:31px;padding:0}
+.vwork-training-operations .course-management-modal{width:min(960px,96vw)}
+.vwork-training-operations .course-management-body{min-height:0;overflow:auto;padding:20px 24px 24px}
+.vwork-training-operations .course-management-modal .modal-head p{margin:4px 0 0;color:var(--muted);font-size:10px}
+.vwork-training-operations .course-control-panel.creating .course-control-head,.vwork-training-operations .course-control-panel.creating .course-control-grid{display:none}
+.vwork-training-operations .course-management-modal .course-create{margin-top:0}
+.vwork-training-operations .class-detail-modal{width:min(1040px,96vw);max-height:90vh}
+.vwork-training-operations .class-detail-modal .class-detail-layer{margin:0;border:0;border-radius:0;overflow:auto}
+.vwork-training-operations .class-detail-modal .class-task-customize{max-height:62vh;overflow:auto}
+@media(max-width:1100px){.vwork-training-operations .layer-table-head.course-layer{grid-template-columns:1.5fr 1fr .7fr 82px}.vwork-training-operations .layer-table-head.course-layer span:nth-child(4){display:none}.vwork-training-operations .layer-course-open{grid-template-columns:1.5fr 1fr .7fr}.vwork-training-operations .layer-course-open em{display:none}}
+@media(max-width:760px){.vwork-training-operations .layer-page-title,.vwork-training-operations .layer-head-actions{align-items:stretch;flex-direction:column}.vwork-training-operations .layer-add-button{justify-content:center}.vwork-training-operations .layer-table-head.course-layer{grid-template-columns:1fr 70px}.vwork-training-operations .layer-table-head.course-layer span:not(:first-child):not(:last-child){display:none}.vwork-training-operations .layer-course-entry{grid-template-columns:minmax(0,1fr) 70px}.vwork-training-operations .layer-course-open{grid-template-columns:1fr;padding:12px}.vwork-training-operations .layer-course-open>span,.vwork-training-operations .layer-course-open em{display:none}.vwork-training-operations .layer-row-actions{padding:6px;gap:3px}.vwork-training-operations .course-management-body{padding:14px}.vwork-training-operations .course-management-modal{width:100%}}

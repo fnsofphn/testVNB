@@ -146,12 +146,30 @@ function canAccessVPlanning(profile: AuthProfile | null) {
   return allowedPages.includes('vplanning') || hasVPlanningSpecificAccess(profile);
 }
 
+function hasTrainingOperationsProfileAccess(profile: AuthProfile | null) {
+  if (!profile) return false;
+  const explicitRoles = (profile.vplanningRoles || []).map(normalizeAccessText);
+  if (explicitRoles.some((role) => ['vplanning_intake', 'vplanning_content', 'vplanning_vtraining', 'vplanning_manager', 'vplanning_member'].includes(role))) return true;
+  const profileRole = normalizeAccessText(profile.role);
+  const title = normalizeAccessText(profile.title);
+  if (profileRole === 'client' && ['dau_moi', 'sale', 'account_manager'].some((token) => title.includes(token))) return true;
+  if (profileRole === 'specialist' && ['chuyen_vien_noi_dung', 'content', 'van_hanh_vtraining', 'vtraining'].some((token) => title.includes(token))) return true;
+  return false;
+}
+
+function trainingOperationsEnabled() {
+  return !import.meta.env.PROD || import.meta.env.VITE_ENABLE_VWORK_TRAINING_OPERATIONS === 'true';
+}
+
 function StaticVPlanningPage() {
   const { loading, session, profile, signOut } = useAuth();
 
   if (loading) return <AppSplash />;
   if (!session) return <Navigate to="/login?next=%2Fvwork" replace />;
-  if (!canAccessVPlanning(profile)) return <Navigate to="/login" replace />;
+  if (!canAccessVPlanning(profile)) {
+    if (trainingOperationsEnabled() && hasTrainingOperationsProfileAccess(profile)) return <Navigate to="/vwork/training-operations" replace />;
+    return <Navigate to="/login" replace />;
+  }
   return (
     <Suspense fallback={<AppSplash />}>
       <VPlanningNativePage onSignOut={signOut} />
@@ -179,8 +197,8 @@ function StaticVWorkTrainingOperationsPage() {
   const { loading, session, profile, signOut } = useAuth();
   if (loading) return <AppSplash />;
   if (!session) return <Navigate to="/login?next=%2Fvwork%2Ftraining-operations" replace />;
-  if (!canAccessVPlanning(profile)) return <Navigate to="/login" replace />;
-  if (import.meta.env.PROD && import.meta.env.VITE_ENABLE_VWORK_TRAINING_OPERATIONS !== 'true') {
+  if (!canAccessVPlanning(profile) && !hasTrainingOperationsProfileAccess(profile)) return <Navigate to="/login" replace />;
+  if (!trainingOperationsEnabled()) {
     return <Navigate to="/vwork" replace />;
   }
   return (

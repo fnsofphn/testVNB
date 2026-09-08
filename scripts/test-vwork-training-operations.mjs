@@ -22,7 +22,9 @@ const databaseGuards = read('supabase/tests/vwork_training_operations_guards.sql
 
 assert(app.includes("import('@/modules/vplanning/trainingOperations/TrainingOperationsPage')"), 'Training Operations must stay lazy-loaded behind the V-Work boundary.');
 assert(app.includes('path="/vwork/training-operations"'), 'Training Operations must have its own V-Work route.');
-assert(app.includes("VITE_ENABLE_VWORK_TRAINING_OPERATIONS !== 'true'"), 'Production route must remain feature-flagged until explicitly enabled.');
+assert(app.includes('function trainingOperationsEnabled()') && app.includes("VITE_ENABLE_VWORK_TRAINING_OPERATIONS === 'true'"), 'Production route must remain feature-flagged until explicitly enabled.');
+assert(app.includes('hasTrainingOperationsProfileAccess') && app.includes('<Navigate to="/vwork/training-operations" replace />'), 'Training Operations-only accounts must be routed from the VWork entry to their scoped module.');
+assert(app.includes("profileRole === 'client'") && app.includes("title.includes(token)"), 'Existing Sale profiles must pass the scoped Training Operations guard without receiving broad VPlanning access.');
 assert(app.indexOf("identity.includes('training_manager')") < app.indexOf("identity.includes('manager') ||"), 'Client role mapping must resolve training managers as operations before the generic manager rule.');
 assert(shell.includes("href:'/vwork/training-operations'"), 'The V-Work shell must link to the isolated Training Operations route.');
 assert(shell.includes('hidden:!ENABLE_TRAINING_OPERATIONS'), 'The V-Work navigation entry must follow the same feature flag.');
@@ -45,6 +47,7 @@ assert(api.includes('const fullDirectory = canAssignTasks ? await loadVWorkAccou
 assert(api.includes('profilesByAuthUserId') && api.includes("item.payload?.authUserId") && api.includes('profilesByEmail.get(email)'), 'VWork accounts must link to PeopleOne profiles by stable Auth user id before falling back to email.');
 assert(userApi.includes('findAuthUserByEmail') && userApi.includes('roles: requestedRoles') && userApi.includes('authUserCreated'), 'Provisioning must link an existing Auth user and persist multiple roles without resetting its password.');
 assert(userApi.includes("operations: { profileRole: 'production_manager'") && !userApi.includes("operations: { profileRole: 'training_manager'"), 'Operations account updates must use a profile role accepted by vcontent_profiles_role_check.');
+assert(userApi.includes("profileVplanningRole: 'vplanning_intake'") && userApi.includes("profileVplanningRole: 'vplanning_content'") && userApi.includes("profileVplanningRole: 'vplanning_vtraining'"), 'New scoped Training Operations accounts must persist an explicit module access marker.');
 assert(page.includes('không sinh công việc ngang hàng ở cấp dự án hoặc khóa học'), 'Tasks must be generated inside classes only.');
 assert(!page.includes('LegacyCreateWizard'), 'The obsolete project/course-level task wizard must not remain in production source.');
 assert(!page.includes('MOCKUP DUYỆT') && !page.includes('Mock state'), 'Production source must not expose mockup-only labels.');
@@ -59,6 +62,9 @@ assert(page.includes('Ekip khóa học') && page.includes('Thêm khóa học') &
 assert(page.includes('course-admin-menu') && page.includes('Quản trị vòng đời khóa') && !page.includes('<h3>Vòng đời khóa</h3>'), 'Course lifecycle actions must live in the administration menu instead of a primary card.');
 assert(!page.includes('Retrospective → template kế tiếp') && !page.includes('Lưu khuyến nghị'), 'Retrospective must not be exposed in the current UI.');
 assert(domain.includes("'COURSE_DUPLICATED'") && domain.includes('copyFromCourseId'), 'Course duplication must copy configuration through the isolated domain and write an explicit audit event.');
+assert(!page.includes('FEEDBACK 05'), 'Internal feedback labels must not be exposed in the Training Operations UI.');
+assert(page.includes("tab !== 'structure' && <div className=\"training-context-bar\"") && page.includes('layer-course-entry'), 'The structure screen must use the layered table instead of duplicating the global context selectors.');
+assert(page.includes('Thêm khóa học vào {selectedProject?.code}') && page.includes('class-detail-modal') && page.includes('course-management-modal'), 'Layer actions must identify their parent object and open course/class details in dialogs.');
 assert(page.includes('Input readiness theo từng khóa') && page.includes('getCourseInputProgress') && page.includes('đầu vào sẵn sàng'), 'Input readiness must start with a course list and show server-aggregated progress for each course.');
 assert(page.includes('sale-course-list') && page.includes('Lịch lớp') && page.includes('danh sách đã có'), 'The Sale upload queue must group class schedules and roster progress by course.');
 assert(page.includes("role === 'intake' ? <><p>ĐẦU MỐI / SALE</p><button className={tab === 'inputs' ? 'active' : ''}") && page.includes('Việc của tôi · cập nhật danh sách lớp'), 'Sale Việc của tôi must open the roster upload workspace instead of an empty class-task page.');

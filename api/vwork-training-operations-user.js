@@ -6,9 +6,9 @@ const MAX_BODY_BYTES = parseByteLimit(process.env.VWORK_TRAINING_OPERATIONS_USER
 const readLimitedBuffer = createLimitedBufferReader({ maxBytes: MAX_BODY_BYTES });
 const ACCOUNT_ROLES = {
   operations: { profileRole: 'production_manager', profileVplanningRole: 'vplanning_director', directoryRole: 'vplanning_director', title: 'Quản lý vận hành' },
-  intake: { profileRole: 'client', directoryRole: 'account_manager', title: 'Đầu mối / Sale' },
-  content: { profileRole: 'specialist', directoryRole: 'content_manager', title: 'Chuyên viên nội dung' },
-  vtraining: { profileRole: 'specialist', directoryRole: 'vtraining', title: 'Chuyên viên vận hành VTraining' },
+  intake: { profileRole: 'client', profileVplanningRole: 'vplanning_intake', directoryRole: 'account_manager', title: 'Đầu mối / Sale' },
+  content: { profileRole: 'specialist', profileVplanningRole: 'vplanning_content', directoryRole: 'content_manager', title: 'Chuyên viên nội dung' },
+  vtraining: { profileRole: 'specialist', profileVplanningRole: 'vplanning_vtraining', directoryRole: 'vtraining', title: 'Chuyên viên vận hành VTraining' },
   manager: { profileRole: 'ctv', profileVplanningRole: 'vplanning_manager', directoryRole: 'vplanning_manager', title: 'Quản lý ekip' },
   member: { profileRole: 'ctv', profileVplanningRole: 'vplanning_member', directoryRole: 'vplanning_member', title: 'Thành viên ekip' },
 };
