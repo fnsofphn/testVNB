@@ -15,6 +15,20 @@ globalThis.fetch = async (url, options = {}) => {
   if (value.includes('/vcontent_profiles?') && value.includes('or=')) {
     return Response.json([{ id: 'profile-operations', email: 'ops@peopleone.vn', role: 'production_manager', active: true, auth_user_id: 'auth-operations', vplanning_roles: ['vplanning_director'] }]);
   }
+  if (value.includes('/vplanning_users?select=email&email=eq.old1%40peopleone.vn')) {
+    return Response.json([{ email: 'old1@peopleone.vn' }]);
+  }
+  if (value.includes('/vcontent_profiles?select=email,active&email=eq.old1%40peopleone.vn')) {
+    return Response.json([{ email: 'old1@peopleone.vn', active: true }]);
+  }
+  if (value.includes('/vplanning_users?select=email&email=eq.disabled%40peopleone.vn')) {
+    return Response.json([{ email: 'disabled@peopleone.vn' }]);
+  }
+  if (value.includes('/vcontent_profiles?select=email,active&email=eq.disabled%40peopleone.vn')) {
+    return Response.json([{ email: 'disabled@peopleone.vn', active: false }]);
+  }
+  if (value.includes('/vplanning_users?select=email&email=eq.outside%40example.com')) return Response.json([]);
+  if (value.includes('/vcontent_profiles?select=email,active&email=eq.outside%40example.com')) return Response.json([]);
   if (value.includes('/vplanning_users?') && value.includes('ops%40peopleone.vn')) return Response.json([]);
   if (value.includes('/vcontent_profiles?select=id,email,full_name')) {
     return Response.json([
@@ -40,6 +54,7 @@ globalThis.fetch = async (url, options = {}) => {
     return Response.json({ id: authById, email: `old${suffix}@peopleone.vn`, banned_until: unbannedAuthUsers.has(authById) ? null : '2099-01-01T00:00:00.000Z' });
   }
   if (value.includes('/auth/v1/admin/users?page=1&per_page=1000')) return Response.json({ users: [
+    { id: 'auth-old-1', email: 'old1@peopleone.vn', banned_until: unbannedAuthUsers.has('auth-old-1') ? null : '2099-01-01T00:00:00.000Z' },
     { id: 'auth-old-2', email: 'old2@peopleone.vn', banned_until: '2099-01-01T00:00:00.000Z' },
     { id: 'auth-old-3', email: 'old3@peopleone.vn', banned_until: '2099-01-01T00:00:00.000Z' },
     { id: 'auth-old-4', email: 'old4@peopleone.vn', banned_until: '2099-01-01T00:00:00.000Z' },
@@ -88,5 +103,40 @@ const allowedProfileRoles = new Set(['vplanning_admin', 'vplanning_director', 'v
 for (const call of calls.filter((item) => item.url.includes('/vcontent_profiles') && ['POST', 'PATCH'].includes(item.method))) {
   assert.equal((call.body?.vplanning_roles || []).every((role) => allowedProfileRoles.has(role)), true, 'Profile sync must respect the production role constraint.');
 }
+
+unbannedAuthUsers.delete('auth-old-1');
+const recoveryStart = calls.length;
+const recoveryResult = { status: 0, payload: null };
+await handler({
+  method: 'POST',
+  headers: { 'x-forwarded-for': '127.0.0.43' },
+  body: { action: 'RESTORE_LOGIN_ACCESS', email: 'old1@peopleone.vn' },
+  socket: { remoteAddress: '127.0.0.43' },
+}, {
+  setHeader() {},
+  status(value) { recoveryResult.status = value; return this; },
+  json(value) { recoveryResult.payload = value; return this; },
+});
+assert.equal(recoveryResult.status, 200);
+assert.equal(recoveryResult.payload.ok, true);
+assert.equal(calls.slice(recoveryStart).filter((call) => call.method === 'PUT' && call.body?.ban_duration === 'none').length, 1, 'An active VWork directory account must be unbanned during login recovery.');
+
+const protectedStart = calls.length;
+for (const email of ['disabled@peopleone.vn', 'outside@example.com']) {
+  const protectedResult = { status: 0, payload: null };
+  await handler({
+    method: 'POST',
+    headers: { 'x-forwarded-for': email.startsWith('disabled') ? '127.0.0.44' : '127.0.0.45' },
+    body: { action: 'RESTORE_LOGIN_ACCESS', email },
+    socket: { remoteAddress: email.startsWith('disabled') ? '127.0.0.44' : '127.0.0.45' },
+  }, {
+    setHeader() {},
+    status(value) { protectedResult.status = value; return this; },
+    json(value) { protectedResult.payload = value; return this; },
+  });
+  assert.equal(protectedResult.status, 200);
+  assert.equal(protectedResult.payload.ok, true);
+}
+assert.equal(calls.slice(protectedStart).some((call) => call.method === 'PUT'), false, 'Disabled profiles and emails outside the VWork directory must not be unbanned.');
 
 console.log('V-Work legacy account login reconciliation checks passed.');

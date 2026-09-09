@@ -7,6 +7,7 @@ const assert = (condition, message) => {
 
 const app = read('src/App.tsx');
 const loginPage = read('src/pages/LoginPage.tsx');
+const authContext = read('src/contexts/AuthContext.tsx');
 const shell = read('src/modules/vplanning/VPlanningNativePage.tsx');
 const page = read('src/modules/vplanning/trainingOperations/TrainingOperationsPage.tsx');
 const css = read('src/modules/vplanning/trainingOperations/TrainingOperationsPage.css');
@@ -51,6 +52,8 @@ assert(page.includes('restoreLoginAccess: true') && userApi.includes("ban_durati
 assert(page.includes('Đồng bộ đăng nhập tài khoản cũ') && service.includes('RESTORE_ACTIVE_LOGIN_ACCESS') && userApi.includes('restoreActiveVWorkLoginAccess'), 'Operations must be able to reconcile active legacy VWork accounts in one explicit action.');
 assert(userApi.includes('for (const email of directoryByEmail.keys())') && userApi.includes('profile?.active !== false') && userApi.includes("roles: ['vplanning_member']") && userApi.includes('taskAccessGranted'), 'Active legacy and profile-only VWork accounts must be included and granted task-receiving access without reopening disabled profiles.');
 assert(userApi.includes('const verifiedUser = await getAuthUserById') && userApi.includes('Auth user không khớp email tài khoản VWork'), 'A successful unban response must be verified against a fresh Auth user read and the expected email.');
+assert(userApi.includes("body.action === 'RESTORE_LOGIN_ACCESS'") && userApi.includes('directoryUser && profile?.active !== false'), 'Login recovery must only reopen an active account present in the VWork directory.');
+assert(authContext.includes('isAuthBannedError') && authContext.includes('restoreVWorkLoginAccess(loginEmail)') && authContext.includes('restoredBannedLogin'), 'A banned VWork login must recover once and retry the original password sign-in once.');
 assert(loginPage.includes("normalized.includes('user is banned')") && loginPage.includes('Tài khoản đang bị khóa đăng nhập'), 'Banned Auth accounts must receive an actionable Vietnamese login message instead of a raw provider error.');
 assert(userApi.includes("operations: { profileRole: 'production_manager'") && !userApi.includes("operations: { profileRole: 'training_manager'"), 'Operations account updates must use a profile role accepted by vcontent_profiles_role_check.');
 assert(userApi.includes("intake: { profileRole: 'client', profileVplanningRole: 'vplanning_member'") && userApi.includes("content: { profileRole: 'specialist', profileVplanningRole: 'vplanning_member'") && userApi.includes("vtraining: { profileRole: 'specialist', profileVplanningRole: 'vplanning_member'"), 'Scoped Training Operations accounts must use a profile marker allowed by the production database constraint.');
@@ -92,7 +95,7 @@ for (const field of ['content_name', 'eln_structure', 'game_content', 'play_limi
 assert(page.includes("uploadTrainingOperationsFile(file, task.id, 'evidence', role)"), 'Members must upload private evidence under the selected server-validated role.');
 assert(page.includes('getTrainingOperationsFileUrl(record.path, record.name, role)'), 'Reviewers must open private evidence under the selected server-validated role.');
 assert(page.includes('deadlineOverrideReason') && page.includes('Lý do deadline sau khai giảng'), 'Task assignment must capture a reason for post-class-start deadline exceptions.');
-assert(page.includes('Vướng mắc / blocker') && page.includes("runCommand('UPDATE_TASK_PROGRESS'"), 'Members must persist checklist blockers as part of D12 progress tracking.');
+assert(page.includes('Vướng mắc') && page.includes("runCommand('UPDATE_TASK_PROGRESS'"), 'Members must persist checklist blockers as part of D12 progress tracking.');
 assert(domain.includes("ASSIGN_GROUP_MANAGER: ['operations', 'admin']"), 'Group manager assignment must be authorized at the domain boundary.');
 assert(api.includes('/rpc/persist_vwork_training_operations_state'), 'All mutations must use the isolated atomic persistence RPC.');
 assert(api.includes("VWORK_TRAINING_OPERATIONS_ENABLED !== 'true'") && fileApi.includes("VWORK_TRAINING_OPERATIONS_ENABLED !== 'true'") && userApi.includes("VWORK_TRAINING_OPERATIONS_ENABLED !== 'true'"), 'Every server endpoint must remain disabled in production until the module server flag is explicitly enabled.');
@@ -140,7 +143,11 @@ assert(css.includes('.account-form-actions button:disabled') && css.includes('cu
 assert(css.includes('.account-role-matrix') && css.includes('.account-role-badges'), 'The account role matrix and directory role badges must be styled.');
 assert(css.includes('min-height:350px') && css.includes('.calendar-dialog.task-preview .check-row input{width:16px;height:16px'), 'Overview calendar must be reduced by about one third and task-preview checkboxes must keep a stable popup layout.');
 assert(css.includes('.vwork-training-operations{overflow-x:clip}'), 'Horizontal clipping must not create a scroll container that breaks sticky navigation.');
-assert(css.includes('.layered-task-detail>.task-drawer{position:sticky') && css.includes('max-height:calc(100vh - 96px)') && css.includes('overflow-y:auto'), 'Desktop task details must remain visible below the sticky topbar and scroll independently.');
+assert(css.includes('.layered-task-detail>.task-drawer{position:static') && css.includes('max-height:none') && css.includes('overflow:visible'), 'Desktop task details must use the page scrollbar instead of trapping content in a nested scrollbar.');
+assert(page.includes('Minh chứng cho tiêu chí') && page.includes('Minh chứng tổng hợp (URL / ID)') && !page.includes('Evidence cho tiêu chí'), 'Member-facing evidence labels must be written in Vietnamese.');
+assert(page.includes("return runCommand('SUBMIT_REVIEW'") && page.includes('checklistEvidence: patch.checklistEvidence') && domain.includes('if (payload.actualOutput !== undefined || Array.isArray(payload.evidence)) submitOutput'), 'Review submission must persist progress, output and evidence atomically in one command.');
+assert(domain.includes("role: 'member'") && domain.includes('state.teamAssignments.push(membership)'), 'Assigning a task must grant the assignee course membership in the same state transaction.');
+assert(domain.includes('derivedFromTask: true') && domain.includes("task.assignee !== 'Chưa giao'"), 'Legacy assigned tasks must derive missing course membership during read normalization.');
 assert(!/^\s*(?:body|html|:root|\.sidebar|\.topbar|button|input|select|textarea)\s*\{/m.test(css), 'Training Operations CSS must not leak generic selectors into VLearning or VTraining.');
 
 console.log('V-Work Training Operations architecture checks passed.');

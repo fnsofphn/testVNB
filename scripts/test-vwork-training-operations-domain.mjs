@@ -95,6 +95,7 @@ state = command(state, 'ASSIGN_TASKS', { taskIds: [discussionTaskId], assigneeId
 assert.equal(state.tasks.find((item) => item.id === discussionTaskId).status, 'READY');
 assert.equal(state.tasks.find((item) => item.id === discussionTaskId).deadlineStatus, 'ACTIVE');
 assert.equal(state.tasks.find((item) => item.id === discussionTaskId).assignmentHistory.length, 1);
+assert.ok(state.teamAssignments.some((item) => item.courseId === 'ALPHA-CX' && item.role === 'member' && item.accountId === 'member-01' && item.status === 'ACTIVE'));
 assert.throws(() => command(state, 'ASSIGN_TASKS', { taskIds: [discussionTaskId], assigneeId: 'member-01', assigneeName: 'Nam Nguyễn', reviewerId: 'manager-01', reviewerName: 'Ngọc Trần', deadline: '2026-10-11' }, 'manager', 'Ngọc Trần'), /lý do ngoại lệ/);
 
 // UC11 — start and checklist/progress update.
@@ -115,8 +116,7 @@ assert.throws(() => commandAs(state, 'REVIEW_TASK', { taskId: discussionTaskId, 
 assert.throws(() => command(state, 'REVIEW_TASK', { taskId: discussionTaskId, result: 'REWORK', comment: '' }, 'manager', 'Ngọc Trần'), /Comment/);
 state = command(state, 'REVIEW_TASK', { taskId: discussionTaskId, result: 'REWORK', comment: 'Bổ sung ảnh kết quả tài khoản test.' }, 'manager', 'Ngọc Trần');
 assert.equal(state.tasks.find((item) => item.id === discussionTaskId).status, 'REWORK');
-state = command(state, 'SUBMIT_OUTPUT', { taskId: discussionTaskId, actualOutput: 'Đã bổ sung ảnh kiểm thử.', evidence: [{ id: 'E-02', url: 'https://vtraining.example/discussion/01-proof' }] }, 'member', 'Nam Nguyễn');
-state = command(state, 'SUBMIT_REVIEW', { taskId: discussionTaskId }, 'member', 'Nam Nguyễn');
+state = command(state, 'SUBMIT_REVIEW', { taskId: discussionTaskId, checklist: Array(checklistLength).fill(true), checklistEvidence: Array.from({ length: checklistLength }, (_, index) => [{ id: `CE-R-${index + 1}`, url: `https://minhchung.example/check-${index + 1}` }]), blocker: '', actualOutput: 'Đã bổ sung ảnh kiểm thử.', evidence: [{ id: 'E-02', url: 'https://vtraining.example/discussion/01-proof' }] }, 'member', 'Nam Nguyễn');
 state = command(state, 'REVIEW_TASK', { taskId: discussionTaskId, result: 'PASS', comment: 'Đạt.' }, 'manager', 'Ngọc Trần');
 assert.equal(state.tasks.find((item) => item.id === discussionTaskId).status, 'DONE');
 assert.equal(state.tasks.find((item) => item.id === discussionTaskId).progress, 100);

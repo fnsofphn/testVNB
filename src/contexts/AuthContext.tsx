@@ -195,6 +195,21 @@ function isAuthTransientError(error: unknown) {
   );
 }
 
+function isAuthBannedError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error || '');
+  const normalized = message.toLowerCase();
+  return normalized.includes('user is banned') || normalized.includes('user banned');
+}
+
+async function restoreVWorkLoginAccess(email: string) {
+  const response = await fetch('/api/vwork-training-operations-user', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'RESTORE_LOGIN_ACCESS', email }),
+  });
+  if (!response.ok) throw new Error('Không thể mở lại đăng nhập VWork.');
+}
+
 async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallbackValue: T): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
@@ -628,6 +643,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
           let data: Awaited<ReturnType<typeof supabase.auth.signInWithPassword>>['data'] | null = null;
           let lastSignInError: unknown = null;
+          let restoredBannedLogin = false;
           for (let attempt = 0; attempt < 3; attempt += 1) {
             const result = await supabase.auth.signInWithPassword({ email: loginEmail, password });
             if (!result.error) {
@@ -636,6 +652,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
               break;
             }
             lastSignInError = result.error;
+            if (!restoredBannedLogin && isAuthBannedError(result.error)) {
+              await restoreVWorkLoginAccess(loginEmail);
+              restoredBannedLogin = true;
+              continue;
+            }
             const isRateLimited = isAuthRateLimitError(result.error);
             const isTransient = isAuthTransientError(result.error);
             if ((!isRateLimited && !isTransient) || attempt === 2) break;

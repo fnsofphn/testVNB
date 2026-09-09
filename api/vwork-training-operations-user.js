@@ -285,7 +285,7 @@ export default async function handler(req, res) {
     res.status(405).json({ ok: false, error: 'Method not allowed.' });
     return;
   }
-  if (!enforceRateLimit(req, res, { route: 'vwork-training-operations-user', ...RATE_LIMITS.admin })) return;
+  if (!(await enforceRateLimit(req, res, { route: 'vwork-training-operations-user', ...RATE_LIMITS.admin }))) return;
 
   const config = {
     supabaseUrl: process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '',
@@ -306,6 +306,29 @@ export default async function handler(req, res) {
   let vplanningUserWasCreated = false;
   let databaseWasMutated = false;
   try {
+    const body = await readJsonBody(req);
+    const restUrl = `${config.supabaseUrl}/rest/v1`;
+    const serviceHeaders = buildHeaders(config.serviceRoleKey, `Bearer ${config.serviceRoleKey}`);
+    if (body.action === 'RESTORE_LOGIN_ACCESS') {
+      const email = normalizeEmail(body.email);
+      if (!/^\S+@\S+\.\S+$/.test(email)) {
+        res.status(400).json({ ok: false, code: 'LOGIN_EMAIL_INVALID', error: 'Email đăng nhập không hợp lệ.' });
+        return;
+      }
+      const [directoryRows, profileRows] = await Promise.all([
+        requestJson(`${restUrl}/vplanning_users?select=email&email=eq.${encodeURIComponent(email)}&limit=1`, { headers: serviceHeaders }),
+        requestJson(`${restUrl}/vcontent_profiles?select=email,active&email=eq.${encodeURIComponent(email)}&limit=1`, { headers: serviceHeaders }),
+      ]);
+      const directoryUser = Array.isArray(directoryRows) ? directoryRows[0] || null : null;
+      const profile = Array.isArray(profileRows) ? profileRows[0] || null : null;
+      if (directoryUser && profile?.active !== false) {
+        const authUser = await findAuthUserByEmail(config.supabaseUrl, serviceHeaders, email);
+        if (authUser) await ensureAuthLoginReady(config.supabaseUrl, serviceHeaders, authUser, email);
+      }
+      res.status(200).json({ ok: true });
+      return;
+    }
+
     const authHeader = String(req.headers.authorization || '');
     const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
     if (!token) {
@@ -316,8 +339,6 @@ export default async function handler(req, res) {
     const sessionUser = await requestJson(`${config.supabaseUrl}/auth/v1/user`, {
       headers: buildHeaders(config.anonKey, `Bearer ${token}`),
     });
-    const restUrl = `${config.supabaseUrl}/rest/v1`;
-    const serviceHeaders = buildHeaders(config.serviceRoleKey, `Bearer ${config.serviceRoleKey}`);
     const requesterEmail = normalizeEmail(sessionUser?.email);
     const requesterProfiles = await requestJson(
       `${restUrl}/vcontent_profiles?select=id,email,role,title,vplanning_roles,active,auth_user_id&or=(auth_user_id.eq.${encodeURIComponent(sessionUser.id)},email.eq.${encodeURIComponent(requesterEmail)})&active=is.true&limit=1`,
@@ -336,7 +357,6 @@ export default async function handler(req, res) {
       return;
     }
 
-    const body = await readJsonBody(req);
     if (body.action === 'RESTORE_ACTIVE_LOGIN_ACCESS') {
       const reconciliation = await restoreActiveVWorkLoginAccess(config.supabaseUrl, restUrl, serviceHeaders);
       res.status(200).json({ ok: true, reconciliation });

@@ -271,7 +271,7 @@
 .vwork-training-operations .assignment-dialog>.modal-actions{padding:0 24px 20px}
 
 @media(min-width:1401px){
-  .vwork-training-operations .layered-task-detail>.task-drawer{position:sticky;top:80px;align-self:start;max-height:calc(100vh - 96px);overflow-y:auto;overscroll-behavior:contain}
+  .vwork-training-operations .layered-task-detail>.task-drawer{position:static;align-self:start;max-height:none;overflow:visible;overscroll-behavior:auto}
 }
 
 @media(max-width:760px){
@@ -419,3 +419,4 @@
 .vwork-training-operations .roster-class-progress>div.ready>span,.vwork-training-operations .roster-class-progress>div.ready>small{color:#08794f}
 @media(max-width:1100px){.vwork-training-operations .layer-table-head.course-layer{grid-template-columns:1.5fr 1fr .7fr 82px}.vwork-training-operations .layer-table-head.course-layer span:nth-child(4){display:none}.vwork-training-operations .layer-course-open{grid-template-columns:1.5fr 1fr .7fr}.vwork-training-operations .layer-course-open em{display:none}}
 @media(max-width:760px){.vwork-training-operations .layer-page-title,.vwork-training-operations .layer-head-actions{align-items:stretch;flex-direction:column}.vwork-training-operations .layer-add-button{justify-content:center}.vwork-training-operations .layer-table-head.course-layer{grid-template-columns:1fr 70px}.vwork-training-operations .layer-table-head.course-layer span:not(:first-child):not(:last-child){display:none}.vwork-training-operations .layer-course-entry{grid-template-columns:minmax(0,1fr) 70px}.vwork-training-operations .layer-course-open{grid-template-columns:1fr;padding:12px}.vwork-training-operations .layer-course-open>span,.vwork-training-operations .layer-course-open em{display:none}.vwork-training-operations .layer-row-actions{padding:6px;gap:3px}.vwork-training-operations .course-management-body{padding:14px}.vwork-training-operations .course-management-modal{width:100%}}
+.vwork-training-operations .hint.ready{color:#08764e}

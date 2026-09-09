@@ -402,6 +402,24 @@ export function normalizeTrainingOperationsState(currentState, context = {}) {
       ? task.checklistItems.map((_, index) => clone(task.checklistEvidence[index] || []))
       : task.checklistItems.map(() => []),
   }));
+  state.tasks.filter((task) => task.assigneeId && task.assignee !== 'Chưa giao' && task.status !== 'CANCELLED').forEach((task) => {
+    const assigneeTokens = new Set([task.assigneeId, task.assignee].map((item) => String(item || '').trim().toLowerCase()).filter(Boolean));
+    const existing = state.teamAssignments.find((item) => item.courseId === task.courseId && item.role === 'member'
+      && [item.accountId, item.accountEmail, item.accountName].some((item) => assigneeTokens.has(String(item || '').trim().toLowerCase())));
+    if (!existing) state.teamAssignments.push({
+      id: `${task.courseId}:member:${task.assigneeId}`,
+      projectId: task.projectId,
+      courseId: task.courseId,
+      role: 'member',
+      accountId: task.assigneeId,
+      accountName: task.assignee,
+      accountEmail: String(task.assigneeId).includes('@') ? task.assigneeId : '',
+      status: 'ACTIVE',
+      assignedAt: task.assignmentHistory?.at(-1)?.assignedAt || task.updatedAt || timestamp,
+      updatedAt: task.updatedAt || timestamp,
+      derivedFromTask: true,
+    });
+  });
   state.schemaVersion = 3;
   return state;
 }
@@ -831,6 +849,7 @@ function assignTasks(state, payload, context) {
   const taskIds = Array.isArray(payload.taskIds) ? payload.taskIds : [payload.taskId];
   if (!taskIds.filter(Boolean).length) throw domainError('VALIDATION_ERROR', 'Chưa chọn công việc cần phân công.');
   const assigneeName = requiredText(payload.assigneeName, 'Người thực hiện');
+  const assigneeId = payload.assigneeId || assigneeName;
   const reviewerName = requiredText(payload.reviewerName, 'Người duyệt');
   if (payload.requireSeparation && payload.assigneeId && payload.assigneeId === payload.reviewerId) throw domainError('VALIDATION_ERROR', 'Người thực hiện và người duyệt phải khác nhau.');
   taskIds.forEach((taskId) => {
@@ -841,7 +860,7 @@ function assignTasks(state, payload, context) {
       throw domainError('VALIDATION_ERROR', `Deadline ${task.id} sau ngày khai giảng; cần nêu lý do ngoại lệ.`);
     }
     task.assignee = assigneeName;
-    task.assigneeId = payload.assigneeId || assigneeName;
+    task.assigneeId = assigneeId;
     task.reviewer = reviewerName;
     task.reviewerId = payload.reviewerId || reviewerName;
     task.priority = payload.priority || 'Normal';
@@ -850,6 +869,20 @@ function assignTasks(state, payload, context) {
     task.updatedAt = timestamp;
     appendNotification(state, { createdAt: timestamp, kind: 'TASK_ASSIGNED', title: `Bạn được giao ${task.id}`, body: task.title, entityType: 'task', entityId: task.id, recipients: [task.assigneeId, task.reviewerId] });
     refreshTaskReadiness(state, task.projectId, timestamp);
+    const courseMembership = state.teamAssignments.find((item) => item.courseId === task.courseId && item.role === 'member' && actorMatches({ actor: { id: assigneeId, email: assigneeId, name: assigneeName } }, item.accountId, item.accountEmail, item.accountName));
+    const membership = {
+      id: courseMembership?.id || `${task.courseId}:member:${assigneeId}`,
+      projectId: task.projectId,
+      courseId: task.courseId,
+      role: 'member',
+      accountId: assigneeId,
+      accountName: assigneeName,
+      accountEmail: String(assigneeId).includes('@') ? assigneeId : '',
+      status: 'ACTIVE',
+      assignedAt: courseMembership?.assignedAt || timestamp,
+      updatedAt: timestamp,
+    };
+    if (courseMembership) Object.assign(courseMembership, membership); else state.teamAssignments.push(membership);
   });
   appendAudit(state, auditEvent('TASKS_ASSIGNED', `Phân công ${taskIds.length} công việc cho ${assigneeName}.`, context, 'task_batch', taskIds.join(','), {
     taskIds,
@@ -993,7 +1026,7 @@ function updateTaskProgress(state, payload, context) {
     task.checklistLog.push({ checklist: [...task.checklist], actor: actorFrom(context), happenedAt: nowIso(context) });
   }
   if (Array.isArray(payload.checklistEvidence)) {
-    if (payload.checklistEvidence.length !== task.checklistItems.length) throw domainError('VALIDATION_ERROR', 'Evidence theo checklist không khớp cấu hình.');
+    if (payload.checklistEvidence.length !== task.checklistItems.length) throw domainError('VALIDATION_ERROR', 'Minh chứng theo checklist không khớp cấu hình.');
     task.checklistEvidence = payload.checklistEvidence.map((items) => Array.isArray(items)
       ? items.filter((item) => item && (item.url || item.fileUrl || item.path || item.id))
       : []);
@@ -1008,27 +1041,29 @@ function submitOutput(state, payload, context) {
   const task = findTask(state, payload.taskId);
   assertTaskAssignee(task, context);
   if (!['IN_PROGRESS', 'REWORK'].includes(task.status)) throw domainError('INVALID_TRANSITION', 'Công việc chưa ở trạng thái cho phép nộp kết quả.');
-  const actualOutput = requiredText(payload.actualOutput, 'Actual Output');
+  const actualOutput = requiredText(payload.actualOutput, 'Kết quả thực tế');
   const evidence = Array.isArray(payload.evidence) ? payload.evidence.filter((item) => item && (item.url || item.fileUrl || item.path || item.id)) : [];
-  if (!evidence.length) throw domainError('VALIDATION_ERROR', 'Cần ít nhất một Evidence có thể truy cập.');
+  if (!evidence.length) throw domainError('VALIDATION_ERROR', 'Cần ít nhất một minh chứng có thể truy cập.');
   const version = (task.outputs.at(-1)?.version || 0) + 1;
   task.outputs.push({ id: `${task.id}:OUT:v${version}`, version, actualOutput, metrics: payload.metrics || {}, evidence, submittedBy: actorFrom(context), submittedAt: nowIso(context) });
   task.evidence = evidence[0].url || evidence[0].fileUrl || evidence[0].path || evidence[0].id;
   task.progress = Math.max(task.progress, 75);
   task.updatedAt = nowIso(context);
-  appendAudit(state, auditEvent('TASK_OUTPUT_SUBMITTED', `Nộp Output/Evidence phiên bản ${version} cho ${task.id}.`, context, 'task', task.id, { version }));
+  appendAudit(state, auditEvent('TASK_OUTPUT_SUBMITTED', `Nộp kết quả và minh chứng phiên bản ${version} cho ${task.id}.`, context, 'task', task.id, { version }));
 }
 
 function submitReview(state, payload, context) {
   const task = findTask(state, payload.taskId);
   assertTaskAssignee(task, context);
   if (!['IN_PROGRESS', 'REWORK'].includes(task.status)) throw domainError('INVALID_TRANSITION', 'Công việc chưa thể gửi duyệt.');
+  if (Array.isArray(payload.checklist) || Array.isArray(payload.checklistEvidence) || payload.blocker !== undefined) updateTaskProgress(state, payload, context);
+  if (payload.actualOutput !== undefined || Array.isArray(payload.evidence)) submitOutput(state, payload, context);
   if (!task.checklist.length || !task.checklist.every(Boolean)) throw domainError('SUBMISSION_NOT_READY', 'Checklist bắt buộc chưa hoàn thành 100%.');
   if (task.checklistEvidence.some((items, index) => task.checklist[index] && !items.length)) {
-    throw domainError('SUBMISSION_NOT_READY', 'Mỗi tiêu chí checklist đã hoàn thành cần có evidence riêng.');
+    throw domainError('SUBMISSION_NOT_READY', 'Mỗi tiêu chí checklist đã hoàn thành cần có minh chứng riêng.');
   }
   const output = task.outputs.at(-1);
-  if (!output?.evidence?.length) throw domainError('SUBMISSION_NOT_READY', 'Chưa có Output và Evidence hợp lệ.');
+  if (!output?.evidence?.length) throw domainError('SUBMISSION_NOT_READY', 'Chưa có kết quả và minh chứng hợp lệ.');
   if (!task.reviewerId && !task.reviewer) throw domainError('SUBMISSION_NOT_READY', 'Chưa có người duyệt còn hiệu lực.');
   const timestamp = nowIso(context);
   const submission = { id: `${task.id}:SUB:${task.submissions.length + 1}`, status: 'IN_REVIEW', taskSnapshot: { checklistItems: clone(task.checklistItems), checklist: clone(task.checklist), checklistEvidence: clone(task.checklistEvidence), requiredInputVersions: clone(task.requiredInputVersions), output: clone(output) }, submittedBy: actorFrom(context), submittedAt: timestamp };

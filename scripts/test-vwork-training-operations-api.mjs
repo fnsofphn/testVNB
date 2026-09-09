@@ -100,6 +100,15 @@ assert.equal(memberView.statusCode, 200);
 assert.equal(memberView.payload.role, 'member');
 assert.equal(memberView.payload.state.tasks.length, 0);
 
+const legacyAssignedState = structuredClone(getResponse.payload.state);
+const legacyAssignedTask = legacyAssignedState.tasks.find((item) => item.id === 'CX-FOUNDATION-TNKH01-T-101');
+legacyAssignedTask.assigneeId = 'member@peopleone.vn';
+legacyAssignedTask.assignee = 'Nam Nguyễn';
+const legacyMemberView = stateForRole(legacyAssignedState, { role: 'member', actor: { id: 'profile-member', email: 'member@peopleone.vn', name: 'Nam Nguyễn' } });
+assert.equal(legacyMemberView.courses.length, 1);
+assert.equal(legacyMemberView.tasks.length, 1);
+assert.ok(legacyMemberView.teamAssignments.some((item) => item.courseId === 'CX-FOUNDATION' && item.accountId === 'member@peopleone.vn' && item.derivedFromTask === true), 'Legacy task assignments must derive course membership during read normalization.');
+
 const assignedManagerState = structuredClone(getResponse.payload.state);
 assignedManagerState.teamAssignments.push({ courseId: 'CX-FOUNDATION', projectId: 'EVNSPC-2026', role: 'manager', accountId: 'profile-operations', status: 'ACTIVE' });
 const assignedManagerView = stateForRole(assignedManagerState, { role: 'manager', actor: { id: 'profile-operations', email: 'ops@peopleone.vn', name: 'Quản trị đa vai' } });
@@ -177,6 +186,7 @@ const assignedTasks = lastPersistedBody.p_tasks.filter((item) => ['CX-FOUNDATION
 assert.equal(assignedTasks.length, 2);
 assert.ok(assignedTasks.every((item) => item.assigneeId === 'member@peopleone.vn' && item.assignee === 'Nam Nguyễn'));
 assert.ok(assignedTasks.every((item) => item.reviewerId === 'manager@peopleone.vn' && item.reviewer === 'Ngọc Trần'));
+assert.ok(lastPersistedBody.p_payload.teamAssignments.some((item) => item.courseId === 'CX-FOUNDATION' && item.role === 'member' && item.accountId === 'member@peopleone.vn' && item.status === 'ACTIVE'), 'Task assignment must persist the assignee course membership in the same RPC payload.');
 
 persistedRequest = null;
 lastPersistedBody = null;
