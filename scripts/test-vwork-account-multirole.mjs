@@ -13,6 +13,7 @@ process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-role';
 process.env.SUPABASE_ANON_KEY = 'test-anon-key';
 
 const calls = [];
+let authUserBanned = true;
 globalThis.fetch = async (url, options = {}) => {
   const method = options.method || 'GET';
   calls.push({ url: String(url), method, body: options.body ? JSON.parse(options.body) : null });
@@ -28,8 +29,9 @@ globalThis.fetch = async (url, options = {}) => {
   } else if (String(url).includes('/vplanning_users?') && method === 'GET') {
     payload = [{ email: 'member@peopleone.vn', full_name: 'Tên cũ', title: 'Thành viên ekip', roles: ['vplanning_member', 'finance_viewer'], departments: ['VTraining'], owner_ids: [], payload: { authUserId: 'existing-auth' } }];
   } else if (String(url).endsWith('/auth/v1/admin/users/existing-auth') && method === 'GET') {
-    payload = { id: 'existing-auth', email: 'member@peopleone.vn', app_metadata: {}, banned_until: '2099-01-01T00:00:00.000Z' };
+    payload = { id: 'existing-auth', email: 'member@peopleone.vn', app_metadata: {}, banned_until: authUserBanned ? '2099-01-01T00:00:00.000Z' : null };
   } else if (String(url).endsWith('/auth/v1/admin/users/existing-auth') && method === 'PUT') {
+    authUserBanned = false;
     payload = { id: 'existing-auth', email: 'member@peopleone.vn', app_metadata: {}, banned_until: null };
   } else {
     payload = [];
@@ -62,10 +64,11 @@ try {
   const directoryUpsert = calls.find((call) => call.url.includes('/vplanning_users?on_conflict=email') && call.method === 'POST');
   assert.deepEqual(profilePatch.body.vplanning_roles.sort(), ['vplanning_director', 'vplanning_member']);
   assert.equal(profilePatch.body.role, 'production_manager');
-  assert.deepEqual(directoryUpsert.body.roles.sort(), ['content_manager', 'finance_viewer', 'vplanning_director']);
+  assert.deepEqual(directoryUpsert.body.roles.sort(), ['content_manager', 'finance_viewer', 'vplanning_director', 'vplanning_member']);
   assert.equal(calls.some((call) => call.body?.password), false, 'Existing-user reconciliation must not send or persist a password.');
   const authRestore = calls.find((call) => call.url.endsWith('/auth/v1/admin/users/existing-auth') && call.method === 'PUT');
   assert.deepEqual(authRestore?.body, { ban_duration: 'none' }, 'Explicit account reconciliation must lift an existing Auth ban.');
+  assert.equal(calls.filter((call) => call.url.endsWith('/auth/v1/admin/users/existing-auth') && call.method === 'GET').length, 2, 'Auth login readiness must be verified by a fresh read after unbanning.');
 
   const mutationCount = calls.filter((call) => ['PATCH', 'POST'].includes(call.method) && call.url.includes('/rest/v1/')).length;
   const selfResult = { status: 0, payload: null };

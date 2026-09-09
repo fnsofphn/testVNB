@@ -5,6 +5,7 @@ process.env.SUPABASE_ANON_KEY = 'anon-test';
 process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-test';
 
 const calls = [];
+const unbannedAuthUsers = new Set();
 globalThis.fetch = async (url, options = {}) => {
   const value = String(url);
   const method = options.method || 'GET';
@@ -19,6 +20,8 @@ globalThis.fetch = async (url, options = {}) => {
     return Response.json([
       { id: 'profile-old-1', email: 'old1@peopleone.vn', full_name: 'Old One', role: 'ctv', title: 'Thành viên ekip', vplanning_roles: ['vplanning_member'], active: true, auth_user_id: 'auth-old-1' },
       { id: 'profile-old-2', email: 'old2@peopleone.vn', full_name: 'Old Two', role: 'ctv', title: 'Thành viên ekip', vplanning_roles: ['vplanning_collaborator'], active: true, auth_user_id: null },
+      { id: 'profile-old-5', email: 'old5@peopleone.vn', full_name: 'Old Five', role: 'ctv', title: 'Thành viên ekip', vplanning_roles: ['vplanning_member'], active: true, auth_user_id: 'auth-old-5' },
+      { id: 'profile-disabled', email: 'disabled@peopleone.vn', full_name: 'Disabled', role: 'ctv', title: 'Thành viên ekip', vplanning_roles: ['vplanning_member'], active: false, auth_user_id: 'auth-disabled' },
       { id: 'profile-unrelated', email: 'outside@example.com', role: 'student', title: 'Học viên', vplanning_roles: [], active: true, auth_user_id: 'auth-outside' },
     ]);
   }
@@ -27,19 +30,29 @@ globalThis.fetch = async (url, options = {}) => {
       { email: 'old1@peopleone.vn', full_name: 'Old One', title: 'Thành viên ekip', roles: ['vplanning_member'], payload: { authUserId: 'auth-old-1' } },
       { email: 'old2@peopleone.vn', full_name: 'Old Two', title: 'Đầu mối / Sale', roles: ['account_manager'], payload: {} },
       { email: 'old3@peopleone.vn', full_name: 'Old Three', title: 'Chuyên viên nội dung', roles: ['content_manager'], payload: {} },
+      { email: 'old4@peopleone.vn', full_name: 'Old Four', title: 'Vai trò lịch sử', roles: ['legacy_operator'], payload: {} },
+      { email: 'disabled@peopleone.vn', full_name: 'Disabled', title: 'Thành viên ekip', roles: ['vplanning_member'], payload: { authUserId: 'auth-disabled' } },
     ]);
   }
-  if (value.endsWith('/auth/v1/admin/users/auth-old-1') && method === 'GET') return Response.json({ id: 'auth-old-1', email: 'old1@peopleone.vn', banned_until: '2099-01-01T00:00:00.000Z' });
+  const authById = value.match(/\/auth\/v1\/admin\/users\/(auth-old-\d+)$/)?.[1];
+  if (authById && method === 'GET') {
+    const suffix = authById.replace('auth-old-', '');
+    return Response.json({ id: authById, email: `old${suffix}@peopleone.vn`, banned_until: unbannedAuthUsers.has(authById) ? null : '2099-01-01T00:00:00.000Z' });
+  }
   if (value.includes('/auth/v1/admin/users?page=1&per_page=1000')) return Response.json({ users: [
     { id: 'auth-old-2', email: 'old2@peopleone.vn', banned_until: '2099-01-01T00:00:00.000Z' },
     { id: 'auth-old-3', email: 'old3@peopleone.vn', banned_until: '2099-01-01T00:00:00.000Z' },
+    { id: 'auth-old-4', email: 'old4@peopleone.vn', banned_until: '2099-01-01T00:00:00.000Z' },
   ], last_page: 1 });
   if (value.includes('/vcontent_profiles?id=eq.profile-old-2') && method === 'PATCH') return new Response(null, { status: 204 });
   if (value.endsWith('/rest/v1/vcontent_profiles') && method === 'POST') return new Response(null, { status: 201 });
+  if (value.includes('/rest/v1/vplanning_users?on_conflict=email') && method === 'POST') return new Response(null, { status: 201 });
   if (value.includes('/rest/v1/vplanning_users?email=eq.') && method === 'PATCH') return new Response(null, { status: 204 });
-  if (value.endsWith('/auth/v1/admin/users/auth-old-1') && method === 'PUT') return Response.json({ id: 'auth-old-1', email: 'old1@peopleone.vn' });
-  if (value.endsWith('/auth/v1/admin/users/auth-old-2') && method === 'PUT') return Response.json({ id: 'auth-old-2', email: 'old2@peopleone.vn' });
-  if (value.endsWith('/auth/v1/admin/users/auth-old-3') && method === 'PUT') return Response.json({ id: 'auth-old-3', email: 'old3@peopleone.vn' });
+  if (authById && method === 'PUT') {
+    unbannedAuthUsers.add(authById);
+    const suffix = authById.replace('auth-old-', '');
+    return Response.json({ id: authById, email: `old${suffix}@peopleone.vn`, banned_until: null });
+  }
   throw new Error(`Unexpected fetch: ${method} ${value}`);
 };
 
@@ -58,12 +71,19 @@ await handler({
 
 assert.equal(result.status, 200, JSON.stringify({ payload: result.payload, calls }, null, 2));
 assert.equal(result.payload.ok, true);
-assert.deepEqual(result.payload.reconciliation, { candidates: 3, checked: 3, loginAccessReady: 3, restored: 3, linked: 1, profilesCreated: 1, rolesReconciled: 1, missingAuth: 0, failures: [] });
-assert.equal(calls.filter((call) => call.method === 'PUT' && call.body?.ban_duration === 'none').length, 3);
+assert.deepEqual(result.payload.reconciliation, { candidates: 5, checked: 5, loginAccessReady: 5, restored: 5, linked: 1, profilesCreated: 2, rolesReconciled: 1, taskAccessGranted: 4, missingAuth: 0, failures: [] });
+assert.equal(calls.filter((call) => call.method === 'PUT' && call.body?.ban_duration === 'none').length, 5);
 assert.equal(calls.some((call) => call.url.includes('auth-outside') && call.method === 'PUT'), false, 'Unrelated active profiles must not be unbanned.');
+assert.equal(calls.some((call) => call.url.includes('auth-disabled') && call.method === 'PUT'), false, 'Explicitly disabled profiles must remain blocked.');
 assert.equal(calls.some((call) => call.url.includes('profile-old-2') && call.method === 'PATCH' && call.body?.auth_user_id === 'auth-old-2'), true);
 assert.equal(calls.some((call) => call.url.includes('profile-old-2') && call.method === 'PATCH' && call.body?.vplanning_roles?.includes('vplanning_member')), true);
 assert.equal(calls.some((call) => call.url.endsWith('/rest/v1/vcontent_profiles') && call.method === 'POST' && call.body?.email === 'old3@peopleone.vn'), true, 'Directory-only accounts must receive a linked profile.');
+assert.equal(calls.some((call) => call.url.endsWith('/rest/v1/vcontent_profiles') && call.method === 'POST' && call.body?.email === 'old4@peopleone.vn'), true, 'Every directory account must be reconciled even when it uses a legacy role token.');
+assert.equal(calls.some((call) => call.url.includes('/vplanning_users?on_conflict=email') && call.method === 'POST' && call.body?.email === 'old5@peopleone.vn'), true, 'Profile-only VWork accounts must receive a task directory entry.');
+for (const [index, call] of calls.entries()) {
+  if (call.method !== 'PUT' || !call.url.includes('/auth/v1/admin/users/auth-old-')) continue;
+  assert.equal(calls.slice(index + 1).some((later) => later.method === 'GET' && later.url === call.url), true, 'Every Auth update must be verified by a fresh read.');
+}
 const allowedProfileRoles = new Set(['vplanning_admin', 'vplanning_director', 'vplanning_manager', 'vplanning_member', 'vplanning_collaborator', 'vplanning_lecturer', 'vplanning_controller']);
 for (const call of calls.filter((item) => item.url.includes('/vcontent_profiles') && ['POST', 'PATCH'].includes(item.method))) {
   assert.equal((call.body?.vplanning_roles || []).every((role) => allowedProfileRoles.has(role)), true, 'Profile sync must respect the production role constraint.');
