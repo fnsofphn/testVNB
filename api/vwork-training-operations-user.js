@@ -137,6 +137,23 @@ async function findAuthUserByEmail(supabaseUrl, serviceHeaders, email) {
   return null;
 }
 
+async function ensureAuthLoginReady(supabaseUrl, serviceHeaders, authUser) {
+  const authUserId = String(authUser?.id || '');
+  if (!authUserId) throw new Error('Không tìm thấy Auth user để mở đăng nhập.');
+  const wasBanned = isAuthUserBanned(authUser);
+  const updateResult = await requestJson(`${supabaseUrl}/auth/v1/admin/users/${encodeURIComponent(authUserId)}`, {
+    method: 'PUT',
+    headers: serviceHeaders,
+    body: JSON.stringify({ ban_duration: 'none' }),
+  });
+  let verifiedUser = updateResult?.user || updateResult || null;
+  if (!verifiedUser?.id || isAuthUserBanned(verifiedUser)) {
+    verifiedUser = await getAuthUserById(supabaseUrl, serviceHeaders, authUserId);
+  }
+  if (!verifiedUser || isAuthUserBanned(verifiedUser)) throw new Error('Supabase Auth vẫn giữ trạng thái khóa sau khi mở đăng nhập.');
+  return { wasBanned };
+}
+
 async function restoreActiveVWorkLoginAccess(supabaseUrl, restUrl, serviceHeaders) {
   const [profiles, directoryUsers] = await Promise.all([
     requestJson(`${restUrl}/vcontent_profiles?select=id,email,full_name,role,title,vplanning_roles,active,auth_user_id&limit=1000`, { headers: serviceHeaders }),
@@ -153,6 +170,7 @@ async function restoreActiveVWorkLoginAccess(supabaseUrl, restUrl, serviceHeader
     if (!profileByEmail.has(email) && (directoryUser?.roles || []).some(isManagedRoleToken)) candidateEmails.add(email);
   }
   let checked = 0;
+  let loginAccessReady = 0;
   let restored = 0;
   let linked = 0;
   let profilesCreated = 0;
@@ -175,7 +193,10 @@ async function restoreActiveVWorkLoginAccess(supabaseUrl, restUrl, serviceHeader
       const resolvedRoles = resolveTrainingRoles(profile, directoryUser);
       const primaryRole = resolvedRoles[0] || 'member';
       const primaryRoleConfig = ACCOUNT_ROLES[primaryRole] || ACCOUNT_ROLES.member;
-      const expectedProfileRoles = resolvedRoles.map((role) => ACCOUNT_ROLES[role]?.profileVplanningRole).filter(Boolean);
+      const expectedProfileRoles = [...new Set([
+        ...resolvedRoles.map((role) => ACCOUNT_ROLES[role]?.profileVplanningRole).filter(Boolean),
+        'vplanning_member',
+      ])];
       const currentProfileRoles = Array.isArray(profile?.vplanning_roles) ? profile.vplanning_roles : [];
       const nextProfileRoles = [...new Set([...currentProfileRoles, ...expectedProfileRoles])];
       if (!profile) {
@@ -211,26 +232,27 @@ async function restoreActiveVWorkLoginAccess(supabaseUrl, restUrl, serviceHeader
           if (shouldReconcileRoles) rolesReconciled += 1;
         }
       }
-      if (!directoryUser?.payload?.authUserId) {
+      const nextDirectoryRoles = [...new Set([...(directoryUser?.roles || []), 'vplanning_member'])];
+      const shouldLinkDirectory = !directoryUser?.payload?.authUserId;
+      const shouldEnableTaskReceipt = !(directoryUser?.roles || []).includes('vplanning_member');
+      if (directoryUser && (shouldLinkDirectory || shouldEnableTaskReceipt)) {
         await requestJson(`${restUrl}/vplanning_users?email=eq.${encodeURIComponent(email)}`, {
           method: 'PATCH',
           headers: { ...serviceHeaders, Prefer: 'return=minimal' },
-          body: JSON.stringify({ payload: { ...(directoryUser?.payload || {}), authUserId, source: directoryUser?.payload?.source || 'vwork_training_operations' } }),
+          body: JSON.stringify({
+            ...(shouldEnableTaskReceipt ? { roles: nextDirectoryRoles } : {}),
+            ...(shouldLinkDirectory ? { payload: { ...(directoryUser?.payload || {}), authUserId, source: directoryUser?.payload?.source || 'vwork_training_operations' } } : {}),
+          }),
         });
       }
-      if (isAuthUserBanned(authUser)) {
-        await requestJson(`${supabaseUrl}/auth/v1/admin/users/${encodeURIComponent(authUserId)}`, {
-          method: 'PUT',
-          headers: serviceHeaders,
-          body: JSON.stringify({ ban_duration: 'none' }),
-        });
-        restored += 1;
-      }
+      const loginAccess = await ensureAuthLoginReady(supabaseUrl, serviceHeaders, authUser);
+      loginAccessReady += 1;
+      if (loginAccess.wasBanned) restored += 1;
     } catch (error) {
       failures.push({ email, error: String(error?.message || error).slice(0, 240) });
     }
   }
-  return { candidates: candidateEmails.size, checked, restored, linked, profilesCreated, rolesReconciled, missingAuth, failures };
+  return { candidates: candidateEmails.size, checked, loginAccessReady, restored, linked, profilesCreated, rolesReconciled, missingAuth, failures };
 }
 
 export default async function handler(req, res) {
@@ -407,13 +429,7 @@ export default async function handler(req, res) {
 
     const loginAccessRestored = restoreLoginAccess && isAuthUserBanned(authUser);
     const loginAccessReconciled = restoreLoginAccess && !createdAuthUserId;
-    if (loginAccessReconciled) {
-      await requestJson(`${config.supabaseUrl}/auth/v1/admin/users/${encodeURIComponent(authUserId)}`, {
-        method: 'PUT',
-        headers: serviceHeaders,
-        body: JSON.stringify({ ban_duration: 'none' }),
-      });
-    }
+    if (loginAccessReconciled) await ensureAuthLoginReady(config.supabaseUrl, serviceHeaders, authUser);
 
     res.status(createdAuthUserId ? 201 : 200).json({
       ok: true,

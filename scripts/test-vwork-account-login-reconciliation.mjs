@@ -58,7 +58,7 @@ await handler({
 
 assert.equal(result.status, 200, JSON.stringify({ payload: result.payload, calls }, null, 2));
 assert.equal(result.payload.ok, true);
-assert.deepEqual(result.payload.reconciliation, { candidates: 3, checked: 3, restored: 3, linked: 1, profilesCreated: 1, rolesReconciled: 1, missingAuth: 0, failures: [] });
+assert.deepEqual(result.payload.reconciliation, { candidates: 3, checked: 3, loginAccessReady: 3, restored: 3, linked: 1, profilesCreated: 1, rolesReconciled: 1, missingAuth: 0, failures: [] });
 assert.equal(calls.filter((call) => call.method === 'PUT' && call.body?.ban_duration === 'none').length, 3);
 assert.equal(calls.some((call) => call.url.includes('auth-outside') && call.method === 'PUT'), false, 'Unrelated active profiles must not be unbanned.');
 assert.equal(calls.some((call) => call.url.includes('profile-old-2') && call.method === 'PATCH' && call.body?.auth_user_id === 'auth-old-2'), true);

@@ -275,7 +275,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
       const response = await restoreActiveTrainingOperationsLoginAccess(role);
       setSyncState('synced');
       const result = response.reconciliation;
-      notify(`Đã kiểm tra ${result.checked} tài khoản VWork; mở lại ${result.restored}, tạo ${result.profilesCreated} hồ sơ và đồng bộ role ${result.rolesReconciled} tài khoản${result.failures.length ? `; còn ${result.failures.length} lỗi` : ''}.`);
+      notify(`${result.loginAccessReady}/${result.candidates} tài khoản VWork đã sẵn sàng đăng nhập${result.failures.length ? `; còn ${result.failures.length} lỗi` : ''}.`);
       return { reconciliation: result, error: '' };
     } catch (error) {
       const message = error.message || 'Không thể đồng bộ quyền đăng nhập tài khoản cũ.';
@@ -788,7 +788,7 @@ function AccountsPanel({ directory = [], provisionAccount, restoreExistingLoginA
   }
   return <section className="accounts-workspace">
     <div className="page-title accounts-title"><div><small>VWORK IDENTITY · END-TO-END</small><h2>Ekip và tài khoản đăng nhập</h2><p>Tạo đồng thời tài khoản Supabase Auth, hồ sơ PeopleOne và thành viên trong danh mục VWork để có thể giao việc thật.</p></div><div className="account-title-actions"><span className="account-total">{directory.length} tài khoản VWork</span><button type="button" disabled={reconciling} onClick={() => void reconcileExistingAccounts()}>{reconciling ? 'Đang đồng bộ…' : 'Đồng bộ đăng nhập tài khoản cũ'}</button></div></div>
-    {reconciliation && <div className={`account-reconciliation-result${reconciliation.failures.length ? ' has-errors' : ''}`} role="status"><b>Đã kiểm tra {reconciliation.checked}/{reconciliation.candidates} tài khoản VWork</b><span>Mở lại đăng nhập: {reconciliation.restored} · Tạo hồ sơ thiếu: {reconciliation.profilesCreated} · Liên kết hồ sơ: {reconciliation.linked} · Đồng bộ role: {reconciliation.rolesReconciled} · Không tìm thấy Auth: {reconciliation.missingAuth}</span>{reconciliation.failures.length > 0 && <small>Chưa đồng bộ được: {reconciliation.failures.map((item) => item.email).join(', ')}</small>}</div>}
+    {reconciliation && <div className={`account-reconciliation-result${reconciliation.failures.length ? ' has-errors' : ''}`} role="status"><b>{reconciliation.loginAccessReady}/{reconciliation.candidates} tài khoản đã sẵn sàng đăng nhập</b><span>Mở khóa: {reconciliation.restored} · Tạo/liên kết hồ sơ: {reconciliation.profilesCreated + reconciliation.linked} · Không tìm thấy Auth: {reconciliation.missingAuth}</span>{reconciliation.failures.length > 0 && <small>Chưa xử lý được: {reconciliation.failures.map((item) => `${item.email} — ${item.error}`).join('; ')}</small>}</div>}
     <div className="accounts-grid">
       <form className="card account-create-card" onSubmit={submit}>
         <div className="account-card-head"><div><span>{editingEmail ? 'CHỈNH TÀI KHOẢN HIỆN CÓ' : 'TẠO / CẬP NHẬT TÀI KHOẢN'}</span><h3>{editingEmail ? 'Chỉnh vai trò tài khoản' : 'Thành viên và vai trò'}</h3></div><b>{editingEmail ? 'VWORK ROLE' : 'AUTH + VWORK'}</b></div>
@@ -1368,7 +1368,7 @@ function AssigneePickerDialog({ open, directory, loading, taskCount, selectedId 
     <div className="modal-head"><div><small>PHÂN CÔNG THEO DIRECTORY</small><h2 id="assignment-dialog-title">Bạn muốn giao việc cho ai?</h2></div><button type="button" aria-label="Đóng popup giao việc" onClick={onClose}>×</button></div>
     <div className="assignment-dialog-body"><label className="assignee-search">Tìm theo tên hoặc email<input ref={inputRef} value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Nhập tên hoặc email…"/></label><p>Mỗi công việc hiện hỗ trợ một người thực hiện; lựa chọn này áp dụng cho {taskCount || 1} công việc đã chọn.</p>
       {!query && recent.length > 0 && <div className="assignee-section"><b>Đã chọn gần đây</b>{recent.map((person) => <PersonRow person={person} key={`recent-${person.id}`}/>)}</div>}
-      <div className="assignee-section"><b>Tài khoản có thể nhận việc</b>{loading ? <div className="assignee-state">Đang tải danh mục tài khoản…</div> : !filtered.length ? <div className="assignee-state">{directory.length ? 'Không tìm thấy tài khoản phù hợp.' : 'Chưa có tài khoản Quản lý ekip hoặc Thành viên ekip.'}</div> : filtered.map((person) => <PersonRow person={person} key={person.id}/>)}</div>
+      <div className="assignee-section"><b>Tài khoản có thể nhận việc</b>{loading ? <div className="assignee-state">Đang tải danh mục tài khoản…</div> : !filtered.length ? <div className="assignee-state">{directory.length ? 'Không tìm thấy tài khoản phù hợp.' : 'Chưa có tài khoản VWork.'}</div> : filtered.map((person) => <PersonRow person={person} key={person.id}/>)}</div>
     </div>
     <div className="modal-actions"><button type="button" onClick={onClose}>Hủy</button><button type="button" className="primary" disabled={!chosenPerson} onClick={selectPerson}>Giao việc</button></div>
   </section></div>;

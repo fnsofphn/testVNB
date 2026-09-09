@@ -27,8 +27,10 @@ globalThis.fetch = async (url, options = {}) => {
     payload = [{ id: 'target-profile', email: 'member@peopleone.vn', full_name: 'Tên cũ', role: 'ctv', title: 'Thành viên ekip', vplanning_roles: ['vplanning_member'], active: true, access_scope: 'self', auth_user_id: 'existing-auth' }];
   } else if (String(url).includes('/vplanning_users?') && method === 'GET') {
     payload = [{ email: 'member@peopleone.vn', full_name: 'Tên cũ', title: 'Thành viên ekip', roles: ['vplanning_member', 'finance_viewer'], departments: ['VTraining'], owner_ids: [], payload: { authUserId: 'existing-auth' } }];
-  } else if (String(url).endsWith('/auth/v1/admin/users/existing-auth')) {
+  } else if (String(url).endsWith('/auth/v1/admin/users/existing-auth') && method === 'GET') {
     payload = { id: 'existing-auth', email: 'member@peopleone.vn', app_metadata: {}, banned_until: '2099-01-01T00:00:00.000Z' };
+  } else if (String(url).endsWith('/auth/v1/admin/users/existing-auth') && method === 'PUT') {
+    payload = { id: 'existing-auth', email: 'member@peopleone.vn', app_metadata: {}, banned_until: null };
   } else {
     payload = [];
   }

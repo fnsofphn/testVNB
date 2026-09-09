@@ -268,15 +268,16 @@ async function loadVWorkAccountDirectory(auth) {
     const projectIds = Array.isArray(item.payload?.projectIds) ? item.payload.projectIds.map(String) : [];
     const classIds = Array.isArray(item.payload?.classIds) ? item.payload.classIds.map(String) : [];
     const courseIds = Array.isArray(item.payload?.courseIds) ? item.payload.courseIds.map(String) : [];
+    const active = Boolean(profile) && profile.active !== false;
     return {
       id: email,
       name: String(item.full_name || profile?.full_name || item.email || '').trim(),
       email,
       role: roles.includes('manager') ? 'manager' : roles.includes('member') ? 'member' : roles[0],
       roles,
-      active: Boolean(profile) && profile.active !== false,
+      active,
       profileLinked: Boolean(profile),
-      assignable: canReceiveVWorkTasks(roles),
+      assignable: active && canReceiveVWorkTasks(roles),
       projectIds,
       courseIds,
       classIds,
@@ -303,7 +304,7 @@ async function normalizeAssignmentCommand(auth, state, command) {
   const assignee = directory.find((item) => item.id === normalizeEmail(payload.assigneeId));
   const reviewer = directory.find((item) => item.id === normalizeEmail(payload.reviewerId));
   if (!assignee?.assignable) {
-    const error = new Error('Người nhận phải có vai trò Quản lý ekip hoặc Thành viên ekip trong VWork.');
+    const error = new Error('Người nhận phải là tài khoản VWork đang hoạt động.');
     error.status = 400;
     error.code = 'TRAINING_OPERATIONS_ASSIGNEE_INVALID';
     throw error;

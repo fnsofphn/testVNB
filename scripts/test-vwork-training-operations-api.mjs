@@ -77,11 +77,11 @@ assert.equal(getResponse.payload.role, 'operations');
 assert.deepEqual(getResponse.payload.availableRoles, ['operations', 'intake', 'content', 'vtraining', 'manager', 'member']);
 assert.equal(getResponse.payload.storage, 'seed');
 assert.equal(getResponse.payload.state.tasks.length, 33);
-assert.deepEqual(getResponse.payload.directory.map((item) => [item.id, item.role]), [['ops@peopleone.vn', 'manager'], ['manager@peopleone.vn', 'manager'], ['member@peopleone.vn', 'member'], ['scoped@peopleone.vn', 'member'], ['chieuanh18082003@gmail.com', 'member'], ['inactive@peopleone.vn', 'member']]);
+assert.deepEqual(getResponse.payload.directory.map((item) => [item.id, item.role]), [['ops@peopleone.vn', 'manager'], ['manager@peopleone.vn', 'manager'], ['member@peopleone.vn', 'member'], ['scoped@peopleone.vn', 'member'], ['chieuanh18082003@gmail.com', 'member']]);
 assert.deepEqual(getResponse.payload.directory[0].roles, ['operations', 'intake', 'content', 'vtraining', 'manager', 'member']);
 assert.equal(getResponse.payload.directory.find((item) => item.id === 'chieuanh18082003@gmail.com').assignable, true);
 assert.equal(getResponse.payload.directory.find((item) => item.id === 'chieuanh18082003@gmail.com').profileLinked, true);
-assert.equal(getResponse.payload.directory.find((item) => item.id === 'inactive@peopleone.vn').assignable, true);
+assert.equal(getResponse.payload.accountDirectory.find((item) => item.id === 'inactive@peopleone.vn').assignable, false);
 assert.equal(getResponse.payload.directory.some((item) => item.id === 'content@peopleone.vn'), false);
 assert.equal(getResponse.payload.accountDirectory.length, 7);
 assert.equal(getResponse.payload.accountDirectory.find((item) => item.id === 'inactive@peopleone.vn').profileLinked, false);
@@ -89,7 +89,7 @@ assert.equal(getResponse.payload.accountDirectory.find((item) => item.id === 'in
 const managerView = responseRecorder();
 await handler(request('GET', undefined, 'manager'), managerView);
 assert.equal(managerView.statusCode, 200);
-assert.equal(managerView.payload.directory.length, 6);
+assert.equal(managerView.payload.directory.length, 5);
 assert.equal(managerView.payload.accountDirectory.length, 0);
 assert.equal(managerView.payload.state.projects.length, 0);
 assert.equal(managerView.payload.state.tasks.length, 0);
@@ -186,8 +186,9 @@ await handler(request('POST', {
   requestId: '77777777-7777-4777-8777-777777777777',
   command: { type: 'ASSIGN_TASKS', payload: { taskIds: ['CX-FOUNDATION-TNKH01-T-101'], assigneeId: 'inactive@peopleone.vn', reviewerId: 'manager@peopleone.vn', requireSeparation: true } },
 }), vworkRoleOnlyAssignment);
-assert.equal(vworkRoleOnlyAssignment.statusCode, 200);
-assert.equal(lastPersistedBody.p_tasks.find((item) => item.id === 'CX-FOUNDATION-TNKH01-T-101').assigneeId, 'inactive@peopleone.vn');
+assert.equal(vworkRoleOnlyAssignment.statusCode, 400);
+assert.equal(vworkRoleOnlyAssignment.payload.code, 'TRAINING_OPERATIONS_ASSIGNEE_INVALID');
+assert.equal(lastPersistedBody, null);
 
 persistedRequest = null;
 const scopedAssignment = responseRecorder();
