@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import { CopyPlus, MoreVertical, Plus, X } from 'lucide-react';
 import './TrainingOperationsPage.css';
 import {
@@ -14,6 +15,7 @@ import {
   executeTrainingOperationsCommand,
   fetchTrainingOperationsState,
   getTrainingOperationsFileUrl,
+  restoreActiveTrainingOperationsLoginAccess,
   uploadTrainingOperationsFile,
 } from './service';
 import { TRAINING_ROLE_OPTIONS } from './roles.js';
@@ -27,6 +29,10 @@ const COURSE_SYSTEMS = [
 
 const INPUT_OWNER_LABEL = { intake: 'Đầu mối / Sale', content: 'Chuyên viên nội dung', vtraining: 'Chuyên viên vận hành VTraining' };
 const INPUT_META = Object.fromEntries(Object.entries(TRAINING_INPUT_DEFINITIONS).map(([key, value]) => [key, [value.code, value.title, INPUT_OWNER_LABEL[value.ownerRole]]]));
+function renderTrainingOverlay(content) {
+  if (typeof document === 'undefined') return content;
+  return createPortal(<div className="vwork-training-operations training-overlay-portal">{content}</div>, document.body);
+}
 const INPUT_FIELDS = {
   vlearning: [
     { key: 'content_name', label: 'Tên bộ nội dung', defaultValue: 'Trải nghiệm khách hàng', required: true },
@@ -260,6 +266,22 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
       setSyncState('error');
       setSyncError(message);
       return { user: null, error: message };
+    }
+  }
+  async function restoreExistingLoginAccess() {
+    setSyncState('saving');
+    setSyncError('');
+    try {
+      const response = await restoreActiveTrainingOperationsLoginAccess(role);
+      setSyncState('synced');
+      const result = response.reconciliation;
+      notify(`Đã kiểm tra ${result.checked} tài khoản VWork; mở lại ${result.restored}, liên kết ${result.linked} và đồng bộ role ${result.rolesReconciled} tài khoản.`);
+      return { reconciliation: result, error: '' };
+    } catch (error) {
+      const message = error.message || 'Không thể đồng bộ quyền đăng nhập tài khoản cũ.';
+      setSyncState('error');
+      setSyncError(message);
+      return { reconciliation: null, error: message };
     }
   }
 
@@ -506,7 +528,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
         {tab === 'inputs' && <Inputs role={role} activeCourse={activeCourse} courses={projectCourses} inputs={inputs} inputRecords={projectInputs} courseInputProgress={workspaceState.courseInputProgress || []} tasks={tasks} classes={projectClasses} uploadStep={uploadStep} setUploadStep={setUploadStep} submitInput={submitInput} onSelectCourse={(courseId) => writeRoute('inputs', { projectId: activeProject?.id, courseId, classId: '', taskId: '' })}/>}
         {tab === 'tasks' && <LayeredTasks role={role} tasks={tasks} classes={classes} directory={directory} directoryLoading={syncState === 'loading'} actor={actor} project={activeProject} course={activeCourse} routeContext={routeContext} onNavigate={navigateWork} selectedTask={selectedTask} setSelectedTaskId={setSelectedTaskId} updateTask={updateTask} createClassTask={createClassTask} archiveTask={archiveTask} assignTasks={assignTasks} toggleChecklist={toggleChecklist}/>}
         {['due', 'review'].includes(tab) && <WorkActionInbox role={role} tasks={tasks} classes={classes} directory={directory} actor={actor} project={activeProject} course={activeCourse} selectedTask={selectedTask} setSelectedTaskId={setSelectedTaskId} updateTask={updateTask} assignTasks={assignTasks} toggleChecklist={toggleChecklist} initialTab={tab === 'review' ? 'acceptance' : 'tracking'}/>}
-        {tab === 'accounts' && <AccountsPanel directory={accountDirectory} provisionAccount={provisionAccount}/>}
+        {tab === 'accounts' && <AccountsPanel directory={accountDirectory} provisionAccount={provisionAccount} restoreExistingLoginAccess={restoreExistingLoginAccess}/>}
         {tab === 'change' && <ChangePanel role={role} open={changeOpen} setOpen={setChangeOpen} counts={scopeCounts} submit={submitScopeChange} requests={changeRequests} onRequest={requestChange} onApprove={approveChange} onInputUpdate={(label, type, objectKey, reason) => { if (objectKey === 'learner') { setChangeOpen(false); setTab('inputs'); return; } const inputKey = objectKey === 'exercise' ? 'vlearning' : objectKey; void submitInput(inputKey, { data: { label, changeType: type, updatedAt: new Date().toISOString() }, reason: reason || `${label} · ${type}` }).then((response) => { if (response) setChangeOpen(false); }); }}/>} {tab === 'audit' && <Audit entries={audit}/>}</main>
     </div>
     {showCreate && <CreateWizard
@@ -689,7 +711,7 @@ function generateTemporaryPassword() {
   return `Vw!${Array.from(bytes, (value) => alphabet[value % alphabet.length]).join('')}`;
 }
 
-function AccountsPanel({ directory = [], provisionAccount }) {
+function AccountsPanel({ directory = [], provisionAccount, restoreExistingLoginAccess }) {
   const [draft, setDraft] = useState({ fullName: '', email: '', roles: ['member'], password: generateTemporaryPassword() });
   const [editingEmail, setEditingEmail] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -697,6 +719,8 @@ function AccountsPanel({ directory = [], provisionAccount }) {
   const [showPassword, setShowPassword] = useState(false);
   const [created, setCreated] = useState(null);
   const [submitError, setSubmitError] = useState('');
+  const [reconciling, setReconciling] = useState(false);
+  const [reconciliation, setReconciliation] = useState(null);
   const nameValid = draft.fullName.trim().length >= 2;
   const emailValid = /^\S+@\S+\.\S+$/.test(draft.email.trim());
   const existingDirectoryAccount = directory.some((person) => String(person.email || person.id || '').trim().toLowerCase() === draft.email.trim().toLowerCase());
@@ -750,8 +774,21 @@ function AccountsPanel({ directory = [], provisionAccount }) {
     setCreated({ ...result.user, temporaryPassword: draft.password });
     resetForm();
   }
+  async function reconcileExistingAccounts() {
+    if (reconciling || !window.confirm('Kiểm tra và mở lại đăng nhập cho toàn bộ tài khoản VWork cũ đang hoạt động? Tài khoản đã khóa ở hồ sơ PeopleOne sẽ không bị mở.')) return;
+    setReconciling(true);
+    setSubmitError('');
+    const result = await restoreExistingLoginAccess();
+    setReconciling(false);
+    if (!result?.reconciliation) {
+      setSubmitError(result?.error || 'Không thể đồng bộ tài khoản cũ.');
+      return;
+    }
+    setReconciliation(result.reconciliation);
+  }
   return <section className="accounts-workspace">
-    <div className="page-title accounts-title"><div><small>VWORK IDENTITY · END-TO-END</small><h2>Ekip và tài khoản đăng nhập</h2><p>Tạo đồng thời tài khoản Supabase Auth, hồ sơ PeopleOne và thành viên trong danh mục VWork để có thể giao việc thật.</p></div><span className="account-total">{directory.length} tài khoản VWork</span></div>
+    <div className="page-title accounts-title"><div><small>VWORK IDENTITY · END-TO-END</small><h2>Ekip và tài khoản đăng nhập</h2><p>Tạo đồng thời tài khoản Supabase Auth, hồ sơ PeopleOne và thành viên trong danh mục VWork để có thể giao việc thật.</p></div><div className="account-title-actions"><span className="account-total">{directory.length} tài khoản VWork</span><button type="button" disabled={reconciling} onClick={() => void reconcileExistingAccounts()}>{reconciling ? 'Đang đồng bộ…' : 'Đồng bộ đăng nhập tài khoản cũ'}</button></div></div>
+    {reconciliation && <div className="account-reconciliation-result" role="status"><b>Đã kiểm tra {reconciliation.checked}/{reconciliation.candidates} tài khoản đang hoạt động</b><span>Mở lại đăng nhập: {reconciliation.restored} · Liên kết hồ sơ: {reconciliation.linked} · Đồng bộ role: {reconciliation.rolesReconciled} · Không tìm thấy Auth: {reconciliation.missingAuth}</span></div>}
     <div className="accounts-grid">
       <form className="card account-create-card" onSubmit={submit}>
         <div className="account-card-head"><div><span>{editingEmail ? 'CHỈNH TÀI KHOẢN HIỆN CÓ' : 'TẠO / CẬP NHẬT TÀI KHOẢN'}</span><h3>{editingEmail ? 'Chỉnh vai trò tài khoản' : 'Thành viên và vai trò'}</h3></div><b>{editingEmail ? 'VWORK ROLE' : 'AUTH + VWORK'}</b></div>
@@ -769,7 +806,7 @@ function AccountsPanel({ directory = [], provisionAccount }) {
         {!valid && <p className="account-validation-note">Điền đủ họ tên, email hợp lệ và chọn ít nhất một vai trò.</p>}
         {submitError && <div className="account-submit-error" role="alert">{submitError}</div>}
         <p className="account-security-note">Khi lưu, hệ thống đồng bộ hồ sơ PeopleOne, role VWork và mở lại đăng nhập nếu tài khoản Auth đang bị khóa; mật khẩu hiện tại không thay đổi.</p>
-        {created && <div className="account-created" role="status"><b>{created.authUserCreated ? 'Đã tạo' : 'Đã cập nhật'} {created.name}</b><span>{created.email} · {(created.roles || [created.role]).map((value) => roleLabels[value] || value).join(' · ')}</span>{created.authUserCreated && <label>Mật khẩu tạm<input readOnly value={created.temporaryPassword} onFocus={(event) => event.target.select()}/></label>}<small>{created.authUserCreated ? 'Gửi thông tin này cho đúng người dùng qua kênh nội bộ an toàn.' : created.loginAccessRestored ? 'Đã cập nhật role và mở lại quyền đăng nhập; mật khẩu cũ được giữ nguyên.' : 'Tài khoản đăng nhập đang hoạt động; role VWork đã được cập nhật và mật khẩu cũ được giữ nguyên.'}</small></div>}
+        {created && <div className="account-created" role="status"><b>{created.authUserCreated ? 'Đã tạo' : 'Đã cập nhật'} {created.name}</b><span>{created.email} · {(created.roles || [created.role]).map((value) => roleLabels[value] || value).join(' · ')}</span>{created.authUserCreated && <label>Mật khẩu tạm<input readOnly value={created.temporaryPassword} onFocus={(event) => event.target.select()}/></label>}<small>{created.authUserCreated ? 'Gửi thông tin này cho đúng người dùng qua kênh nội bộ an toàn.' : created.loginAccessReconciled ? 'Đã đồng bộ lại quyền đăng nhập Auth và role VWork; mật khẩu cũ được giữ nguyên.' : 'Tài khoản đăng nhập đang hoạt động; role VWork đã được cập nhật và mật khẩu cũ được giữ nguyên.'}</small></div>}
       </form>
       <section className="card account-directory-card">
         <div className="account-card-head"><div><span>DANH MỤC VWORK</span><h3>Toàn bộ tài khoản VWork</h3></div><b>{filteredDirectory.length}/{directory.length}</b></div>
@@ -842,7 +879,7 @@ function CourseControlPanel({ role, project, course, initialMode = '', onClose, 
     await updateCourseStatus(status, course?.id);
   }
 
-  return <div className="modal-backdrop course-management-backdrop" onMouseDown={onClose}><section className="modal course-management-modal" role="dialog" aria-modal="true" aria-label={createMode === 'duplicate' ? `Nhân bản khóa ${course?.code}` : createMode === 'new' ? `Thêm khóa học vào ${project?.code}` : `Quản lý khóa ${course?.code}`} onMouseDown={(event) => event.stopPropagation()}>
+  return renderTrainingOverlay(<div className="modal-backdrop course-management-backdrop" onMouseDown={onClose}><section className="modal course-management-modal" role="dialog" aria-modal="true" aria-label={createMode === 'duplicate' ? `Nhân bản khóa ${course?.code}` : createMode === 'new' ? `Thêm khóa học vào ${project?.code}` : `Quản lý khóa ${course?.code}`} onMouseDown={(event) => event.stopPropagation()}>
     <div className="modal-head"><div><small>{createMode ? 'DỰ ÁN · KHÓA HỌC MỚI' : 'CHI TIẾT KHÓA HỌC'}</small><h2>{createMode === 'duplicate' ? `Nhân bản khóa ${course?.code}` : createMode === 'new' ? `Thêm khóa học vào ${project?.code}` : `${course?.code} · ${course?.name}`}</h2></div><button type="button" aria-label="Đóng popup" onClick={onClose}><X size={20}/></button></div>
     <div className="course-management-body"><section className={`course-control-panel${createMode ? ' creating' : ''}`}>
     <div className="page-title course-control-head">
@@ -851,7 +888,7 @@ function CourseControlPanel({ role, project, course, initialMode = '', onClose, 
     </div>
     <div className="course-control-grid single"><article><h3>Ekip khóa học</h3>{courseAssignments.length ? courseAssignments.map((item) => <div className="course-team-row" key={item.id}><b>{item.accountName}</b><span>{TRAINING_ROLE_OPTIONS.find(([value]) => value === item.role)?.[1] || item.role}</span></div>) : <p>Chưa có phân công theo khóa.</p>}{canOperate && <div className="inline-controls"><select value={accountId} onChange={(event) => setAccountId(event.target.value)}><option value="">Chọn tài khoản</option>{directory.map((item) => <option value={item.id} key={item.id}>{item.name}</option>)}</select><select value={courseRole} onChange={(event) => setCourseRole(event.target.value)}>{TRAINING_ROLE_OPTIONS.filter(([value]) => value !== 'operations').map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select><button disabled={!accountId} onClick={() => { const person = directory.find((item) => item.id === accountId); if (person) void assignCourseRole({ accountId: person.id, accountName: person.name, accountEmail: person.email, role: courseRole }); }}>Gán vai trò</button></div>}</article></div>
     {canOperate && <div className="course-create"><div className="course-create-actions">{!createMode && <button type="button" onClick={() => openCreateCourse('new')}><Plus size={16} strokeWidth={1.9}/>Thêm khóa học vào {project?.code}</button>}{!createMode && <button type="button" className="course-icon-action" title={`Nhân bản khóa ${course?.code}`} aria-label={`Nhân bản khóa ${course?.code || ''}`} onClick={() => openCreateCourse('duplicate')}><CopyPlus size={16} strokeWidth={1.9}/></button>}</div>{createMode && <div className="course-create-form"><div className="course-create-form-head"><div><b>{createMode === 'duplicate' ? `Nhân bản khóa ${course?.code}` : `Thêm khóa học vào ${project?.code}`}</b>{createMode === 'duplicate' && <small>Sao chép cấu hình từ {course?.code}; dữ liệu vận hành và lịch sử không được sao chép.</small>}</div></div><label>Mã khóa<input placeholder="Ví dụ QL01B" value={newCourse.code} onChange={(event) => setNewCourse((current) => ({ ...current, code: event.target.value }))}/></label><label>Tên khóa<input placeholder="Tên khóa học" value={newCourse.name} onChange={(event) => setNewCourse((current) => ({ ...current, name: event.target.value }))}/></label><label>Mã lớp đầu tiên<input placeholder="L01" value={newCourse.classCode} onChange={(event) => setNewCourse((current) => ({ ...current, classCode: event.target.value }))}/></label><label>Tên lớp đầu tiên<input placeholder="Lớp 01" value={newCourse.className} onChange={(event) => setNewCourse((current) => ({ ...current, className: event.target.value }))}/></label><label>Ngày bắt đầu<input type="date" value={newCourse.startDate} onChange={(event) => setNewCourse((current) => ({ ...current, startDate: event.target.value }))}/></label><label>Ngày kết thúc<input type="date" value={newCourse.endDate} onChange={(event) => setNewCourse((current) => ({ ...current, endDate: event.target.value }))}/></label><div className="course-create-submit"><button type="button" onClick={onClose}>Hủy</button><button type="button" className="primary" disabled={!newCourse.code.trim() || !newCourse.name.trim() || !newCourse.classCode.trim() || !newCourse.className.trim() || !newCourse.startDate || !newCourse.endDate || newCourse.endDate < newCourse.startDate} onClick={() => void addCourse()}>{createMode === 'duplicate' ? `Nhân bản khóa ${course?.code}` : `Tạo khóa trong ${project?.code}`}</button></div></div>}</div>}
-  </section></div></section></div>;
+  </section></div></section></div>);
 }
 
 function StructureWorkspace({ role, tasks, projects = [], classes = CLASS_META, courses = [], project, course, updateTask, workflowClass, setWorkflowClass, onSelectProject, onSelectCourse, onOpenCourseDialog }) {
@@ -946,7 +983,7 @@ function StructureWorkspace({ role, tasks, projects = [], classes = CLASS_META, 
       })}
     </div>}
 
-    {selectedClass && <div className="modal-backdrop class-detail-backdrop" onMouseDown={() => setSelectedClass(null)}><section className="modal class-detail-modal" role="dialog" aria-modal="true" aria-labelledby="class-detail-title" onMouseDown={(event) => event.stopPropagation()}><div className="class-detail-layer">
+    {selectedClass && renderTrainingOverlay(<div className="modal-backdrop class-detail-backdrop" onMouseDown={() => setSelectedClass(null)}><section className="modal class-detail-modal" role="dialog" aria-modal="true" aria-labelledby="class-detail-title" onMouseDown={(event) => event.stopPropagation()}><div className="class-detail-layer">
       <div className="class-detail-head">
         <div><span>CHI TIẾT LỚP · {selectedCourse?.code}</span><h3 id="class-detail-title">{selectedMeta.name}</h3><p>{selectedMeta.code} · {formatDate(selectedMeta.startDate)} — {formatDate(selectedMeta.endDate)}</p></div>
         <button type="button" aria-label="Đóng chi tiết lớp" onClick={() => setSelectedClass(null)}><X size={18}/></button>
@@ -960,7 +997,7 @@ function StructureWorkspace({ role, tasks, projects = [], classes = CLASS_META, 
           <span>{dueLabel(task.startDate, task.dueOffset, task.dueDirection, task.anchorType)}</span>
         </div>)}
       </div>
-    </div></section></div>}
+    </div></section></div>)}
   </section>;
 }
 function getCourseInputProgress(courseId, classes = [], inputRecords = [], aggregates = []) {
@@ -971,6 +1008,15 @@ function getCourseInputProgress(courseId, classes = [], inputRecords = [], aggre
   const rosterReady = courseClasses.length > 0 && courseClasses.every((classItem) => courseRecords.some((record) => record.key === 'roster' && record.classId === classItem.id && record.status === 'ACTIVE'));
   const readyKeys = Object.keys(INPUT_META).filter((key) => key === 'roster' ? rosterReady : courseRecords.some((record) => record.key === key && record.status === 'ACTIVE'));
   return { ready: readyKeys.length, total: Object.keys(INPUT_META).length, classCount: courseClasses.length };
+}
+
+function getRosterClassProgress(courseId, classes = [], inputRecords = []) {
+  const courseClasses = classes.filter((item) => item.courseId === courseId);
+  const rows = courseClasses.map((classItem) => {
+    const input = inputRecords.find((record) => record.courseId === courseId && record.key === 'roster' && record.classId === classItem.id);
+    return { classItem, input, ready: input?.status === 'ACTIVE' };
+  });
+  return { rows, ready: rows.filter((item) => item.ready).length, total: rows.length };
 }
 
 function Inputs({ role, activeCourse, courses = [], inputRecords = [], courseInputProgress = [], tasks = [], classes = [], uploadStep, setUploadStep, submitInput, onSelectCourse }) {
@@ -1066,14 +1112,15 @@ function Inputs({ role, activeCourse, courses = [], inputRecords = [], courseInp
     {selectedCourse && <div className="selected-course-input"><span>ĐANG XEM INPUT CỦA KHÓA</span><b>{selectedCourse.id} · {selectedCourse.name}</b></div>}
     {!canSubmit.length && <div className="input-role-note"><b>Vai trò hiện tại chỉ theo dõi</b><span>Đổi sang Đầu mối/Sale, Chuyên viên nội dung hoặc Chuyên viên VTraining để nhập đúng phạm vi.</span></div>}
     <div className={visibleInputs.length <= 2 ? 'input-grid compact' : 'input-grid'}>
-      {visibleInputs.map(([key, [code, title, owner]]) => { const inputRecord = scopedInputRecords.find((item) => item.key === key); const impactedTasks = tasks.filter((task) => task.courseId === selectedCourse?.id && task.requiredInputCodes?.includes(code)); const blockedClasses = new Set(impactedTasks.filter((task) => task.status === 'WAITING_INPUT').map((task) => task.classId)).size; return <article className={`${scopedInputs[key] ? 'input-card valid' : 'input-card'} ${editing === key ? 'editing' : ''}`} key={key}>
-        <div><span>{code}</span><b>{scopedInputs[key] ? `Đã cập nhật · v${inputRecord?.activeVersion || 1}` : 'CHƯA CÓ'}</b></div>
+      {visibleInputs.map(([key, [code, title, owner]]) => { const inputRecord = scopedInputRecords.find((item) => item.key === key); const impactedTasks = tasks.filter((task) => task.courseId === selectedCourse?.id && task.requiredInputCodes?.includes(code)); const blockedClasses = new Set(impactedTasks.filter((task) => task.status === 'WAITING_INPUT').map((task) => task.classId)).size; const rosterProgress = key === 'roster' ? getRosterClassProgress(selectedCourse?.id, scopedClasses, scopedInputRecords) : null; const partiallyReady = Boolean(rosterProgress?.ready && rosterProgress.ready < rosterProgress.total); const statusLabel = rosterProgress ? (rosterProgress.ready === rosterProgress.total && rosterProgress.total > 0 ? `Đã cập nhật đủ · ${rosterProgress.ready}/${rosterProgress.total} lớp` : rosterProgress.ready > 0 ? `Đã cập nhật ${rosterProgress.ready}/${rosterProgress.total} lớp` : `CHƯA CÓ · 0/${rosterProgress.total} lớp`) : scopedInputs[key] ? `Đã cập nhật · v${inputRecord?.activeVersion || 1}` : 'CHƯA CÓ'; return <article className={`${scopedInputs[key] ? 'input-card valid' : partiallyReady ? 'input-card partial' : 'input-card'} ${editing === key ? 'editing' : ''}`} key={key}>
+        <div><span>{code}</span><b>{statusLabel}</b></div>
         <h3>{title}</h3>
         <p>Người cập nhật: {owner}</p>
         <div className="input-source"><small>Nguồn dữ liệu</small><strong>{key === 'material' ? 'Thư viện VTraining + link / file bổ sung' : key === 'roster' ? 'Excel lớp / học viên / nhóm' : 'Form VWork + file đính kèm'}</strong></div>
         <div className="input-impact"><b>{impactedTasks.filter((task) => task.status === 'WAITING_INPUT').length} việc bị chặn</b><span>{blockedClasses} lớp liên quan</span></div>
+        {rosterProgress && <div className="roster-class-progress"><div><b>Danh sách học viên theo lớp</b><span>{rosterProgress.ready}/{rosterProgress.total} đã cập nhật</span></div>{rosterProgress.rows.map(({ classItem, input, ready }) => <div className={ready ? 'ready' : ''} key={classItem.id}><span>{ready ? '✓' : '○'}</span><b>{classItem.code}</b><small>{ready ? `Đã cập nhật · v${input.activeVersion}` : 'Chưa tải danh sách'}</small></div>)}</div>}
         {canSubmit.includes(key) && editing !== key && <button className={scopedInputs[key] ? '' : 'primary'} onClick={() => beginEdit(key)}>{scopedInputs[key] ? 'Tải lại & chỉnh sửa' : `Cập nhật ${title}`}</button>}
-        {scopedInputs[key] && editing !== key && <div className="input-updated"><b>Input v{inputRecord?.activeVersion || 1} đã sẵn sàng</b><small>Dữ liệu hiện tại sẽ được tải vào form khi chỉnh sửa.</small></div>}
+        {scopedInputs[key] && editing !== key && <div className="input-updated"><b>{rosterProgress ? `Đủ danh sách ${rosterProgress.ready}/${rosterProgress.total} lớp` : `Input v${inputRecord?.activeVersion || 1} đã sẵn sàng`}</b><small>{rosterProgress ? 'Khóa chỉ được tính đã cập nhật khi tất cả lớp đều có danh sách.' : 'Dữ liệu hiện tại sẽ được tải vào form khi chỉnh sửa.'}</small></div>}
         {editing === key && <div className="input-editor">
           <div className="input-editor-fields">{(INPUT_FIELDS[key] || []).map((field) => key === 'game' && field.key === 'game_content'
             ? <GameContentFields key={field.key} count={Number(drafts[key]?.game_count ?? defaultFieldValue(key, INPUT_FIELDS.game[0]))} values={drafts[key]?.game_contents || []} onCount={(count) => patchDraft(key, { game_count: String(count) })} onChange={(values) => patchDraft(key, { game_contents: values })}/>

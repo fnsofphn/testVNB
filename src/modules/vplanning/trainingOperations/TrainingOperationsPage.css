@@ -395,5 +395,25 @@
 .vwork-training-operations .class-detail-modal{width:min(1040px,96vw);max-height:90vh}
 .vwork-training-operations .class-detail-modal .class-detail-layer{margin:0;border:0;border-radius:0;overflow:auto}
 .vwork-training-operations .class-detail-modal .class-task-customize{max-height:62vh;overflow:auto}
+.vwork-training-operations.training-overlay-portal{position:relative;z-index:1000;min-width:0;min-height:0}
+.vwork-training-operations.training-overlay-portal .modal-backdrop{z-index:1000}
+.vwork-training-operations .class-detail-modal{display:flex;max-height:calc(100vh - 40px);overflow:hidden;flex-direction:column}
+.vwork-training-operations .class-detail-modal .class-detail-layer{display:flex;min-height:0;flex:1;overflow:hidden;flex-direction:column}
+.vwork-training-operations .class-detail-modal .class-detail-head{flex:0 0 auto}
+.vwork-training-operations .class-detail-modal .class-task-customize{min-height:0;max-height:none;flex:1;overflow:auto}
+.vwork-training-operations .class-detail-modal .class-task-head{position:sticky;top:0;z-index:2}
+.vwork-training-operations .account-title-actions{display:flex;align-items:flex-end;gap:8px;flex-direction:column}
+.vwork-training-operations .account-title-actions button{font-size:10px}
+.vwork-training-operations .account-reconciliation-result{display:flex;justify-content:space-between;gap:12px;margin:12px 0;padding:11px 13px;border:1px solid #b8dfce;border-radius:8px;background:#f2fbf7;color:#176849;font-size:10px}
+.vwork-training-operations .input-card.partial{border-color:#e7c98f;background:#fffdf8}
+.vwork-training-operations .input-card.partial>div:first-child>b{background:#fff1d6;color:#895c13}
+.vwork-training-operations .roster-class-progress{display:grid;gap:5px;margin:12px 0;padding:10px;border:1px solid #e1e5eb;border-radius:8px;background:#fafbfc}
+.vwork-training-operations .roster-class-progress>div{display:grid;grid-template-columns:18px minmax(70px,.55fr) 1fr;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid #eaedf1}
+.vwork-training-operations .roster-class-progress>div:first-child{display:flex;justify-content:space-between;color:#5d6676}
+.vwork-training-operations .roster-class-progress>div:last-child{border-bottom:0}
+.vwork-training-operations .roster-class-progress>div>span{font-size:10px;color:#9aa2af}
+.vwork-training-operations .roster-class-progress>div>b{font-size:10px;color:#434b5a}
+.vwork-training-operations .roster-class-progress>div>small{font-size:9px;color:#7c8492}
+.vwork-training-operations .roster-class-progress>div.ready>span,.vwork-training-operations .roster-class-progress>div.ready>small{color:#08794f}
 @media(max-width:1100px){.vwork-training-operations .layer-table-head.course-layer{grid-template-columns:1.5fr 1fr .7fr 82px}.vwork-training-operations .layer-table-head.course-layer span:nth-child(4){display:none}.vwork-training-operations .layer-course-open{grid-template-columns:1.5fr 1fr .7fr}.vwork-training-operations .layer-course-open em{display:none}}
 @media(max-width:760px){.vwork-training-operations .layer-page-title,.vwork-training-operations .layer-head-actions{align-items:stretch;flex-direction:column}.vwork-training-operations .layer-add-button{justify-content:center}.vwork-training-operations .layer-table-head.course-layer{grid-template-columns:1fr 70px}.vwork-training-operations .layer-table-head.course-layer span:not(:first-child):not(:last-child){display:none}.vwork-training-operations .layer-course-entry{grid-template-columns:minmax(0,1fr) 70px}.vwork-training-operations .layer-course-open{grid-template-columns:1fr;padding:12px}.vwork-training-operations .layer-course-open>span,.vwork-training-operations .layer-course-open em{display:none}.vwork-training-operations .layer-row-actions{padding:6px;gap:3px}.vwork-training-operations .course-management-body{padding:14px}.vwork-training-operations .course-management-modal{width:100%}}

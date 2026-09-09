@@ -54,6 +54,7 @@ try {
   assert.deepEqual(result.payload.user.roles, ['operations', 'content']);
   assert.equal(result.payload.user.authUserCreated, false);
   assert.equal(result.payload.user.loginAccessRestored, true);
+  assert.equal(result.payload.user.loginAccessReconciled, true);
   assert.equal(calls.filter((call) => call.url.endsWith('/auth/v1/admin/users') && call.method === 'POST').length, 0, 'Known Auth users must not be recreated.');
   const profilePatch = calls.find((call) => call.url.includes('/vcontent_profiles?id=') && call.method === 'PATCH');
   const directoryUpsert = calls.find((call) => call.url.includes('/vplanning_users?on_conflict=email') && call.method === 'POST');
