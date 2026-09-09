@@ -58,7 +58,7 @@ try {
   assert.equal(calls.filter((call) => call.url.endsWith('/auth/v1/admin/users') && call.method === 'POST').length, 0, 'Known Auth users must not be recreated.');
   const profilePatch = calls.find((call) => call.url.includes('/vcontent_profiles?id=') && call.method === 'PATCH');
   const directoryUpsert = calls.find((call) => call.url.includes('/vplanning_users?on_conflict=email') && call.method === 'POST');
-  assert.deepEqual(profilePatch.body.vplanning_roles.sort(), ['vplanning_content', 'vplanning_director']);
+  assert.deepEqual(profilePatch.body.vplanning_roles.sort(), ['vplanning_director', 'vplanning_member']);
   assert.equal(profilePatch.body.role, 'production_manager');
   assert.deepEqual(directoryUpsert.body.roles.sort(), ['content_manager', 'finance_viewer', 'vplanning_director']);
   assert.equal(calls.some((call) => call.body?.password), false, 'Existing-user reconciliation must not send or persist a password.');

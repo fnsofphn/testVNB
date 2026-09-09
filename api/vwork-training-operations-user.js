@@ -6,9 +6,9 @@ const MAX_BODY_BYTES = parseByteLimit(process.env.VWORK_TRAINING_OPERATIONS_USER
 const readLimitedBuffer = createLimitedBufferReader({ maxBytes: MAX_BODY_BYTES });
 const ACCOUNT_ROLES = {
   operations: { profileRole: 'production_manager', profileVplanningRole: 'vplanning_director', directoryRole: 'vplanning_director', title: 'Quản lý vận hành' },
-  intake: { profileRole: 'client', profileVplanningRole: 'vplanning_intake', directoryRole: 'account_manager', title: 'Đầu mối / Sale' },
-  content: { profileRole: 'specialist', profileVplanningRole: 'vplanning_content', directoryRole: 'content_manager', title: 'Chuyên viên nội dung' },
-  vtraining: { profileRole: 'specialist', profileVplanningRole: 'vplanning_vtraining', directoryRole: 'vtraining', title: 'Chuyên viên vận hành VTraining' },
+  intake: { profileRole: 'client', profileVplanningRole: 'vplanning_member', directoryRole: 'account_manager', title: 'Đầu mối / Sale' },
+  content: { profileRole: 'specialist', profileVplanningRole: 'vplanning_member', directoryRole: 'content_manager', title: 'Chuyên viên nội dung' },
+  vtraining: { profileRole: 'specialist', profileVplanningRole: 'vplanning_member', directoryRole: 'vtraining', title: 'Chuyên viên vận hành VTraining' },
   manager: { profileRole: 'ctv', profileVplanningRole: 'vplanning_manager', directoryRole: 'vplanning_manager', title: 'Quản lý ekip' },
   member: { profileRole: 'ctv', profileVplanningRole: 'vplanning_member', directoryRole: 'vplanning_member', title: 'Thành viên ekip' },
 };
@@ -139,60 +139,98 @@ async function findAuthUserByEmail(supabaseUrl, serviceHeaders, email) {
 
 async function restoreActiveVWorkLoginAccess(supabaseUrl, restUrl, serviceHeaders) {
   const [profiles, directoryUsers] = await Promise.all([
-    requestJson(`${restUrl}/vcontent_profiles?select=id,email,role,title,vplanning_roles,active,auth_user_id&active=is.true&limit=1000`, { headers: serviceHeaders }),
-    requestJson(`${restUrl}/vplanning_users?select=email,roles,payload&limit=1000`, { headers: serviceHeaders }),
+    requestJson(`${restUrl}/vcontent_profiles?select=id,email,full_name,role,title,vplanning_roles,active,auth_user_id&limit=1000`, { headers: serviceHeaders }),
+    requestJson(`${restUrl}/vplanning_users?select=email,full_name,title,roles,payload&limit=1000`, { headers: serviceHeaders }),
   ]);
+  const profileByEmail = new Map((Array.isArray(profiles) ? profiles : []).map((item) => [normalizeEmail(item?.email), item]));
   const directoryByEmail = new Map((Array.isArray(directoryUsers) ? directoryUsers : []).map((item) => [normalizeEmail(item?.email), item]));
-  const candidates = (Array.isArray(profiles) ? profiles : []).filter((profile) => {
-    const directoryUser = directoryByEmail.get(normalizeEmail(profile?.email));
-    return (profile?.vplanning_roles || []).some(isManagedRoleToken)
-      || (directoryUser?.roles || []).some(isManagedRoleToken);
-  });
+  const candidateEmails = new Set();
+  for (const [email, profile] of profileByEmail) {
+    const directoryUser = directoryByEmail.get(email);
+    if (profile?.active !== false && ((profile?.vplanning_roles || []).some(isManagedRoleToken) || (directoryUser?.roles || []).some(isManagedRoleToken))) candidateEmails.add(email);
+  }
+  for (const [email, directoryUser] of directoryByEmail) {
+    if (!profileByEmail.has(email) && (directoryUser?.roles || []).some(isManagedRoleToken)) candidateEmails.add(email);
+  }
   let checked = 0;
   let restored = 0;
   let linked = 0;
+  let profilesCreated = 0;
   let rolesReconciled = 0;
   let missingAuth = 0;
-  for (const profile of candidates) {
-    const email = normalizeEmail(profile?.email);
+  const failures = [];
+  for (const email of candidateEmails) {
+    const profile = profileByEmail.get(email) || null;
     const directoryUser = directoryByEmail.get(email);
-    const knownAuthUserId = String(profile?.auth_user_id || directoryUser?.payload?.authUserId || '');
-    const authUser = await getAuthUserById(supabaseUrl, serviceHeaders, knownAuthUserId)
-      || await findAuthUserByEmail(supabaseUrl, serviceHeaders, email);
-    const authUserId = String(authUser?.id || '');
-    if (!authUserId) {
-      missingAuth += 1;
-      continue;
-    }
-    checked += 1;
-    const resolvedRoles = resolveTrainingRoles(profile, directoryUser);
-    const expectedProfileRoles = resolvedRoles.map((role) => ACCOUNT_ROLES[role]?.profileVplanningRole).filter(Boolean);
-    const currentProfileRoles = Array.isArray(profile.vplanning_roles) ? profile.vplanning_roles : [];
-    const nextProfileRoles = [...new Set([...currentProfileRoles, ...expectedProfileRoles])];
-    const shouldLink = !profile.auth_user_id;
-    const shouldReconcileRoles = expectedProfileRoles.some((role) => !currentProfileRoles.includes(role));
-    if (shouldLink || shouldReconcileRoles) {
-      await requestJson(`${restUrl}/vcontent_profiles?id=eq.${encodeURIComponent(profile.id)}`, {
-        method: 'PATCH',
-        headers: { ...serviceHeaders, Prefer: 'return=minimal' },
-        body: JSON.stringify({
-          ...(shouldLink ? { auth_user_id: authUserId } : {}),
-          ...(shouldReconcileRoles ? { vplanning_roles: nextProfileRoles } : {}),
-        }),
-      });
-      if (shouldLink) linked += 1;
-      if (shouldReconcileRoles) rolesReconciled += 1;
-    }
-    if (isAuthUserBanned(authUser)) {
-      await requestJson(`${supabaseUrl}/auth/v1/admin/users/${encodeURIComponent(authUserId)}`, {
-        method: 'PUT',
-        headers: serviceHeaders,
-        body: JSON.stringify({ ban_duration: 'none' }),
-      });
-      restored += 1;
+    try {
+      const knownAuthUserId = String(profile?.auth_user_id || directoryUser?.payload?.authUserId || '');
+      const authUser = await getAuthUserById(supabaseUrl, serviceHeaders, knownAuthUserId)
+        || await findAuthUserByEmail(supabaseUrl, serviceHeaders, email);
+      const authUserId = String(authUser?.id || '');
+      if (!authUserId) {
+        missingAuth += 1;
+        continue;
+      }
+      checked += 1;
+      const resolvedRoles = resolveTrainingRoles(profile, directoryUser);
+      const primaryRole = resolvedRoles[0] || 'member';
+      const primaryRoleConfig = ACCOUNT_ROLES[primaryRole] || ACCOUNT_ROLES.member;
+      const expectedProfileRoles = resolvedRoles.map((role) => ACCOUNT_ROLES[role]?.profileVplanningRole).filter(Boolean);
+      const currentProfileRoles = Array.isArray(profile?.vplanning_roles) ? profile.vplanning_roles : [];
+      const nextProfileRoles = [...new Set([...currentProfileRoles, ...expectedProfileRoles])];
+      if (!profile) {
+        await requestJson(`${restUrl}/vcontent_profiles`, {
+          method: 'POST',
+          headers: { ...serviceHeaders, Prefer: 'return=minimal' },
+          body: JSON.stringify({
+            id: `VWOPS_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`,
+            email,
+            full_name: String(directoryUser?.full_name || email).trim(),
+            role: primaryRoleConfig.profileRole,
+            title: String(directoryUser?.title || primaryRoleConfig.title).trim(),
+            vplanning_roles: nextProfileRoles,
+            access_scope: 'self',
+            auth_user_id: authUserId,
+            active: true,
+          }),
+        });
+        profilesCreated += 1;
+      } else {
+        const shouldLink = !profile.auth_user_id;
+        const shouldReconcileRoles = expectedProfileRoles.some((role) => !currentProfileRoles.includes(role));
+        if (shouldLink || shouldReconcileRoles) {
+          await requestJson(`${restUrl}/vcontent_profiles?id=eq.${encodeURIComponent(profile.id)}`, {
+            method: 'PATCH',
+            headers: { ...serviceHeaders, Prefer: 'return=minimal' },
+            body: JSON.stringify({
+              ...(shouldLink ? { auth_user_id: authUserId } : {}),
+              ...(shouldReconcileRoles ? { vplanning_roles: nextProfileRoles } : {}),
+            }),
+          });
+          if (shouldLink) linked += 1;
+          if (shouldReconcileRoles) rolesReconciled += 1;
+        }
+      }
+      if (!directoryUser?.payload?.authUserId) {
+        await requestJson(`${restUrl}/vplanning_users?email=eq.${encodeURIComponent(email)}`, {
+          method: 'PATCH',
+          headers: { ...serviceHeaders, Prefer: 'return=minimal' },
+          body: JSON.stringify({ payload: { ...(directoryUser?.payload || {}), authUserId, source: directoryUser?.payload?.source || 'vwork_training_operations' } }),
+        });
+      }
+      if (isAuthUserBanned(authUser)) {
+        await requestJson(`${supabaseUrl}/auth/v1/admin/users/${encodeURIComponent(authUserId)}`, {
+          method: 'PUT',
+          headers: serviceHeaders,
+          body: JSON.stringify({ ban_duration: 'none' }),
+        });
+        restored += 1;
+      }
+    } catch (error) {
+      failures.push({ email, error: String(error?.message || error).slice(0, 240) });
     }
   }
-  return { candidates: candidates.length, checked, restored, linked, rolesReconciled, missingAuth };
+  return { candidates: candidateEmails.size, checked, restored, linked, profilesCreated, rolesReconciled, missingAuth, failures };
 }
 
 export default async function handler(req, res) {

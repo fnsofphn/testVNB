@@ -404,7 +404,9 @@
 .vwork-training-operations .class-detail-modal .class-task-head{position:sticky;top:0;z-index:2}
 .vwork-training-operations .account-title-actions{display:flex;align-items:flex-end;gap:8px;flex-direction:column}
 .vwork-training-operations .account-title-actions button{font-size:10px}
-.vwork-training-operations .account-reconciliation-result{display:flex;justify-content:space-between;gap:12px;margin:12px 0;padding:11px 13px;border:1px solid #b8dfce;border-radius:8px;background:#f2fbf7;color:#176849;font-size:10px}
+.vwork-training-operations .account-reconciliation-result{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin:12px 0;padding:11px 13px;border:1px solid #b8dfce;border-radius:8px;background:#f2fbf7;color:#176849;font-size:10px}
+.vwork-training-operations .account-reconciliation-result.has-errors{border-color:#efc6c6;background:#fff5f5;color:#9a2424}
+.vwork-training-operations .account-reconciliation-result small{flex-basis:100%;color:inherit}
 .vwork-training-operations .input-card.partial{border-color:#e7c98f;background:#fffdf8}
 .vwork-training-operations .input-card.partial>div:first-child>b{background:#fff1d6;color:#895c13}
 .vwork-training-operations .roster-class-progress{display:grid;gap:5px;margin:12px 0;padding:10px;border:1px solid #e1e5eb;border-radius:8px;background:#fafbfc}

@@ -275,7 +275,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
       const response = await restoreActiveTrainingOperationsLoginAccess(role);
       setSyncState('synced');
       const result = response.reconciliation;
-      notify(`Đã kiểm tra ${result.checked} tài khoản VWork; mở lại ${result.restored}, liên kết ${result.linked} và đồng bộ role ${result.rolesReconciled} tài khoản.`);
+      notify(`Đã kiểm tra ${result.checked} tài khoản VWork; mở lại ${result.restored}, tạo ${result.profilesCreated} hồ sơ và đồng bộ role ${result.rolesReconciled} tài khoản${result.failures.length ? `; còn ${result.failures.length} lỗi` : ''}.`);
       return { reconciliation: result, error: '' };
     } catch (error) {
       const message = error.message || 'Không thể đồng bộ quyền đăng nhập tài khoản cũ.';
@@ -788,7 +788,7 @@ function AccountsPanel({ directory = [], provisionAccount, restoreExistingLoginA
   }
   return <section className="accounts-workspace">
     <div className="page-title accounts-title"><div><small>VWORK IDENTITY · END-TO-END</small><h2>Ekip và tài khoản đăng nhập</h2><p>Tạo đồng thời tài khoản Supabase Auth, hồ sơ PeopleOne và thành viên trong danh mục VWork để có thể giao việc thật.</p></div><div className="account-title-actions"><span className="account-total">{directory.length} tài khoản VWork</span><button type="button" disabled={reconciling} onClick={() => void reconcileExistingAccounts()}>{reconciling ? 'Đang đồng bộ…' : 'Đồng bộ đăng nhập tài khoản cũ'}</button></div></div>
-    {reconciliation && <div className="account-reconciliation-result" role="status"><b>Đã kiểm tra {reconciliation.checked}/{reconciliation.candidates} tài khoản đang hoạt động</b><span>Mở lại đăng nhập: {reconciliation.restored} · Liên kết hồ sơ: {reconciliation.linked} · Đồng bộ role: {reconciliation.rolesReconciled} · Không tìm thấy Auth: {reconciliation.missingAuth}</span></div>}
+    {reconciliation && <div className={`account-reconciliation-result${reconciliation.failures.length ? ' has-errors' : ''}`} role="status"><b>Đã kiểm tra {reconciliation.checked}/{reconciliation.candidates} tài khoản VWork</b><span>Mở lại đăng nhập: {reconciliation.restored} · Tạo hồ sơ thiếu: {reconciliation.profilesCreated} · Liên kết hồ sơ: {reconciliation.linked} · Đồng bộ role: {reconciliation.rolesReconciled} · Không tìm thấy Auth: {reconciliation.missingAuth}</span>{reconciliation.failures.length > 0 && <small>Chưa đồng bộ được: {reconciliation.failures.map((item) => item.email).join(', ')}</small>}</div>}
     <div className="accounts-grid">
       <form className="card account-create-card" onSubmit={submit}>
         <div className="account-card-head"><div><span>{editingEmail ? 'CHỈNH TÀI KHOẢN HIỆN CÓ' : 'TẠO / CẬP NHẬT TÀI KHOẢN'}</span><h3>{editingEmail ? 'Chỉnh vai trò tài khoản' : 'Thành viên và vai trò'}</h3></div><b>{editingEmail ? 'VWORK ROLE' : 'AUTH + VWORK'}</b></div>

@@ -78,7 +78,7 @@ export async function restoreActiveTrainingOperationsLoginAccess(activeRole?: st
   return requestApi('/api/vwork-training-operations-user', {
     method: 'POST',
     body: JSON.stringify({ action: 'RESTORE_ACTIVE_LOGIN_ACCESS' }),
-  }, activeRole) as Promise<{ ok: true; reconciliation: { candidates: number; checked: number; restored: number; linked: number; rolesReconciled: number; missingAuth: number } }>;
+  }, activeRole) as Promise<{ ok: true; reconciliation: { candidates: number; checked: number; restored: number; linked: number; profilesCreated: number; rolesReconciled: number; missingAuth: number; failures: { email: string; error: string }[] } }>;
 }
 
 async function uploadFileToSignedUrl(signedUrl: string, file: File) {
