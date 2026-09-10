@@ -9,6 +9,18 @@ export const TRAINING_ROLE_OPTIONS = Object.freeze([
 
 export const TRAINING_ROLE_VALUES = Object.freeze(TRAINING_ROLE_OPTIONS.map(([value]) => value));
 
+// A multi-role account uses one stable workspace. Prefer the role with the
+// broadest coordination responsibility so a manager never lands in the
+// member-only surface and loses their review queue.
+export const TRAINING_INTERFACE_ROLE_PRIORITY = Object.freeze([
+  'operations',
+  'manager',
+  'intake',
+  'content',
+  'vtraining',
+  'member',
+]);
+
 export function normalizeTrainingRole(value) {
   return String(value || '')
     .trim()
@@ -43,5 +55,5 @@ export function resolveTrainingRoles(profile, vplanningUser) {
 export function resolveActiveTrainingRole(requestedRole, availableRoles) {
   const requested = normalizeTrainingRole(requestedRole);
   if (requested) return availableRoles.includes(requested) ? requested : null;
-  return TRAINING_ROLE_VALUES.find((role) => availableRoles.includes(role)) || null;
+  return TRAINING_INTERFACE_ROLE_PRIORITY.find((role) => availableRoles.includes(role)) || null;
 }

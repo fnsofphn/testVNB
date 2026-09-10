@@ -256,4 +256,23 @@ assert.equal(duplicatedTask.dueOffset, 5);
 assert.deepEqual(duplicatedTask.checklistItems, ['Tiêu chí cấu hình riêng']);
 assert.ok(duplicateState.auditEvents.some((item) => item.type === 'COURSE_DUPLICATED' && item.entityId === 'CX-FOUNDATION-COPY'));
 
+// Class task maintenance — assigned managers may append, edit, reorder and soft-delete tasks.
+let taskMaintenanceState = createInitialTrainingOperationsState({ now: '2026-08-25T00:00:00.000Z' });
+taskMaintenanceState = command(taskMaintenanceState, 'ASSIGN_COURSE_ROLE', { courseId: 'CX-FOUNDATION', role: 'manager', accountId: 'manager-01', accountName: 'Ngọc Trần', accountEmail: 'manager@peopleone.vn' }, 'operations', 'Quản lý vận hành');
+const setupOrderBefore = Math.max(...taskMaintenanceState.tasks.filter((item) => item.classId === 'TNKH01' && item.group === 'setup').map((item) => item.sortOrder));
+taskMaintenanceState = commandAs(taskMaintenanceState, 'CREATE_CLASS_TASK', { classId: 'TNKH01', title: 'Việc mới A', group: 'setup', inputKey: 'roster', dueOffset: 1, checklistItems: ['Tiêu chí A'] }, 'manager', 'manager-01', 'Ngọc Trần');
+taskMaintenanceState = commandAs(taskMaintenanceState, 'CREATE_CLASS_TASK', { classId: 'TNKH01', title: 'Việc mới B', group: 'setup', inputKey: 'roster', dueOffset: 1, checklistItems: ['Tiêu chí B'] }, 'manager', 'manager-01', 'Ngọc Trần');
+const customA = taskMaintenanceState.tasks.find((item) => item.title === 'Việc mới A');
+const customB = taskMaintenanceState.tasks.find((item) => item.title === 'Việc mới B');
+assert.ok(customA.sortOrder > setupOrderBefore && customB.sortOrder > customA.sortOrder, 'New tasks must append to the selected group instead of jumping to the top.');
+assert.equal(customA.managerId, 'manager-01');
+assert.equal(customA.reviewerId, 'manager-01');
+taskMaintenanceState = commandAs(taskMaintenanceState, 'MOVE_CLASS_TASK', { taskId: customB.id, direction: 'UP' }, 'manager', 'manager-01', 'Ngọc Trần');
+assert.ok(taskMaintenanceState.tasks.find((item) => item.id === customB.id).sortOrder < taskMaintenanceState.tasks.find((item) => item.id === customA.id).sortOrder);
+taskMaintenanceState = commandAs(taskMaintenanceState, 'UPDATE_TASK_CONFIG', { taskId: customA.id, title: 'Việc mới A đã sửa', checklistItems: ['Tiêu chí đã sửa'] }, 'manager', 'manager-01', 'Ngọc Trần');
+assert.equal(taskMaintenanceState.tasks.find((item) => item.id === customA.id).title, 'Việc mới A đã sửa');
+taskMaintenanceState = commandAs(taskMaintenanceState, 'ARCHIVE_TASK', { taskId: customA.id, reason: 'Không còn áp dụng.' }, 'manager', 'manager-01', 'Ngọc Trần');
+assert.equal(taskMaintenanceState.tasks.find((item) => item.id === customA.id).status, 'CANCELLED');
+assert.throws(() => commandAs(taskMaintenanceState, 'CREATE_CLASS_TASK', { classId: 'TNKH01', title: 'Ngoài phạm vi', group: 'setup', checklistItems: ['Không hợp lệ'] }, 'manager', 'manager-02', 'Quản lý khác'), /không phải Quản lý khóa học/);
+
 console.log('V-Work Training Operations domain UC01-UC16 and FB2 course model passed.');

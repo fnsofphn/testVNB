@@ -47,9 +47,10 @@ const COMMAND_ROLES = Object.freeze({
   UPDATE_COURSE_TEMPLATE: ['operations', 'manager', 'admin'],
   UPDATE_CLASS_STATUS: ['operations', 'manager', 'admin'],
   CLONE_CLASS: ['operations', 'admin'],
-  CREATE_CLASS_TASK: ['operations', 'vtraining', 'admin'],
-  UPDATE_TASK_CONFIG: ['operations', 'vtraining', 'admin'],
-  ARCHIVE_TASK: ['operations', 'vtraining', 'admin'],
+  CREATE_CLASS_TASK: ['operations', 'vtraining', 'manager', 'admin'],
+  UPDATE_TASK_CONFIG: ['operations', 'vtraining', 'manager', 'admin'],
+  MOVE_CLASS_TASK: ['operations', 'vtraining', 'manager', 'admin'],
+  ARCHIVE_TASK: ['operations', 'vtraining', 'manager', 'admin'],
   SUBMIT_INPUT: ['intake', 'content', 'vtraining', 'operations', 'admin'],
   ASSIGN_TASKS: ['manager', 'operations', 'admin'],
   ASSIGN_GROUP_MANAGER: ['operations', 'admin'],
@@ -388,7 +389,7 @@ export function normalizeTrainingOperationsState(currentState, context = {}) {
     const definition = inputDefinitionByCode(input.dataCode)?.[1];
     return definition ? { ...input, title: definition.title, ownerRole: definition.ownerRole } : input;
   });
-  state.tasks = state.tasks.map((task) => ({
+  state.tasks = state.tasks.map((task, taskIndex) => ({
     ...task,
     scopeLevel: task.scopeLevel || 'class',
     dependsOnTaskIds: Array.isArray(task.dependsOnTaskIds) ? task.dependsOnTaskIds : task.templateId === 'T-110'
@@ -398,6 +399,7 @@ export function normalizeTrainingOperationsState(currentState, context = {}) {
         : [],
     blockingInputCodes: Array.isArray(task.blockingInputCodes) ? task.blockingInputCodes : clone(task.requiredInputCodes || []),
     blockingTaskIds: Array.isArray(task.blockingTaskIds) ? task.blockingTaskIds : [],
+    sortOrder: Number.isFinite(Number(task.sortOrder)) ? Number(task.sortOrder) : taskIndex,
     checklistEvidence: Array.isArray(task.checklistEvidence)
       ? task.checklistItems.map((_, index) => clone(task.checklistEvidence[index] || []))
       : task.checklistItems.map(() => []),
@@ -772,6 +774,7 @@ function cloneClass(state, payload, context) {
 
 function updateTaskConfig(state, payload, context) {
   const task = findTask(state, payload.taskId);
+  assertTaskConfigurationAccess(state, task.courseId, context);
   const allowedGroups = new Set(TRAINING_TASK_TEMPLATES.map((item) => item.group));
   if (payload.enabled !== undefined) task.status = payload.enabled ? 'WAITING_INPUT' : 'CANCELLED';
   if (payload.dueOffset !== undefined) task.dueOffset = Math.max(0, Number(payload.dueOffset) || 0);
@@ -798,6 +801,7 @@ function createClassTask(state, payload, context) {
   const classId = requiredText(payload.classId || payload.classCode, 'Lớp');
   const classItem = state.classes.find((item) => item.id === classId || item.code === classId);
   if (!classItem) throw domainError('NOT_FOUND', 'Không tìm thấy lớp cần thêm công việc.');
+  assertTaskConfigurationAccess(state, classItem.courseId, context);
   const group = requiredText(payload.group, 'Nhóm công việc');
   if (!new Set(TRAINING_TASK_TEMPLATES.map((item) => item.group)).has(group)) throw domainError('VALIDATION_ERROR', 'Nhóm công việc không hợp lệ.');
   const checklistItems = (Array.isArray(payload.checklistItems) ? payload.checklistItems : [])
@@ -825,14 +829,48 @@ function createClassTask(state, payload, context) {
     checklistItems,
     checklist: checklistItems.map(() => false),
     custom: true,
+    sortOrder: Math.max(-1, ...state.tasks.filter((item) => item.classId === classItem.id && item.group === group && item.status !== 'CANCELLED').map((item) => Number(item.sortOrder) || 0)) + 1,
   };
+  const courseManagers = state.teamAssignments.filter((item) => item.courseId === classItem.courseId && item.role === 'manager' && item.status !== 'ARCHIVED');
+  const courseManager = context.role === 'manager'
+    ? courseManagers.find((item) => actorMatches(context, item.accountId, item.accountEmail, item.accountName))
+    : courseManagers[0];
+  if (courseManager) {
+    task.manager = courseManager.accountName || courseManager.accountEmail || courseManager.accountId;
+    task.managerId = courseManager.accountId || courseManager.accountEmail || task.manager;
+    task.reviewer = task.manager;
+    task.reviewerId = task.managerId;
+  }
   state.tasks.push(task);
   refreshTaskReadiness(state, classItem.projectId, timestamp);
   appendAudit(state, auditEvent('CLASS_TASK_CREATED', `Thêm ${task.id} vào lớp ${classItem.code}.`, context, 'task', task.id, { classId: classItem.id, group, inputKey }));
 }
 
+function moveClassTask(state, payload, context) {
+  const task = findTask(state, payload.taskId);
+  assertTaskConfigurationAccess(state, task.courseId, context);
+  const direction = String(payload.direction || '').toUpperCase();
+  if (!['UP', 'DOWN'].includes(direction)) throw domainError('VALIDATION_ERROR', 'Hướng di chuyển công việc không hợp lệ.');
+  const siblings = state.tasks
+    .filter((item) => item.classId === task.classId && item.group === task.group && item.status !== 'CANCELLED')
+    .sort((a, b) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0) || String(a.createdAt || '').localeCompare(String(b.createdAt || '')) || String(a.id).localeCompare(String(b.id)));
+  const index = siblings.findIndex((item) => item.id === task.id);
+  const targetIndex = index + (direction === 'UP' ? -1 : 1);
+  if (index < 0 || targetIndex < 0 || targetIndex >= siblings.length) return;
+  siblings.forEach((item, itemIndex) => { item.sortOrder = itemIndex; });
+  const target = siblings[targetIndex];
+  const currentOrder = task.sortOrder;
+  task.sortOrder = target.sortOrder;
+  target.sortOrder = currentOrder;
+  const timestamp = nowIso(context);
+  task.updatedAt = timestamp;
+  target.updatedAt = timestamp;
+  appendAudit(state, auditEvent('CLASS_TASK_MOVED', `Di chuyển ${task.id} ${direction === 'UP' ? 'lên' : 'xuống'} trong nhóm ${task.group}.`, context, 'task', task.id, { direction, adjacentTaskId: target.id }));
+}
+
 function archiveTask(state, payload, context) {
   const task = findTask(state, payload.taskId);
+  assertTaskConfigurationAccess(state, task.courseId, context);
   if (['IN_PROGRESS', 'IN_REVIEW'].includes(task.status)) throw domainError('INVALID_TRANSITION', 'Không thể xóa công việc đang thực hiện hoặc đang chờ review.');
   const timestamp = nowIso(context);
   task.status = 'CANCELLED';
@@ -925,6 +963,11 @@ function assertCourseManager(state, courseId, context) {
   if (context.role !== 'manager' || !courseAssignmentMatches(state, courseId, 'manager', context)) {
     throw domainError('TRAINING_OPERATIONS_PERMISSION_DENIED', 'Bạn không phải Quản lý khóa học được phân công cho khóa này.');
   }
+}
+
+function assertTaskConfigurationAccess(state, courseId, context) {
+  if (['operations', 'vtraining', 'admin'].includes(context.role)) return;
+  assertCourseManager(state, courseId, context);
 }
 
 function assignCourseRole(state, payload, context) {
@@ -1242,6 +1285,7 @@ export function applyTrainingOperationsCommand(currentState, command, context = 
     case 'CLONE_CLASS': cloneClass(state, payload, { ...context, role }); break;
     case 'CREATE_CLASS_TASK': createClassTask(state, payload, { ...context, role }); break;
     case 'UPDATE_TASK_CONFIG': updateTaskConfig(state, payload, { ...context, role }); break;
+    case 'MOVE_CLASS_TASK': moveClassTask(state, payload, { ...context, role }); break;
     case 'ARCHIVE_TASK': archiveTask(state, payload, { ...context, role }); break;
     case 'SUBMIT_INPUT': submitInput(state, payload, { ...context, role }, false); break;
     case 'SUBMIT_INPUT_VERSION': submitInput(state, payload, { ...context, role }, true); break;

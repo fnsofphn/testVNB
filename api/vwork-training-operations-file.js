@@ -12,14 +12,15 @@ const BLOCKED_EXTENSIONS = new Set([
   'svg', 'sys', 'vb', 'vbe', 'vbs', 'ws', 'wsc', 'wsf', 'wsh',
 ]);
 const BLOCKED_CONTENT_TYPES = /(?:text\/html|javascript|x-msdownload|x-sh|x-shellscript|x-dosexec|x-executable)/i;
+const SCOPED_INPUT_READERS = Object.freeze(['intake', 'content', 'vtraining', 'manager', 'member']);
 const DOCUMENT_ACCESS = Object.freeze({
-  roster: { upload: ['intake'], download: ['intake'] },
-  vlearning: { upload: ['content'], download: ['content'] },
-  game: { upload: ['content'], download: ['content'] },
-  discussion: { upload: ['content'], download: ['content'] },
-  assignment: { upload: ['content'], download: ['content'] },
-  test: { upload: ['content'], download: ['content'] },
-  material: { upload: ['content'], download: ['content', 'vtraining'] },
+  roster: { upload: ['intake'], download: SCOPED_INPUT_READERS },
+  vlearning: { upload: ['content'], download: SCOPED_INPUT_READERS },
+  game: { upload: ['content'], download: SCOPED_INPUT_READERS },
+  discussion: { upload: ['content'], download: SCOPED_INPUT_READERS },
+  assignment: { upload: ['content'], download: SCOPED_INPUT_READERS },
+  test: { upload: ['content'], download: SCOPED_INPUT_READERS },
+  material: { upload: ['content'], download: SCOPED_INPUT_READERS },
   evidence: { upload: ['member'], download: ['member', 'manager'] },
 });
 
@@ -89,6 +90,18 @@ async function assertEvidenceTaskAccess(admin, profile, role, taskId, action) {
   if (!allowed) { const denied = new Error('Bạn không được phân công trên công việc của file minh chứng này.'); denied.status = 403; throw denied; }
 }
 
+export async function assertInputDocumentAccess(admin, profile, role, inputId, documentType) {
+  if (['operations', 'admin'].includes(role)) return;
+  const { data: stateRow, error } = await admin.from('vwork_training_operations_state').select('payload').eq('id', TRAINING_OPERATIONS_STATE_ID).maybeSingle();
+  if (error) throw error;
+  const state = stateRow?.payload || {};
+  const input = (state.inputs || []).find((item) => item.id === inputId && item.key === documentType);
+  if (!input) { const missing = new Error('Không tìm thấy input của file này.'); missing.status = 404; throw missing; }
+  const scoped = (state.teamAssignments || []).some((item) => item.courseId === input.courseId && item.status !== 'ARCHIVED'
+    && profileMatches(profile, item.accountId, item.accountEmail, item.accountName));
+  if (!scoped) { const denied = new Error('Bạn không được phân công trong khóa học của file input này.'); denied.status = 403; throw denied; }
+}
+
 async function authorize(req, config) {
   const authHeader = String(req.headers.authorization || '');
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
@@ -128,7 +141,9 @@ export default async function handler(req, res) {
       if (!objectPath.startsWith('training-operations/')) { res.status(400).json({ ok: false, error: 'Đường dẫn file không hợp lệ.' }); return; }
       const documentType = objectPath.split('/')[2] || '';
       if (!canAccessDocument(role, documentType, 'download')) { res.status(403).json({ ok: false, error: 'Vai trò hiện tại không được phép đọc file này.' }); return; }
-      if (documentType === 'evidence') await assertEvidenceTaskAccess(admin, profile, role, decodeEntityId(objectPath.split('/')[1]), 'download');
+      const entityId = decodeEntityId(objectPath.split('/')[1]);
+      if (documentType === 'evidence') await assertEvidenceTaskAccess(admin, profile, role, entityId, 'download');
+      else if (DOCUMENT_ACCESS[documentType]) await assertInputDocumentAccess(admin, profile, role, entityId, documentType);
       const signedDownload = await admin.storage.from(config.bucket).createSignedUrl(objectPath, 300, { download: String(body.fileName || '').trim() || true });
       if (signedDownload.error) throw signedDownload.error;
       res.status(200).json({ ok: true, download: { signedUrl: signedDownload.data.signedUrl, expiresIn: 300 } });

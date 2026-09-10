@@ -51,6 +51,10 @@ globalThis.fetch = async (url, options = {}) => {
 };
 
 const { default: handler, stateForRole } = await import('../api/vwork-training-operations.js');
+const { resolveActiveTrainingRole } = await import('../src/modules/vplanning/trainingOperations/roles.js');
+
+assert.equal(resolveActiveTrainingRole(undefined, ['vtraining', 'manager', 'member']), 'manager', 'A team manager must land in the fixed manager interface without switching roles.');
+assert.equal(resolveActiveTrainingRole(undefined, ['content', 'member']), 'content', 'A specialist/member account must keep its specialist interface.');
 
 function responseRecorder() {
   return {
@@ -117,9 +121,20 @@ assert.ok(legacyMemberView.teamAssignments.some((item) => item.courseId === 'CX-
 
 const assignedManagerState = structuredClone(getResponse.payload.state);
 assignedManagerState.teamAssignments.push({ courseId: 'CX-FOUNDATION', projectId: 'EVNSPC-2026', role: 'manager', accountId: 'profile-operations', status: 'ACTIVE' });
+const managerVisibleInput = assignedManagerState.inputs.find((item) => item.courseId === 'CX-FOUNDATION' && item.key === 'vlearning');
+managerVisibleInput.status = 'ACTIVE';
+managerVisibleInput.activeVersion = 2;
+managerVisibleInput.versions = [
+  { id: `${managerVisibleInput.id}:v1`, version: 1, status: 'SUPERSEDED', data: { content_name: 'Bản cũ không được lộ' }, files: [{ name: 'old.docx', path: 'training-operations/old/vlearning/old.docx' }] },
+  { id: `${managerVisibleInput.id}:v2`, version: 2, status: 'ACTIVE', data: { content_name: 'Trải nghiệm khách hàng' }, files: [{ name: 'input.xlsx', path: 'training-operations/current/vlearning/input.xlsx' }] },
+];
 const assignedManagerView = stateForRole(assignedManagerState, { role: 'manager', actor: { id: 'profile-operations', email: 'ops@peopleone.vn', name: 'Quản trị đa vai' } });
 assert.equal(assignedManagerView.courses.length, 1);
 assert.equal(assignedManagerView.courseInputProgress[0].total, 7);
+const projectedManagerInput = assignedManagerView.inputs.find((item) => item.id === managerVisibleInput.id);
+assert.equal(projectedManagerInput.versions.find((item) => item.version === 2).data.content_name, 'Trải nghiệm khách hàng');
+assert.equal(projectedManagerInput.versions.find((item) => item.version === 2).files[0].name, 'input.xlsx');
+assert.equal(projectedManagerInput.versions.find((item) => item.version === 1).data, undefined, 'Non-owners must only receive active input details, not superseded source data.');
 
 const invalidRole = responseRecorder();
 await handler(request('GET', undefined, 'director'), invalidRole);

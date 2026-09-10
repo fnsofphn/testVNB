@@ -137,19 +137,21 @@ async function authenticate(req, config) {
   };
 }
 
-function redactInput(input) {
+function projectActiveInput(input) {
   return {
     ...input,
     versions: input.versions.map((version) => ({
-      id: version.id,
-      version: version.version,
-      status: version.status,
-      sourceDataCode: version.sourceDataCode,
-      validation: version.validation,
-      reason: version.reason,
-      effectiveAt: version.effectiveAt,
-      submittedBy: version.submittedBy,
-      submittedAt: version.submittedAt,
+      ...(version.version === input.activeVersion ? version : {
+        id: version.id,
+        version: version.version,
+        status: version.status,
+        sourceDataCode: version.sourceDataCode,
+        validation: version.validation,
+        reason: version.reason,
+        effectiveAt: version.effectiveAt,
+        submittedBy: version.submittedBy,
+        submittedAt: version.submittedAt,
+      }),
       fileCount: version.files?.length || 0,
     })),
   };
@@ -196,14 +198,14 @@ export function stateForRole(state, auth) {
   output.auditEvents = output.auditEvents.filter((item) => matchesActor(item.actor?.id, item.actor?.email, item.actor?.name) || scopedEntityIds.has(item.entityId));
   output.activeProjectId = output.projects.some((item) => item.id === output.activeProjectId) ? output.activeProjectId : output.projects[0]?.id || null;
   if (role === 'intake') {
-    output.inputs = output.inputs.filter((item) => item.ownerRole === 'intake');
+    output.inputs = output.inputs.map((item) => item.ownerRole === role ? item : projectActiveInput(item));
     output.tasks = output.tasks.filter(isAssigned);
     output.notifications = output.notifications.filter((item) => (item.recipients || []).some((value) => ['intake', auth.actor.id, auth.actor.email].includes(value)));
     output.auditEvents = output.auditEvents.filter((item) => item.actor?.id === auth.actor.id || ['PROJECT_CREATED', 'SCOPE_CHANGE_APPROVED'].includes(item.type));
     return output;
   }
   if (role === 'content') {
-    output.inputs = output.inputs.filter((item) => item.ownerRole === 'content');
+    output.inputs = output.inputs.map((item) => item.ownerRole === role ? item : projectActiveInput(item));
     output.tasks = output.tasks.filter(isAssigned);
     output.changeRequests = [];
     output.notifications = output.notifications.filter((item) => (item.recipients || []).some((value) => ['content', auth.actor.id, auth.actor.email].includes(value)));
@@ -211,12 +213,12 @@ export function stateForRole(state, auth) {
     return output;
   }
   if (role === 'vtraining') {
-    output.inputs = output.inputs.filter((item) => item.ownerRole === 'vtraining');
+    output.inputs = output.inputs.map((item) => item.ownerRole === role ? item : projectActiveInput(item));
     output.tasks = output.tasks.filter(isAssigned);
     output.changeRequests = [];
     return output;
   }
-  output.inputs = output.inputs.map(redactInput);
+  output.inputs = output.inputs.map(projectActiveInput);
   if (role === 'member') {
     output.tasks = output.tasks.filter(isAssigned);
     output.changeRequests = [];

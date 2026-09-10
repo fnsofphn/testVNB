@@ -27,7 +27,8 @@ assert(app.includes('path="/vwork/training-operations"'), 'Training Operations m
 assert(app.includes('function trainingOperationsEnabled()') && app.includes("VITE_ENABLE_VWORK_TRAINING_OPERATIONS === 'true'"), 'Production route must remain feature-flagged until explicitly enabled.');
 assert(app.includes('hasTrainingOperationsProfileAccess') && app.includes('<Navigate to="/vwork/training-operations" replace />'), 'Training Operations-only accounts must be routed from the VWork entry to their scoped module.');
 assert(app.includes("profileRole === 'client'") && app.includes("title.includes(token)"), 'Existing Sale profiles must pass the scoped Training Operations guard without receiving broad VPlanning access.');
-assert(app.indexOf("identity.includes('training_manager')") < app.indexOf("identity.includes('manager') ||"), 'Client role mapping must resolve training managers as operations before the generic manager rule.');
+assert(app.indexOf("identity.includes('training_manager')") < app.indexOf("identity.includes('vplanning_manager')"), 'Client role mapping must resolve training managers as operations before the team-manager rule.');
+assert(app.indexOf("identity.includes('vplanning_manager')") < app.indexOf("identity.includes('collaborator')"), 'The fixed interface must prefer team-manager responsibilities over member access.');
 assert(shell.includes("href:'/vwork/training-operations'"), 'The V-Work shell must link to the isolated Training Operations route.');
 assert(shell.includes('hidden:!ENABLE_TRAINING_OPERATIONS'), 'The V-Work navigation entry must follow the same feature flag.');
 
@@ -78,14 +79,16 @@ assert(page.includes('renderTrainingOverlay') && page.includes('createPortal') &
 assert(page.includes('Input readiness theo từng khóa') && page.includes('getCourseInputProgress') && page.includes('đầu vào sẵn sàng'), 'Input readiness must start with a course list and show server-aggregated progress for each course.');
 assert(page.includes('getRosterClassProgress') && page.includes('Danh sách học viên theo lớp') && page.includes('Đủ danh sách ${rosterProgress.ready}/${rosterProgress.total} lớp'), 'D03 readiness must expose each class status and only become ready when every class roster is active.');
 assert(page.includes('sale-course-list') && page.includes('Lịch lớp') && page.includes('danh sách đã có'), 'The Sale upload queue must group class schedules and roster progress by course.');
-assert(page.includes("role === 'intake' ? <><p>ĐẦU MỐI / SALE</p><button className={tab === 'inputs' ? 'active' : ''}") && page.includes('Việc của tôi · cập nhật danh sách lớp'), 'Sale Việc của tôi must open the roster upload workspace instead of an empty class-task page.');
+assert(page.includes("role === 'intake' ? <><p>ĐẦU MỐI / SALE</p><button className={tab === 'inputs' ? 'active' : ''}") && page.includes('Input lớp học') && page.includes('Việc của tôi · cập nhật danh sách lớp'), 'Sale Input must open the roster upload workspace instead of an empty class-task page.');
 assert(page.includes('additionalCourses') && page.includes("runCommand('CREATE_PROJECT_BUNDLE'") && page.includes('+ Thêm khóa'), 'The create wizard must persist multiple courses atomically inside a project.');
 assert(page.includes('enabledTaskIds') && page.includes('taskDueOffsets') && page.includes('taskTemplates: taskTemplates.map'), 'Wizard task enablement, deadline offsets and checklist edits must be persisted into the atomic project payload.');
 assert(domain.includes('schemaVersion = 3') && domain.includes("scopeLevel: 'course'") && domain.includes("scopeLevel: 'class'"), 'FB2 state must distinguish course and class inputs in schema v3.');
 assert(api.includes('normalizeTrainingOperationsState') && api.includes('scopedCourseIds'), 'The API must normalize legacy state and scope non-global users by course membership.');
 assert(api.includes("item.role === role") && api.includes("output.projects = output.projects.filter"), 'Non-global roles must fail closed when no matching course assignment exists.');
-assert(domain.includes("ownerRole: 'content'") && page.includes("vtraining: []"), 'D09 source ownership must stay with Content; VTraining receives execution tasks instead of a duplicate input workspace.');
-assert(fileApi.includes("material: { upload: ['content'], download: ['content', 'vtraining'] }"), 'D09 file access must allow Content to upload and VTraining to consume the approved source.');
+assert(domain.includes("ownerRole: 'content'") && page.includes("vtraining: []"), 'D09 source ownership must stay with Content while VTraining consumes the active input read-only.');
+assert(fileApi.includes("material: { upload: ['content'], download: SCOPED_INPUT_READERS }") && fileApi.includes('assertInputDocumentAccess'), 'Every assigned course role must be able to consume active input files through a server-scoped download check.');
+assert(page.includes('Input công việc') && page.includes('Input khóa học') && page.includes('InputVersionSnapshot'), 'VTraining, manager and member interfaces must expose the shared Input workspace and active version details.');
+assert(api.includes('projectActiveInput') && !api.includes("output.inputs = output.inputs.filter((item) => item.ownerRole"), 'Role-scoped API views must include every course input while exposing full detail only for the active version of non-owned inputs.');
 assert(domain.includes('dependsOnTaskIds') && domain.includes("dependsOnGroups: ['setup']"), 'Live tasks must wait for setup task dependencies.');
 assert(page.includes('const baseTasks = tasks;') && page.includes('const baseVisible = tasks;'), 'Member task lists must trust the server-scoped result instead of filtering a hard-coded mock identity.');
 assert(!page.includes("task.assignee === 'Nam Nguyễn'") && !page.includes('<option>Nam Nguyễn</option>'), 'Production assignment UI must not depend on mock people names.');
@@ -109,6 +112,9 @@ assert(page.includes("message && ['manager', 'operations'].includes(role)"), 'Ma
 assert(api.includes('normalizeAssignmentCommand') && api.includes('TRAINING_OPERATIONS_ASSIGNMENT_SCOPE_DENIED'), 'Assignment identity and project/class scope must be validated on the server.');
 assert(page.includes('game_contents') && page.includes('GameContentFields'), 'D05 must render and persist one content/link field per configured game.');
 assert(domain.includes("case 'CREATE_CLASS_TASK'") && domain.includes("case 'ARCHIVE_TASK'"), 'Class task creation and soft archive must be enforced in the domain.');
+assert(domain.includes("MOVE_CLASS_TASK: ['operations', 'vtraining', 'manager', 'admin']") && domain.includes("case 'MOVE_CLASS_TASK'") && domain.includes('sortOrder: Math.max(-1'), 'Managers must be able to append and reorder class tasks through the domain boundary.');
+assert(page.includes('<Pencil size={14}/>') && page.includes('<Plus size={15}/>') && page.includes('<Trash2 size={14}/>') && page.includes("moveTask(task, 'UP')") && page.includes("moveTask(task, 'DOWN')"), 'Class task rows must expose add, edit, delete and accessible ordering controls.');
+assert(page.includes("const canConfigure = ['operations', 'vtraining', 'manager'].includes(role)") && domain.includes('assertTaskConfigurationAccess(state, task.courseId, context)'), 'Assigned team managers must be authorized in both UI and domain before maintaining class tasks.');
 assert(fileApi.includes('BLOCKED_EXTENSIONS') && fileApi.includes('validateUploadMetadata') && !fileApi.includes('ALLOWED_EXTENSIONS'), 'Upload validation must use a safe deny policy instead of a narrow business-format whitelist.');
 assert(!page.includes("setTab('workflow')") && !page.includes("tab === 'workflow'"), 'The obsolete VTraining configuration page must not remain reachable from the module UI.');
 assert(api.includes('/vwork_training_operations_tasks?') && api.includes('/vwork_training_operations_audit_events?'), 'Reads must reconstruct state from independent task and audit rows.');
@@ -129,7 +135,9 @@ assert(api.includes('TRAINING_OPERATIONS_ROLE_NOT_GRANTED') && api.includes('ava
 assert(fileApi.includes("resolveActiveTrainingRole(req.headers['x-vwork-role']"), 'Private files must enforce the same selected role as the main API.');
 assert(userApi.includes("activeRole !== 'operations'"), 'Account provisioning must remain limited to the active operations role.');
 assert(roles.includes("return [...TRAINING_ROLE_VALUES]") && roles.includes("['member', 'Thành viên ekip']"), 'Training administrators must receive the six explicit operational roles.');
-assert(page.includes('availableRoles.length > 1') && page.includes('Chọn vai trò làm việc'), 'Production UI must expose a role switcher only to multi-role accounts.');
+assert(page.includes('Giao diện làm việc') && page.includes('Có {availableRoles.length} quyền được cấp') && !page.includes('Chọn vai trò làm việc') && !page.includes('switchRole('), 'Multi-role accounts must use one fixed interface without a manual role switcher.');
+assert(page.includes('loadWorkspace({ requestedRole: null })'), 'Initial workspace loading must let the server resolve the fixed interface from every granted role.');
+assert(roles.includes("'operations',\n  'manager',") && roles.includes('TRAINING_INTERFACE_ROLE_PRIORITY.find'), 'Server role resolution must prefer the manager interface over specialist and member roles.');
 assert(multiRoleSql.includes("'training_ops_admin'") && multiRoleSql.includes("'vplanning_manager'") && multiRoleSql.includes("'vplanning_member'") && !/(?:encrypted_password|password\s*[:=])/i.test(multiRoleSql), 'The manual SQL must grant multi-role and owner-directory access without storing a password.');
 assert(fileApi.includes("public: false") && fileApi.includes("vwork-training-operations-private"), 'Roster and evidence files must not be stored in a public bucket.');
 assert(fileApi.includes("evidence: { upload: ['member'], download: ['member', 'manager'] }"), 'Private evidence access must be limited to the assigned workflow roles and operations administrators.');

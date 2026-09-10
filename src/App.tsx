@@ -184,12 +184,12 @@ function resolveTrainingOperationsRole(profile: AuthProfile | null) {
     ...(profile?.vplanningRoles || []),
     ...(profile?.vplanningDepartments || []),
   ].filter(Boolean).join(' '));
+  if (identity.includes('admin') || identity.includes('training_manager') || identity.includes('production_manager') || identity.includes('vplanning_director')) return 'operations';
+  if (identity.includes('vplanning_manager') || identity.includes('quan_ly_ekip') || identity.includes('manager') || identity.includes('truong')) return 'manager';
   if (identity.includes('client') || identity.includes('sale') || identity.includes('account_manager') || identity.includes('dau_moi')) return 'intake';
   if (identity.includes('noi_dung') || identity.includes('content')) return 'content';
   if (identity.includes('vtraining') || identity.includes('training_instructor') || identity.includes('van_hanh_vtraining')) return 'vtraining';
-  if (identity.includes('admin') || identity.includes('training_manager') || identity.includes('production_manager') || identity.includes('vplanning_director')) return 'operations';
   if (identity.includes('collaborator') || identity.includes('member') || identity.includes('nhan_vien')) return 'member';
-  if (identity.includes('manager') || identity.includes('truong')) return 'manager';
   return 'member';
 }
 
