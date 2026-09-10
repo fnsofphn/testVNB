@@ -453,6 +453,7 @@
 
 .vwork-training-operations .review-card{display:grid;gap:14px}
 .vwork-training-operations .review-card.expanded{border-color:#bccbdd;box-shadow:0 5px 18px #172b4510}
+.vwork-training-operations .review-card-top{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:20px}
 .vwork-training-operations .review-summary{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
 .vwork-training-operations .review-summary>div{min-width:0}
 .vwork-training-operations .review-detail-toggle{flex:none;color:var(--blue)}
@@ -466,8 +467,10 @@
 .vwork-training-operations .review-evidence-list,.vwork-training-operations .review-output-evidence{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 .vwork-training-operations .review-evidence-list button,.vwork-training-operations .review-output-evidence button{padding:5px 7px;color:var(--blue);font-size:8px}
 .vwork-training-operations .review-output-evidence>b{font-size:9px}
+.vwork-training-operations .review-output-evidence-summary{margin-top:10px}
+.vwork-training-operations .review-output-evidence-summary button{max-width:min(100%,360px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .vwork-training-operations .review-actions{display:flex;justify-content:flex-end;gap:8px}
-.vwork-training-operations .review-card>.review-actions:last-child{display:flex;align-items:center}
+.vwork-training-operations .review-card-top>.review-actions{align-items:flex-start;white-space:nowrap}
 .vwork-training-operations .review-comment{display:grid!important;gap:10px;padding:12px;border:1px solid #edc6a4;border-radius:8px;background:#fff9f4}
 .vwork-training-operations .review-comment label{display:grid;gap:6px;color:#6c4b31;font-size:10px;font-weight:800}
 .vwork-training-operations .review-comment textarea{min-height:72px;resize:vertical}
@@ -476,10 +479,12 @@
 @media(max-width:760px){
   .vwork-training-operations .course-role-assignment{grid-template-columns:1fr}
   .vwork-training-operations .course-role-assignment>button{width:100%}
+  .vwork-training-operations .review-card-top{grid-template-columns:1fr}
   .vwork-training-operations .review-summary{display:grid}
   .vwork-training-operations .review-detail-toggle{justify-self:start}
-  .vwork-training-operations .review-actions{display:grid;grid-template-columns:1fr 1fr}
+  .vwork-training-operations .review-actions{display:grid;grid-template-columns:1fr 1fr;justify-content:stretch}
 }
+.vwork-training-operations .badge.REWORK{background:#fde7eb;color:#b4233c;border:1px solid #f3b5c0}
 .vwork-training-operations .input-card.partial>div:first-child>b{background:#fff1d6;color:#895c13}
 .vwork-training-operations .roster-class-progress{display:grid;gap:5px;margin:12px 0;padding:10px;border:1px solid #e1e5eb;border-radius:8px;background:#fafbfc}
 .vwork-training-operations .roster-class-progress>div{display:grid;grid-template-columns:18px minmax(70px,.55fr) 1fr;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid #eaedf1}

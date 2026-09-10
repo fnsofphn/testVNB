@@ -106,10 +106,11 @@ state = command(state, 'UPDATE_TASK_PROGRESS', { taskId: discussionTaskId, check
 assert.equal(state.tasks.find((item) => item.id === discussionTaskId).progress, 100);
 
 // UC12 + UC13 — output/evidence version and immutable submission snapshot.
-state = command(state, 'SUBMIT_OUTPUT', { taskId: discussionTaskId, actualOutput: 'Đã khởi tạo và kiểm thử thảo luận.', evidence: [{ id: 'E-01', url: 'https://vtraining.example/discussion/01' }], metrics: { testAccounts: 2 } }, 'member', 'Nam Nguyễn');
+state = command(state, 'SUBMIT_OUTPUT', { taskId: discussionTaskId, actualOutput: 'Đã khởi tạo và kiểm thử thảo luận.', evidence: [{ id: 'E-01', name: 'Danh sach lop.xlsx', path: 'private/evidence/danh-sach-lop.xlsx', type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }], metrics: { testAccounts: 2 } }, 'member', 'Nam Nguyễn');
 state = command(state, 'SUBMIT_REVIEW', { taskId: discussionTaskId }, 'member', 'Nam Nguyễn');
 assert.equal(state.tasks.find((item) => item.id === discussionTaskId).status, 'IN_REVIEW');
 assert.equal(state.tasks.find((item) => item.id === discussionTaskId).submissions[0].taskSnapshot.output.version, 1);
+assert.deepEqual(state.tasks.find((item) => item.id === discussionTaskId).submissions[0].taskSnapshot.output.evidence[0], { id: 'E-01', name: 'Danh sach lop.xlsx', path: 'private/evidence/danh-sach-lop.xlsx', type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 assert.throws(() => commandAs(state, 'REVIEW_TASK', { taskId: discussionTaskId, result: 'PASS', comment: 'Không có quyền.' }, 'manager', 'manager-02', 'Quản lý khác'), /không phải người duyệt/);
 
 // UC14 — rework requires a comment, then pass completes at 100%.
