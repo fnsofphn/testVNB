@@ -69,10 +69,6 @@ function normalizeEmail(value) {
   return String(value || '').trim().toLowerCase();
 }
 
-function canReceiveVWorkTasks(roles) {
-  return Array.isArray(roles) && roles.some((role) => ['manager', 'member'].includes(role));
-}
-
 function hasPeopleOneEmail(value) {
   return PEOPLEONE_EMAIL_DOMAINS.has(normalizeEmail(value).split('@')[1] || '');
 }
@@ -277,7 +273,7 @@ async function loadVWorkAccountDirectory(auth) {
       roles,
       active,
       profileLinked: Boolean(profile),
-      assignable: active && canReceiveVWorkTasks(roles),
+      assignable: active,
       projectIds,
       courseIds,
       classIds,

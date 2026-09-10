@@ -103,7 +103,7 @@ assert.throws(() => commandAs(state, 'START_TASK', { taskId: discussionTaskId },
 state = command(state, 'START_TASK', { taskId: discussionTaskId }, 'member', 'Nam Nguyễn');
 const checklistLength = state.tasks.find((item) => item.id === discussionTaskId).checklist.length;
 state = command(state, 'UPDATE_TASK_PROGRESS', { taskId: discussionTaskId, checklist: Array(checklistLength).fill(true), checklistEvidence: Array.from({ length: checklistLength }, (_, index) => [{ id: `CE-${index + 1}`, url: `https://evidence.example/check-${index + 1}` }]), blocker: '' }, 'member', 'Nam Nguyễn');
-assert.equal(state.tasks.find((item) => item.id === discussionTaskId).progress, 70);
+assert.equal(state.tasks.find((item) => item.id === discussionTaskId).progress, 100);
 
 // UC12 + UC13 — output/evidence version and immutable submission snapshot.
 state = command(state, 'SUBMIT_OUTPUT', { taskId: discussionTaskId, actualOutput: 'Đã khởi tạo và kiểm thử thảo luận.', evidence: [{ id: 'E-01', url: 'https://vtraining.example/discussion/01' }], metrics: { testAccounts: 2 } }, 'member', 'Nam Nguyễn');
@@ -120,6 +120,22 @@ state = command(state, 'SUBMIT_REVIEW', { taskId: discussionTaskId, checklist: A
 state = command(state, 'REVIEW_TASK', { taskId: discussionTaskId, result: 'PASS', comment: 'Đạt.' }, 'manager', 'Ngọc Trần');
 assert.equal(state.tasks.find((item) => item.id === discussionTaskId).status, 'DONE');
 assert.equal(state.tasks.find((item) => item.id === discussionTaskId).progress, 100);
+
+// FB-02/FB-07/FB-08 — 0% and no evidence may be reviewed; rework comment survives; PASS completes at 100%.
+const zeroProgressTaskId = 'ALPHA-CX-ALPHA01-T-105';
+state = command(state, 'ASSIGN_TASKS', { taskIds: [zeroProgressTaskId], assigneeId: 'member-01', assigneeName: 'Nam Nguyễn', reviewerId: 'manager-01', reviewerName: 'Ngọc Trần', priority: 'Normal', requireSeparation: true }, 'manager', 'Ngọc Trần');
+state = command(state, 'START_TASK', { taskId: zeroProgressTaskId }, 'member', 'Nam Nguyễn');
+assert.equal(state.tasks.find((item) => item.id === zeroProgressTaskId).progress, 0);
+state = command(state, 'SUBMIT_REVIEW', { taskId: zeroProgressTaskId, checklist: Array(state.tasks.find((item) => item.id === zeroProgressTaskId).checklist.length).fill(false), checklistEvidence: Array.from({ length: state.tasks.find((item) => item.id === zeroProgressTaskId).checklist.length }, () => []), blocker: '' }, 'member', 'Nam Nguyễn');
+assert.equal(state.tasks.find((item) => item.id === zeroProgressTaskId).status, 'IN_REVIEW');
+assert.equal(state.tasks.find((item) => item.id === zeroProgressTaskId).submissions.at(-1).taskSnapshot.output, null);
+state = command(state, 'REVIEW_TASK', { taskId: zeroProgressTaskId, result: 'REWORK', comment: 'Bổ sung cấu hình thời gian làm bài.' }, 'manager', 'Ngọc Trần');
+assert.equal(state.tasks.find((item) => item.id === zeroProgressTaskId).progress, 0);
+assert.equal(state.tasks.find((item) => item.id === zeroProgressTaskId).reviews.at(-1).comment, 'Bổ sung cấu hình thời gian làm bài.');
+state = command(state, 'SUBMIT_REVIEW', { taskId: zeroProgressTaskId }, 'member', 'Nam Nguyễn');
+state = command(state, 'REVIEW_TASK', { taskId: zeroProgressTaskId, result: 'PASS', comment: 'Đạt.' }, 'manager', 'Ngọc Trần');
+assert.equal(state.tasks.find((item) => item.id === zeroProgressTaskId).status, 'DONE');
+assert.equal(state.tasks.find((item) => item.id === zeroProgressTaskId).progress, 100);
 const livePublishTask = state.tasks.find((item) => item.id === 'ALPHA-CX-ALPHA01-T-110');
 assert.ok(livePublishTask.dependsOnTaskIds.some((id) => id.endsWith('T-109')));
 assert.equal(livePublishTask.status, 'WAITING_INPUT');

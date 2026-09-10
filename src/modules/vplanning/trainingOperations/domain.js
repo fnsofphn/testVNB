@@ -1032,7 +1032,7 @@ function updateTaskProgress(state, payload, context) {
       : []);
   }
   if (payload.blocker !== undefined) task.blocker = String(payload.blocker || '').trim();
-  task.progress = Math.min(70, Math.round(task.checklist.filter(Boolean).length / Math.max(task.checklist.length, 1) * 70));
+  task.progress = Math.round(task.checklist.filter(Boolean).length / Math.max(task.checklist.length, 1) * 100);
   task.updatedAt = nowIso(context);
   appendAudit(state, auditEvent('TASK_PROGRESS_UPDATED', `Cập nhật tiến độ ${task.id} đạt ${task.progress}%.`, context, 'task', task.id, { blocker: task.blocker }));
 }
@@ -1047,7 +1047,6 @@ function submitOutput(state, payload, context) {
   const version = (task.outputs.at(-1)?.version || 0) + 1;
   task.outputs.push({ id: `${task.id}:OUT:v${version}`, version, actualOutput, metrics: payload.metrics || {}, evidence, submittedBy: actorFrom(context), submittedAt: nowIso(context) });
   task.evidence = evidence[0].url || evidence[0].fileUrl || evidence[0].path || evidence[0].id;
-  task.progress = Math.max(task.progress, 75);
   task.updatedAt = nowIso(context);
   appendAudit(state, auditEvent('TASK_OUTPUT_SUBMITTED', `Nộp kết quả và minh chứng phiên bản ${version} cho ${task.id}.`, context, 'task', task.id, { version }));
 }
@@ -1057,19 +1056,14 @@ function submitReview(state, payload, context) {
   assertTaskAssignee(task, context);
   if (!['IN_PROGRESS', 'REWORK'].includes(task.status)) throw domainError('INVALID_TRANSITION', 'Công việc chưa thể gửi duyệt.');
   if (Array.isArray(payload.checklist) || Array.isArray(payload.checklistEvidence) || payload.blocker !== undefined) updateTaskProgress(state, payload, context);
-  if (payload.actualOutput !== undefined || Array.isArray(payload.evidence)) submitOutput(state, payload, context);
-  if (!task.checklist.length || !task.checklist.every(Boolean)) throw domainError('SUBMISSION_NOT_READY', 'Checklist bắt buộc chưa hoàn thành 100%.');
-  if (task.checklistEvidence.some((items, index) => task.checklist[index] && !items.length)) {
-    throw domainError('SUBMISSION_NOT_READY', 'Mỗi tiêu chí checklist đã hoàn thành cần có minh chứng riêng.');
-  }
-  const output = task.outputs.at(-1);
-  if (!output?.evidence?.length) throw domainError('SUBMISSION_NOT_READY', 'Chưa có kết quả và minh chứng hợp lệ.');
+  const hasOutput = String(payload.actualOutput || '').trim() || (Array.isArray(payload.evidence) && payload.evidence.some((item) => item && (item.url || item.fileUrl || item.path || item.id)));
+  if (hasOutput) submitOutput(state, payload, context);
+  const output = task.outputs.at(-1) || null;
   if (!task.reviewerId && !task.reviewer) throw domainError('SUBMISSION_NOT_READY', 'Chưa có người duyệt còn hiệu lực.');
   const timestamp = nowIso(context);
-  const submission = { id: `${task.id}:SUB:${task.submissions.length + 1}`, status: 'IN_REVIEW', taskSnapshot: { checklistItems: clone(task.checklistItems), checklist: clone(task.checklist), checklistEvidence: clone(task.checklistEvidence), requiredInputVersions: clone(task.requiredInputVersions), output: clone(output) }, submittedBy: actorFrom(context), submittedAt: timestamp };
+  const submission = { id: `${task.id}:SUB:${task.submissions.length + 1}`, status: 'IN_REVIEW', taskSnapshot: { checklistItems: clone(task.checklistItems), checklist: clone(task.checklist), checklistEvidence: clone(task.checklistEvidence), requiredInputVersions: clone(task.requiredInputVersions), output: output ? clone(output) : null }, submittedBy: actorFrom(context), submittedAt: timestamp };
   task.submissions.push(submission);
   task.status = 'IN_REVIEW';
-  task.progress = 80;
   task.updatedAt = timestamp;
   appendNotification(state, { createdAt: timestamp, kind: 'REVIEW_REQUESTED', title: `${task.id} chờ duyệt`, body: task.title, entityType: 'submission', entityId: submission.id, recipients: [task.reviewerId || task.reviewer] });
   appendAudit(state, auditEvent('TASK_SUBMITTED_FOR_REVIEW', `Tạo phiếu ${submission.id} và khóa snapshot kết quả.`, context, 'submission', submission.id));
@@ -1090,7 +1084,7 @@ function reviewTask(state, payload, context) {
   submission.reviewedAt = timestamp;
   task.reviews.push({ id: `${submission.id}:REV`, submissionId: submission.id, result, comment, reviewer: actorFrom(context), reviewedAt: timestamp });
   task.status = result === 'PASS' ? 'DONE' : 'REWORK';
-  task.progress = result === 'PASS' ? 100 : 60;
+  task.progress = result === 'PASS' ? 100 : task.progress;
   task.completedAt = result === 'PASS' ? timestamp : null;
   if (result === 'REWORK') task.rework += 1;
   task.updatedAt = timestamp;

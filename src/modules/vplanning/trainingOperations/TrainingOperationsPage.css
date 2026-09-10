@@ -408,6 +408,78 @@
 .vwork-training-operations .account-reconciliation-result.has-errors{border-color:#efc6c6;background:#fff5f5;color:#9a2424}
 .vwork-training-operations .account-reconciliation-result small{flex-basis:100%;color:inherit}
 .vwork-training-operations .input-card.partial{border-color:#e7c98f;background:#fffdf8}
+
+/* Feedback polish: visible course assignment, balanced checklist, and evidence-first review. */
+.vwork-training-operations .course-team-panel{gap:12px!important}
+.vwork-training-operations .course-team-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.vwork-training-operations .course-team-heading>div{display:grid;gap:4px}
+.vwork-training-operations .course-team-heading>span{flex:none;padding:5px 8px;border-radius:12px;background:var(--primary-soft);color:var(--primary);font-size:9px;font-weight:800}
+.vwork-training-operations .course-team-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:7px}
+.vwork-training-operations .course-team-empty{padding:12px;border:1px dashed var(--border);border-radius:8px;text-align:center}
+.vwork-training-operations .course-role-assignment{display:grid;grid-template-columns:minmax(185px,1.3fr) minmax(180px,1fr) minmax(160px,.8fr) auto;align-items:end;gap:10px;padding:13px;border:1px solid #d8dee8;border-radius:9px;background:#f8f9fb}
+.vwork-training-operations .course-role-assignment>div,.vwork-training-operations .course-role-assignment label{display:grid;gap:4px}
+.vwork-training-operations .course-role-assignment strong{font-size:11px;color:var(--navy)}
+.vwork-training-operations .course-role-assignment small,.vwork-training-operations .course-role-assignment label span{font-size:9px;color:var(--muted)}
+.vwork-training-operations .course-role-assignment select{width:100%}
+.vwork-training-operations .course-role-assignment>button{white-space:nowrap}
+
+.vwork-training-operations.training-overlay-portal .assignment-dialog-backdrop{z-index:1100}
+.vwork-training-operations .assignment-dialog{display:flex;max-height:calc(100vh - 40px);overflow:hidden;flex-direction:column}
+.vwork-training-operations .assignment-dialog-body{min-height:0;overflow:auto}
+.vwork-training-operations .assignment-dialog>.modal-actions{flex:0 0 auto;margin-top:0;padding-top:16px;border-top:1px solid var(--border);background:#fff}
+
+.vwork-training-operations .task-drawer{container-type:inline-size}
+.vwork-training-operations .task-section-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+.vwork-training-operations .task-section-heading h3{margin-bottom:4px}
+.vwork-training-operations .task-section-heading p{margin:0;color:var(--muted);font-size:9px;line-height:1.45}
+.vwork-training-operations .task-section-heading>strong{padding:5px 8px;border-radius:12px;background:#eef2f6;color:#43536a;font-size:10px}
+.vwork-training-operations .checklist-grid{display:grid;grid-template-columns:1fr;gap:9px}
+.vwork-training-operations .check-evidence-row{min-width:0;margin:0;padding:10px;background:#fff}
+.vwork-training-operations .check-evidence-row.completed{border-color:#b8dfce;background:#fbfffd}
+.vwork-training-operations .check-evidence-row .check-row{display:grid;grid-template-columns:18px minmax(0,1fr);align-items:start;gap:9px;margin:0;padding:0;border:0}
+.vwork-training-operations .check-evidence-row .check-row input{width:16px;height:16px;margin:1px 0 0;accent-color:var(--green)}
+.vwork-training-operations .check-evidence-row .check-row span{display:grid;gap:3px;min-width:0;line-height:1.4}
+.vwork-training-operations .check-evidence-row .check-row b{color:var(--muted);font-size:8px;letter-spacing:.06em;text-transform:uppercase}
+.vwork-training-operations .criterion-evidence{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px;padding-top:8px;border-top:1px solid #edf0f4}
+.vwork-training-operations .criterion-evidence>span{grid-column:1/-1;color:var(--muted);font-size:8px;font-weight:800}
+.vwork-training-operations .criterion-evidence>input{min-width:0;width:100%;padding:7px 8px;font-size:9px}
+.vwork-training-operations .criterion-evidence>small{min-width:0;overflow:hidden;color:#267253;font-size:9px;text-overflow:ellipsis;white-space:nowrap}
+.vwork-training-operations .criterion-file{display:flex;min-width:0;align-items:center;gap:5px}.vwork-training-operations .criterion-file small{min-width:0;overflow:hidden;color:#267253;font-size:9px;text-overflow:ellipsis;white-space:nowrap}.vwork-training-operations .criterion-file button{flex:none;padding:5px 6px;color:var(--blue);font-size:8px}
+.vwork-training-operations .criterion-upload{position:relative;display:inline-flex!important;align-items:center;justify-content:center;padding:7px 9px;border:1px solid #ccd5e1;border-radius:7px;background:#fff;color:#43536a!important;font-size:9px!important;cursor:pointer}
+.vwork-training-operations .criterion-upload input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.vwork-training-operations .rework-feedback{margin:0 0 10px;padding:10px 12px;border-left:3px solid #d47b35;border-radius:7px;background:#fff7ef}
+.vwork-training-operations .rework-feedback b{font-size:10px;color:#8f4b18}.vwork-training-operations .rework-feedback p{margin:4px 0 0;font-size:10px;line-height:1.45;color:#67452c}
+@container (min-width:720px){.vwork-training-operations .checklist-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.vwork-training-operations .review-card{display:grid;gap:14px}
+.vwork-training-operations .review-card.expanded{border-color:#bccbdd;box-shadow:0 5px 18px #172b4510}
+.vwork-training-operations .review-summary{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+.vwork-training-operations .review-summary>div{min-width:0}
+.vwork-training-operations .review-detail-toggle{flex:none;color:var(--blue)}
+.vwork-training-operations .review-detail{display:grid;gap:10px;padding:14px;border-radius:9px;background:#f7f9fb}
+.vwork-training-operations .review-detail h4{margin:0;color:#40516a;font-size:11px}
+.vwork-training-operations .review-checklist{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px}
+.vwork-training-operations .review-checklist>div{display:grid;align-content:start;gap:5px;padding:10px;border:1px solid #e1e6ed;border-radius:8px;background:#fff}
+.vwork-training-operations .review-checklist>div>span{width:max-content;padding:3px 6px;border-radius:8px;background:#f5e9df;color:#985319;font-size:8px;font-weight:800}
+.vwork-training-operations .review-checklist>div>span.is-done{background:#def2e8;color:#16704f}
+.vwork-training-operations .review-checklist b{font-size:10px;line-height:1.4}.vwork-training-operations .review-checklist small,.vwork-training-operations .review-no-evidence{margin:0;color:var(--muted);font-size:9px}
+.vwork-training-operations .review-evidence-list,.vwork-training-operations .review-output-evidence{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.vwork-training-operations .review-evidence-list button,.vwork-training-operations .review-output-evidence button{padding:5px 7px;color:var(--blue);font-size:8px}
+.vwork-training-operations .review-output-evidence>b{font-size:9px}
+.vwork-training-operations .review-actions{display:flex;justify-content:flex-end;gap:8px}
+.vwork-training-operations .review-card>.review-actions:last-child{display:flex;align-items:center}
+.vwork-training-operations .review-comment{display:grid!important;gap:10px;padding:12px;border:1px solid #edc6a4;border-radius:8px;background:#fff9f4}
+.vwork-training-operations .review-comment label{display:grid;gap:6px;color:#6c4b31;font-size:10px;font-weight:800}
+.vwork-training-operations .review-comment textarea{min-height:72px;resize:vertical}
+.vwork-training-operations .review-comment>div{display:flex;justify-content:flex-end;gap:8px}
+
+@media(max-width:760px){
+  .vwork-training-operations .course-role-assignment{grid-template-columns:1fr}
+  .vwork-training-operations .course-role-assignment>button{width:100%}
+  .vwork-training-operations .review-summary{display:grid}
+  .vwork-training-operations .review-detail-toggle{justify-self:start}
+  .vwork-training-operations .review-actions{display:grid;grid-template-columns:1fr 1fr}
+}
 .vwork-training-operations .input-card.partial>div:first-child>b{background:#fff1d6;color:#895c13}
 .vwork-training-operations .roster-class-progress{display:grid;gap:5px;margin:12px 0;padding:10px;border:1px solid #e1e5eb;border-radius:8px;background:#fafbfc}
 .vwork-training-operations .roster-class-progress>div{display:grid;grid-template-columns:18px minmax(70px,.55fr) 1fr;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid #eaedf1}

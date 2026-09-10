@@ -358,15 +358,27 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
     if (!task) return;
     if (patch.status === 'IN_PROGRESS') return runCommand('START_TASK', { taskId: id }, message || `Đã bắt đầu ${id}.`);
     if (patch.status === 'IN_REVIEW') {
-      const evidenceRecord = patch.evidenceRecord || { id: `${id}:EVIDENCE`, url: patch.evidence || task.evidence };
-      return runCommand('SUBMIT_REVIEW', {
+      const evidenceRecord = patch.evidenceRecord || (patch.evidence?.trim() ? { id: `${id}:EVIDENCE`, url: patch.evidence.trim() } : null);
+      const payload = {
         taskId: id,
         checklist: task.checklist,
         checklistEvidence: patch.checklistEvidence || task.checklistEvidence,
         blocker: patch.blocker ?? task.blocker,
-        actualOutput: patch.actualOutput || task.actualOutput || 'Đã hoàn thành theo checklist.',
-        evidence: [evidenceRecord],
-      }, message || `Đã gửi ${id} duyệt.`);
+      };
+      const output = String(patch.actualOutput || task.actualOutput || '').trim();
+      if (output || evidenceRecord) {
+        payload.actualOutput = output || 'Có minh chứng đính kèm.';
+        payload.evidence = evidenceRecord ? [evidenceRecord] : [];
+      }
+      return runCommand('SUBMIT_REVIEW', payload, message || `Đã gửi ${id} duyệt.`);
+    }
+    if (patch.checklistEvidence !== undefined || patch.blocker !== undefined) {
+      return runCommand('UPDATE_TASK_PROGRESS', {
+        taskId: id,
+        checklist: patch.checklist || task.checklist,
+        checklistEvidence: patch.checklistEvidence || task.checklistEvidence,
+        blocker: patch.blocker ?? task.blocker,
+      }, message || `Đã lưu tiến độ ${id}.`);
     }
     if (patch.status === 'DONE') return runCommand('REVIEW_TASK', { taskId: id, result: 'PASS', comment: patch.comment || 'Đạt yêu cầu.' }, message || `Đã duyệt ${id}.`);
     if (patch.status === 'REWORK') return runCommand('REVIEW_TASK', { taskId: id, result: 'REWORK', comment: patch.comment || 'Cần bổ sung theo tiêu chí review.' }, message || `Đã trả lại ${id}.`);
@@ -891,7 +903,7 @@ function CourseControlPanel({ role, project, course, initialMode = '', onClose, 
       <div><small>{createMode ? `THUỘC DỰ ÁN ${project?.code}` : 'ĐƠN VỊ VẬN HÀNH · KHÓA HỌC'}</small><h2>{createMode ? (createMode === 'duplicate' ? 'Thông tin khóa học bản sao' : 'Thông tin khóa học mới') : `${course?.code} · ${course?.name}`}</h2><p>{createMode ? `Khóa học sẽ được tạo trong dự án ${project?.name}.` : 'Quản lý ekip và cấu trúc của khóa học đang chọn.'}</p></div>
       <div className="course-head-actions"><span className={`badge ${course?.status}`}>{course?.status || 'DECLARED'}</span>{canManage && <div className="course-admin"><button type="button" className="course-icon-action" title="Quản trị khóa" aria-label="Mở menu quản trị khóa" aria-haspopup="menu" aria-expanded={showAdminMenu} onClick={() => setShowAdminMenu((value) => !value)}><MoreVertical size={18} strokeWidth={1.9}/></button>{showAdminMenu && <div className="course-admin-menu" role="menu" aria-label="Quản trị vòng đời khóa">{['DECLARED', 'PREPARING'].includes(course?.status) && <button type="button" role="menuitem" onClick={() => void changeCourseStatus('ACTIVE')}>Kích hoạt khóa</button>}{course?.status === 'ACTIVE' && <button type="button" role="menuitem" onClick={() => void changeCourseStatus('ENDED')}>Kết thúc khóa</button>}{['DECLARED', 'PREPARING', 'ENDED'].includes(course?.status) && <button type="button" className="danger" role="menuitem" onClick={() => void changeCourseStatus('ARCHIVED')}>Lưu trữ khóa</button>}</div>}</div>}</div>
     </div>
-    <div className="course-control-grid single"><article><h3>Ekip khóa học</h3>{courseAssignments.length ? courseAssignments.map((item) => <div className="course-team-row" key={item.id}><b>{item.accountName}</b><span>{TRAINING_ROLE_OPTIONS.find(([value]) => value === item.role)?.[1] || item.role}</span></div>) : <p>Chưa có phân công theo khóa.</p>}{canOperate && <div className="inline-controls"><select value={accountId} onChange={(event) => setAccountId(event.target.value)}><option value="">Chọn tài khoản</option>{directory.map((item) => <option value={item.id} key={item.id}>{item.name}</option>)}</select><select value={courseRole} onChange={(event) => setCourseRole(event.target.value)}>{TRAINING_ROLE_OPTIONS.filter(([value]) => value !== 'operations').map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select><button disabled={!accountId} onClick={() => { const person = directory.find((item) => item.id === accountId); if (person) void assignCourseRole({ accountId: person.id, accountName: person.name, accountEmail: person.email, role: courseRole }); }}>Gán vai trò</button></div>}</article></div>
+    <div className="course-control-grid single"><article className="course-team-panel"><div className="course-team-heading"><div><h3>Ekip khóa học</h3><p>Phân công tài khoản và vai trò ngay trong phạm vi khóa học này.</p></div><span>{courseAssignments.length} thành viên</span></div>{courseAssignments.length ? <div className="course-team-list">{courseAssignments.map((item) => <div className="course-team-row" key={item.id}><b>{item.accountName}</b><span>{TRAINING_ROLE_OPTIONS.find(([value]) => value === item.role)?.[1] || item.role}</span></div>)}</div> : <p className="course-team-empty">Chưa có phân công theo khóa.</p>}{canOperate && <div className="course-role-assignment"><div><strong>Gán vai trò cho thành viên</strong><small>Chọn tài khoản và vai trò cần đảm nhiệm trong khóa.</small></div><label><span>Tài khoản</span><select aria-label="Tài khoản nhận vai trò trong khóa" value={accountId} onChange={(event) => setAccountId(event.target.value)}><option value="">Chọn tài khoản</option>{directory.map((item) => <option value={item.id} key={item.id}>{item.name}</option>)}</select></label><label><span>Vai trò</span><select aria-label="Vai trò trong khóa" value={courseRole} onChange={(event) => setCourseRole(event.target.value)}>{TRAINING_ROLE_OPTIONS.filter(([value]) => value !== 'operations').map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label><button type="button" className="primary" disabled={!accountId} onClick={() => { const person = directory.find((item) => item.id === accountId); if (person) void assignCourseRole({ accountId: person.id, accountName: person.name, accountEmail: person.email, role: courseRole }); }}>Gán vai trò</button></div>}</article></div>
     {canOperate && <div className="course-create"><div className="course-create-actions">{!createMode && <button type="button" onClick={() => openCreateCourse('new')}><Plus size={16} strokeWidth={1.9}/>Thêm khóa học vào {project?.code}</button>}{!createMode && <button type="button" className="course-icon-action" title={`Nhân bản khóa ${course?.code}`} aria-label={`Nhân bản khóa ${course?.code || ''}`} onClick={() => openCreateCourse('duplicate')}><CopyPlus size={16} strokeWidth={1.9}/></button>}</div>{createMode && <div className="course-create-form"><div className="course-create-form-head"><div><b>{createMode === 'duplicate' ? `Nhân bản khóa ${course?.code}` : `Thêm khóa học vào ${project?.code}`}</b>{createMode === 'duplicate' && <small>Sao chép cấu hình từ {course?.code}; dữ liệu vận hành và lịch sử không được sao chép.</small>}</div></div><label>Mã khóa<input placeholder="Ví dụ QL01B" value={newCourse.code} onChange={(event) => setNewCourse((current) => ({ ...current, code: event.target.value }))}/></label><label>Tên khóa<input placeholder="Tên khóa học" value={newCourse.name} onChange={(event) => setNewCourse((current) => ({ ...current, name: event.target.value }))}/></label><label>Mã lớp đầu tiên<input placeholder="L01" value={newCourse.classCode} onChange={(event) => setNewCourse((current) => ({ ...current, classCode: event.target.value }))}/></label><label>Tên lớp đầu tiên<input placeholder="Lớp 01" value={newCourse.className} onChange={(event) => setNewCourse((current) => ({ ...current, className: event.target.value }))}/></label><label>Ngày bắt đầu<input type="date" value={newCourse.startDate} onChange={(event) => setNewCourse((current) => ({ ...current, startDate: event.target.value }))}/></label><label>Ngày kết thúc<input type="date" value={newCourse.endDate} onChange={(event) => setNewCourse((current) => ({ ...current, endDate: event.target.value }))}/></label><div className="course-create-submit"><button type="button" onClick={onClose}>Hủy</button><button type="button" className="primary" disabled={!newCourse.code.trim() || !newCourse.name.trim() || !newCourse.classCode.trim() || !newCourse.className.trim() || !newCourse.startDate || !newCourse.endDate || newCourse.endDate < newCourse.startDate} onClick={() => void addCourse()}>{createMode === 'duplicate' ? `Nhân bản khóa ${course?.code}` : `Tạo khóa trong ${project?.code}`}</button></div></div>}</div>}
   </section></div></section></div>);
 }
@@ -1208,7 +1220,7 @@ function LegacyLayeredTasks({ role, tasks, classes = CLASS_META, directory = [],
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkAssignee, setBulkAssignee] = useState('');
   const baseTasks = tasks;
-  const members = directory.filter((item) => directoryHasRole(item, 'member'));
+  const members = directory.filter((item) => item.active !== false);
   const reviewerId = actor?.role === 'manager' ? actor.id : directory.find((item) => directoryHasRole(item, 'manager'))?.id;
   const activeClass = classes.find((item) => item.code === classCode) || classes[0] || CLASS_META[0];
   const classTasks = baseTasks.filter((task) => task.classCode === classCode);
@@ -1342,6 +1354,7 @@ function AssigneePickerDialog({ open, directory, loading, taskCount, selectedId 
   const [query, setQuery] = useState('');
   const [chosenId, setChosenId] = useState(selectedId);
   const inputRef = useRef(null);
+  const dialogRef = useRef(null);
   const previousFocus = useRef(null);
   const recentIds = useMemo(() => {
     try { return JSON.parse(window.localStorage.getItem('vwork-recent-assignees') || '[]'); } catch { return []; }
@@ -1352,13 +1365,22 @@ function AssigneePickerDialog({ open, directory, loading, taskCount, selectedId 
     setChosenId(selectedId);
     setQuery('');
     window.setTimeout(() => inputRef.current?.focus(), 0);
-    const onKeyDown = (event) => { if (event.key === 'Escape') onClose(); };
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') onClose();
+      if (event.key !== 'Tab') return;
+      const focusable = dialogRef.current?.querySelectorAll('button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [href], [tabindex]:not([tabindex="-1"])');
+      if (!focusable?.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
     document.addEventListener('keydown', onKeyDown);
     return () => { document.removeEventListener('keydown', onKeyDown); previousFocus.current?.focus?.(); };
   }, [open, selectedId]);
   if (!open) return null;
-  const token = query.trim().toLowerCase();
-  const filtered = directory.filter((item) => !token || `${item.name} ${item.email || item.id}`.toLowerCase().includes(token));
+  const token = normalizeSearchText(query);
+  const filtered = directory.filter((item) => !token || normalizeSearchText(`${item.name} ${item.email || item.id}`).includes(token));
   const recent = recentIds.map((id) => directory.find((item) => item.id === id)).filter(Boolean);
   const chosenPerson = directory.find((item) => item.id === chosenId);
   const selectPerson = () => {
@@ -1369,14 +1391,14 @@ function AssigneePickerDialog({ open, directory, loading, taskCount, selectedId 
     onSelect(person);
   };
   const PersonRow = ({ person }) => <label className="assignee-person"><input type="radio" name="assignee" checked={chosenId === person.id} onChange={() => setChosenId(person.id)} aria-label={`${person.name} · ${person.email || person.id}`}/><span><b>{person.name}</b><small>{person.email || person.id}</small></span></label>;
-  return <div className="assignment-dialog-backdrop" onMouseDown={onClose}><section className="assignment-dialog" role="dialog" aria-modal="true" aria-labelledby="assignment-dialog-title" onMouseDown={(event) => event.stopPropagation()}>
+  return renderTrainingOverlay(<div className="assignment-dialog-backdrop" onMouseDown={onClose}><section ref={dialogRef} className="assignment-dialog" role="dialog" aria-modal="true" aria-labelledby="assignment-dialog-title" onMouseDown={(event) => event.stopPropagation()}>
     <div className="modal-head"><div><small>PHÂN CÔNG THEO DIRECTORY</small><h2 id="assignment-dialog-title">Bạn muốn giao việc cho ai?</h2></div><button type="button" aria-label="Đóng popup giao việc" onClick={onClose}>×</button></div>
     <div className="assignment-dialog-body"><label className="assignee-search">Tìm theo tên hoặc email<input ref={inputRef} value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Nhập tên hoặc email…"/></label><p>Mỗi công việc hiện hỗ trợ một người thực hiện; lựa chọn này áp dụng cho {taskCount || 1} công việc đã chọn.</p>
       {!query && recent.length > 0 && <div className="assignee-section"><b>Đã chọn gần đây</b>{recent.map((person) => <PersonRow person={person} key={`recent-${person.id}`}/>)}</div>}
       <div className="assignee-section"><b>Tài khoản có thể nhận việc</b>{loading ? <div className="assignee-state">Đang tải danh mục tài khoản…</div> : !filtered.length ? <div className="assignee-state">{directory.length ? 'Không tìm thấy tài khoản phù hợp.' : 'Chưa có tài khoản VWork.'}</div> : filtered.map((person) => <PersonRow person={person} key={person.id}/>)}</div>
     </div>
     <div className="modal-actions"><button type="button" onClick={onClose}>Hủy</button><button type="button" className="primary" disabled={!chosenPerson} onClick={selectPerson}>Giao việc</button></div>
-  </section></div>;
+  </section></div>);
 }
 
 function Tasks({ role, tasks, classes = CLASS_META, directory = [], actor, project, course, selectedTask, setSelectedTaskId, updateTask, assignTasks, toggleChecklist, view = 'hierarchy', onView }) {
@@ -1384,7 +1406,7 @@ function Tasks({ role, tasks, classes = CLASS_META, directory = [], actor, proje
   const [bulkAssignee, setBulkAssignee] = useState('');
   const [activeClassCode, setActiveClassCode] = useState(selectedTask?.classCode || classes[0]?.code || CLASS_META[0].code);
   const baseVisible = tasks;
-  const members = directory.filter((item) => directoryHasRole(item, 'member'));
+  const members = directory.filter((item) => item.active !== false);
   const reviewerId = actor?.role === 'manager' ? actor.id : directory.find((item) => directoryHasRole(item, 'manager'))?.id;
   const classVisible = baseVisible.filter((task) => task.classCode === activeClassCode);
   const visible = view === 'due' ? [...baseVisible].filter((task) => !['DONE', 'CANCELLED'].includes(task.status)).sort((a, b) => dueDate(a) - dueDate(b)).slice(0, 7) : classVisible;
@@ -1410,6 +1432,7 @@ function TaskDrawer({ role, task, directory = [], directoryLoading = false, acto
   const [evidence, setEvidence] = useState(task?.evidence || '');
   const [evidenceRecord, setEvidenceRecord] = useState(null);
   const [uploadingEvidence, setUploadingEvidence] = useState(false);
+  const [uploadingChecklistIndex, setUploadingChecklistIndex] = useState(-1);
   const [evidenceError, setEvidenceError] = useState('');
   const [assigneeId, setAssigneeId] = useState(task?.assigneeId || '');
   const [assignmentOpen, setAssignmentOpen] = useState(false);
@@ -1418,6 +1441,7 @@ function TaskDrawer({ role, task, directory = [], directoryLoading = false, acto
   const [deadlineOverrideReason, setDeadlineOverrideReason] = useState('');
   const [blocker, setBlocker] = useState(task?.blocker || '');
   const [checklistEvidenceDraft, setChecklistEvidenceDraft] = useState(() => (task?.checklistEvidence || []).map((items) => items?.[0]?.url || items?.[0]?.fileUrl || items?.[0]?.path || items?.[0]?.id || ''));
+  const [checklistEvidenceRecords, setChecklistEvidenceRecords] = useState(() => (task?.checklistEvidence || []).map((items) => items || []));
   const [configDraft, setConfigDraft] = useState({ title: task?.title || '', group: task?.group || 'setup', dueOffset: task?.dueOffset || 0, checklistText: (task?.checklistItems || []).join('\n') });
   useEffect(() => {
     setActualOutput(task?.actualOutput || '');
@@ -1430,19 +1454,13 @@ function TaskDrawer({ role, task, directory = [], directoryLoading = false, acto
     setDeadlineOverrideReason('');
     setBlocker(task?.blocker || '');
     setChecklistEvidenceDraft((task?.checklistEvidence || []).map((items) => items?.[0]?.url || items?.[0]?.fileUrl || items?.[0]?.path || items?.[0]?.id || ''));
+    setChecklistEvidenceRecords((task?.checklistEvidence || []).map((items) => items || []));
+    setUploadingChecklistIndex(-1);
     setConfigDraft({ title: task?.title || '', group: task?.group || 'setup', dueOffset: task?.dueOffset || 0, checklistText: (task?.checklistItems || []).join('\n') });
     window.setTimeout(() => drawerRef.current?.focus(), 0);
   }, [task?.id, task?.actualOutput, task?.evidence, task?.assigneeId, task?.priority, task?.plannedDeadline, task?.blocker]);
   if (!task?.id) return <aside className="card task-drawer"><div className="empty">Chưa có công việc trong phạm vi này.</div></aside>;
-  const allDone = task.checklist.every(Boolean);
-  const missingChecklistEvidence = checklistEvidenceDraft.some((value) => !value.trim());
-  const hasSummaryEvidence = Boolean(evidence.trim() || evidenceRecord);
-  const canSubmitReview = !uploadingEvidence && allDone && !missingChecklistEvidence && hasSummaryEvidence;
-  const missingReviewItems = [
-    !allDone ? 'hoàn tất checklist' : '',
-    missingChecklistEvidence ? 'thêm minh chứng cho từng tiêu chí' : '',
-    !hasSummaryEvidence ? 'thêm minh chứng tổng hợp' : '',
-  ].filter(Boolean);
+  const canSubmitReview = !uploadingEvidence && uploadingChecklistIndex < 0;
   const needsDeadlineReason = Boolean(plannedDeadline && plannedDeadline > task.startDate);
   const actorTokens = new Set([actor?.id, actor?.email, actor?.name].map((item) => String(item || '').toLowerCase()).filter(Boolean));
   const canExecute = [task.assigneeId, task.assignee].some((item) => actorTokens.has(String(item || '').toLowerCase()));
@@ -1450,6 +1468,51 @@ function TaskDrawer({ role, task, directory = [], directoryLoading = false, acto
   const canConfigure = ['operations', 'vtraining'].includes(role);
   const reviewer = directory.find((item) => [task.reviewerId, actor?.id, actor?.email].includes(item.id) || item.email === actor?.email);
   const configChecklist = configDraft.checklistText.split('\n').map((item) => item.trim()).filter(Boolean);
+  const latestRework = [...(task.reviews || [])].reverse().find((item) => item.result === 'REWORK');
+  function buildChecklistEvidence(draft = checklistEvidenceDraft, records = checklistEvidenceRecords) {
+    return task.checklist.map((_, index) => {
+      if (records[index]?.length) return records[index];
+      const value = String(draft[index] || '').trim();
+      return value ? [{ id: value, url: value }] : [];
+    });
+  }
+  function saveProgress(nextDraft = checklistEvidenceDraft, nextRecords = checklistEvidenceRecords, nextBlocker = blocker, message = `Đã tự động lưu tiến độ ${task.id}.`) {
+    return updateTask(task.id, { checklist: task.checklist, checklistEvidence: buildChecklistEvidence(nextDraft, nextRecords), blocker: nextBlocker }, message);
+  }
+  async function selectChecklistEvidenceFile(index, file) {
+    if (!file) return;
+    setUploadingChecklistIndex(index);
+    setEvidenceError('');
+    try {
+      const uploaded = await uploadTrainingOperationsFile(file, task.id, 'evidence', role);
+      const nextRecords = checklistEvidenceRecords.map((items, itemIndex) => itemIndex === index ? [uploaded] : items);
+      const nextDraft = checklistEvidenceDraft.map((value, itemIndex) => itemIndex === index ? (uploaded.name || uploaded.id || '') : value);
+      setChecklistEvidenceRecords(nextRecords);
+      setChecklistEvidenceDraft(nextDraft);
+      await saveProgress(nextDraft, nextRecords, blocker, `Đã lưu minh chứng tiêu chí ${index + 1} của ${task.id}.`);
+    } catch (error) {
+      setEvidenceError(error.message || 'Không thể tải minh chứng tiêu chí.');
+    } finally {
+      setUploadingChecklistIndex(-1);
+    }
+  }
+  async function openTaskEvidenceRecord(record) {
+    setEvidenceError('');
+    try {
+      const url = record?.path ? await getTrainingOperationsFileUrl(record.path, record.name, role) : record?.url || record?.fileUrl;
+      if (!url) throw new Error('Minh chứng chưa có đường dẫn hợp lệ.');
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      setEvidenceError(error.message || 'Không thể mở minh chứng.');
+    }
+  }
+  async function clearChecklistEvidence(index) {
+    const nextRecords = checklistEvidenceRecords.map((items, itemIndex) => itemIndex === index ? [] : items);
+    const nextDraft = checklistEvidenceDraft.map((value, itemIndex) => itemIndex === index ? '' : value);
+    setChecklistEvidenceRecords(nextRecords);
+    setChecklistEvidenceDraft(nextDraft);
+    await saveProgress(nextDraft, nextRecords, blocker, `Đã xóa minh chứng tiêu chí ${index + 1} của ${task.id}.`);
+  }
   async function selectEvidenceFile(file) {
     if (!file) return;
     setUploadingEvidence(true);
@@ -1471,7 +1534,7 @@ function TaskDrawer({ role, task, directory = [], directoryLoading = false, acto
     <section><h3>Required / Actual Input</h3>{task.requiredInputCodes?.map((code) => { const input = Object.values(INPUT_META).find(([itemCode]) => itemCode === code); return <div className="input-line" key={code}><span>{code} · {input?.[1] || 'Input bắt buộc'}</span><b>{task.requiredInputVersions?.[code] ? `Đã khóa v${task.requiredInputVersions[code]}` : 'Còn thiếu'}</b></div>; })}</section>
     {canAssign && <section><h3>Phân công người thực hiện</h3><div className="form-grid"><label>Người thực hiện<button type="button" className="assignee-trigger" onClick={() => setAssignmentOpen(true)}>{directory.find((item) => item.id === assigneeId)?.name || task.assignee || 'Bạn muốn giao việc cho ai?'}</button></label><label>Người xác nhận<input value={task.reviewer || reviewer?.name || actor?.name || task.manager} readOnly/></label><label>Priority<select value={priority} onChange={(event) => setPriority(event.target.value)}><option>Low</option><option>Normal</option><option>High</option><option>Critical</option></select></label><label>Deadline<input type="date" value={plannedDeadline} onChange={(event) => setPlannedDeadline(event.target.value)}/></label>{needsDeadlineReason && <label className="wide">Lý do deadline sau khai giảng<textarea value={deadlineOverrideReason} onChange={(event) => setDeadlineOverrideReason(event.target.value)} placeholder="Nêu rõ ngoại lệ vận hành..."/></label>}</div><button disabled={!assigneeId || !reviewer || (needsDeadlineReason && !deadlineOverrideReason.trim())} onClick={() => { const assignee = directory.find((item) => item.id === assigneeId); if (assignee && reviewer) void updateTask(task.id, { assigneeId: assignee.id, assignee: assignee.name, priority, reviewerId: reviewer.id, reviewer: reviewer.name, plannedDeadline, deadlineOverrideReason: deadlineOverrideReason.trim() }, `Đã giao ${task.id} cho ${assignee.name}.`); }}>Lưu phân công</button></section>}
     {canConfigure && <section className="task-config-section"><h3>Cấu hình công việc trong lớp</h3><div className="form-grid"><label>Tên công việc<input value={configDraft.title} onChange={(event) => setConfigDraft((current) => ({ ...current, title: event.target.value }))}/></label><label>Nhóm<select value={configDraft.group} onChange={(event) => setConfigDraft((current) => ({ ...current, group: event.target.value }))}>{Object.entries(GROUP_META).map(([value, [, label]]) => <option value={value} key={value}>{label}</option>)}</select></label><label>Deadline trước lớp (ngày)<input type="number" min="0" step="1" value={configDraft.dueOffset} onChange={(event) => setConfigDraft((current) => ({ ...current, dueOffset: Number(event.target.value) }))}/></label><label className="wide">Checklist<textarea rows="5" value={configDraft.checklistText} onChange={(event) => setConfigDraft((current) => ({ ...current, checklistText: event.target.value }))}/></label></div><button disabled={!configDraft.title.trim() || !configChecklist.length} onClick={() => updateTask(task.id, { title: configDraft.title.trim(), group: configDraft.group, dueOffset: configDraft.dueOffset, checklistItems: configChecklist }, `Đã cập nhật cấu hình ${task.id}.`)}>Lưu cấu hình</button><button className="danger-action" disabled={['IN_PROGRESS', 'IN_REVIEW'].includes(task.status)} onClick={() => void archiveTask(task.id)}>Xóa công việc</button></section>}
-    {canExecute && <section><h3>Checklist hoàn thành</h3>{task.checklist.map((checked, index) => <div className="check-evidence-row" key={task.checklistItems[index]}><label className="check-row"><input type="checkbox" checked={checked} disabled={!['IN_PROGRESS', 'REWORK'].includes(task.status)} onChange={() => toggleChecklist(index)}/><span>{task.checklistItems[index]}</span></label><label>Minh chứng cho tiêu chí<input value={checklistEvidenceDraft[index] || ''} disabled={!['IN_PROGRESS', 'REWORK'].includes(task.status)} onChange={(event) => setChecklistEvidenceDraft((current) => current.map((value, itemIndex) => itemIndex === index ? event.target.value : value))} placeholder="URL, ID hoặc đường dẫn file"/></label></div>)}{task.status === 'READY' && <button className="primary" onClick={() => updateTask(task.id, { status: 'IN_PROGRESS' }, `Bắt đầu ${task.id}.`)}>Bắt đầu công việc</button>}{['IN_PROGRESS', 'REWORK'].includes(task.status) && <><label className="field">Vướng mắc<textarea value={blocker} onChange={(event) => setBlocker(event.target.value)} placeholder="Để trống nếu không có vướng mắc..."/></label><button type="button" onClick={() => updateTask(task.id, { checklistEvidence: checklistEvidenceDraft.map((value) => value.trim() ? [{ id: value.trim(), url: value.trim() }] : []), blocker }, `Đã lưu bản nháp của ${task.id}.`)}>Lưu bản nháp</button><label className="field">Kết quả thực tế (không bắt buộc)<textarea value={actualOutput} onChange={(event) => setActualOutput(event.target.value)} placeholder="Mô tả kết quả thực tế nếu cần..."/></label><label className="field">Minh chứng tổng hợp (URL / ID)<input value={evidenceRecord ? '' : evidence} disabled={Boolean(evidenceRecord)} onChange={(event) => setEvidence(event.target.value)} placeholder="https://... hoặc ID VTraining"/></label><label className="field">Hoặc tải file minh chứng<input type="file" disabled={uploadingEvidence} onChange={(event) => void selectEvidenceFile(event.target.files?.[0])}/></label>{evidenceRecord && <small className="hint">Đã tải riêng tư: {evidenceRecord.name}</small>}{evidenceError && <small className="hint error">{evidenceError}</small>}<button className="primary" disabled={!canSubmitReview} onClick={() => updateTask(task.id, { status: 'IN_REVIEW', checklistEvidence: checklistEvidenceDraft.map((value) => value.trim() ? [{ id: value.trim(), url: value.trim() }] : []), blocker, actualOutput: actualOutput.trim(), evidence: evidence.trim(), evidenceRecord }, `Đã gửi ${task.id} yêu cầu xác nhận hoàn thành.`)}>Gửi yêu cầu xác nhận</button>{missingReviewItems.length > 0 ? <small className="hint">Còn thiếu: {missingReviewItems.join('; ')}.</small> : <small className="hint ready">Đã đủ thông tin để gửi yêu cầu xác nhận.</small>}</>}</section>}
+    {canExecute && <section className="task-checklist-section"><div className="task-section-heading"><div><h3>Checklist hoàn thành</h3><p>Đánh dấu và thêm minh chứng theo từng tiêu chí. Mọi thay đổi được lưu ngay.</p></div><strong>{task.checklist.filter(Boolean).length}/{task.checklist.length}</strong></div>{latestRework && task.status === 'REWORK' && <div className="rework-feedback"><b>Yêu cầu bổ sung từ người duyệt</b><p>{latestRework.comment}</p></div>}<div className="checklist-grid">{task.checklist.map((checked, index) => { const record = checklistEvidenceRecords[index]?.[0]; const editable = ['IN_PROGRESS', 'REWORK'].includes(task.status); return <article className={`check-evidence-row${checked ? ' completed' : ''}`} key={task.checklistItems[index]}><label className="check-row"><input type="checkbox" checked={checked} disabled={!editable} onChange={() => toggleChecklist(index)}/><span><b>Tiêu chí {index + 1}</b>{task.checklistItems[index]}</span></label><div className="criterion-evidence"><span>Minh chứng (không bắt buộc)</span>{record?.path ? <div className="criterion-file"><small title={record.name || record.id}>Đã tải: {record.name || record.id}</small><button type="button" onClick={() => void openTaskEvidenceRecord(record)}>Mở</button>{editable && <button type="button" onClick={() => void clearChecklistEvidence(index)}>Xóa</button>}</div> : <input value={checklistEvidenceDraft[index] || ''} disabled={!editable || uploadingChecklistIndex === index} onChange={(event) => { const value = event.target.value; setChecklistEvidenceDraft((current) => current.map((item, itemIndex) => itemIndex === index ? value : item)); setChecklistEvidenceRecords((current) => current.map((items, itemIndex) => itemIndex === index ? [] : items)); }} onBlur={() => void saveProgress()} placeholder="Dán URL hoặc ID"/>}<label className="criterion-upload"><input type="file" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" disabled={!editable || uploadingChecklistIndex >= 0} onChange={(event) => void selectChecklistEvidenceFile(index, event.target.files?.[0])}/>{uploadingChecklistIndex === index ? 'Đang tải…' : record?.path ? 'Thay file' : 'Tải file'}</label></div></article>; })}</div>{task.status === 'READY' && <button className="primary" onClick={() => updateTask(task.id, { status: 'IN_PROGRESS' }, `Bắt đầu ${task.id}.`)}>Bắt đầu công việc</button>}{['IN_PROGRESS', 'REWORK'].includes(task.status) && <><label className="field">Vướng mắc<textarea value={blocker} onChange={(event) => setBlocker(event.target.value)} onBlur={() => void saveProgress(checklistEvidenceDraft, checklistEvidenceRecords, blocker)} placeholder="Để trống nếu không có vướng mắc..."/></label><label className="field">Kết quả thực tế (không bắt buộc)<textarea value={actualOutput} onChange={(event) => setActualOutput(event.target.value)} placeholder="Mô tả kết quả thực tế nếu cần..."/></label><label className="field">Minh chứng tổng hợp (không bắt buộc)<input value={evidenceRecord ? '' : evidence} disabled={Boolean(evidenceRecord)} onChange={(event) => setEvidence(event.target.value)} placeholder="https://... hoặc ID VTraining"/></label><label className="field">Hoặc tải file minh chứng<input type="file" disabled={uploadingEvidence} onChange={(event) => void selectEvidenceFile(event.target.files?.[0])}/></label>{evidenceRecord && <small className="hint ready">Đã tải riêng tư: {evidenceRecord.name}</small>}{evidenceError && <small className="hint error">{evidenceError}</small>}<button className="primary" disabled={!canSubmitReview} onClick={() => updateTask(task.id, { status: 'IN_REVIEW', checklistEvidence: buildChecklistEvidence(), blocker, actualOutput: actualOutput.trim(), evidence: evidence.trim(), evidenceRecord }, `Đã gửi ${task.id} yêu cầu xác nhận hoàn thành.`)}>Gửi yêu cầu xác nhận</button><small className="hint ready">Có thể gửi ở mọi mức tiến độ, kể cả 0% và chưa có minh chứng. Người duyệt sẽ quyết định Đạt hoặc yêu cầu bổ sung.</small></>}</section>}
     {!canExecute && !canAssign && !canConfigure && <div className="read-only">Vai trò hiện tại chỉ được xem trạng thái công việc.</div>}
     <AssigneePickerDialog open={assignmentOpen} directory={directory} loading={directoryLoading} taskCount={1} selectedId={assigneeId} onClose={() => setAssignmentOpen(false)} onSelect={(person) => { setAssigneeId(person.id); setAssignmentOpen(false); }}/>
   </aside>;
@@ -1493,19 +1556,21 @@ function WorkActionInbox({ initialTab = 'tracking', ...props }) {
 
 function ReviewQueue({ role, tasks, updateTask }) {
   const [evidenceError, setEvidenceError] = useState('');
+  const [expandedTaskId, setExpandedTaskId] = useState('');
+  const [reworkTaskId, setReworkTaskId] = useState('');
+  const [reviewComment, setReviewComment] = useState('');
   const queue = tasks.filter((task) => task.status === 'IN_REVIEW');
-  async function openEvidence(task) {
-    const record = task.outputs?.at(-1)?.evidence?.[0];
+  async function openEvidenceRecord(record, task) {
     setEvidenceError('');
     try {
-      const url = record?.path ? await getTrainingOperationsFileUrl(record.path, record.name, role) : record?.url || task.evidence;
+      const url = record?.path ? await getTrainingOperationsFileUrl(record.path, record.name, role) : record?.url || record?.fileUrl || task.evidence;
       if (!url) throw new Error('Công việc chưa có minh chứng hợp lệ.');
       window.open(url, '_blank', 'noopener,noreferrer');
     } catch (error) {
       setEvidenceError(error.message || 'Không thể mở minh chứng.');
     }
   }
-  return <section className="card full"><div className="page-title"><div><small>HÀNG ĐỢI XÁC NHẬN</small><h2>Chờ Quản lý ekip xác nhận</h2><p>Công việc chỉ hoàn thành sau khi Quản lý ekip chọn Đạt.</p></div><span className="queue-count">{queue.length}</span></div>{evidenceError && <div className="read-only">{evidenceError}</div>}{!queue.length ? <div className="empty"><strong>Chưa có yêu cầu xác nhận</strong><p>Thành viên cần hoàn tất checklist, thêm minh chứng và gửi yêu cầu xác nhận.</p></div> : queue.map((task) => <article className="review-card" key={task.id}><div><span>{task.id}</span><h3>{task.title}</h3><p>Kết quả: {task.actualOutput || 'Đã hoàn thành theo checklist chi tiết.'}</p><button type="button" onClick={() => void openEvidence(task)}>Mở minh chứng: {task.outputs?.at(-1)?.evidence?.[0]?.name || task.evidence}</button><div className="review-meta"><span>Checklist {task.checklist.filter(Boolean).length}/{task.checklist.length}</span><span>Input đã khóa</span><span>Làm lại {task.rework}</span><span>Tiến độ {task.progress}%</span></div></div><div><button className="pass" onClick={() => updateTask(task.id, { status: 'DONE', comment: 'Đạt yêu cầu.' }, `Đã xác nhận đạt ${task.id}.`)}>Đạt</button><button className="rework" onClick={() => updateTask(task.id, { status: 'REWORK', comment: 'Cần bổ sung cấu hình hoặc minh chứng theo tiêu chí xác nhận.' }, `Đã trả lại ${task.id}.`)}>Yêu cầu làm lại</button></div></article>)}</section>;
+  return <section className="card full"><div className="page-title"><div><small>HÀNG ĐỢI XÁC NHẬN</small><h2>Chờ Quản lý ekip xác nhận</h2><p>Mở chi tiết để đối chiếu checklist và minh chứng trước khi quyết định.</p></div><span className="queue-count">{queue.length}</span></div>{evidenceError && <div className="read-only">{evidenceError}</div>}{!queue.length ? <div className="empty"><strong>Chưa có yêu cầu xác nhận</strong><p>Chưa có thành viên gửi yêu cầu trong phạm vi hiện tại.</p></div> : queue.map((task) => { const submission = task.submissions?.at(-1); const snapshot = submission?.taskSnapshot || task; const output = snapshot.output || task.outputs?.at(-1); const expanded = expandedTaskId === task.id; const reworking = reworkTaskId === task.id; return <article className={`review-card${expanded ? ' expanded' : ''}`} key={task.id}><div className="review-summary"><div><span>{task.id}</span><h3>{task.title}</h3><p>Kết quả: {output?.actualOutput || 'Chưa có mô tả kết quả.'}</p><div className="review-meta"><span>Checklist {(snapshot.checklist || []).filter(Boolean).length}/{(snapshot.checklist || []).length}</span><span>Làm lại {task.rework}</span><span>Tiến độ {task.progress}%</span></div></div><button type="button" className="review-detail-toggle" aria-expanded={expanded} onClick={() => setExpandedTaskId(expanded ? '' : task.id)}>{expanded ? 'Thu gọn' : 'Xem chi tiết'}</button></div>{expanded && <div className="review-detail"><h4>Checklist tại thời điểm gửi duyệt</h4><div className="review-checklist">{(snapshot.checklistItems || []).map((label, index) => { const records = snapshot.checklistEvidence?.[index] || []; return <div key={`${task.id}:${index}`}><span className={snapshot.checklist?.[index] ? 'is-done' : ''}>{snapshot.checklist?.[index] ? 'Đã hoàn thành' : 'Chưa hoàn thành'}</span><b>{label}</b>{records.length ? <div className="review-evidence-list">{records.map((record, recordIndex) => <button type="button" key={record.id || record.url || recordIndex} onClick={() => void openEvidenceRecord(record, task)}>Mở minh chứng {recordIndex + 1}: {record.name || record.url || record.id}</button>)}</div> : <small>Không có minh chứng cho tiêu chí này.</small>}</div>; })}</div>{output?.evidence?.length ? <div className="review-output-evidence"><b>Minh chứng tổng hợp</b>{output.evidence.map((record, index) => <button type="button" key={record.id || record.url || index} onClick={() => void openEvidenceRecord(record, task)}>Mở {record.name || record.url || record.id}</button>)}</div> : <p className="review-no-evidence">Không có minh chứng tổng hợp.</p>}</div>}<div className="review-actions"><button className="pass" onClick={() => updateTask(task.id, { status: 'DONE', comment: 'Đạt yêu cầu.' }, `Đã xác nhận đạt ${task.id}.`)}>Đạt</button><button className="rework" onClick={() => { setReworkTaskId(reworking ? '' : task.id); setReviewComment(''); }}>Yêu cầu làm lại</button></div>{reworking && <div className="review-comment"><label>Lý do yêu cầu làm lại<textarea autoFocus value={reviewComment} onChange={(event) => setReviewComment(event.target.value)} placeholder="Nêu rõ tiêu chí hoặc nội dung cần bổ sung…"/></label><div><button type="button" onClick={() => { setReworkTaskId(''); setReviewComment(''); }}>Hủy</button><button type="button" className="rework" disabled={!reviewComment.trim()} onClick={async () => { const response = await updateTask(task.id, { status: 'REWORK', comment: reviewComment.trim() }, `Đã trả lại ${task.id}.`); if (response) { setReworkTaskId(''); setReviewComment(''); } }}>Xác nhận trả lại</button></div></div>}</article>; })}</section>;
 }
 function initials(value) { const parts = String(value || '').trim().split(/\s+/).filter(Boolean); return (parts.length ? parts.slice(-2).map((part) => part[0]).join('') : '—').toUpperCase(); }
 function taskReadinessLabel(task) {

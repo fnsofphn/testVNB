@@ -17,6 +17,7 @@ globalThis.fetch = async (url, options = {}) => {
     { id: 'profile-member', email: 'member@peopleone.vn', full_name: 'Nam Nguyễn', role: 'user', active: true, vplanning_roles: ['vplanning_member'] },
     { id: 'profile-scoped', email: 'scoped@peopleone.vn', full_name: 'Ngoài phạm vi', role: 'user', active: true, vplanning_roles: ['vplanning_member'] },
     { id: 'profile-chieu-anh', email: 'chieuanh.old@gmail.com', full_name: 'Chiêu Anh', role: 'user', active: true, auth_user_id: 'auth-chieu-anh', vplanning_roles: ['vplanning_member'] },
+    { id: 'profile-content', email: 'content@peopleone.vn', full_name: 'Chỉ nội dung', role: 'user', active: true, vplanning_roles: ['vplanning_content'] },
   ]);
   if (value.includes('/vcontent_profiles?')) return Response.json([{ id: 'profile-operations', email: 'ops@peopleone.vn', full_name: 'Quản trị đa vai', role: 'training_ops_admin', active: true, auth_user_id: 'auth-operations', vplanning_roles: ['vplanning_admin'] }]);
   if (value.includes('/vplanning_users?') && value.includes('email=eq.')) return Response.json([]);
@@ -77,19 +78,19 @@ assert.equal(getResponse.payload.role, 'operations');
 assert.deepEqual(getResponse.payload.availableRoles, ['operations', 'intake', 'content', 'vtraining', 'manager', 'member']);
 assert.equal(getResponse.payload.storage, 'seed');
 assert.equal(getResponse.payload.state.tasks.length, 33);
-assert.deepEqual(getResponse.payload.directory.map((item) => [item.id, item.role]), [['ops@peopleone.vn', 'manager'], ['manager@peopleone.vn', 'manager'], ['member@peopleone.vn', 'member'], ['scoped@peopleone.vn', 'member'], ['chieuanh18082003@gmail.com', 'member']]);
+assert.deepEqual(getResponse.payload.directory.map((item) => [item.id, item.role]), [['ops@peopleone.vn', 'manager'], ['manager@peopleone.vn', 'manager'], ['member@peopleone.vn', 'member'], ['scoped@peopleone.vn', 'member'], ['chieuanh18082003@gmail.com', 'member'], ['content@peopleone.vn', undefined]]);
 assert.deepEqual(getResponse.payload.directory[0].roles, ['operations', 'intake', 'content', 'vtraining', 'manager', 'member']);
 assert.equal(getResponse.payload.directory.find((item) => item.id === 'chieuanh18082003@gmail.com').assignable, true);
 assert.equal(getResponse.payload.directory.find((item) => item.id === 'chieuanh18082003@gmail.com').profileLinked, true);
 assert.equal(getResponse.payload.accountDirectory.find((item) => item.id === 'inactive@peopleone.vn').assignable, false);
-assert.equal(getResponse.payload.directory.some((item) => item.id === 'content@peopleone.vn'), false);
+assert.equal(getResponse.payload.directory.find((item) => item.id === 'content@peopleone.vn').assignable, true);
 assert.equal(getResponse.payload.accountDirectory.length, 7);
 assert.equal(getResponse.payload.accountDirectory.find((item) => item.id === 'inactive@peopleone.vn').profileLinked, false);
 
 const managerView = responseRecorder();
 await handler(request('GET', undefined, 'manager'), managerView);
 assert.equal(managerView.statusCode, 200);
-assert.equal(managerView.payload.directory.length, 5);
+assert.equal(managerView.payload.directory.length, 6);
 assert.equal(managerView.payload.accountDirectory.length, 0);
 assert.equal(managerView.payload.state.projects.length, 0);
 assert.equal(managerView.payload.state.tasks.length, 0);
