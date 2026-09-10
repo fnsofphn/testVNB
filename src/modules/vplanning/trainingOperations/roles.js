@@ -56,10 +56,10 @@ export function resolveTrainingRoles(profile, vplanningUser) {
   if (has('admin', 'training_ops_admin', 'vplanning_admin')) return [...TRAINING_ROLE_VALUES];
 
   const roles = [];
-  if (has('operations', 'training_manager', 'training_admin', 'production_manager', 'pm', 'vplanning_director', 'quan_ly_van_hanh')) roles.push('operations');
-  if (has('intake', 'client', 'sale', 'account_manager', 'dau_moi', 'dau_moi_sale')) roles.push('intake');
-  if (has('content', 'specialist', 'content_manager', 'vplanning_content', 'chuyen_vien_noi_dung', 'noi_dung')) roles.push('content');
-  if (has('vtraining', 'training_instructor', 'chuyen_vien_van_hanh_vtraining', 'van_hanh_vtraining')) roles.push('vtraining');
+  if (has('operations', 'vplanning_operations', 'training_manager', 'training_admin', 'production_manager', 'pm', 'vplanning_director', 'quan_ly_van_hanh')) roles.push('operations');
+  if (has('intake', 'vplanning_intake', 'client', 'sale', 'account_manager', 'dau_moi', 'dau_moi_sale')) roles.push('intake');
+  if (has('content', 'content_manager', 'vplanning_content', 'chuyen_vien_noi_dung', 'noi_dung')) roles.push('content');
+  if (has('vtraining', 'vplanning_vtraining', 'training_instructor', 'chuyen_vien_van_hanh_vtraining', 'van_hanh_vtraining')) roles.push('vtraining');
   if (has('manager', 'vplanning_manager', 'teamlead', 'quan_ly_ekip')) roles.push('manager');
   if (has('member', 'vplanning_member', 'vplanning_collaborator', 'ctv', 'cong_tac_vien', 'thanh_vien_ekip')) roles.push('member');
   return [...new Set(roles)];
@@ -89,8 +89,7 @@ export function resolvePrimaryTrainingRole(profile, vplanningUser, availableRole
 }
 
 export function resolveActiveTrainingRole(requestedRole, availableRoles, profile = null, vplanningUser = null) {
-  const primaryRole = resolvePrimaryTrainingRole(profile, vplanningUser, availableRoles);
   const requested = normalizeTrainingRole(requestedRole);
-  if (requested) return requested === primaryRole ? primaryRole : null;
-  return primaryRole;
+  if (requested) return availableRoles.includes(requested) ? requested : null;
+  return resolvePrimaryTrainingRole(profile, vplanningUser, availableRoles);
 }

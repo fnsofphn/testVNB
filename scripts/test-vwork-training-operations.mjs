@@ -136,10 +136,9 @@ assert(api.includes('role: resolvePrimaryTrainingRole(profile || { title: item.t
 assert(fileApi.includes("resolveActiveTrainingRole(req.headers['x-vwork-role'], availableRoles, profile"), 'Private files must enforce the same selected role as the main API.');
 assert(userApi.includes("activeRole !== 'operations'"), 'Account provisioning must remain limited to the active operations role.');
 assert(roles.includes("return [...TRAINING_ROLE_VALUES]") && roles.includes("['member', 'Thành viên ekip']"), 'Training administrators must receive the six explicit operational roles.');
-assert(page.includes('Giao diện làm việc') && page.includes('Có {availableRoles.length} quyền được cấp') && !page.includes('Chọn vai trò làm việc') && !page.includes('switchRole('), 'Multi-role accounts must use one fixed interface without a manual role switcher.');
-assert(page.includes('Giao diện chính') && page.includes('các role còn lại chỉ là quyền bổ sung'), 'Account management must explicitly configure one fixed primary interface.');
-assert(page.includes('loadWorkspace({ requestedRole: null })'), 'Initial workspace loading must let the server resolve the fixed interface from every granted role.');
-assert(roles.includes('resolvePrimaryTrainingRole') && roles.includes('PRIMARY_ROLE_BY_IDENTITY_TOKEN') && roles.includes('return availableRoles[0] || null'), 'Server role resolution must keep the account primary interface instead of promoting extra capability grants.');
+assert(page.includes('availableRoles.length > 1') && page.includes('Chọn vai trò làm việc') && page.includes('switchRole('), 'Multi-role accounts must expose the original granted-role switcher.');
+assert(page.includes('loadWorkspace({ requestedRole: initialRole })'), 'Initial workspace loading must open the role inferred from the signed-in profile.');
+assert(roles.includes('if (requested) return availableRoles.includes(requested) ? requested : null'), 'Server role resolution must allow switching to every granted role and reject ungranted roles.');
 assert(multiRoleSql.includes("'training_ops_admin'") && multiRoleSql.includes("'vplanning_manager'") && multiRoleSql.includes("'vplanning_member'") && !/(?:encrypted_password|password\s*[:=])/i.test(multiRoleSql), 'The manual SQL must grant multi-role and owner-directory access without storing a password.');
 assert(fileApi.includes("public: false") && fileApi.includes("vwork-training-operations-private"), 'Roster and evidence files must not be stored in a public bucket.');
 assert(fileApi.includes("evidence: { upload: ['member'], download: ['member', 'manager'] }"), 'Private evidence access must be limited to the assigned workflow roles and operations administrators.');

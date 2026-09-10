@@ -285,7 +285,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
     }
   }
 
-  useEffect(() => { void loadWorkspace({ requestedRole: null }); }, []);
+  useEffect(() => { void loadWorkspace({ requestedRole: initialRole }); }, []);
   useEffect(() => {
     const nextTab = VIEW_TO_TAB[routeContext.view] || routeContext.view || 'overview';
     setTabState(nextTab);
@@ -346,6 +346,12 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
     }
     const type = inputRecord?.activeVersion > 0 ? 'SUBMIT_INPUT_VERSION' : 'SUBMIT_INPUT';
     return runCommand(type, { projectId: activeProject.id, courseId: inputRecord?.courseId || draft.courseId || activeCourse?.id, classId: inputRecord?.classId || draft.classId || null, inputId: inputRecord?.id, inputKey: key, data, files, validation, reason: draft.reason || (type === 'SUBMIT_INPUT_VERSION' ? 'Cập nhật dữ liệu theo yêu cầu mới.' : 'Nộp input lần đầu'), sourceStepCode: type === 'SUBMIT_INPUT_VERSION' ? 'UC15-B03' : undefined }, `${INPUT_META[key][1]} đã được lưu và kiểm tra readiness trên server.`);
+  }
+  async function switchRole(nextRole) {
+    if (!availableRoles.includes(nextRole) || nextRole === role) return;
+    setRole(nextRole);
+    setTab(nextRole === 'member' || nextRole === 'manager' ? 'tasks' : nextRole === 'intake' || nextRole === 'content' ? 'inputs' : nextRole === 'vtraining' ? 'workflow' : nextRole === 'operations' ? 'structure' : 'overview');
+    await loadWorkspace({ requestedRole: nextRole });
   }
   async function updateTask(id, patch, message) {
     const task = tasks.find((item) => item.id === id);
@@ -486,7 +492,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
     </aside>
 
     <div className="main-shell">
-      <header className="topbar"><div><small>{topbarPath}</small></div><div className="role-switch"><div className="actor-identity"><b>{actor?.name || 'Đang xác định tài khoản'}</b><small>{actor?.email || ''}</small></div><span>Giao diện làm việc</span><strong>{TRAINING_ROLE_OPTIONS.find(([value]) => value === role)?.[1] || 'Thành viên ekip'}</strong>{availableRoles.length > 1 && <small className="additional-role-count" title={TRAINING_ROLE_OPTIONS.filter(([value]) => availableRoles.includes(value)).map(([, label]) => label).join(', ')}>Có {availableRoles.length} quyền được cấp</small>}<div className="avatar" title={actor?.name || ''}>{initials(actor?.name || actor?.email)}</div></div></header>
+      <header className="topbar"><div><small>{topbarPath}</small></div><div className="role-switch"><div className="actor-identity"><b>{actor?.name || 'Đang xác định tài khoản'}</b><small>{actor?.email || ''}</small></div><span>{availableRoles.length > 1 ? 'Đang làm việc với vai trò' : 'Vai trò hiện tại'}</span>{availableRoles.length > 1 ? <select aria-label="Chọn vai trò làm việc" value={role} onChange={(event) => void switchRole(event.target.value)}>{TRAINING_ROLE_OPTIONS.filter(([value]) => availableRoles.includes(value)).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select> : <strong>{TRAINING_ROLE_OPTIONS.find(([value]) => value === role)?.[1] || 'Thành viên ekip'}</strong>}<div className="avatar" title={actor?.name || ''}>{initials(actor?.name || actor?.email)}</div></div></header>
       {tab !== 'structure' && <div className="training-context-bar" aria-label="Ngữ cảnh dự án khóa học lớp">
         <label>Dự án<select value={activeProject?.id || ''} onChange={(event) => { const projectId = event.target.value; const courseId = (workspaceState.courses || []).find((item) => item.projectId === projectId && item.status !== 'ARCHIVED')?.id || ''; writeRoute(tab, { projectId, courseId, classId: '', taskId: '' }); }}>
           {(workspaceState.projects || []).map((item) => <option value={item.id} key={item.id}>{item.code} · {item.name}</option>)}
@@ -728,7 +734,7 @@ function generateTemporaryPassword() {
 }
 
 function AccountsPanel({ directory = [], provisionAccount, restoreExistingLoginAccess }) {
-  const [draft, setDraft] = useState({ fullName: '', email: '', roles: ['member'], primaryRole: 'member', password: generateTemporaryPassword() });
+  const [draft, setDraft] = useState({ fullName: '', email: '', roles: ['member'], password: generateTemporaryPassword() });
   const [editingEmail, setEditingEmail] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [busy, setBusy] = useState(false);
@@ -740,7 +746,7 @@ function AccountsPanel({ directory = [], provisionAccount, restoreExistingLoginA
   const nameValid = draft.fullName.trim().length >= 2;
   const emailValid = /^\S+@\S+\.\S+$/.test(draft.email.trim());
   const existingDirectoryAccount = directory.some((person) => String(person.email || person.id || '').trim().toLowerCase() === draft.email.trim().toLowerCase());
-  const rolesValid = draft.roles.length > 0 && draft.roles.includes(draft.primaryRole);
+  const rolesValid = draft.roles.length > 0;
   const valid = nameValid && emailValid && rolesValid;
   const roleLabels = Object.fromEntries(TRAINING_ROLE_OPTIONS);
   const searchToken = normalizeSearchText(searchQuery);
@@ -753,14 +759,10 @@ function AccountsPanel({ directory = [], provisionAccount, restoreExistingLoginA
     setEditingEmail('');
     setShowPassword(false);
     setSubmitError('');
-    setDraft({ fullName: '', email: '', roles: ['member'], primaryRole: 'member', password: generateTemporaryPassword() });
+    setDraft({ fullName: '', email: '', roles: ['member'], password: generateTemporaryPassword() });
   }
   function editAccount(person) {
     const email = String(person.email || person.id || '').trim().toLowerCase();
-    const grantedRoles = (person.roles?.length ? person.roles : [person.role]).filter(Boolean);
-    const orderedRoles = person.role
-      ? [person.role, ...grantedRoles.filter((roleValue) => roleValue !== person.role)]
-      : grantedRoles;
     setEditingEmail(email);
     setCreated(null);
     setSubmitError('');
@@ -768,22 +770,17 @@ function AccountsPanel({ directory = [], provisionAccount, restoreExistingLoginA
     setDraft({
       fullName: String(person.name || '').trim(),
       email,
-      roles: orderedRoles,
-      primaryRole: person.role || orderedRoles[0] || 'member',
+      roles: person.roles?.length ? [...person.roles] : [person.role].filter(Boolean),
       password: '',
     });
   }
   function toggleRole(roleValue) {
-    setDraft((current) => {
-      const roles = current.roles.includes(roleValue)
+    setDraft((current) => ({
+      ...current,
+      roles: current.roles.includes(roleValue)
         ? current.roles.filter((value) => value !== roleValue)
-        : [...current.roles, roleValue];
-      return {
-        ...current,
-        roles,
-        primaryRole: roles.includes(current.primaryRole) ? current.primaryRole : roles[0] || '',
-      };
-    });
+        : [...current.roles, roleValue],
+    }));
   }
   async function submit(event) {
     event.preventDefault();
@@ -827,7 +824,6 @@ function AccountsPanel({ directory = [], provisionAccount, restoreExistingLoginA
           <div>{TRAINING_ROLE_OPTIONS.map(([roleValue, label]) => <label className={draft.roles.includes(roleValue) ? 'selected' : ''} key={roleValue}><input type="checkbox" checked={draft.roles.includes(roleValue)} onChange={() => toggleRole(roleValue)}/><span><b>{label}</b><small>{RoleSummaryText[roleValue]}</small></span></label>)}</div>
           <small className={rolesValid ? 'account-field-help' : 'account-field-error'} id="account-role-help">{rolesValid ? `Đã chọn ${draft.roles.length} vai trò.` : 'Phải chọn ít nhất một vai trò.'}</small>
         </fieldset>
-        <label className="account-primary-role"><span>Giao diện chính</span><select value={draft.primaryRole} disabled={!rolesValid} onChange={(event) => setDraft((current) => ({ ...current, primaryRole: event.target.value }))}>{draft.roles.map((roleValue) => <option value={roleValue} key={roleValue}>{roleLabels[roleValue] || roleValue}</option>)}</select><small>Giao diện này được cố định sau khi đăng nhập; các role còn lại chỉ là quyền bổ sung.</small></label>
         <div className="account-form-actions">{editingEmail ? <button type="button" onClick={resetForm}>Hủy chỉnh sửa</button> : <button type="button" onClick={() => setDraft((current) => ({ ...current, password: generateTemporaryPassword() }))}>Tạo mật khẩu khác</button>}<button className="primary" type="submit" disabled={!valid || busy}>{busy ? 'Đang lưu…' : editingEmail ? 'Cập nhật quyền & mở đăng nhập' : 'Lưu tài khoản và quyền đăng nhập'}</button></div>
         {!valid && <p className="account-validation-note">Điền đủ họ tên, email hợp lệ và chọn ít nhất một vai trò.</p>}
         {submitError && <div className="account-submit-error" role="alert">{submitError}</div>}
