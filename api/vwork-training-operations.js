@@ -264,7 +264,10 @@ async function loadVWorkAccountDirectory(auth) {
     const projectIds = Array.isArray(item.payload?.projectIds) ? item.payload.projectIds.map(String) : [];
     const classIds = Array.isArray(item.payload?.classIds) ? item.payload.classIds.map(String) : [];
     const courseIds = Array.isArray(item.payload?.courseIds) ? item.payload.courseIds.map(String) : [];
-    const active = Boolean(profile) && profile.active !== false;
+    // A vplanning_users row is the VWork account record. A missing PeopleOne
+    // profile must not silently remove that account from task assignment; only
+    // an explicitly disabled linked profile makes the account inactive.
+    const active = profile?.active !== false;
     return {
       id: email,
       name: String(item.full_name || profile?.full_name || item.email || '').trim(),
