@@ -178,18 +178,21 @@ function StaticVPlanningPage() {
 }
 
 function resolveTrainingOperationsRole(profile: AuthProfile | null) {
-  const identity = normalizeAccessText([
-    profile?.role,
-    profile?.title,
-    ...(profile?.vplanningRoles || []),
-    ...(profile?.vplanningDepartments || []),
-  ].filter(Boolean).join(' '));
-  if (identity.includes('admin') || identity.includes('training_manager') || identity.includes('production_manager') || identity.includes('vplanning_director')) return 'operations';
-  if (identity.includes('vplanning_manager') || identity.includes('quan_ly_ekip') || identity.includes('manager') || identity.includes('truong')) return 'manager';
-  if (identity.includes('client') || identity.includes('sale') || identity.includes('account_manager') || identity.includes('dau_moi')) return 'intake';
-  if (identity.includes('noi_dung') || identity.includes('content')) return 'content';
-  if (identity.includes('vtraining') || identity.includes('training_instructor') || identity.includes('van_hanh_vtraining')) return 'vtraining';
-  if (identity.includes('collaborator') || identity.includes('member') || identity.includes('nhan_vien')) return 'member';
+  const profileRole = normalizeAccessText(profile?.role || '');
+  const title = normalizeAccessText(profile?.title || '');
+  const grants = (profile?.vplanningRoles || []).map(normalizeAccessText);
+  const hasGrant = (...values: string[]) => values.some((value) => grants.includes(value));
+  if (['admin', 'training_ops_admin', 'training_manager', 'training_admin', 'production_manager', 'vplanning_director'].includes(profileRole) || hasGrant('vplanning_admin', 'vplanning_director')) return 'operations';
+  if (['client', 'sale', 'account_manager'].includes(profileRole) || ['dau_moi', 'dau_moi_sale', 'sale'].includes(title)) return 'intake';
+  if (['chuyen_vien_van_hanh_vtraining', 'van_hanh_vtraining', 'vtraining'].includes(title)) return 'vtraining';
+  if (['chuyen_vien_noi_dung', 'noi_dung', 'content'].includes(title)) return 'content';
+  if (['quan_ly_ekip', 'manager', 'teamlead'].includes(title)) return 'manager';
+  if (['thanh_vien_ekip', 'member', 'cong_tac_vien'].includes(title)) return 'member';
+  if (hasGrant('account_manager', 'vplanning_intake')) return 'intake';
+  if (hasGrant('content_manager', 'vplanning_content')) return 'content';
+  if (hasGrant('vtraining', 'vplanning_vtraining')) return 'vtraining';
+  if (hasGrant('vplanning_manager')) return 'manager';
+  if (hasGrant('vplanning_member', 'vplanning_collaborator')) return 'member';
   return 'member';
 }
 

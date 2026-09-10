@@ -1,6 +1,6 @@
 import { createLimitedBufferReader, parseByteLimit } from './_body-limit.js';
 import { enforceRateLimit, RATE_LIMITS } from './_rate-limit.js';
-import { resolveActiveTrainingRole, resolveTrainingRoles } from '../src/modules/vplanning/trainingOperations/roles.js';
+import { resolveActiveTrainingRole, resolvePrimaryTrainingRole, resolveTrainingRoles } from '../src/modules/vplanning/trainingOperations/roles.js';
 
 const MAX_BODY_BYTES = parseByteLimit(process.env.VWORK_TRAINING_OPERATIONS_USER_BODY_LIMIT, 64 * 1024);
 const readLimitedBuffer = createLimitedBufferReader({ maxBytes: MAX_BODY_BYTES });
@@ -195,7 +195,7 @@ async function restoreActiveVWorkLoginAccess(supabaseUrl, restUrl, serviceHeader
       }
       checked += 1;
       const resolvedRoles = resolveTrainingRoles(profile, directoryUser);
-      const primaryRole = resolvedRoles[0] || 'member';
+      const primaryRole = resolvePrimaryTrainingRole(profile, directoryUser, resolvedRoles) || 'member';
       const primaryRoleConfig = ACCOUNT_ROLES[primaryRole] || ACCOUNT_ROLES.member;
       const expectedProfileRoles = [...new Set([
         ...resolvedRoles.map((role) => ACCOUNT_ROLES[role]?.profileVplanningRole).filter(Boolean),
@@ -238,6 +238,7 @@ async function restoreActiveVWorkLoginAccess(supabaseUrl, restUrl, serviceHeader
       }
       const nextDirectoryRoles = [...new Set([...(directoryUser?.roles || []), 'vplanning_member'])];
       const shouldLinkDirectory = !directoryUser?.payload?.authUserId;
+      const shouldSetPrimaryRole = directoryUser?.payload?.primaryRole !== primaryRole;
       const shouldEnableTaskReceipt = !(directoryUser?.roles || []).includes('vplanning_member');
       if (!directoryUser) {
         await requestJson(`${restUrl}/vplanning_users?on_conflict=email`, {
@@ -250,17 +251,17 @@ async function restoreActiveVWorkLoginAccess(supabaseUrl, restUrl, serviceHeader
             roles: ['vplanning_member'],
             departments: ['VTraining'],
             owner_ids: [],
-            payload: { source: 'vwork_training_operations', authUserId },
+            payload: { source: 'vwork_training_operations', authUserId, primaryRole },
           }),
         });
         taskAccessGranted += 1;
-      } else if (shouldLinkDirectory || shouldEnableTaskReceipt) {
+      } else if (shouldLinkDirectory || shouldEnableTaskReceipt || shouldSetPrimaryRole) {
         await requestJson(`${restUrl}/vplanning_users?email=eq.${encodeURIComponent(email)}`, {
           method: 'PATCH',
           headers: { ...serviceHeaders, Prefer: 'return=minimal' },
           body: JSON.stringify({
             ...(shouldEnableTaskReceipt ? { roles: nextDirectoryRoles } : {}),
-            ...(shouldLinkDirectory ? { payload: { ...(directoryUser?.payload || {}), authUserId, source: directoryUser?.payload?.source || 'vwork_training_operations' } } : {}),
+            ...((shouldLinkDirectory || shouldSetPrimaryRole) ? { payload: { ...(directoryUser?.payload || {}), authUserId, primaryRole, source: directoryUser?.payload?.source || 'vwork_training_operations' } } : {}),
           }),
         });
         if (shouldEnableTaskReceipt) taskAccessGranted += 1;
@@ -346,12 +347,12 @@ export default async function handler(req, res) {
     );
     const requesterProfile = Array.isArray(requesterProfiles) ? requesterProfiles[0] || null : null;
     const requesterUsers = requesterEmail ? await requestJson(
-      `${restUrl}/vplanning_users?select=email,roles&email=eq.${encodeURIComponent(requesterEmail)}&limit=1`,
+      `${restUrl}/vplanning_users?select=email,title,roles,payload&email=eq.${encodeURIComponent(requesterEmail)}&limit=1`,
       { headers: serviceHeaders },
     ) : [];
     const requesterVplanningUser = Array.isArray(requesterUsers) ? requesterUsers[0] || null : null;
     const availableRoles = resolveTrainingRoles(requesterProfile, requesterVplanningUser);
-    const activeRole = resolveActiveTrainingRole(req.headers['x-vwork-role'], availableRoles);
+    const activeRole = resolveActiveTrainingRole(req.headers['x-vwork-role'], availableRoles, requesterProfile, requesterVplanningUser);
     if (!requesterProfile || activeRole !== 'operations' || !canProvisionAccounts(requesterProfile, requesterVplanningUser)) {
       res.status(403).json({ ok: false, code: 'TRAINING_OPERATIONS_ACCOUNT_PERMISSION_DENIED', error: 'Chỉ Quản lý vận hành hoặc quản trị viên VWork được tạo tài khoản ekip.' });
       return;
@@ -372,9 +373,10 @@ export default async function handler(req, res) {
       .map((value) => String(value || '').trim().toLowerCase())
       .filter((value, index, values) => value && values.indexOf(value) === index);
     const invalidRoles = requestedRoles.filter((value) => !ACCOUNT_ROLE_VALUES.includes(value));
-    const primaryRole = requestedRoles[0];
+    const requestedPrimaryRole = String(body.primaryRole || '').trim().toLowerCase();
+    const primaryRole = requestedPrimaryRole || requestedRoles[0];
     const primaryRoleConfig = ACCOUNT_ROLES[primaryRole];
-    if (!/^\S+@\S+\.\S+$/.test(email) || fullName.length < 2 || !primaryRoleConfig || invalidRoles.length) {
+    if (!/^\S+@\S+\.\S+$/.test(email) || fullName.length < 2 || !primaryRoleConfig || invalidRoles.length || !requestedRoles.includes(primaryRole)) {
       res.status(400).json({ ok: false, code: 'TRAINING_OPERATIONS_ACCOUNT_INVALID', error: 'Họ tên, email hợp lệ và ít nhất một vai trò VWork hợp lệ là bắt buộc.' });
       return;
     }
@@ -406,7 +408,7 @@ export default async function handler(req, res) {
             password,
             email_confirm: true,
             user_metadata: { full_name: fullName },
-            app_metadata: { product: 'vwork', module: 'training_operations', roles: requestedRoles },
+            app_metadata: { product: 'vwork', module: 'training_operations', roles: requestedRoles, primaryRole },
           }),
         });
         authUser = created?.user || created || null;
@@ -466,7 +468,7 @@ export default async function handler(req, res) {
         roles: [...new Set([...retainedDirectoryRoles, ...directoryRoles])],
         departments: previousVplanningUser?.departments || ['VTraining'],
         owner_ids: previousVplanningUser?.owner_ids || [],
-        payload: { ...(previousVplanningUser?.payload || {}), source: 'vwork_training_operations', authUserId },
+        payload: { ...(previousVplanningUser?.payload || {}), source: 'vwork_training_operations', authUserId, primaryRole },
       }),
     });
 

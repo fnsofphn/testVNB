@@ -114,7 +114,9 @@ async function authorize(req, config) {
   let rows = await requestJson(`${config.supabaseUrl}/rest/v1/vcontent_profiles?select=${select}&auth_user_id=${authId}&active=is.true&limit=1`, { headers: serviceHeaders });
   if (!Array.isArray(rows) || !rows.length) rows = await requestJson(`${config.supabaseUrl}/rest/v1/vcontent_profiles?select=${select}&email=${email}&active=is.true&limit=1`, { headers: serviceHeaders });
   if (!Array.isArray(rows) || !rows.length) { const error = new Error('Tài khoản chưa được cấp quyền upload trong VWork.'); error.status = 403; throw error; }
-  return rows[0];
+  const profile = rows[0];
+  const directoryRows = await requestJson(`${config.supabaseUrl}/rest/v1/vplanning_users?select=email,title,roles,payload&email=${email}&limit=1`, { headers: serviceHeaders });
+  return { profile, vplanningUser: Array.isArray(directoryRows) ? directoryRows[0] || null : null };
 }
 
 export default async function handler(req, res) {
@@ -129,9 +131,9 @@ export default async function handler(req, res) {
   };
   if (!config.supabaseUrl || !config.serviceRoleKey || !config.anonKey) { res.status(500).json({ ok: false, error: 'Server upload is not configured.' }); return; }
   try {
-    const profile = await authorize(req, config);
-    const availableRoles = resolveTrainingRoles(profile, null);
-    const role = resolveActiveTrainingRole(req.headers['x-vwork-role'], availableRoles);
+    const { profile, vplanningUser } = await authorize(req, config);
+    const availableRoles = resolveTrainingRoles(profile, vplanningUser);
+    const role = resolveActiveTrainingRole(req.headers['x-vwork-role'], availableRoles, profile, vplanningUser);
     if (!role) { res.status(403).json({ ok: false, error: 'Vai trò hiện tại không được phép truy cập kho file vận hành đào tạo.' }); return; }
     const body = await readJson(req);
     const { createClient } = await import('@supabase/supabase-js');

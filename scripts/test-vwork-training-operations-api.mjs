@@ -51,10 +51,35 @@ globalThis.fetch = async (url, options = {}) => {
 };
 
 const { default: handler, stateForRole } = await import('../api/vwork-training-operations.js');
-const { resolveActiveTrainingRole } = await import('../src/modules/vplanning/trainingOperations/roles.js');
+const { resolveActiveTrainingRole, resolveTrainingRoles } = await import('../src/modules/vplanning/trainingOperations/roles.js');
 
-assert.equal(resolveActiveTrainingRole(undefined, ['vtraining', 'manager', 'member']), 'manager', 'A team manager must land in the fixed manager interface without switching roles.');
-assert.equal(resolveActiveTrainingRole(undefined, ['content', 'member']), 'content', 'A specialist/member account must keep its specialist interface.');
+assert.deepEqual(resolveTrainingRoles({ role: 'client' }, { roles: ['account_manager', 'vplanning_member'] }), ['intake', 'member'], 'account_manager must not be misread as the manager role.');
+assert.deepEqual(resolveTrainingRoles({ role: 'specialist' }, { roles: ['vtraining', 'vplanning_member'] }), ['content', 'vtraining', 'member'], 'Specialist capability tokens must remain distinct and exact.');
+
+for (const primaryRole of ['operations', 'intake', 'content', 'vtraining', 'manager', 'member']) {
+  assert.equal(
+    resolveActiveTrainingRole(undefined, ['operations', 'intake', 'content', 'vtraining', 'manager', 'member'], { role: 'ctv', title: 'Quản lý ekip' }, { payload: { primaryRole } }),
+    primaryRole,
+    `The configured ${primaryRole} account must open its own fixed interface.`,
+  );
+}
+assert.equal(
+  resolveActiveTrainingRole(undefined, ['intake', 'manager', 'member'], { role: 'client', title: 'Đầu mối / Sale' }, { roles: ['vplanning_manager', 'vplanning_member'] }),
+  'intake',
+  'A Sale account must keep the Sale interface even when it has additional manager capabilities.',
+);
+assert.equal(
+  resolveActiveTrainingRole(undefined, ['manager', 'member'], { role: 'ctv', title: 'Quản lý ekip' }, { roles: ['vplanning_manager', 'vplanning_member'] }),
+  'manager',
+  'A team manager must land in the fixed manager interface without switching roles.',
+);
+assert.equal(
+  resolveActiveTrainingRole(undefined, ['content', 'manager', 'member'], { role: 'specialist', title: 'Chuyên viên nội dung' }, null),
+  'content',
+  'A content specialist must keep the specialist interface when granted extra capabilities.',
+);
+assert.equal(resolveActiveTrainingRole('intake', ['intake', 'manager'], { role: 'client' }), 'intake', 'Follow-up requests must keep using the fixed primary interface.');
+assert.equal(resolveActiveTrainingRole('manager', ['intake', 'manager'], { role: 'client' }), null, 'An extra capability grant must not allow switching away from the fixed primary interface.');
 
 function responseRecorder() {
   return {
@@ -84,7 +109,7 @@ assert.equal(getResponse.payload.role, 'operations');
 assert.deepEqual(getResponse.payload.availableRoles, ['operations', 'intake', 'content', 'vtraining', 'manager', 'member']);
 assert.equal(getResponse.payload.storage, 'seed');
 assert.equal(getResponse.payload.state.tasks.length, 33);
-assert.deepEqual(getResponse.payload.directory.map((item) => [item.id, item.role]), [['ops@peopleone.vn', 'manager'], ['manager@peopleone.vn', 'manager'], ['member@peopleone.vn', 'member'], ['scoped@peopleone.vn', 'member'], ['chieuanh18082003@gmail.com', 'member'], ['content@peopleone.vn', undefined], ['unlinked@peopleone.vn', 'member']]);
+assert.deepEqual(getResponse.payload.directory.map((item) => [item.id, item.role]), [['ops@peopleone.vn', 'operations'], ['manager@peopleone.vn', 'manager'], ['member@peopleone.vn', 'member'], ['scoped@peopleone.vn', 'member'], ['chieuanh18082003@gmail.com', 'member'], ['content@peopleone.vn', 'content'], ['unlinked@peopleone.vn', 'member']]);
 assert.deepEqual(getResponse.payload.directory[0].roles, ['operations', 'intake', 'content', 'vtraining', 'manager', 'member']);
 assert.equal(getResponse.payload.directory.find((item) => item.id === 'chieuanh18082003@gmail.com').assignable, true);
 assert.equal(getResponse.payload.directory.find((item) => item.id === 'chieuanh18082003@gmail.com').profileLinked, true);
@@ -98,17 +123,13 @@ assert.equal(getResponse.payload.accountDirectory.find((item) => item.id === 'in
 
 const managerView = responseRecorder();
 await handler(request('GET', undefined, 'manager'), managerView);
-assert.equal(managerView.statusCode, 200);
-assert.equal(managerView.payload.directory.length, 7);
-assert.equal(managerView.payload.accountDirectory.length, 0);
-assert.equal(managerView.payload.state.projects.length, 0);
-assert.equal(managerView.payload.state.tasks.length, 0);
+assert.equal(managerView.statusCode, 403);
+assert.equal(managerView.payload.code, 'TRAINING_OPERATIONS_PERMISSION_DENIED');
 
 const memberView = responseRecorder();
 await handler(request('GET', undefined, 'member'), memberView);
-assert.equal(memberView.statusCode, 200);
-assert.equal(memberView.payload.role, 'member');
-assert.equal(memberView.payload.state.tasks.length, 0);
+assert.equal(memberView.statusCode, 403);
+assert.equal(memberView.payload.code, 'TRAINING_OPERATIONS_PERMISSION_DENIED');
 
 const legacyAssignedState = structuredClone(getResponse.payload.state);
 const legacyAssignedTask = legacyAssignedState.tasks.find((item) => item.id === 'CX-FOUNDATION-TNKH01-T-101');

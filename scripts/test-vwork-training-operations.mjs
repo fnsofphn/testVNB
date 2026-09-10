@@ -27,8 +27,8 @@ assert(app.includes('path="/vwork/training-operations"'), 'Training Operations m
 assert(app.includes('function trainingOperationsEnabled()') && app.includes("VITE_ENABLE_VWORK_TRAINING_OPERATIONS === 'true'"), 'Production route must remain feature-flagged until explicitly enabled.');
 assert(app.includes('hasTrainingOperationsProfileAccess') && app.includes('<Navigate to="/vwork/training-operations" replace />'), 'Training Operations-only accounts must be routed from the VWork entry to their scoped module.');
 assert(app.includes("profileRole === 'client'") && app.includes("title.includes(token)"), 'Existing Sale profiles must pass the scoped Training Operations guard without receiving broad VPlanning access.');
-assert(app.indexOf("identity.includes('training_manager')") < app.indexOf("identity.includes('vplanning_manager')"), 'Client role mapping must resolve training managers as operations before the team-manager rule.');
-assert(app.indexOf("identity.includes('vplanning_manager')") < app.indexOf("identity.includes('collaborator')"), 'The fixed interface must prefer team-manager responsibilities over member access.');
+assert(app.includes("const hasGrant = (...values: string[]) => values.some((value) => grants.includes(value))") && !app.includes("identity.includes('manager')"), 'Initial client role mapping must use exact grants so account_manager is never misread as manager.');
+assert(app.indexOf("hasGrant('account_manager', 'vplanning_intake')") < app.indexOf("hasGrant('vplanning_manager')"), 'The legacy client fallback must resolve the Sale interface before manager capability grants.');
 assert(shell.includes("href:'/vwork/training-operations'"), 'The V-Work shell must link to the isolated Training Operations route.');
 assert(shell.includes('hidden:!ENABLE_TRAINING_OPERATIONS'), 'The V-Work navigation entry must follow the same feature flag.');
 
@@ -132,12 +132,14 @@ assert(service.includes("'/api/vwork-training-operations-file'") && !service.inc
 assert(service.includes('requestId: crypto.randomUUID()'), 'Every browser mutation must carry a unique idempotency key.');
 assert(service.includes("headers.set('X-VWork-Role', activeRole)"), 'Every VWork API call must send the selected role for server validation.');
 assert(api.includes('TRAINING_OPERATIONS_ROLE_NOT_GRANTED') && api.includes('availableRoles: auth.availableRoles'), 'The main API must reject ungranted roles and return the granted role list.');
-assert(fileApi.includes("resolveActiveTrainingRole(req.headers['x-vwork-role']"), 'Private files must enforce the same selected role as the main API.');
+assert(api.includes('role: resolvePrimaryTrainingRole(profile || { title: item.title }, item, roles)'), 'The account directory must expose the same primary role used for the fixed workspace.');
+assert(fileApi.includes("resolveActiveTrainingRole(req.headers['x-vwork-role'], availableRoles, profile"), 'Private files must enforce the same selected role as the main API.');
 assert(userApi.includes("activeRole !== 'operations'"), 'Account provisioning must remain limited to the active operations role.');
 assert(roles.includes("return [...TRAINING_ROLE_VALUES]") && roles.includes("['member', 'Thành viên ekip']"), 'Training administrators must receive the six explicit operational roles.');
 assert(page.includes('Giao diện làm việc') && page.includes('Có {availableRoles.length} quyền được cấp') && !page.includes('Chọn vai trò làm việc') && !page.includes('switchRole('), 'Multi-role accounts must use one fixed interface without a manual role switcher.');
+assert(page.includes('Giao diện chính') && page.includes('các role còn lại chỉ là quyền bổ sung'), 'Account management must explicitly configure one fixed primary interface.');
 assert(page.includes('loadWorkspace({ requestedRole: null })'), 'Initial workspace loading must let the server resolve the fixed interface from every granted role.');
-assert(roles.includes("'operations',\n  'manager',") && roles.includes('TRAINING_INTERFACE_ROLE_PRIORITY.find'), 'Server role resolution must prefer the manager interface over specialist and member roles.');
+assert(roles.includes('resolvePrimaryTrainingRole') && roles.includes('PRIMARY_ROLE_BY_IDENTITY_TOKEN') && roles.includes('return availableRoles[0] || null'), 'Server role resolution must keep the account primary interface instead of promoting extra capability grants.');
 assert(multiRoleSql.includes("'training_ops_admin'") && multiRoleSql.includes("'vplanning_manager'") && multiRoleSql.includes("'vplanning_member'") && !/(?:encrypted_password|password\s*[:=])/i.test(multiRoleSql), 'The manual SQL must grant multi-role and owner-directory access without storing a password.');
 assert(fileApi.includes("public: false") && fileApi.includes("vwork-training-operations-private"), 'Roster and evidence files must not be stored in a public bucket.');
 assert(fileApi.includes("evidence: { upload: ['member'], download: ['member', 'manager'] }"), 'Private evidence access must be limited to the assigned workflow roles and operations administrators.');

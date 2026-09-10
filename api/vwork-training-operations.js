@@ -11,6 +11,7 @@ import {
 import {
   normalizeTrainingRole,
   resolveActiveTrainingRole,
+  resolvePrimaryTrainingRole,
   resolveTrainingRoles,
 } from '../src/modules/vplanning/trainingOperations/roles.js';
 
@@ -89,7 +90,7 @@ async function findProfile(restUrl, serviceHeaders, sessionUser) {
 
 async function findVPlanningUser(restUrl, serviceHeaders, email) {
   if (!email) return null;
-  const rows = await requestJson(`${restUrl}/vplanning_users?select=email,full_name,title,roles,departments,owner_ids&email=${encodeURIComponent(`eq.${email}`)}&limit=1`, { headers: serviceHeaders });
+  const rows = await requestJson(`${restUrl}/vplanning_users?select=email,full_name,title,roles,departments,owner_ids,payload&email=${encodeURIComponent(`eq.${email}`)}&limit=1`, { headers: serviceHeaders });
   return Array.isArray(rows) ? rows[0] || null : null;
 }
 
@@ -116,7 +117,7 @@ async function authenticate(req, config) {
     error.code = 'TRAINING_OPERATIONS_ROLE_NOT_GRANTED';
     throw error;
   }
-  const role = resolveActiveTrainingRole(requestedRole, availableRoles);
+  const role = resolveActiveTrainingRole(requestedRole, availableRoles, profile, vplanningUser);
   if (!profile || !role || (!hasPeopleOneEmail(profile.email) && !vplanningUser && !availableRoles.includes('operations'))) {
     const error = new Error('Tài khoản hiện tại chưa được cấp quyền cho VWork Vận hành đào tạo.');
     error.status = 403;
@@ -274,7 +275,7 @@ async function loadVWorkAccountDirectory(auth) {
       id: email,
       name: String(item.full_name || profile?.full_name || item.email || '').trim(),
       email,
-      role: roles.includes('manager') ? 'manager' : roles.includes('member') ? 'member' : roles[0],
+      role: resolvePrimaryTrainingRole(profile || { title: item.title }, item, roles),
       roles,
       active,
       profileLinked: Boolean(profile),

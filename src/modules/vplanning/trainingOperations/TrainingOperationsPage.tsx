@@ -728,7 +728,7 @@ function generateTemporaryPassword() {
 }
 
 function AccountsPanel({ directory = [], provisionAccount, restoreExistingLoginAccess }) {
-  const [draft, setDraft] = useState({ fullName: '', email: '', roles: ['member'], password: generateTemporaryPassword() });
+  const [draft, setDraft] = useState({ fullName: '', email: '', roles: ['member'], primaryRole: 'member', password: generateTemporaryPassword() });
   const [editingEmail, setEditingEmail] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [busy, setBusy] = useState(false);
@@ -740,7 +740,7 @@ function AccountsPanel({ directory = [], provisionAccount, restoreExistingLoginA
   const nameValid = draft.fullName.trim().length >= 2;
   const emailValid = /^\S+@\S+\.\S+$/.test(draft.email.trim());
   const existingDirectoryAccount = directory.some((person) => String(person.email || person.id || '').trim().toLowerCase() === draft.email.trim().toLowerCase());
-  const rolesValid = draft.roles.length > 0;
+  const rolesValid = draft.roles.length > 0 && draft.roles.includes(draft.primaryRole);
   const valid = nameValid && emailValid && rolesValid;
   const roleLabels = Object.fromEntries(TRAINING_ROLE_OPTIONS);
   const searchToken = normalizeSearchText(searchQuery);
@@ -753,10 +753,14 @@ function AccountsPanel({ directory = [], provisionAccount, restoreExistingLoginA
     setEditingEmail('');
     setShowPassword(false);
     setSubmitError('');
-    setDraft({ fullName: '', email: '', roles: ['member'], password: generateTemporaryPassword() });
+    setDraft({ fullName: '', email: '', roles: ['member'], primaryRole: 'member', password: generateTemporaryPassword() });
   }
   function editAccount(person) {
     const email = String(person.email || person.id || '').trim().toLowerCase();
+    const grantedRoles = (person.roles?.length ? person.roles : [person.role]).filter(Boolean);
+    const orderedRoles = person.role
+      ? [person.role, ...grantedRoles.filter((roleValue) => roleValue !== person.role)]
+      : grantedRoles;
     setEditingEmail(email);
     setCreated(null);
     setSubmitError('');
@@ -764,17 +768,22 @@ function AccountsPanel({ directory = [], provisionAccount, restoreExistingLoginA
     setDraft({
       fullName: String(person.name || '').trim(),
       email,
-      roles: person.roles?.length ? [...person.roles] : [person.role].filter(Boolean),
+      roles: orderedRoles,
+      primaryRole: person.role || orderedRoles[0] || 'member',
       password: '',
     });
   }
   function toggleRole(roleValue) {
-    setDraft((current) => ({
-      ...current,
-      roles: current.roles.includes(roleValue)
+    setDraft((current) => {
+      const roles = current.roles.includes(roleValue)
         ? current.roles.filter((value) => value !== roleValue)
-        : [...current.roles, roleValue],
-    }));
+        : [...current.roles, roleValue];
+      return {
+        ...current,
+        roles,
+        primaryRole: roles.includes(current.primaryRole) ? current.primaryRole : roles[0] || '',
+      };
+    });
   }
   async function submit(event) {
     event.preventDefault();
@@ -818,6 +827,7 @@ function AccountsPanel({ directory = [], provisionAccount, restoreExistingLoginA
           <div>{TRAINING_ROLE_OPTIONS.map(([roleValue, label]) => <label className={draft.roles.includes(roleValue) ? 'selected' : ''} key={roleValue}><input type="checkbox" checked={draft.roles.includes(roleValue)} onChange={() => toggleRole(roleValue)}/><span><b>{label}</b><small>{RoleSummaryText[roleValue]}</small></span></label>)}</div>
           <small className={rolesValid ? 'account-field-help' : 'account-field-error'} id="account-role-help">{rolesValid ? `Đã chọn ${draft.roles.length} vai trò.` : 'Phải chọn ít nhất một vai trò.'}</small>
         </fieldset>
+        <label className="account-primary-role"><span>Giao diện chính</span><select value={draft.primaryRole} disabled={!rolesValid} onChange={(event) => setDraft((current) => ({ ...current, primaryRole: event.target.value }))}>{draft.roles.map((roleValue) => <option value={roleValue} key={roleValue}>{roleLabels[roleValue] || roleValue}</option>)}</select><small>Giao diện này được cố định sau khi đăng nhập; các role còn lại chỉ là quyền bổ sung.</small></label>
         <div className="account-form-actions">{editingEmail ? <button type="button" onClick={resetForm}>Hủy chỉnh sửa</button> : <button type="button" onClick={() => setDraft((current) => ({ ...current, password: generateTemporaryPassword() }))}>Tạo mật khẩu khác</button>}<button className="primary" type="submit" disabled={!valid || busy}>{busy ? 'Đang lưu…' : editingEmail ? 'Cập nhật quyền & mở đăng nhập' : 'Lưu tài khoản và quyền đăng nhập'}</button></div>
         {!valid && <p className="account-validation-note">Điền đủ họ tên, email hợp lệ và chọn ít nhất một vai trò.</p>}
         {submitError && <div className="account-submit-error" role="alert">{submitError}</div>}
