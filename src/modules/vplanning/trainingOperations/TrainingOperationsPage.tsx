@@ -102,7 +102,7 @@ const CLASS_META = TRAINING_DEFAULT_CLASSES;
 const INITIAL_WORKSPACE = createInitialTrainingOperationsState({ now: '2026-08-25T00:00:00.000Z' });
 const initialTasks = INITIAL_WORKSPACE.tasks;
 
-const STATUS_LABEL = { WAITING_INPUT: 'Chưa sẵn sàng', READY: 'Sẵn sàng', IN_PROGRESS: 'Đang thực hiện', IN_REVIEW: 'Chờ review', REWORK: 'Cần làm lại', DONE: 'Hoàn thành', CANCELLED: 'Đã hủy theo scope' };
+const STATUS_LABEL = { WAITING_INPUT: 'Chưa sẵn sàng', READY: 'Sẵn sàng', IN_PROGRESS: 'Đang thực hiện', IN_REVIEW: 'Chờ review', REWORK: 'Cần làm lại', NEEDS_REASSIGNMENT: 'Chờ phân công lại', DONE: 'Hoàn thành', CANCELLED: 'Đã hủy theo scope' };
 const directoryHasRole = (item, expectedRole) => item?.role === expectedRole || item?.roles?.includes(expectedRole);
 const directoryMatchesIdentity = (item, ...values) => {
   const identities = [item?.id, item?.email, item?.name].map((value) => String(value || '').trim().toLowerCase()).filter(Boolean);
@@ -745,7 +745,7 @@ function Overview({ tasks, classes = CLASS_META, project, course, projects = [],
         <div className="agenda-list">
           {classTasks.map((task) => <button className={['DONE', 'CANCELLED'].includes(task.status) ? 'agenda-task complete' : 'agenda-task'} onClick={() => setSelectedCalendarTask(task)} key={task.id}>
             <div><b>{task.title}</b><small>{task.id} · {dueLabel(task.startDate, task.dueOffset, task.dueDirection, task.anchorType)}</small></div>
-            <span className={`badge ${task.status}`}>{STATUS_LABEL[task.status]}</span>
+            <span className={`badge ${taskStatusClass(task)}`}>{taskStatusLabel(task)}</span>
           </button>)}
         </div>
         <button onClick={onTasks}>Mở toàn bộ công việc của lớp</button>
@@ -1661,7 +1661,7 @@ function TaskDrawer({ role, task, directory = [], directoryLoading = false, acto
     }
   }
   return <aside className="card task-drawer" ref={drawerRef} tabIndex={-1} aria-label={`Chi tiết công việc ${task.title}`}>
-    <div className="drawer-head"><div><span>{task.classCode} · {GROUP_META[task.group]?.[0]} · {task.id}</span><h2>{task.title}</h2><small>{task.className} · Cấp lớp · {GROUP_META[task.group]?.[1]}</small></div><div className="drawer-head-actions"><span className={`badge ${task.status}`}>{STATUS_LABEL[task.status]}</span>{onClose && <button type="button" aria-label="Đóng chi tiết công việc" onClick={onClose}>×</button>}</div></div>
+    <div className="drawer-head"><div><span>{task.classCode} · {GROUP_META[task.group]?.[0]} · {task.id}</span><h2>{task.title}</h2><small>{task.className} · Cấp lớp · {GROUP_META[task.group]?.[1]}</small></div><div className="drawer-head-actions"><span className={`badge ${taskStatusClass(task)}`}>{taskStatusLabel(task)}</span>{onClose && <button type="button" aria-label="Đóng chi tiết công việc" onClick={onClose}>×</button>}</div></div>
     <div className="meta-grid"><div><small>Quản lý ekip</small><b>{task.manager}</b></div><div><small>Người thực hiện</small><b>{task.assignee}</b></div><div><small>Deadline</small><b>{dueLabel(task.startDate, task.dueOffset, task.dueDirection, task.anchorType)}</b></div><div><small>Progress tự động</small><b>{task.progress}%</b></div></div>
     <section><h3>Required / Actual Input</h3>{task.requiredInputCodes?.map((code) => { const input = Object.values(INPUT_META).find(([itemCode]) => itemCode === code); return <div className="input-line" key={code}><span>{code} · {input?.[1] || 'Input bắt buộc'}</span><b>{task.requiredInputVersions?.[code] ? `Đã khóa v${task.requiredInputVersions[code]}` : 'Còn thiếu'}</b></div>; })}</section>
     {canAssign && <section><h3>Phân công người thực hiện</h3><div className="form-grid"><label>Người thực hiện<button type="button" className="assignee-trigger" onClick={() => setAssignmentOpen(true)}>{directory.find((item) => item.id === assigneeId)?.name || task.assignee || 'Bạn muốn giao việc cho ai?'}</button></label><label>Người xác nhận<input value={task.reviewer || reviewer?.name || actor?.name || task.manager} readOnly/></label><label>Priority<select value={priority} onChange={(event) => setPriority(event.target.value)}><option>Low</option><option>Normal</option><option>High</option><option>Critical</option></select></label><label>Deadline<input type="date" value={plannedDeadline} onChange={(event) => setPlannedDeadline(event.target.value)}/></label>{needsDeadlineReason && <label className="wide">Lý do deadline sau khai giảng<textarea value={deadlineOverrideReason} onChange={(event) => setDeadlineOverrideReason(event.target.value)} placeholder="Nêu rõ ngoại lệ vận hành..."/></label>}</div><button disabled={!assigneeId || !reviewer || (needsDeadlineReason && !deadlineOverrideReason.trim())} onClick={() => { const assignee = directory.find((item) => item.id === assigneeId); if (assignee && reviewer) void updateTask(task.id, { assigneeId: assignee.id, assignee: assignee.name, priority, reviewerId: reviewer.id, reviewer: reviewer.name, plannedDeadline, deadlineOverrideReason: deadlineOverrideReason.trim() }, `Đã giao ${task.id} cho ${assignee.name}.`); }}>Lưu phân công</button></section>}
@@ -1733,12 +1733,15 @@ function ReviewQueue({ role, tasks, updateTask }) {
 }
 function initials(value) { const parts = String(value || '').trim().split(/\s+/).filter(Boolean); return (parts.length ? parts.slice(-2).map((part) => part[0]).join('') : '—').toUpperCase(); }
 function taskReadinessLabel(task) {
+  if (task.assignmentStatus === 'NEEDS_REASSIGNMENT') return 'Chờ phân công lại';
   if (task.status !== 'WAITING_INPUT') return 'Đủ điều kiện';
   if (task.blockingInputCodes?.length) return `Thiếu ${task.blockingInputCodes.join(', ')}`;
   if (task.waitingReason === 'ASSIGNMENT' || !task.assigneeId || !task.reviewerId) return 'Chưa phân công đủ';
   if (task.blockingTaskIds?.length) return `Chờ ${task.blockingTaskIds.length} việc trước`;
   return 'Chưa sẵn sàng';
 }
+function taskStatusLabel(task) { return task.assignmentStatus === 'NEEDS_REASSIGNMENT' ? 'Chờ phân công lại' : STATUS_LABEL[task.status]; }
+function taskStatusClass(task) { return task.assignmentStatus === 'NEEDS_REASSIGNMENT' ? 'NEEDS_REASSIGNMENT' : task.status; }
 function formatDate(isoDate) { if (!isoDate) return '—'; const [year, month, day] = String(isoDate).split('-'); return day && month && year ? `${day}/${month}/${year}` : String(isoDate); }
 function dueDate(task) { const date = new Date(`${task.startDate}T00:00:00Z`); date.setUTCDate(date.getUTCDate() + (task.dueDirection === 'AFTER' ? task.dueOffset : -task.dueOffset)); return date; }
 function dueLabel(startDate, offset, direction = 'BEFORE', anchorType = 'CLASS_START') { const date = new Date(`${startDate}T00:00:00Z`); date.setUTCDate(date.getUTCDate() + (direction === 'AFTER' ? offset : -offset)); const label = `${String(date.getUTCDate()).padStart(2, '0')}/${String(date.getUTCMonth() + 1).padStart(2, '0')}`; if (anchorType === 'PROJECT_START') return `${label} · sau bắt đầu dự án ${offset} ngày`; return offset === 0 ? `${label} · ngày chạy lớp` : `${label} · trước lớp ${offset} ngày`; }

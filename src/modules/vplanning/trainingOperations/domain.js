@@ -902,6 +902,12 @@ function assignTasks(state, payload, context) {
     task.assigneeId = assigneeId;
     task.reviewer = reviewerName;
     task.reviewerId = payload.reviewerId || reviewerName;
+    if (task.assignmentStatus === 'NEEDS_REASSIGNMENT') task.status = task.resumeStatus || 'WAITING_INPUT';
+    task.assignmentStatus = null;
+    task.assignmentReason = null;
+    task.resumeStatus = null;
+    task.unassignedAt = null;
+    task.unassignedBy = null;
     task.priority = payload.priority || 'Normal';
     task.plannedDeadline = plannedDeadline;
     task.assignmentHistory.push({ assigneeId: task.assigneeId, assigneeName, reviewerId: task.reviewerId, reviewerName, deadline: task.plannedDeadline, deadlineOverrideReason: payload.deadlineOverrideReason || '', priority: task.priority, note: payload.note || '', assignedBy: actorFrom(context), assignedAt: timestamp });
@@ -1010,6 +1016,12 @@ function assignCourseRole(state, payload, context) {
       task.reviewer = assignment.accountName;
       task.reviewerId = accountId;
     }
+    if (task.assigneeId && task.reviewerId) {
+      if (task.assignmentStatus === 'NEEDS_REASSIGNMENT') task.status = task.resumeStatus || 'WAITING_INPUT';
+      task.assignmentStatus = null;
+      task.assignmentReason = null;
+      task.resumeStatus = null;
+    }
     task.updatedAt = timestamp;
   });
   refreshTaskReadiness(state, course.projectId, timestamp);
@@ -1025,14 +1037,35 @@ function removeCourseRole(state, payload, context) {
   const assignment = state.teamAssignments.find((item) => item.courseId === course.id && item.role === role && item.accountId === accountId && item.status !== 'ARCHIVED');
   if (!assignment) throw domainError('NOT_FOUND', 'Không tìm thấy phân công còn hiệu lực trong khóa học này.');
   const assignmentIdentity = { actor: { id: assignment.accountId, email: assignment.accountEmail, name: assignment.accountName } };
-  const retainedTaskIds = state.tasks
-    .filter((item) => item.courseId === course.id && actorMatches(assignmentIdentity, item.assigneeId, item.assignee, item.managerId, item.manager, item.reviewerId, item.reviewer))
-    .map((item) => item.id);
+  const affectedTasks = state.tasks.filter((item) => {
+    if (item.courseId !== course.id || ['DONE', 'CANCELLED'].includes(item.status)) return false;
+    if (role === 'manager') return actorMatches(assignmentIdentity, item.managerId, item.manager, item.reviewerId, item.reviewer);
+    if (role === 'member') return actorMatches(assignmentIdentity, item.assigneeId, item.assignee);
+    return false;
+  });
+  affectedTasks.forEach((task) => {
+    if (role === 'manager') {
+      task.manager = 'Chưa giao';
+      task.managerId = null;
+      task.reviewer = 'Chưa giao';
+      task.reviewerId = null;
+    } else {
+      task.assignee = 'Chưa giao';
+      task.assigneeId = null;
+    }
+    task.resumeStatus = task.status;
+    task.status = 'NEEDS_REASSIGNMENT';
+    task.assignmentStatus = 'NEEDS_REASSIGNMENT';
+    task.assignmentReason = role === 'manager' ? 'COURSE_MANAGER_REMOVED' : 'COURSE_MEMBER_REMOVED';
+    task.unassignedAt = timestamp;
+    task.unassignedBy = actorFrom(context);
+    task.updatedAt = timestamp;
+  });
   assignment.status = 'ARCHIVED';
   assignment.archivedAt = timestamp;
   assignment.archivedBy = actorFrom(context);
   assignment.updatedAt = timestamp;
-  appendAudit(state, auditEvent('COURSE_ROLE_REMOVED', `Gỡ ${assignment.accountName} khỏi vai trò ${role} tại khóa ${course.code}; giữ nguyên lịch sử công việc.`, context, 'course', course.id, { assignmentId: assignment.id, accountId, role, retainedTaskIds }));
+  appendAudit(state, auditEvent('COURSE_ROLE_REMOVED', `Gỡ ${assignment.accountName} khỏi vai trò ${role} tại khóa ${course.code}; ${affectedTasks.length} công việc chuyển sang chờ phân công lại.`, context, 'course', course.id, { assignmentId: assignment.id, accountId, role, affectedTaskIds: affectedTasks.map((item) => item.id) }));
 }
 
 function updateCourseStatus(state, payload, context) {
