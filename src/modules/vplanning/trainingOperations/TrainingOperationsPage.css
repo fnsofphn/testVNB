@@ -450,6 +450,13 @@
 .vwork-training-operations .course-role-assignment small,.vwork-training-operations .course-role-assignment label span{font-size:9px;color:var(--muted)}
 .vwork-training-operations .course-role-assignment select{width:100%}
 .vwork-training-operations .course-role-assignment>button{white-space:nowrap}
+.vwork-training-operations .course-team-workspace{display:grid;gap:16px}
+.vwork-training-operations .course-role-assignment-page{margin-top:2px}
+.vwork-training-operations .course-team-list-page{grid-template-columns:1fr}
+.vwork-training-operations .course-team-list-page .course-team-row{display:grid;grid-template-columns:minmax(200px,1fr) minmax(130px,.45fr) auto;align-items:center;gap:14px;padding:11px 12px;border:1px solid var(--border);background:#fff}
+.vwork-training-operations .course-team-list-page .course-team-row>div{display:grid;gap:3px;min-width:0}
+.vwork-training-operations .course-team-list-page .course-team-row small{overflow:hidden;color:var(--muted);text-overflow:ellipsis;white-space:nowrap}
+.vwork-training-operations .course-team-list-page .course-team-row .danger-action{display:inline-flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap}
 
 .vwork-training-operations.training-overlay-portal .assignment-dialog-backdrop{z-index:1100}
 .vwork-training-operations .assignment-dialog{display:flex;max-height:calc(100vh - 40px);overflow:hidden;flex-direction:column}
@@ -507,6 +514,8 @@
 @media(max-width:760px){
   .vwork-training-operations .course-role-assignment{grid-template-columns:1fr}
   .vwork-training-operations .course-role-assignment>button{width:100%}
+  .vwork-training-operations .course-team-list-page .course-team-row{grid-template-columns:1fr}
+  .vwork-training-operations .course-team-list-page .course-team-row .danger-action{justify-self:start}
   .vwork-training-operations .review-card-top{grid-template-columns:1fr}
   .vwork-training-operations .review-summary{display:grid}
   .vwork-training-operations .review-detail-toggle{justify-self:start}

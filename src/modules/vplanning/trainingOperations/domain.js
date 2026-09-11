@@ -43,6 +43,7 @@ const COMMAND_ROLES = Object.freeze({
   CREATE_COURSE: ['operations', 'admin'],
   COPY_COURSE_CONFIG: ['operations', 'admin'],
   ASSIGN_COURSE_ROLE: ['operations', 'admin'],
+  REMOVE_COURSE_ROLE: ['operations', 'admin'],
   UPDATE_COURSE_STATUS: ['operations', 'manager', 'admin'],
   UPDATE_COURSE_TEMPLATE: ['operations', 'manager', 'admin'],
   UPDATE_CLASS_STATUS: ['operations', 'manager', 'admin'],
@@ -987,9 +988,20 @@ function assignCourseRole(state, payload, context) {
     accountName: payload.accountName || accountId,
     accountEmail: payload.accountEmail || '',
     status: 'ACTIVE',
+    archivedAt: null,
+    archivedBy: null,
     assignedAt: existing?.assignedAt || timestamp,
     updatedAt: timestamp,
   };
+  const replacedAssignments = role === 'manager'
+    ? state.teamAssignments.filter((item) => item.courseId === course.id && item.role === 'manager' && item.status !== 'ARCHIVED' && item.accountId !== accountId)
+    : [];
+  replacedAssignments.forEach((item) => {
+    item.status = 'ARCHIVED';
+    item.archivedAt = timestamp;
+    item.archivedBy = actorFrom(context);
+    item.updatedAt = timestamp;
+  });
   if (existing) Object.assign(existing, assignment); else state.teamAssignments.push(assignment);
   state.tasks.filter((item) => item.courseId === course.id && !['DONE', 'CANCELLED'].includes(item.status)).forEach((task) => {
     if (role === 'manager') {
@@ -1001,7 +1013,30 @@ function assignCourseRole(state, payload, context) {
     task.updatedAt = timestamp;
   });
   refreshTaskReadiness(state, course.projectId, timestamp);
-  appendAudit(state, auditEvent('COURSE_ROLE_ASSIGNED', `Gán ${assignment.accountName} làm ${role} tại khóa ${course.code}.`, context, 'course', course.id, { assignmentId: assignment.id }));
+  appendAudit(state, auditEvent('COURSE_ROLE_ASSIGNED', `Gán ${assignment.accountName} làm ${role} tại khóa ${course.code}.`, context, 'course', course.id, { assignmentId: assignment.id, replacedAssignmentIds: replacedAssignments.map((item) => item.id) }));
+}
+
+function removeCourseRole(state, payload, context) {
+  const timestamp = nowIso(context);
+  const course = state.courses.find((item) => item.id === payload.courseId);
+  if (!course) throw domainError('NOT_FOUND', 'Không tìm thấy khóa học cần gỡ phân quyền.');
+  const accountId = requiredText(payload.accountId, 'Tài khoản');
+  const role = requiredText(payload.role, 'Vai trò trong khóa').toLowerCase();
+  const assignment = state.teamAssignments.find((item) => item.courseId === course.id && item.role === role && item.accountId === accountId && item.status !== 'ARCHIVED');
+  if (!assignment) throw domainError('NOT_FOUND', 'Không tìm thấy phân công còn hiệu lực trong khóa học này.');
+  const assignmentIdentity = { actor: { id: assignment.accountId, email: assignment.accountEmail, name: assignment.accountName } };
+  const activeTasks = state.tasks.filter((item) => item.courseId === course.id && !['DONE', 'CANCELLED'].includes(item.status));
+  if (role === 'manager' && activeTasks.some((task) => actorMatches(assignmentIdentity, task.managerId, task.manager, task.reviewerId, task.reviewer))) {
+    throw domainError('COURSE_MANAGER_REPLACEMENT_REQUIRED', 'Hãy gán Quản lý ekip thay thế trước khi gỡ người đang xác nhận công việc.');
+  }
+  if (role === 'member' && activeTasks.some((task) => actorMatches(assignmentIdentity, task.assigneeId, task.assignee))) {
+    throw domainError('COURSE_MEMBER_REASSIGNMENT_REQUIRED', 'Hãy chuyển các công việc đang giao cho thành viên này trước khi gỡ khỏi khóa.');
+  }
+  assignment.status = 'ARCHIVED';
+  assignment.archivedAt = timestamp;
+  assignment.archivedBy = actorFrom(context);
+  assignment.updatedAt = timestamp;
+  appendAudit(state, auditEvent('COURSE_ROLE_REMOVED', `Gỡ ${assignment.accountName} khỏi vai trò ${role} tại khóa ${course.code}.`, context, 'course', course.id, { assignmentId: assignment.id, accountId, role }));
 }
 
 function updateCourseStatus(state, payload, context) {
@@ -1279,6 +1314,7 @@ export function applyTrainingOperationsCommand(currentState, command, context = 
     case 'CREATE_COURSE': createCourse(state, payload, { ...context, role }); break;
     case 'COPY_COURSE_CONFIG': copyCourseConfig(state, payload, { ...context, role }); break;
     case 'ASSIGN_COURSE_ROLE': assignCourseRole(state, payload, { ...context, role }); break;
+    case 'REMOVE_COURSE_ROLE': removeCourseRole(state, payload, { ...context, role }); break;
     case 'UPDATE_COURSE_STATUS': updateCourseStatus(state, payload, { ...context, role }); break;
     case 'UPDATE_COURSE_TEMPLATE': updateCourseTemplate(state, payload, { ...context, role }); break;
     case 'UPDATE_CLASS_STATUS': updateClassStatus(state, payload, { ...context, role }); break;

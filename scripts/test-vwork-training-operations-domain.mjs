@@ -197,7 +197,14 @@ assert.ok(fb2State.teamAssignments.some((item) => item.courseId === 'CX-ADVANCED
 fb2State = command(fb2State, 'ASSIGN_COURSE_ROLE', { courseId: 'CX-ADVANCED', role: 'member', accountId: 'member-01', accountName: 'Nam Nguyễn' }, 'operations', 'Quản lý vận hành');
 assert.ok(fb2State.teamAssignments.some((item) => item.courseId === 'CX-ADVANCED' && item.role === 'member' && item.accountId === 'member-01'));
 assert.ok(fb2State.tasks.filter((item) => item.courseId === 'CX-ADVANCED').every((item) => !item.assigneeId));
-fb2State = commandAs(fb2State, 'UPDATE_COURSE_STATUS', { courseId: 'CX-ADVANCED', status: 'ACTIVE' }, 'manager', 'manager-01', 'Ngọc Trần');
+fb2State = command(fb2State, 'REMOVE_COURSE_ROLE', { courseId: 'CX-ADVANCED', role: 'member', accountId: 'member-01' }, 'operations', 'Quản lý vận hành');
+assert.equal(fb2State.teamAssignments.find((item) => item.courseId === 'CX-ADVANCED' && item.role === 'member' && item.accountId === 'member-01').status, 'ARCHIVED');
+assert.ok(fb2State.auditEvents.some((item) => item.type === 'COURSE_ROLE_REMOVED'));
+assert.throws(() => command(fb2State, 'REMOVE_COURSE_ROLE', { courseId: 'CX-ADVANCED', role: 'manager', accountId: 'manager-01' }, 'operations', 'Quản lý vận hành'), /thay thế/);
+fb2State = command(fb2State, 'ASSIGN_COURSE_ROLE', { courseId: 'CX-ADVANCED', role: 'manager', accountId: 'manager-02', accountName: 'Kim Ánh' }, 'operations', 'Quản lý vận hành');
+assert.equal(fb2State.teamAssignments.find((item) => item.courseId === 'CX-ADVANCED' && item.role === 'manager' && item.accountId === 'manager-01').status, 'ARCHIVED');
+assert.ok(fb2State.tasks.filter((item) => item.courseId === 'CX-ADVANCED' && !['DONE', 'CANCELLED'].includes(item.status)).every((item) => item.managerId === 'manager-02' && item.reviewerId === 'manager-02'));
+fb2State = commandAs(fb2State, 'UPDATE_COURSE_STATUS', { courseId: 'CX-ADVANCED', status: 'ACTIVE' }, 'manager', 'manager-02', 'Kim Ánh');
 assert.equal(fb2State.courses.find((item) => item.id === 'CX-ADVANCED').status, 'ACTIVE');
 fb2State = command(fb2State, 'COPY_COURSE_CONFIG', { sourceCourseId: 'CX-FOUNDATION', targetCourseId: 'CX-ADVANCED' }, 'operations', 'Quản lý vận hành');
 assert.equal(fb2State.courses.find((item) => item.id === 'CX-ADVANCED').copiedFromCourseId, 'CX-FOUNDATION');
@@ -206,11 +213,11 @@ assert.equal(fb2State.courses.find((item) => item.id === 'CX-ADVANCED').copiedFr
 fb2State = command(fb2State, 'REQUEST_SCOPE_CHANGE', { projectId: 'EVNSPC-2026', courseId: 'CX-ADVANCED', changeType: 'content', objectKey: 'material', reason: 'Đổi tài liệu trong một khóa.' }, 'intake', 'Đầu mối');
 let fb2Request = fb2State.changeRequests.at(-1);
 assert.equal(fb2Request.approvalLevel, 'COURSE_MANAGER');
-fb2State = commandAs(fb2State, 'APPROVE_SCOPE_CHANGE', { changeRequestId: fb2Request.id }, 'manager', 'manager-01', 'Ngọc Trần');
+fb2State = commandAs(fb2State, 'APPROVE_SCOPE_CHANGE', { changeRequestId: fb2Request.id }, 'manager', 'manager-02', 'Kim Ánh');
 fb2State = command(fb2State, 'REQUEST_SCOPE_CHANGE', { projectId: 'EVNSPC-2026', affectedCourseIds: ['CX-FOUNDATION', 'CX-ADVANCED'], governanceImpact: { cost: true }, changeType: 'content', objectKey: 'material', reason: 'Thay đổi chi phí liên khóa.' }, 'intake', 'Đầu mối');
 fb2Request = fb2State.changeRequests.at(-1);
 assert.equal(fb2Request.approvalLevel, 'OPERATIONS');
-assert.throws(() => commandAs(fb2State, 'APPROVE_SCOPE_CHANGE', { changeRequestId: fb2Request.id }, 'manager', 'manager-01', 'Ngọc Trần'), /Quản lý vận hành/);
+assert.throws(() => commandAs(fb2State, 'APPROVE_SCOPE_CHANGE', { changeRequestId: fb2Request.id }, 'manager', 'manager-02', 'Kim Ánh'), /Quản lý vận hành/);
 fb2State = command(fb2State, 'APPROVE_SCOPE_CHANGE', { changeRequestId: fb2Request.id }, 'operations', 'Quản lý vận hành');
 assert.equal(fb2State.changeRequests.at(-1).status, 'APPROVED');
 
