@@ -197,10 +197,15 @@ assert.ok(fb2State.teamAssignments.some((item) => item.courseId === 'CX-ADVANCED
 fb2State = command(fb2State, 'ASSIGN_COURSE_ROLE', { courseId: 'CX-ADVANCED', role: 'member', accountId: 'member-01', accountName: 'Nam Nguyễn' }, 'operations', 'Quản lý vận hành');
 assert.ok(fb2State.teamAssignments.some((item) => item.courseId === 'CX-ADVANCED' && item.role === 'member' && item.accountId === 'member-01'));
 assert.ok(fb2State.tasks.filter((item) => item.courseId === 'CX-ADVANCED').every((item) => !item.assigneeId));
+const retainedAssignmentTaskId = fb2State.tasks.find((item) => item.courseId === 'CX-ADVANCED').id;
+fb2State = commandAs(fb2State, 'ASSIGN_TASKS', { taskIds: [retainedAssignmentTaskId], assigneeId: 'member-01', assigneeName: 'Nam Nguyễn', reviewerId: 'manager-01', reviewerName: 'Ngọc Trần', priority: 'Normal', requireSeparation: true }, 'manager', 'manager-01', 'Ngọc Trần');
 fb2State = command(fb2State, 'REMOVE_COURSE_ROLE', { courseId: 'CX-ADVANCED', role: 'member', accountId: 'member-01' }, 'operations', 'Quản lý vận hành');
 assert.equal(fb2State.teamAssignments.find((item) => item.courseId === 'CX-ADVANCED' && item.role === 'member' && item.accountId === 'member-01').status, 'ARCHIVED');
-assert.ok(fb2State.auditEvents.some((item) => item.type === 'COURSE_ROLE_REMOVED'));
-assert.throws(() => command(fb2State, 'REMOVE_COURSE_ROLE', { courseId: 'CX-ADVANCED', role: 'manager', accountId: 'manager-01' }, 'operations', 'Quản lý vận hành'), /thay thế/);
+assert.equal(fb2State.tasks.find((item) => item.id === retainedAssignmentTaskId).assigneeId, 'member-01');
+assert.ok(fb2State.auditEvents.some((item) => item.type === 'COURSE_ROLE_REMOVED' && item.details.retainedTaskIds.includes(retainedAssignmentTaskId)));
+fb2State = command(fb2State, 'REMOVE_COURSE_ROLE', { courseId: 'CX-ADVANCED', role: 'manager', accountId: 'manager-01' }, 'operations', 'Quản lý vận hành');
+assert.equal(fb2State.teamAssignments.find((item) => item.courseId === 'CX-ADVANCED' && item.role === 'manager' && item.accountId === 'manager-01').status, 'ARCHIVED');
+assert.equal(fb2State.tasks.find((item) => item.id === retainedAssignmentTaskId).reviewerId, 'manager-01');
 fb2State = command(fb2State, 'ASSIGN_COURSE_ROLE', { courseId: 'CX-ADVANCED', role: 'manager', accountId: 'manager-02', accountName: 'Kim Ánh' }, 'operations', 'Quản lý vận hành');
 assert.equal(fb2State.teamAssignments.find((item) => item.courseId === 'CX-ADVANCED' && item.role === 'manager' && item.accountId === 'manager-01').status, 'ARCHIVED');
 assert.ok(fb2State.tasks.filter((item) => item.courseId === 'CX-ADVANCED' && !['DONE', 'CANCELLED'].includes(item.status)).every((item) => item.managerId === 'manager-02' && item.reviewerId === 'manager-02'));

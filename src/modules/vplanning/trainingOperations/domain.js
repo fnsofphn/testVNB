@@ -1025,18 +1025,14 @@ function removeCourseRole(state, payload, context) {
   const assignment = state.teamAssignments.find((item) => item.courseId === course.id && item.role === role && item.accountId === accountId && item.status !== 'ARCHIVED');
   if (!assignment) throw domainError('NOT_FOUND', 'Không tìm thấy phân công còn hiệu lực trong khóa học này.');
   const assignmentIdentity = { actor: { id: assignment.accountId, email: assignment.accountEmail, name: assignment.accountName } };
-  const activeTasks = state.tasks.filter((item) => item.courseId === course.id && !['DONE', 'CANCELLED'].includes(item.status));
-  if (role === 'manager' && activeTasks.some((task) => actorMatches(assignmentIdentity, task.managerId, task.manager, task.reviewerId, task.reviewer))) {
-    throw domainError('COURSE_MANAGER_REPLACEMENT_REQUIRED', 'Hãy gán Quản lý ekip thay thế trước khi gỡ người đang xác nhận công việc.');
-  }
-  if (role === 'member' && activeTasks.some((task) => actorMatches(assignmentIdentity, task.assigneeId, task.assignee))) {
-    throw domainError('COURSE_MEMBER_REASSIGNMENT_REQUIRED', 'Hãy chuyển các công việc đang giao cho thành viên này trước khi gỡ khỏi khóa.');
-  }
+  const retainedTaskIds = state.tasks
+    .filter((item) => item.courseId === course.id && actorMatches(assignmentIdentity, item.assigneeId, item.assignee, item.managerId, item.manager, item.reviewerId, item.reviewer))
+    .map((item) => item.id);
   assignment.status = 'ARCHIVED';
   assignment.archivedAt = timestamp;
   assignment.archivedBy = actorFrom(context);
   assignment.updatedAt = timestamp;
-  appendAudit(state, auditEvent('COURSE_ROLE_REMOVED', `Gỡ ${assignment.accountName} khỏi vai trò ${role} tại khóa ${course.code}.`, context, 'course', course.id, { assignmentId: assignment.id, accountId, role }));
+  appendAudit(state, auditEvent('COURSE_ROLE_REMOVED', `Gỡ ${assignment.accountName} khỏi vai trò ${role} tại khóa ${course.code}; giữ nguyên lịch sử công việc.`, context, 'course', course.id, { assignmentId: assignment.id, accountId, role, retainedTaskIds }));
 }
 
 function updateCourseStatus(state, payload, context) {
