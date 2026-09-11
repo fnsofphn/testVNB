@@ -333,7 +333,7 @@ function scopedClassCode(courseCode, rawCode) {
  * Upgrades legacy payloads in memory. Reading old state never writes or merges
  * production data; persistence only happens through an explicit command.
  */
-export function normalizeTrainingOperationsState(currentState, context = {}) {
+  export function normalizeTrainingOperationsState(currentState, context = {}) {
   if (!currentState || typeof currentState !== 'object' || Array.isArray(currentState)) {
     throw domainError('INVALID_STATE', 'Training Operations state không hợp lệ.');
   }
@@ -423,8 +423,43 @@ export function normalizeTrainingOperationsState(currentState, context = {}) {
       derivedFromTask: true,
     });
   });
+  state.tasks.filter((task) => !['DONE', 'CANCELLED'].includes(task.status)).forEach((task) => {
+    const assignmentsForIdentity = (role, ...values) => state.teamAssignments.filter((item) => item.courseId === task.courseId && item.role === role
+      && actorMatches({ actor: { id: item.accountId, email: item.accountEmail, name: item.accountName } }, ...values));
+    const memberAssignments = assignmentsForIdentity('member', task.assigneeId, task.assignee);
+    if (task.assigneeId && memberAssignments.some((item) => item.status === 'ARCHIVED') && !memberAssignments.some((item) => item.status !== 'ARCHIVED')) {
+      task.assignee = 'Chưa giao';
+      task.assigneeId = null;
+      markTaskForReassignment(task, 'COURSE_MEMBER_REMOVED', timestamp);
+    }
+    const managerAssignments = assignmentsForIdentity('manager', task.managerId, task.manager, task.reviewerId, task.reviewer);
+    if ((task.managerId || task.reviewerId) && managerAssignments.some((item) => item.status === 'ARCHIVED') && !managerAssignments.some((item) => item.status !== 'ARCHIVED')) {
+      task.manager = 'Chưa giao';
+      task.managerId = null;
+      task.reviewer = 'Chưa giao';
+      task.reviewerId = null;
+      markTaskForReassignment(task, 'COURSE_MANAGER_REMOVED', timestamp);
+    }
+  });
   state.schemaVersion = 3;
   return state;
+}
+
+function markTaskForReassignment(task, reason, timestamp, unassignedBy = null) {
+  const resumeStatus = task.resumeStatus || task.status;
+  const wasInFlight = task.assignmentStatus === 'NEEDS_REASSIGNMENT' || ['IN_PROGRESS', 'IN_REVIEW', 'REWORK'].includes(resumeStatus);
+  task.resumeStatus = resumeStatus;
+  task.status = wasInFlight ? 'NEEDS_REASSIGNMENT' : 'UNASSIGNED';
+  task.assignmentStatus = wasInFlight ? 'NEEDS_REASSIGNMENT' : 'UNASSIGNED';
+  task.assignmentReason = reason;
+  task.waitingReason = 'ASSIGNMENT';
+  if (!wasInFlight) {
+    task.deadlineStatus = 'INACTIVE';
+    task.slaStartedAt = null;
+  }
+  task.unassignedAt = task.unassignedAt || timestamp;
+  task.unassignedBy = unassignedBy || task.unassignedBy || null;
+  task.updatedAt = timestamp;
 }
 
 function activeProject(state, projectId) {
@@ -531,7 +566,7 @@ function validateInputPayload(input, payload, state) {
 
 function refreshTaskReadiness(state, projectId, timestamp) {
   state.tasks.forEach((task) => {
-    if (task.projectId !== projectId || ['DONE', 'CANCELLED', 'IN_REVIEW', 'IN_PROGRESS', 'REWORK'].includes(task.status)) return;
+    if (task.projectId !== projectId || ['DONE', 'CANCELLED', 'IN_REVIEW', 'IN_PROGRESS', 'REWORK', 'UNASSIGNED', 'NEEDS_REASSIGNMENT'].includes(task.status)) return;
     const inputs = state.inputs.filter((item) => item.projectId === projectId && item.status === 'ACTIVE'
       && (item.scopeLevel === 'course' ? item.courseId === task.courseId : item.classId === task.classId));
     const versions = Object.fromEntries(inputs.map((item) => [item.dataCode, item.activeVersion]));
@@ -902,7 +937,7 @@ function assignTasks(state, payload, context) {
     task.assigneeId = assigneeId;
     task.reviewer = reviewerName;
     task.reviewerId = payload.reviewerId || reviewerName;
-    if (task.assignmentStatus === 'NEEDS_REASSIGNMENT') task.status = task.resumeStatus || 'WAITING_INPUT';
+    if (task.assignmentStatus) task.status = task.resumeStatus || 'WAITING_INPUT';
     task.assignmentStatus = null;
     task.assignmentReason = null;
     task.resumeStatus = null;
@@ -1017,7 +1052,7 @@ function assignCourseRole(state, payload, context) {
       task.reviewerId = accountId;
     }
     if (task.assigneeId && task.reviewerId) {
-      if (task.assignmentStatus === 'NEEDS_REASSIGNMENT') task.status = task.resumeStatus || 'WAITING_INPUT';
+      if (task.assignmentStatus) task.status = task.resumeStatus || 'WAITING_INPUT';
       task.assignmentStatus = null;
       task.assignmentReason = null;
       task.resumeStatus = null;
@@ -1053,13 +1088,7 @@ function removeCourseRole(state, payload, context) {
       task.assignee = 'Chưa giao';
       task.assigneeId = null;
     }
-    task.resumeStatus = task.status;
-    task.status = 'NEEDS_REASSIGNMENT';
-    task.assignmentStatus = 'NEEDS_REASSIGNMENT';
-    task.assignmentReason = role === 'manager' ? 'COURSE_MANAGER_REMOVED' : 'COURSE_MEMBER_REMOVED';
-    task.unassignedAt = timestamp;
-    task.unassignedBy = actorFrom(context);
-    task.updatedAt = timestamp;
+    markTaskForReassignment(task, role === 'manager' ? 'COURSE_MANAGER_REMOVED' : 'COURSE_MEMBER_REMOVED', timestamp, actorFrom(context));
   });
   assignment.status = 'ARCHIVED';
   assignment.archivedAt = timestamp;
