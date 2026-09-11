@@ -52,17 +52,23 @@ assert.deepEqual(response.payload.user, {
   email: 'member@peopleone.vn',
   name: 'Nam Nguyễn',
   role: 'member',
+  roles: ['member'],
+  authUserCreated: true,
+  loginAccessRestored: false,
+  loginAccessReconciled: false,
 });
 assert.equal('password' in response.payload.user, false);
 
 const authCreate = calls.find((item) => item.url.endsWith('/auth/v1/admin/users') && item.method === 'POST');
 assert.equal(authCreate.body.email_confirm, true);
 assert.equal(authCreate.body.app_metadata.module, 'training_operations');
+assert.equal(authCreate.body.app_metadata.primaryRole, 'member');
 const profileCreate = calls.find((item) => item.url.endsWith('/rest/v1/vcontent_profiles') && item.method === 'POST');
 assert.equal(profileCreate.body.role, 'ctv');
 assert.deepEqual(profileCreate.body.vplanning_roles, ['vplanning_member']);
 const directoryCreate = calls.find((item) => item.url.includes('/vplanning_users?on_conflict=email') && item.method === 'POST');
 assert.deepEqual(directoryCreate.body.roles, ['vplanning_member']);
+assert.equal(directoryCreate.body.payload.primaryRole, 'member');
 assert.ok(calls.filter((item) => item.method !== 'GET').every((item) => String(item.headers?.Authorization || '').includes('service-test')));
 
 console.log('V-Work Training Operations account provisioning API checks passed.');

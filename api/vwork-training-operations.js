@@ -3,9 +3,17 @@ import { enforceRateLimit, RATE_LIMITS } from './_rate-limit.js';
 import {
   TRAINING_OPERATIONS_STATE_ID,
   applyTrainingOperationsCommand,
+  assertTrainingOperationsCommandRole,
   createInitialTrainingOperationsState,
+  normalizeTrainingOperationsState,
   summarizeTrainingOperationsState,
 } from '../src/modules/vplanning/trainingOperations/domain.js';
+import {
+  normalizeTrainingRole,
+  resolveActiveTrainingRole,
+  resolvePrimaryTrainingRole,
+  resolveTrainingRoles,
+} from '../src/modules/vplanning/trainingOperations/roles.js';
 
 const MAX_BODY_BYTES = parseByteLimit(process.env.VWORK_TRAINING_OPERATIONS_BODY_LIMIT, 1024 * 1024);
 const readLimitedBuffer = createLimitedBufferReader({ maxBytes: MAX_BODY_BYTES });
@@ -62,36 +70,8 @@ function normalizeEmail(value) {
   return String(value || '').trim().toLowerCase();
 }
 
-function normalizeRole(value) {
-  return String(value || '')
-    .trim()
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_|_$/g, '');
-}
-
 function hasPeopleOneEmail(value) {
   return PEOPLEONE_EMAIL_DOMAINS.has(normalizeEmail(value).split('@')[1] || '');
-}
-
-function resolveTrainingRole(profile, vplanningUser) {
-  const tokens = [
-    profile?.role,
-    profile?.title,
-    ...(Array.isArray(profile?.vplanning_roles) ? profile.vplanning_roles : []),
-    ...(Array.isArray(vplanningUser?.roles) ? vplanningUser.roles : []),
-  ].map(normalizeRole).filter(Boolean);
-  const has = (...values) => values.some((value) => tokens.includes(value) || tokens.some((token) => token.includes(value)));
-  if (has('admin', 'training_ops_admin', 'vplanning_admin')) return 'admin';
-  if (has('client', 'sale', 'account_manager', 'dau_moi')) return 'intake';
-  if (has('specialist', 'content_manager', 'chuyen_vien_noi_dung', 'noi_dung')) return 'content';
-  if (has('vtraining', 'training_instructor', 'van_hanh_vtraining')) return 'vtraining';
-  if (has('training_manager', 'training_admin', 'production_manager', 'pm', 'vplanning_director')) return 'operations';
-  if (has('vplanning_manager', 'manager', 'teamlead', 'quan_ly_ekip')) return 'manager';
-  if (has('vplanning_member', 'vplanning_collaborator', 'ctv', 'member', 'cong_tac_vien')) return 'member';
-  return null;
 }
 
 async function findProfile(restUrl, serviceHeaders, sessionUser) {
@@ -110,7 +90,7 @@ async function findProfile(restUrl, serviceHeaders, sessionUser) {
 
 async function findVPlanningUser(restUrl, serviceHeaders, email) {
   if (!email) return null;
-  const rows = await requestJson(`${restUrl}/vplanning_users?select=email,full_name,title,roles,departments,owner_ids&email=${encodeURIComponent(`eq.${email}`)}&limit=1`, { headers: serviceHeaders });
+  const rows = await requestJson(`${restUrl}/vplanning_users?select=email,full_name,title,roles,departments,owner_ids,payload&email=${encodeURIComponent(`eq.${email}`)}&limit=1`, { headers: serviceHeaders });
   return Array.isArray(rows) ? rows[0] || null : null;
 }
 
@@ -129,8 +109,16 @@ async function authenticate(req, config) {
   const serviceHeaders = headers(config.serviceRoleKey, `Bearer ${config.serviceRoleKey}`);
   const profile = await findProfile(restUrl, serviceHeaders, sessionUser);
   const vplanningUser = await findVPlanningUser(restUrl, serviceHeaders, normalizeEmail(sessionUser?.email));
-  const role = resolveTrainingRole(profile, vplanningUser);
-  if (!profile || !role || (!hasPeopleOneEmail(profile.email) && !vplanningUser && !['admin', 'training_ops_admin'].includes(normalizeRole(profile.role)))) {
+  const availableRoles = resolveTrainingRoles(profile, vplanningUser);
+  const requestedRole = req.headers['x-vwork-role'];
+  if (requestedRole && !availableRoles.includes(normalizeTrainingRole(requestedRole))) {
+    const error = new Error('Tài khoản hiện tại không được cấp vai trò VWork đã chọn.');
+    error.status = 403;
+    error.code = 'TRAINING_OPERATIONS_ROLE_NOT_GRANTED';
+    throw error;
+  }
+  const role = resolveActiveTrainingRole(requestedRole, availableRoles, profile, vplanningUser);
+  if (!profile || !role || (!hasPeopleOneEmail(profile.email) && !vplanningUser && !availableRoles.includes('operations'))) {
     const error = new Error('Tài khoản hiện tại chưa được cấp quyền cho VWork Vận hành đào tạo.');
     error.status = 403;
     error.code = 'TRAINING_OPERATIONS_PERMISSION_DENIED';
@@ -138,6 +126,7 @@ async function authenticate(req, config) {
   }
   return {
     role,
+    availableRoles,
     actor: {
       id: profile.id || sessionUser.id,
       name: profile.full_name || vplanningUser?.full_name || sessionUser.email,
@@ -149,52 +138,90 @@ async function authenticate(req, config) {
   };
 }
 
-function redactInput(input) {
+function projectActiveInput(input) {
   return {
     ...input,
     versions: input.versions.map((version) => ({
-      id: version.id,
-      version: version.version,
-      status: version.status,
-      sourceDataCode: version.sourceDataCode,
-      validation: version.validation,
-      reason: version.reason,
-      effectiveAt: version.effectiveAt,
-      submittedBy: version.submittedBy,
-      submittedAt: version.submittedAt,
+      ...(version.version === input.activeVersion ? version : {
+        id: version.id,
+        version: version.version,
+        status: version.status,
+        sourceDataCode: version.sourceDataCode,
+        validation: version.validation,
+        reason: version.reason,
+        effectiveAt: version.effectiveAt,
+        submittedBy: version.submittedBy,
+        submittedAt: version.submittedAt,
+      }),
       fileCount: version.files?.length || 0,
     })),
   };
 }
 
-function stateForRole(state, auth) {
-  const output = structuredClone(state);
+function courseInputProgress(state) {
+  return state.courses.map((course) => {
+    const records = state.inputs.filter((item) => item.courseId === course.id && item.required !== false);
+    const requiredCodes = [...new Set(records.map((item) => item.dataCode))];
+    const ready = requiredCodes.filter((code) => {
+      const codeRecords = records.filter((item) => item.dataCode === code);
+      return codeRecords.length > 0 && codeRecords.every((item) => item.status === 'ACTIVE');
+    }).length;
+    return { courseId: course.id, ready, total: requiredCodes.length, classCount: state.classes.filter((item) => item.courseId === course.id).length };
+  });
+}
+
+export function stateForRole(state, auth) {
+  const output = normalizeTrainingOperationsState(state);
   const role = auth.role;
+  output.courseInputProgress = courseInputProgress(output);
+  const actorTokens = new Set([auth.actor.id, auth.actor.email, auth.actor.name].map((item) => String(item || '').trim().toLowerCase()).filter(Boolean));
+  const matchesActor = (...values) => values.some((value) => actorTokens.has(String(value || '').trim().toLowerCase()));
+  const isAssigned = (item) => matchesActor(item.assigneeId, item.assignee);
   if (['admin', 'operations'].includes(role)) return output;
+  const scopedCourseIds = new Set(output.teamAssignments.filter((item) => item.status !== 'ARCHIVED'
+    && item.role === role
+    && [item.accountId, item.accountEmail, item.accountName].some((value) => actorTokens.has(String(value || '').trim().toLowerCase())))
+    .map((item) => item.courseId));
+  if (role === 'member') output.tasks.filter(isAssigned).forEach((item) => scopedCourseIds.add(item.courseId));
+  if (role === 'manager') output.tasks.filter((item) => matchesActor(item.managerId, item.manager, item.reviewerId, item.reviewer)).forEach((item) => scopedCourseIds.add(item.courseId));
+  output.courses = output.courses.filter((item) => scopedCourseIds.has(item.id));
+  const scopedProjectIds = new Set(output.courses.map((item) => item.projectId));
+  output.projects = output.projects.filter((item) => scopedProjectIds.has(item.id));
+  output.classes = output.classes.filter((item) => scopedCourseIds.has(item.courseId));
+  output.scopes = output.scopes.filter((item) => scopedCourseIds.has(item.courseId));
+  output.inputs = output.inputs.filter((item) => scopedCourseIds.has(item.courseId));
+  output.tasks = output.tasks.filter((item) => scopedCourseIds.has(item.courseId));
+  output.teamAssignments = output.teamAssignments.filter((item) => scopedCourseIds.has(item.courseId));
+  output.courseInputProgress = output.courseInputProgress.filter((item) => scopedCourseIds.has(item.courseId));
+  output.changeRequests = output.changeRequests.filter((item) => (item.affectedCourseIds || [item.courseId]).some((id) => scopedCourseIds.has(id)));
+  output.notifications = output.notifications.filter((item) => (item.recipients || []).some((value) => [role, ...actorTokens].includes(String(value || '').trim().toLowerCase())));
+  const scopedEntityIds = new Set([...scopedCourseIds, ...scopedProjectIds, ...output.classes.map((item) => item.id), ...output.tasks.map((item) => item.id), ...output.inputs.map((item) => item.id)]);
+  output.auditEvents = output.auditEvents.filter((item) => matchesActor(item.actor?.id, item.actor?.email, item.actor?.name) || scopedEntityIds.has(item.entityId));
+  output.activeProjectId = output.projects.some((item) => item.id === output.activeProjectId) ? output.activeProjectId : output.projects[0]?.id || null;
   if (role === 'intake') {
-    output.inputs = output.inputs.filter((item) => item.ownerRole === 'intake');
-    output.tasks = [];
+    output.inputs = output.inputs.map((item) => item.ownerRole === role ? item : projectActiveInput(item));
+    output.tasks = output.tasks.filter(isAssigned);
     output.notifications = output.notifications.filter((item) => (item.recipients || []).some((value) => ['intake', auth.actor.id, auth.actor.email].includes(value)));
     output.auditEvents = output.auditEvents.filter((item) => item.actor?.id === auth.actor.id || ['PROJECT_CREATED', 'SCOPE_CHANGE_APPROVED'].includes(item.type));
     return output;
   }
   if (role === 'content') {
-    output.inputs = output.inputs.filter((item) => item.ownerRole === 'content');
-    output.tasks = [];
+    output.inputs = output.inputs.map((item) => item.ownerRole === role ? item : projectActiveInput(item));
+    output.tasks = output.tasks.filter(isAssigned);
     output.changeRequests = [];
     output.notifications = output.notifications.filter((item) => (item.recipients || []).some((value) => ['content', auth.actor.id, auth.actor.email].includes(value)));
     output.auditEvents = output.auditEvents.filter((item) => item.actor?.id === auth.actor.id || item.entityType === 'project');
     return output;
   }
   if (role === 'vtraining') {
-    output.inputs = output.inputs.filter((item) => item.ownerRole === 'vtraining');
-    output.tasks = output.tasks.filter((item) => ['material', 'roster'].includes(item.input));
+    output.inputs = output.inputs.map((item) => item.ownerRole === role ? item : projectActiveInput(item));
+    output.tasks = output.tasks.filter(isAssigned);
     output.changeRequests = [];
     return output;
   }
-  output.inputs = output.inputs.map(redactInput);
+  output.inputs = output.inputs.map(projectActiveInput);
   if (role === 'member') {
-    output.tasks = output.tasks.filter((item) => [auth.actor.id, auth.actor.email, auth.actor.name].includes(item.assigneeId) || [auth.actor.email, auth.actor.name].includes(item.assignee));
+    output.tasks = output.tasks.filter(isAssigned);
     output.changeRequests = [];
   }
   return output;
@@ -220,21 +247,102 @@ async function loadState(auth) {
     happenedAt: item.happened_at,
   }));
   return {
-    state: { ...(row.payload || {}), activeProjectId: row.active_project_id || row.payload?.activeProjectId || null, tasks, auditEvents },
+    state: normalizeTrainingOperationsState({ ...(row.payload || {}), activeProjectId: row.active_project_id || row.payload?.activeProjectId || null, tasks, auditEvents }),
     version: Number(row.version || 0), updatedAt: row.updated_at || null, storage: 'database',
   };
 }
 
-async function loadTeamDirectory(auth) {
-  const rows = await requestJson(`${auth.restUrl}/vplanning_users?select=email,full_name,title,roles,departments,owner_ids&order=full_name.asc`, { headers: auth.serviceHeaders });
+async function loadVWorkAccountDirectory(auth) {
+  const [rows, profiles] = await Promise.all([
+    requestJson(`${auth.restUrl}/vplanning_users?select=email,full_name,title,roles,departments,owner_ids,payload&order=full_name.asc`, { headers: auth.serviceHeaders }),
+    requestJson(`${auth.restUrl}/vcontent_profiles?select=id,email,full_name,role,title,vplanning_roles,active,auth_user_id`, { headers: auth.serviceHeaders }),
+  ]);
+  const profilesByEmail = new Map((Array.isArray(profiles) ? profiles : []).map((item) => [normalizeEmail(item.email), item]));
+  const profilesByAuthUserId = new Map((Array.isArray(profiles) ? profiles : []).filter((item) => item.auth_user_id).map((item) => [String(item.auth_user_id), item]));
   return (Array.isArray(rows) ? rows : []).map((item) => {
-    const role = resolveTrainingRole({ title: item.title }, item);
-    return role === 'manager' || role === 'member' ? {
-      id: normalizeEmail(item.email),
-      name: String(item.full_name || item.email || '').trim(),
-      role,
-    } : null;
+    const email = normalizeEmail(item.email);
+    const authUserId = String(item.payload?.authUserId || '');
+    const profile = (authUserId && profilesByAuthUserId.get(authUserId)) || profilesByEmail.get(email);
+    const roles = resolveTrainingRoles(profile || { title: item.title }, item);
+    const projectIds = Array.isArray(item.payload?.projectIds) ? item.payload.projectIds.map(String) : [];
+    const classIds = Array.isArray(item.payload?.classIds) ? item.payload.classIds.map(String) : [];
+    const courseIds = Array.isArray(item.payload?.courseIds) ? item.payload.courseIds.map(String) : [];
+    // A vplanning_users row is the VWork account record. A missing PeopleOne
+    // profile must not silently remove that account from task assignment; only
+    // an explicitly disabled linked profile makes the account inactive.
+    const active = profile?.active !== false;
+    return {
+      id: email,
+      name: String(item.full_name || profile?.full_name || item.email || '').trim(),
+      email,
+      role: resolvePrimaryTrainingRole(profile || { title: item.title }, item, roles),
+      roles,
+      active,
+      profileLinked: Boolean(profile),
+      assignable: active,
+      projectIds,
+      courseIds,
+      classIds,
+    };
   }).filter((item) => item?.id && item?.name);
+}
+
+async function loadTeamDirectory(auth) {
+  const accounts = await loadVWorkAccountDirectory(auth);
+  return accounts.filter((item) => item.assignable);
+}
+
+function assignmentScopeAllows(person, task) {
+  const projectAllowed = !person.projectIds?.length || person.projectIds.includes(String(task.projectId));
+  const courseAllowed = !person.courseIds?.length || person.courseIds.includes(String(task.courseId));
+  const classAllowed = !person.classIds?.length || person.classIds.includes(String(task.classId)) || person.classIds.includes(String(task.classCode));
+  return projectAllowed && courseAllowed && classAllowed;
+}
+
+async function normalizeAssignmentCommand(auth, state, command) {
+  if (String(command?.type || '').toUpperCase() !== 'ASSIGN_TASKS') return command;
+  const directory = await loadTeamDirectory(auth);
+  const payload = structuredClone(command.payload || {});
+  const assignee = directory.find((item) => item.id === normalizeEmail(payload.assigneeId));
+  const reviewer = directory.find((item) => item.id === normalizeEmail(payload.reviewerId));
+  if (!assignee?.assignable) {
+    const error = new Error('Người nhận phải là tài khoản VWork đang hoạt động.');
+    error.status = 400;
+    error.code = 'TRAINING_OPERATIONS_ASSIGNEE_INVALID';
+    throw error;
+  }
+  if (!reviewer || !reviewer.roles.some((role) => ['manager', 'operations'].includes(role))) {
+    const error = new Error('Người xác nhận không hợp lệ trong danh mục VWork.');
+    error.status = 400;
+    error.code = 'TRAINING_OPERATIONS_REVIEWER_INVALID';
+    throw error;
+  }
+  if (payload.requireSeparation && assignee.id === reviewer.id) {
+    const error = new Error('Người thực hiện và người duyệt phải khác nhau.');
+    error.status = 400;
+    error.code = 'TRAINING_OPERATIONS_SEPARATION_REQUIRED';
+    throw error;
+  }
+  const taskIds = Array.isArray(payload.taskIds) ? payload.taskIds : [payload.taskId];
+  const tasks = taskIds.map((taskId) => state.tasks.find((item) => item.id === taskId));
+  if (tasks.some((item) => !item)) {
+    const error = new Error('Có công việc không tồn tại trong phạm vi hiện tại.');
+    error.status = 404;
+    error.code = 'TRAINING_OPERATIONS_TASK_NOT_FOUND';
+    throw error;
+  }
+  const assigningActor = directory.find((item) => item.id === normalizeEmail(auth.actor.email));
+  if (tasks.some((task) => !assignmentScopeAllows(assignee, task) || !assignmentScopeAllows(reviewer, task) || (assigningActor && !assignmentScopeAllows(assigningActor, task)))) {
+    const error = new Error('Người giao, người nhận hoặc người xác nhận nằm ngoài phạm vi dự án/lớp.');
+    error.status = 403;
+    error.code = 'TRAINING_OPERATIONS_ASSIGNMENT_SCOPE_DENIED';
+    throw error;
+  }
+  payload.assigneeId = assignee.id;
+  payload.assigneeName = assignee.name;
+  payload.reviewerId = reviewer.id;
+  payload.reviewerName = reviewer.name;
+  return { ...command, payload };
 }
 
 async function loadCommandRequest(auth, requestId) {
@@ -284,7 +392,8 @@ async function saveState(auth, nextState, expectedVersion, requestId, commandTyp
 }
 
 function sendError(res, error) {
-  res.status(Number(error.status || 500)).json({
+  const status = error.code === 'TRAINING_OPERATIONS_PERMISSION_DENIED' ? 403 : Number(error.status || 500);
+  res.status(status).json({
     ok: false,
     code: error.code || (error.status === 409 ? 'TRAINING_OPERATIONS_VERSION_CONFLICT' : 'TRAINING_OPERATIONS_ERROR'),
     error: String(error.message || error),
@@ -312,8 +421,12 @@ export default async function handler(req, res) {
     const auth = await authenticate(req, config);
     const current = await loadState(auth);
     if (req.method === 'GET') {
-      const directory = ['operations', 'admin', 'manager'].includes(auth.role) ? await loadTeamDirectory(auth) : [];
-      res.status(200).json({ ok: true, role: auth.role, actor: auth.actor, directory, state: stateForRole(current.state, auth), version: current.version, updatedAt: current.updatedAt, storage: current.storage });
+      const canManageAccounts = ['operations', 'admin'].includes(auth.role);
+      const canAssignTasks = canManageAccounts || auth.role === 'manager';
+      const fullDirectory = canAssignTasks ? await loadVWorkAccountDirectory(auth) : [];
+      const accountDirectory = canManageAccounts ? fullDirectory : [];
+      const directory = canAssignTasks ? fullDirectory.filter((item) => item.assignable) : [];
+      res.status(200).json({ ok: true, role: auth.role, availableRoles: auth.availableRoles, actor: auth.actor, directory, accountDirectory, state: stateForRole(current.state, auth), version: current.version, updatedAt: current.updatedAt, storage: current.storage });
       return;
     }
     if (req.method !== 'POST') {
@@ -341,6 +454,7 @@ export default async function handler(req, res) {
       res.status(200).json({
         ok: true,
         role: auth.role,
+        availableRoles: auth.availableRoles,
         state: stateForRole(current.state, auth),
         version: Number(replay.result?.version ?? current.version),
         updatedAt: replay.result?.updatedAt || current.updatedAt,
@@ -354,7 +468,8 @@ export default async function handler(req, res) {
       res.status(409).json({ ok: false, code: 'TRAINING_OPERATIONS_VERSION_CONFLICT', error: 'Dữ liệu đã thay đổi trên server. Hãy tải lại trước khi lưu.', version: current.version, updatedAt: current.updatedAt });
       return;
     }
-    const command = body.command;
+    assertTrainingOperationsCommandRole(String(body.command?.type || '').toUpperCase(), auth.role);
+    const command = await normalizeAssignmentCommand(auth, current.state, body.command);
     const previousAuditLength = current.state.auditEvents?.length || 0;
     const nextState = applyTrainingOperationsCommand(current.state, command, { role: auth.role, actor: auth.actor });
     const newAuditEvents = (nextState.auditEvents || []).slice(previousAuditLength);
@@ -362,6 +477,7 @@ export default async function handler(req, res) {
     res.status(200).json({
       ok: true,
       role: auth.role,
+      availableRoles: auth.availableRoles,
       state: stateForRole(nextState, auth),
       version: Number(saved.version),
       updatedAt: saved.updatedAt || null,
@@ -373,4 +489,3 @@ export default async function handler(req, res) {
     sendError(res, error);
   }
 }
-

@@ -1,0 +1,20 @@
+{
+  "file": "E:\\2026\\Cải tiến\\VWork\\VWork_feedback-mockup_code-UC-van-hanh-dao-tao\\VWork_feedback-mockup_code-UC-van-hanh-dao-tao_07_can-xac-nhan.docx",
+  "counts": {
+    "high": 1,
+    "medium": 0,
+    "low": 0
+  },
+  "findings": [
+    {
+      "severity": "high",
+      "kind": "image_missing_alt",
+      "message": "Image missing alt text (descr/title empty)",
+      "context": {
+        "part": "word/document.xml",
+        "id": "1",
+        "name": "Picture 1"
+      }
+    }
+  ]
+}

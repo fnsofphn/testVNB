@@ -15,3 +15,5 @@ modules/
 !src/modules/
 !src/modules/**
 docs/SUNI_INTEGRATION_RESEARCH.md
+*.png
+*.pdf

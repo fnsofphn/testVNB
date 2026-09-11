@@ -1,0 +1,16 @@
+--- a
++++ b
+@@ -1,9 +1,4 @@
+-1. input cần tính đến trường hợp số lượng lớn hơn 1, ví dụ có 2, 3 game thì phải có 2, 3 ô nhập link hay có thể tuỳ chỉnh bằng dấu cộng trừ
+-2. Ấn vào lớp thì lại nhảy ra giao diện của danh sách dự án -> cần vào công việc của lớp
+-3. file ko cần phải duyệt định dạng, chấp nhận hết, tải lên hiện đã cập nhật, xác nhận thành công là được
+-4. giao diện màn này ở các máy khác nhau lại khác cấu trúc; cần thống nhất lại trình bày nhiều layer: vào lớp mở công việc , pop up cheklist, ko trình bày cùng 1 page
+-5. màn này làm rõ có phải để thêm sửa xoá công việc trong lớp ko
+-6. màn này đổi tên tab thành Công việc
+-7. chỗ này tôi cần giao được việc cho nhiều tài khoản, ko chỉ là CTV, nên hiện pop up bạn muốn giao việc cho ai, rồi có chỗ search, và ai được chọn lần trước thì hiện lên gần
+-8. bỏ trang Cấu hình vtraining
+-9. 
++Feedback cần sửa VWork
++Tài liệu ghi nhận feedback về luồng gán vai trò trong phần Ekip khóa học.
++FB 01 Cải thiện khả năng tìm thấy thao tác Gán vai trò
++Vị trí hiện tại của thao tác Gán vai trò khó tìm. Cần điều chỉnh để người dùng dễ nhận biết và thực hiện thao tác này trong luồng quản lý ekip khóa học.

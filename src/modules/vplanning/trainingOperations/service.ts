@@ -1,14 +1,14 @@
-import * as XLSX from 'xlsx';
 import { supabase } from '@/lib/supabaseClient';
-import { validateRosterRows } from './validation.js';
 
 export type TrainingOperationsCommand = { type: string; payload?: Record<string, unknown> };
 
 type TrainingOperationsResponse = {
   ok: boolean;
   role: string;
+  availableRoles?: string[];
   actor?: { id: string; name: string; email: string; role: string };
-  directory?: Array<{ id: string; name: string; role: 'manager' | 'member' }>;
+  directory?: Array<{ id: string; name: string; email: string; role?: string; roles?: string[]; active?: boolean; profileLinked?: boolean; assignable?: boolean }>;
+  accountDirectory?: Array<{ id: string; name: string; email: string; role?: string; roles?: string[]; active?: boolean; profileLinked?: boolean }>;
   state: any;
   version: number;
   updatedAt?: string | null;
@@ -37,10 +37,11 @@ async function getAccessToken() {
   return session.access_token;
 }
 
-async function requestApi(path: string, init: RequestInit = {}) {
+async function requestApi(path: string, init: RequestInit = {}, activeRole?: string) {
   const token = await getAccessToken();
   const headers = new Headers(init.headers || {});
   headers.set('Authorization', `Bearer ${token}`);
+  if (activeRole) headers.set('X-VWork-Role', activeRole);
   if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
   const response = await fetch(path, { ...init, headers });
   const payload = await response.json().catch(() => ({}));
@@ -55,22 +56,29 @@ async function requestApi(path: string, init: RequestInit = {}) {
   return payload;
 }
 
-export async function fetchTrainingOperationsState(): Promise<TrainingOperationsResponse> {
-  return requestApi('/api/vwork-training-operations', { method: 'GET' });
+export async function fetchTrainingOperationsState(activeRole?: string): Promise<TrainingOperationsResponse> {
+  return requestApi('/api/vwork-training-operations', { method: 'GET' }, activeRole);
 }
 
-export async function executeTrainingOperationsCommand(command: TrainingOperationsCommand, expectedVersion: number): Promise<TrainingOperationsResponse> {
+export async function executeTrainingOperationsCommand(command: TrainingOperationsCommand, expectedVersion: number, activeRole?: string): Promise<TrainingOperationsResponse> {
   return requestApi('/api/vwork-training-operations', {
     method: 'POST',
     body: JSON.stringify({ command, expectedVersion, requestId: crypto.randomUUID() }),
-  });
+  }, activeRole);
 }
 
-export async function createTrainingOperationsAccount(input: { fullName: string; email: string; password: string; role: 'manager' | 'member' }) {
+export async function createTrainingOperationsAccount(input: { fullName: string; email: string; password: string; roles: string[]; replaceRoles?: boolean; restoreLoginAccess?: boolean }, activeRole?: string) {
   return requestApi('/api/vwork-training-operations-user', {
     method: 'POST',
     body: JSON.stringify(input),
-  }) as Promise<{ ok: true; user: { id: string; authUserId: string; email: string; name: string; role: 'manager' | 'member' } }>;
+  }, activeRole) as Promise<{ ok: true; user: { id: string; authUserId: string; email: string; name: string; role: string; roles: string[]; authUserCreated: boolean; loginAccessRestored: boolean; loginAccessReconciled: boolean } }>;
+}
+
+export async function restoreActiveTrainingOperationsLoginAccess(activeRole?: string) {
+  return requestApi('/api/vwork-training-operations-user', {
+    method: 'POST',
+    body: JSON.stringify({ action: 'RESTORE_ACTIVE_LOGIN_ACCESS' }),
+  }, activeRole) as Promise<{ ok: true; reconciliation: { candidates: number; checked: number; loginAccessReady: number; restored: number; linked: number; profilesCreated: number; rolesReconciled: number; taskAccessGranted: number; missingAuth: number; failures: { email: string; error: string }[] } }>;
 }
 
 async function uploadFileToSignedUrl(signedUrl: string, file: File) {
@@ -84,32 +92,22 @@ async function uploadFileToSignedUrl(signedUrl: string, file: File) {
   }
 }
 
-export async function uploadTrainingOperationsFile(file: File, entityId: string, documentType: string) {
+export async function uploadTrainingOperationsFile(file: File, entityId: string, documentType: string, activeRole?: string) {
   const payload = await requestApi('/api/vwork-training-operations-file', {
     method: 'POST',
     body: JSON.stringify({ fileName: file.name, contentType: file.type || 'application/octet-stream', size: file.size, entityId, documentType }),
-  });
+  }, activeRole);
   const upload = payload?.upload;
   if (!upload?.bucket || !upload.path || !upload.signedUrl) throw new Error('Server did not return a signed upload URL.');
   await uploadFileToSignedUrl(upload.signedUrl, file);
   return { id: upload.path, name: upload.fileName || file.name, bucket: upload.bucket, path: upload.path, private: true, size: file.size, contentType: file.type || 'application/octet-stream' };
 }
 
-export async function getTrainingOperationsFileUrl(path: string, fileName?: string) {
+export async function getTrainingOperationsFileUrl(path: string, fileName?: string, activeRole?: string) {
   const payload = await requestApi('/api/vwork-training-operations-file', {
     method: 'POST',
     body: JSON.stringify({ action: 'signed_download', path, fileName }),
-  });
+  }, activeRole);
   if (!payload?.download?.signedUrl) throw new Error('Server did not return a signed download URL.');
   return payload.download.signedUrl as string;
 }
-
-export async function validateRosterWorkbook(file: File, expectedClassCodes: string[]) {
-  const arrayBuffer = await file.arrayBuffer();
-  const workbook = XLSX.read(arrayBuffer, { type: 'array', cellDates: false });
-  const sheetName = workbook.SheetNames[0];
-  if (!sheetName) return validateRosterRows([], expectedClassCodes);
-  const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets[sheetName], { defval: '' });
-  return validateRosterRows(rows, expectedClassCodes);
-}
-

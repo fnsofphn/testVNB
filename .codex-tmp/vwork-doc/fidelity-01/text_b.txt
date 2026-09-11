@@ -1,0 +1,4 @@
+Feedback cần sửa VWork
+Tài liệu ghi nhận feedback về luồng gán vai trò trong phần Ekip khóa học.
+FB 01 Cải thiện khả năng tìm thấy thao tác Gán vai trò
+Vị trí hiện tại của thao tác Gán vai trò khó tìm. Cần điều chỉnh để người dùng dễ nhận biết và thực hiện thao tác này trong luồng quản lý ekip khóa học.

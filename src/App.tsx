@@ -146,12 +146,30 @@ function canAccessVPlanning(profile: AuthProfile | null) {
   return allowedPages.includes('vplanning') || hasVPlanningSpecificAccess(profile);
 }
 
+function hasTrainingOperationsProfileAccess(profile: AuthProfile | null) {
+  if (!profile) return false;
+  const explicitRoles = (profile.vplanningRoles || []).map(normalizeAccessText);
+  if (explicitRoles.some((role) => ['vplanning_intake', 'vplanning_content', 'vplanning_vtraining', 'vplanning_manager', 'vplanning_member'].includes(role))) return true;
+  const profileRole = normalizeAccessText(profile.role);
+  const title = normalizeAccessText(profile.title);
+  if (profileRole === 'client' && ['dau_moi', 'sale', 'account_manager'].some((token) => title.includes(token))) return true;
+  if (profileRole === 'specialist' && ['chuyen_vien_noi_dung', 'content', 'van_hanh_vtraining', 'vtraining'].some((token) => title.includes(token))) return true;
+  return false;
+}
+
+function trainingOperationsEnabled() {
+  return !import.meta.env.PROD || import.meta.env.VITE_ENABLE_VWORK_TRAINING_OPERATIONS === 'true';
+}
+
 function StaticVPlanningPage() {
   const { loading, session, profile, signOut } = useAuth();
 
   if (loading) return <AppSplash />;
   if (!session) return <Navigate to="/login?next=%2Fvwork" replace />;
-  if (!canAccessVPlanning(profile)) return <Navigate to="/login" replace />;
+  if (!canAccessVPlanning(profile)) {
+    if (trainingOperationsEnabled() && hasTrainingOperationsProfileAccess(profile)) return <Navigate to="/vwork/training-operations" replace />;
+    return <Navigate to="/login" replace />;
+  }
   return (
     <Suspense fallback={<AppSplash />}>
       <VPlanningNativePage onSignOut={signOut} />
@@ -160,18 +178,21 @@ function StaticVPlanningPage() {
 }
 
 function resolveTrainingOperationsRole(profile: AuthProfile | null) {
-  const identity = normalizeAccessText([
-    profile?.role,
-    profile?.title,
-    ...(profile?.vplanningRoles || []),
-    ...(profile?.vplanningDepartments || []),
-  ].filter(Boolean).join(' '));
-  if (identity.includes('client') || identity.includes('sale') || identity.includes('account_manager') || identity.includes('dau_moi')) return 'intake';
-  if (identity.includes('noi_dung') || identity.includes('content')) return 'content';
-  if (identity.includes('vtraining') || identity.includes('training_instructor') || identity.includes('van_hanh_vtraining')) return 'vtraining';
-  if (identity.includes('admin') || identity.includes('training_manager') || identity.includes('production_manager') || identity.includes('vplanning_director')) return 'operations';
-  if (identity.includes('collaborator') || identity.includes('member') || identity.includes('nhan_vien')) return 'member';
-  if (identity.includes('manager') || identity.includes('truong')) return 'manager';
+  const profileRole = normalizeAccessText(profile?.role || '');
+  const title = normalizeAccessText(profile?.title || '');
+  const grants = (profile?.vplanningRoles || []).map(normalizeAccessText);
+  const hasGrant = (...values: string[]) => values.some((value) => grants.includes(value));
+  if (['admin', 'training_ops_admin', 'training_manager', 'training_admin', 'production_manager', 'vplanning_director'].includes(profileRole) || hasGrant('vplanning_admin', 'vplanning_director')) return 'operations';
+  if (['client', 'sale', 'account_manager'].includes(profileRole) || ['dau_moi', 'dau_moi_sale', 'sale'].includes(title)) return 'intake';
+  if (['chuyen_vien_van_hanh_vtraining', 'van_hanh_vtraining', 'vtraining'].includes(title)) return 'vtraining';
+  if (['chuyen_vien_noi_dung', 'noi_dung', 'content'].includes(title)) return 'content';
+  if (['quan_ly_ekip', 'manager', 'teamlead'].includes(title)) return 'manager';
+  if (['thanh_vien_ekip', 'member', 'cong_tac_vien'].includes(title)) return 'member';
+  if (hasGrant('account_manager', 'vplanning_intake')) return 'intake';
+  if (hasGrant('content_manager', 'vplanning_content')) return 'content';
+  if (hasGrant('vtraining', 'vplanning_vtraining')) return 'vtraining';
+  if (hasGrant('vplanning_manager')) return 'manager';
+  if (hasGrant('vplanning_member', 'vplanning_collaborator')) return 'member';
   return 'member';
 }
 
@@ -179,8 +200,8 @@ function StaticVWorkTrainingOperationsPage() {
   const { loading, session, profile, signOut } = useAuth();
   if (loading) return <AppSplash />;
   if (!session) return <Navigate to="/login?next=%2Fvwork%2Ftraining-operations" replace />;
-  if (!canAccessVPlanning(profile)) return <Navigate to="/login" replace />;
-  if (import.meta.env.PROD && import.meta.env.VITE_ENABLE_VWORK_TRAINING_OPERATIONS !== 'true') {
+  if (!canAccessVPlanning(profile) && !hasTrainingOperationsProfileAccess(profile)) return <Navigate to="/login" replace />;
+  if (!trainingOperationsEnabled()) {
     return <Navigate to="/vwork" replace />;
   }
   return (
