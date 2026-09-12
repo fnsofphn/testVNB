@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="VWork Operations — prototype v2: Tổng quan nhiều tầng, Khóa/lớp có trạng thái và deadline, Input nằm trong từng công việc.">
+  <title>VWork Operations — Production Review v2</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23c8102e'/%3E%3Ctext x='32' y='41' text-anchor='middle' font-family='Arial' font-size='26' font-weight='700' fill='white'%3EP1%3C/text%3E%3C/svg%3E">
+  <style>
+:root{--sidebar:#1b050d;--sidebar-hover:#310916;--brand:#c8102e;--brand-dark:#9f0d25;--brand-soft:#fff0f3;--ink:#1c2b3f;--muted:#738095;--line:#dfe5ec;--line-soft:#ebeff4;--surface:#fff;--canvas:#f5f7fa;--blue:#2468ad;--blue-soft:#eaf3fc;--green:#087f57;--green-soft:#e4f5ee;--amber:#a5680d;--amber-soft:#fff3d9;--orange:#b25b16;--orange-soft:#fce9d8;--purple:#70459a;--purple-soft:#eee5f8;--shadow:0 10px 32px rgba(22,41,65,.09);--sidebar-width:242px}
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%}body{color:var(--ink);background:var(--canvas);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}button,input,select,textarea{font:inherit}button,select{cursor:pointer}button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid rgba(36,104,173,.22);outline-offset:1px}[hidden]{display:none!important}
+    .app{min-height:100vh;display:grid;grid-template-columns:var(--sidebar-width) minmax(0,1fr)}.sidebar{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;color:#fff;background:var(--sidebar);z-index:30}.brand{height:82px;display:flex;align-items:center;gap:12px;padding:0 18px;border-bottom:1px solid rgba(255,255,255,.1)}.brand-mark{width:40px;height:40px;display:grid;place-items:center;flex:0 0 40px;border-radius:9px;background:var(--brand);font-weight:850;letter-spacing:-.04em;box-shadow:0 9px 22px rgba(200,16,46,.25)}.brand strong{display:block;font-size:15px;line-height:1.15}.brand small{display:block;margin-top:3px;color:#bda9b0;font-size:11px}.sidebar-nav{padding:16px 10px;overflow-y:auto}.nav-group{margin:0 0 17px}.nav-label{margin:0 10px 7px;color:#8d747d;font-size:10px;font-weight:800;letter-spacing:.11em}.nav-button{width:100%;min-height:40px;display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 0;padding:9px 10px;border:0;border-radius:7px;color:#d9cdd1;background:transparent;text-align:left;font-size:13px;font-weight:650}.nav-button:hover{color:#fff;background:var(--sidebar-hover)}.nav-button.active{color:#fff;background:var(--brand);box-shadow:0 8px 19px rgba(200,16,46,.18)}.nav-count{min-width:24px;padding:2px 6px;border-radius:9px;text-align:center;color:#d8cbd0;background:rgba(255,255,255,.09);font-size:10px}.nav-button.active .nav-count{color:#fff;background:rgba(255,255,255,.18)}.sidebar-foot{margin-top:auto;padding:14px 12px}.store-card{padding:13px;border:1px solid rgba(255,255,255,.1);border-radius:9px;background:rgba(255,255,255,.04)}.store-card b{display:block;color:#eeb7c1;font-size:10px;letter-spacing:.1em}.store-card p{margin:7px 0 9px;color:#bcaab0;font-size:11px;line-height:1.45}.sync{display:inline-flex;align-items:center;gap:6px;color:#8dd3b2;font-size:10px}.sync:before{content:"";width:6px;height:6px;border-radius:50%;background:#32b67a}
+    .main-shell{min-width:0}.topbar{position:sticky;top:0;z-index:20;height:66px;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:0 28px;background:#fff;border-bottom:1px solid var(--line)}.breadcrumb{min-width:0;color:#7d8999;font-size:11px;letter-spacing:.025em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.review-chip{margin-right:auto;padding:4px 8px;border-radius:5px;color:#8b5a10;background:#fff4d8;font-size:10px;font-weight:750}.identity{display:flex;align-items:center;gap:10px}.identity-copy{text-align:right}.identity-copy b{display:block;font-size:12px}.identity-copy small{display:block;max-width:190px;color:#8b96a5;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.role-label{color:#697588;font-size:11px}.role-select{width:215px;height:36px;padding:0 34px 0 11px;border:1px solid #ccd5df;border-radius:7px;color:#24364d;background:#fff;font-size:12px;font-weight:750}.avatar{width:32px;height:32px;display:grid;place-items:center;border-radius:50%;color:var(--brand);background:var(--brand-soft);font-size:11px;font-weight:850}
+    .context-bar{min-height:67px;display:grid;grid-template-columns:minmax(230px,1fr) 18px minmax(230px,1fr) 18px minmax(260px,1.25fr);align-items:center;gap:10px;padding:9px 28px;background:#fff;border-bottom:1px solid var(--line)}.context-bar>span{color:#a1acb9;text-align:center}.context-bar label{min-width:0}.context-bar label>span{display:block;margin-bottom:4px;color:#8a95a4;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.context-bar select{width:100%;height:34px;padding:0 30px 0 10px;border:1px solid #d7dee6;border-radius:6px;color:#344054;background:#fafbfc;font-size:11px;font-weight:650}
+    .workspace{width:min(1500px,100%);margin:0 auto;padding:22px 28px 48px}.project-card{min-height:96px;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:18px 20px;border:1px solid var(--line);border-radius:10px;background:#fff}.eyebrow{color:var(--brand);font-size:10px;font-weight:850;letter-spacing:.08em}.project-card h1{margin:5px 0 2px;color:#1d324d;font-size:20px;letter-spacing:-.02em}.project-card p{margin:0;color:var(--muted);font-size:12px}.scope-box{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.scope-pill{padding:7px 9px;border-radius:7px;color:#566579;background:#f4f6f9;border:1px solid #e5e9ee;font-size:10px;font-weight:700}
+    .journey{display:grid;grid-template-columns:repeat(5,1fr);align-items:center;margin:14px 0;border:1px solid var(--line);border-radius:10px;background:#fff;overflow:hidden}.journey-step{position:relative;padding:14px 12px 14px 50px;border-right:1px solid var(--line-soft)}.journey-step:last-child{border-right:0}.journey-step b:first-child{position:absolute;left:14px;top:15px;width:25px;height:25px;display:grid;place-items:center;border-radius:50%;background:#eaf4ef;color:var(--green);font-size:10px}.journey-step.current{background:#fff8fa}.journey-step.current b:first-child{color:#fff;background:var(--brand)}.journey-step strong{display:block;color:#2b3b50;font-size:11px}.journey-step small{display:block;margin-top:2px;color:#8a95a4;font-size:9px}
+    .page-surface{border:1px solid var(--line);border-radius:10px;background:#fff;overflow:hidden;box-shadow:0 2px 5px rgba(28,43,63,.025)}.surface-head{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 18px;border-bottom:1px solid var(--line)}.surface-head small{display:block;color:var(--brand);font-size:9px;font-weight:850;letter-spacing:.08em}.surface-head h2{margin:3px 0 2px;font-size:17px;color:#1d324d}.surface-head p{margin:0;color:var(--muted);font-size:11px}.head-actions{display:flex;align-items:center;gap:8px}.btn{min-height:34px;padding:7px 11px;border:1px solid #cad4df;border-radius:6px;color:#34465c;background:#fff;font-size:11px;font-weight:750}.btn:hover{border-color:#98a8ba;background:#f8fafc}.btn.primary{color:#fff;background:var(--brand);border-color:var(--brand)}.btn.primary:hover{background:var(--brand-dark)}.btn.soft{color:var(--brand);background:var(--brand-soft);border-color:#f2c8cf}.btn:disabled{opacity:.45;cursor:not-allowed}
+    .bulkbar{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:10px 18px;background:#fff8fa;border-bottom:1px solid #f3dce1}.bulkbar label{display:flex;align-items:center;gap:8px;color:#59677a;font-size:11px}.assign-button{min-width:120px;color:#fff;background:#e38a9a;border-color:#e38a9a}input[type=checkbox]{accent-color:var(--brand)}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse}thead th{padding:9px 12px;color:#78869a;background:#f7f9fb;border-bottom:1px solid var(--line);font-size:9px;font-weight:850;letter-spacing:.03em;text-align:left}tbody td{padding:10px 12px;border-bottom:1px solid var(--line-soft);color:#3d4d61;font-size:11px;vertical-align:middle}tbody tr.task-row{cursor:pointer}tbody tr.task-row:hover{background:#f9fbfd}.check-col{width:36px;text-align:center}.task-title{display:block;color:#24364d;font-size:12px;font-weight:750}.task-meta{display:block;margin-top:2px;color:#8995a5;font-size:9px}.group-row td{padding:7px 12px;color:#526176;background:#f6f8fa;font-size:9px;font-weight:850;letter-spacing:.055em;text-transform:uppercase}.group-row td:last-child{text-align:right;color:#8793a2;font-weight:600;letter-spacing:0;text-transform:none}.badge{display:inline-flex;align-items:center;padding:4px 7px;border-radius:999px;font-size:9px;font-weight:800;white-space:nowrap}.badge.done{color:var(--green);background:var(--green-soft)}.badge.ready{color:var(--blue);background:var(--blue-soft)}.badge.waiting{color:var(--amber);background:var(--amber-soft)}.badge.progress{color:#26548d;background:#e6eef8}.badge.review{color:var(--purple);background:var(--purple-soft)}.badge.rework{color:var(--orange);background:var(--orange-soft)}.badge.unassigned{color:#697586;background:#eef1f4}.input-state{color:#42546a;font-weight:650}.input-state.missing{color:#9d6815}.row-actions{display:flex;justify-content:flex-end;gap:4px}.icon-btn{min-width:54px;height:27px;padding:0 6px;display:grid;place-items:center;border:1px solid #d7dee6;border-radius:6px;color:#647286;background:#fff;font-size:9px}.icon-btn:hover{color:var(--brand);border-color:#d9a8b2;background:var(--brand-soft)}
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}.kpi{padding:16px;border:1px solid var(--line);border-radius:9px;background:#fff;border-top:3px solid #9aa8b8}.kpi.blue{border-top-color:var(--blue)}.kpi.green{border-top-color:#20a06e}.kpi.amber{border-top-color:#e1a33e}.kpi.red{border-top-color:var(--brand)}.kpi span{display:block;color:var(--muted);font-size:10px}.kpi strong{display:block;margin:5px 0 1px;color:#21344d;font-size:25px}.kpi small{color:#929dab;font-size:9px}.two-col{display:grid;grid-template-columns:1.15fr .85fr;gap:14px}.card{padding:17px;border:1px solid var(--line);border-radius:9px;background:#fff}.card h3{margin:0 0 13px;color:#263a54;font-size:14px}.class-list,.activity-list{display:grid;gap:8px}.class-row,.activity-row{display:grid;grid-template-columns:1fr auto;gap:12px;padding:11px;border:1px solid var(--line-soft);border-radius:7px;background:#fbfcfd}.class-row b,.activity-row b{display:block;color:#34465d;font-size:11px}.class-row small,.activity-row small{color:#8b97a6;font-size:9px}.progress-bar{width:100%;height:5px;margin-top:7px;border-radius:4px;background:#e7ecf1;overflow:hidden}.progress-bar i{display:block;height:100%;border-radius:inherit;background:var(--blue)}
+    .input-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;padding:16px}.input-card{min-height:176px;display:flex;flex-direction:column;padding:14px;border:1px solid var(--line);border-radius:8px;background:#fff}.input-card.ready{border-color:#b9dfce;background:#fbfffd}.input-code{display:flex;align-items:center;justify-content:space-between;color:#6d7b8e;font-size:9px;font-weight:850}.input-card h3{margin:15px 0 4px;font-size:13px}.input-card p{margin:0;color:var(--muted);font-size:10px}.input-source{margin:13px 0;padding:9px;border-radius:6px;background:#f4f6f8;color:#657388;font-size:9px}.input-card .btn{margin-top:auto;width:100%}.structure-list{padding:10px 16px 16px}.structure-row{display:grid;grid-template-columns:1.5fr 1fr .65fr .65fr auto;align-items:center;gap:12px;padding:13px 12px;border-bottom:1px solid var(--line-soft)}.structure-row:hover{background:#fafbfd}.structure-row b{display:block;font-size:12px}.structure-row small{color:var(--muted);font-size:9px}.structure-row>span{color:#5e6d80;font-size:10px}.change-list,.audit-list{padding:14px 18px 20px}.change-row{display:grid;grid-template-columns:110px 1fr 180px auto;align-items:center;gap:15px;padding:13px 0;border-bottom:1px solid var(--line-soft)}.change-row b{font-size:11px}.change-row p{margin:2px 0 0;color:var(--muted);font-size:9px}.audit-row{position:relative;margin-left:7px;padding:0 0 17px 20px;border-left:1px solid #d6dee7}.audit-row:before{content:"";position:absolute;left:-5px;top:2px;width:8px;height:8px;border-radius:50%;background:var(--blue);border:2px solid #fff}.audit-row b{display:block;font-size:11px}.audit-row small{display:block;margin-top:3px;color:#8592a1;font-size:9px}
+    .drawer-backdrop,.modal-backdrop{position:fixed;inset:0;z-index:80;background:rgba(9,22,38,.46)}.drawer{position:absolute;top:0;right:0;width:min(460px,100%);height:100%;display:flex;flex-direction:column;background:#fff;box-shadow:-20px 0 60px rgba(10,26,45,.18)}.drawer-head{display:flex;justify-content:space-between;gap:16px;padding:19px;border-bottom:1px solid var(--line)}.drawer-head small{color:var(--brand);font-size:9px;font-weight:850}.drawer-head h2{margin:4px 0 0;font-size:17px}.close{width:31px;height:31px;padding:0;border:1px solid var(--line);border-radius:7px;background:#fff;color:#5f6e80}.drawer-body{padding:17px 19px;overflow-y:auto}.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.meta-box{padding:10px;border-radius:7px;background:#f5f7fa}.meta-box span{display:block;color:#8591a0;font-size:9px}.meta-box b{display:block;margin-top:3px;font-size:11px}.drawer-section{margin-top:19px}.drawer-section h3{margin:0 0 9px;font-size:12px}.check-item{display:flex;align-items:flex-start;gap:8px;padding:9px 0;border-bottom:1px solid var(--line-soft);color:#526176;font-size:10px}.note-field{width:100%;min-height:78px;resize:vertical;padding:10px;border:1px solid #ced7e1;border-radius:7px;color:#344054}.drawer-actions{margin-top:auto;display:flex;gap:8px;justify-content:flex-end;padding:13px 19px;border-top:1px solid var(--line);background:#fafbfd}.modal-backdrop{display:grid;place-items:center;padding:20px}.modal{width:min(620px,100%);border-radius:11px;background:#fff;box-shadow:var(--shadow)}.modal-head{display:flex;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)}.modal-head h2{margin:0;font-size:16px}.modal-body{padding:19px 20px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:grid;gap:5px;color:#59697c;font-size:10px}.field.full{grid-column:1/-1}.field input,.field select,.field textarea{width:100%;padding:9px 10px;border:1px solid #ccd6e0;border-radius:6px;color:#2f4157;background:#fff}.modal-actions{display:flex;justify-content:flex-end;gap:8px;padding:0 20px 19px}.toast{position:fixed;right:22px;top:82px;z-index:120;max-width:380px;padding:11px 14px;border-radius:8px;color:#fff;background:#173b62;box-shadow:var(--shadow);font-size:11px;animation:toastIn .2s ease}@keyframes toastIn{from{opacity:0;transform:translateY(-6px)}}
+    .mobile-menu{display:none}@media(max-width:1050px){:root{--sidebar-width:205px}.topbar{padding:0 18px}.identity-copy,.role-label,.review-chip{display:none}.context-bar{padding-inline:18px;grid-template-columns:1fr 12px 1fr}.context-bar label:last-child,.context-bar>span:nth-of-type(2){display:none}.workspace{padding:18px}.journey{grid-template-columns:repeat(3,1fr)}.journey-step:nth-child(n+4){display:none}.input-grid{grid-template-columns:1fr 1fr}.two-col{grid-template-columns:1fr}}@media(max-width:760px){.app{display:block}.sidebar{position:fixed;left:0;transform:translateX(-100%);width:242px;transition:transform .2s ease;box-shadow:14px 0 40px rgba(0,0,0,.18)}.sidebar.open{transform:translateX(0)}.mobile-menu{display:grid;width:34px;height:34px;place-items:center;border:1px solid var(--line);border-radius:7px;background:#fff}.topbar{height:auto;min-height:62px;padding:10px 14px;flex-wrap:wrap}.breadcrumb{order:2;width:calc(100% - 48px)}.identity{margin-left:auto}.role-select{width:172px}.context-bar{grid-template-columns:1fr;padding:10px 14px}.context-bar>span{display:none}.context-bar label:last-child{display:block}.workspace{padding:14px}.project-card{align-items:flex-start;flex-direction:column}.scope-box{justify-content:flex-start}.journey{grid-template-columns:1fr}.journey-step{display:block!important;border-right:0;border-bottom:1px solid var(--line-soft)}.journey-step:last-child{border-bottom:0}.surface-head{align-items:flex-start;flex-direction:column}.head-actions{width:100%}.head-actions .btn{flex:1}.kpi-grid,.input-grid{grid-template-columns:1fr}.structure-row{min-width:760px}.change-row{grid-template-columns:85px 1fr auto}.change-row>:nth-child(3){display:none}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}@media print{.sidebar,.topbar,.context-bar,.head-actions,.bulkbar,.row-actions{display:none!important}.app{display:block}.workspace{width:100%;padding:0}.page-surface,.project-card{box-shadow:none}body{background:#fff}}
+  </style>
+  <style>
+    /* ===== v2 additions ===== */
+    :root{--red:#b42318;--red-soft:#fdecea;--teal:#0e7490;--teal-soft:#e3f4f8}
+    .drawer{width:min(640px,100%)}
+    .toast{top:auto;bottom:22px}
+    .tag{display:inline-block;padding:3px 8px;border-radius:999px;font-size:10px;font-weight:800;white-space:nowrap;line-height:1.45}
+    .t-green{color:var(--green);background:var(--green-soft)}.t-blue{color:var(--blue);background:var(--blue-soft)}.t-amber{color:var(--amber);background:var(--amber-soft)}.t-red{color:var(--red);background:var(--red-soft)}.t-grey{color:#5f6b7b;background:#eef1f4}.t-purple{color:var(--purple);background:var(--purple-soft)}.t-teal{color:var(--teal);background:var(--teal-soft)}
+    .muted{color:var(--muted)}
+    .badge.dep{color:var(--teal);background:var(--teal-soft)}
+    .pill-row{display:flex;gap:4px;flex-wrap:wrap}
+    .prog{display:flex;align-items:center;gap:8px;min-width:120px;font-size:11px;font-weight:700;color:#3d4d61}
+    .bar{flex:1;height:6px;border-radius:4px;background:#e7ecf1;overflow:hidden;min-width:50px}
+    .bar i{display:block;height:100%;background:var(--blue);border-radius:inherit}
+    .bar i.g{background:#20a06e}
+    .dl b{display:block;font-size:11px;color:#34465d}.dl small{display:block;color:var(--muted);font-size:10px}
+    .dl.red b,.dl.red small{color:var(--red)}.dl.amber b{color:var(--amber)}
+    .stt{font-family:ui-monospace,Consolas,monospace;color:#5b6a7d;font-size:11px;white-space:nowrap}
+    .tog{display:inline-grid;place-items:center;width:20px;height:20px;margin-right:6px;border:1px solid #cfd8e2;border-radius:5px;background:#fff;color:#5b6a7d;font-size:10px;cursor:pointer;padding:0;vertical-align:middle}
+    .tree tbody td{vertical-align:middle}
+    .tree tr.lv1 td{background:#fff}.tree tr.lv1 .nm b{font-size:12.5px}
+    .tree tr.lv2 td{background:#fafbfd}.tree tr.lv3 td{background:#f6f8fb}
+    .tree tr.clickable{cursor:pointer}.tree tr.clickable:hover td{background:#fff8fa}
+    .tree tr.sub>td{background:#fcfdfe;padding:0}
+    .ind2{padding-left:30px!important}.ind3{padding-left:56px!important}
+    .nm b{display:block;color:#24364d;font-size:12px}.nm small{display:block;color:#8995a5;font-size:10px}
+    .subtable{width:100%}.subtable th{background:#f3f6f9}.subtable td,.subtable th{padding-top:7px;padding-bottom:7px}
+    .subtable td:first-child,.subtable th:first-child{padding-left:62px}
+    .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .search{height:34px;min-width:230px;padding:0 11px;border:1px solid #ccd5df;border-radius:7px;background:#fff;font-size:12px}
+    .tabs{display:inline-flex;gap:3px;padding:3px;border:1px solid var(--line);border-radius:8px;background:#f7f9fb}
+    .tabs button{border:0;background:transparent;padding:6px 11px;border-radius:6px;font-size:11px;font-weight:750;color:#5b6a7d}
+    .tabs button.on{background:#fff;color:var(--brand);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+    .summary-strip{display:flex;gap:6px;flex-wrap:wrap;padding:10px 18px;border-bottom:1px solid var(--line);background:#fcfdfe}
+    .kpi-grid.five{grid-template-columns:repeat(5,1fr)}
+    .crumbs{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:12px;font-size:11px;color:#7d8999}
+    .crumbs button{border:0;background:none;padding:2px 4px;border-radius:4px;color:var(--blue);font-size:11px;font-weight:700}
+    .crumbs button:hover{background:var(--blue-soft)}
+    .crumbs b{color:#24364d}
+    .class-card{display:grid;grid-template-columns:1.4fr repeat(3,1fr) auto;gap:16px;align-items:center;padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .class-card h1{margin:3px 0 2px;font-size:19px;color:#1d324d}.class-card p{margin:0;color:var(--muted);font-size:11px}
+    .class-card .cell>span:first-child{display:block;color:#8a95a4;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px}
+    .class-switch{height:34px;padding:0 10px;border:1px solid #ccd5df;border-radius:7px;background:#fff;font-size:11px;font-weight:650;max-width:260px}
+    details.mapbox{margin:14px 0;border:1px solid var(--line);border-radius:10px;background:#fff}
+    details.mapbox summary{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;list-style:none;font-size:12px;font-weight:800;color:#263a54}
+    details.mapbox summary::-webkit-details-marker{display:none}
+    details.mapbox summary:before{content:"▸";margin-right:6px;color:#8a95a4}details.mapbox[open] summary:before{content:"▾"}
+    details.mapbox summary .l{flex:1}
+    .matrix th,.matrix td{text-align:center;padding:6px 5px}
+    .matrix th:first-child,.matrix td:first-child{text-align:left;padding-left:14px;white-space:nowrap}
+    .matrix th.tk{font-size:9px;line-height:1.25;min-width:52px}
+    .matrix td.src b{display:block;font-size:11px;color:#34465d}.matrix td.src small{font-size:9.5px;color:var(--muted)}
+    .dot{display:inline-grid;place-items:center;width:21px;height:21px;border-radius:50%;font-size:9px;font-weight:850}
+    .dot.ok{background:var(--green-soft);color:var(--green)}.dot.miss{background:var(--amber-soft);color:var(--amber)}.dot.chg{background:var(--purple-soft);color:var(--purple)}.dot.dep{background:var(--teal-soft);color:var(--teal)}
+    .input-chip{display:inline-flex;flex-direction:column;gap:2px}
+    .input-chip .tag{align-self:flex-start}
+    .meta-box b span{display:inline-block;margin:0}
+    .input-chip small{color:var(--muted);font-size:9.5px}
+    /* drawer input */
+    .dmeta{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .banner{margin-top:14px;padding:10px 12px;border-radius:8px;font-size:11.5px;line-height:1.5}
+    .banner.chg{background:var(--purple-soft);color:#4d2d6e}.banner.miss{background:var(--amber-soft);color:#6f470b}.banner.ok{background:var(--green-soft);color:#0b5a3f}.banner.dep{background:var(--teal-soft);color:#0b4f63}.banner.rev{background:var(--blue-soft);color:#1f4d7a}
+    .banner .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+    .sec{margin-top:14px;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+    .sec>header{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 12px;background:#f7f9fb;border-bottom:1px solid var(--line);font-size:12px;font-weight:800}
+    .sec .body{padding:4px 12px 10px}
+    .srchead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 0 5px;border-bottom:1px dashed var(--line);font-size:10.5px;color:#526176}
+    .srchead b{color:#24364d;font-size:11.5px}
+    .srchead u{cursor:pointer}
+    .field{display:grid;grid-template-columns:150px minmax(0,1fr) auto;gap:8px;align-items:start;padding:7px 0;border-bottom:1px solid var(--line-soft);font-size:11.5px}
+    .field:last-child{border-bottom:0}
+    .field .lb{color:var(--muted)}.field .lb i{font-style:normal;color:var(--red)}.field .lb small{display:block;font-size:9.5px;color:#a0aab6}
+    .field .val b{font-weight:700;color:#2b3b50}.field .val small{display:block;color:var(--muted);font-size:10px}
+    .field.missing .val{color:var(--amber)}
+    .field.changed{background:linear-gradient(90deg,var(--purple-soft),transparent 75%)}
+    .field>.tag{justify-self:end;align-self:start}
+    .fileitem{display:flex;align-items:center;gap:8px;padding:6px 7px;border:1px solid var(--line-soft);border-radius:7px;background:#fbfcfd;margin-bottom:4px}
+    .fileitem.need{border-color:#f0c77f;background:#fffdf7}
+    .fileitem .ic{display:grid;place-items:center;width:30px;height:30px;flex:0 0 30px;border-radius:6px;font-size:8.5px;font-weight:850}
+    .ic.xlsx{background:var(--green-soft);color:var(--green)}.ic.pdf{background:var(--red-soft);color:var(--red)}.ic.docx{background:var(--blue-soft);color:var(--blue)}.ic.link{background:var(--teal-soft);color:var(--teal)}.ic.lib{background:var(--amber-soft);color:var(--amber)}.ic.none{background:#eef1f4;color:#8a95a4}
+    .fileitem div{flex:1;min-width:0}.fileitem b{display:block;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fileitem small{color:var(--muted);font-size:10px}
+    .inp{width:100%;padding:6px 8px;border:1px solid #f0c77f;border-radius:6px;background:#fffdf7;font-size:11.5px;color:#2f4157}
+    .inp.plain{border-color:#ccd6e0;background:#fff}
+    .dep-row{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--line-soft);font-size:11.5px}
+    .dep-row:last-child{border-bottom:0}.dep-row small{display:block;color:var(--muted);font-size:10px}
+    .dep-row .tag,.dep-row .badge{align-self:flex-start}
+    .chk{display:grid;grid-template-columns:18px 1fr;gap:6px;padding:7px 0;border-bottom:1px solid var(--line-soft);font-size:11.5px;color:#3d4d61}
+    .chk:last-child{border-bottom:0}.chk .exp{display:block;margin-top:2px;font-size:10.5px;color:var(--teal)}
+    .btn.xs{min-height:26px;padding:4px 8px;font-size:10px}
+    /* inputs view */
+    .src-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:16px}
+    .src-card{border:1px solid var(--line);border-radius:9px;background:#fff;overflow:hidden}
+    .src-card.miss{border-color:#f0d7a6}.src-card.chg{border-color:#d9c6ec}
+    .src-card header{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;padding:11px 13px;background:#f9fafc;border-bottom:1px solid var(--line)}
+    .src-card header b{display:block;font-size:12.5px;color:#24364d}.src-card header small{display:block;color:var(--muted);font-size:10px}
+    .src-card .body{padding:2px 13px 8px}
+    .src-card footer{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;padding:9px 13px;border-top:1px solid var(--line-soft);background:#fcfdfe;font-size:10.5px;color:var(--muted)}
+    .scope-title{padding:14px 18px 0;font-size:11px;font-weight:850;color:#526176;letter-spacing:.05em;text-transform:uppercase}
+    .queue-sec h3{margin:0;padding:12px 18px;font-size:12.5px;border-bottom:1px solid var(--line);background:#f9fafc;display:flex;justify-content:space-between}
+    .empty-row{padding:14px 18px;color:var(--muted);font-size:11px}
+    .sched{padding:8px 18px 16px}
+    .sched-row{display:grid;grid-template-columns:150px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line-soft);cursor:pointer}
+    .sched-row:hover{background:#fafbfd}
+    .sched-row time{font-size:11px;font-weight:750;color:#34465d}
+    .timeline{position:relative;height:8px;border-radius:4px;background:#eef1f4;margin-top:6px}
+    .timeline i{position:absolute;top:0;height:100%;border-radius:4px}
+    .note-foot{margin-top:14px;color:#8a95a4;font-size:10px;text-align:center}
+    @media(max-width:1050px){.kpi-grid.five{grid-template-columns:repeat(3,1fr)}.class-card{grid-template-columns:1fr 1fr}.src-grid{grid-template-columns:1fr}}
+    @media(max-width:760px){.kpi-grid.five{grid-template-columns:1fr 1fr}.class-card{grid-template-columns:1fr}.field{grid-template-columns:1fr}.field>.tag{justify-self:start}.dmeta{grid-template-columns:1fr 1fr}.search{min-width:0;width:100%}.toolbar{width:100%}.sched-row{grid-template-columns:1fr}.tree{min-width:720px}.table-wrap>table{min-width:720px}.matrix{min-width:0}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar"><div class="brand"><span class="brand-mark">P1</span><span><strong>PeopleOne</strong><small>VWork Operations</small></span></div><nav class="sidebar-nav" id="sidebarNav" aria-label="Điều hướng VWork"></nav><div class="sidebar-foot"><div class="store-card"><b>VẬN HÀNH ĐÀO TẠO</b><p>Dự án, khóa, lớp, input và công việc trong cùng workspace. Hôm nay (mô phỏng): 11/09/2026.</p><span class="sync">Đã đồng bộ · v13</span></div></div></aside>
+    <div class="main-shell">
+      <header class="topbar"><button class="mobile-menu" id="mobileMenu" type="button" aria-label="Mở menu">☰</button><div class="breadcrumb" id="breadcrumb"></div><span class="review-chip">BẢN REVIEW v2 · DỮ LIỆU MINH HỌA</span><div class="identity"><span class="identity-copy"><b id="identityName"></b><small id="identityMail"></small></span><span class="role-label">Đang làm việc với vai trò</span><select class="role-select" id="roleSelect" aria-label="Chọn vai trò làm việc"><option value="operations">Quản lý vận hành</option><option value="intake">Đầu mối / Sale</option><option value="content">Chuyên viên nội dung</option><option value="vtraining">Chuyên viên vận hành VTraining</option><option value="manager">Quản lý ekip</option><option value="member">Thành viên ekip</option></select><span class="avatar" id="avatar"></span></div></header>
+      <main class="workspace" id="workspace"></main>
+    </div>
+  </div>
+  <div class="drawer-backdrop" id="taskDrawer" hidden><aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle"><header class="drawer-head"><div><small id="drawerCode">CÔNG VIỆC</small><h2 id="drawerTitle">Chi tiết công việc</h2></div><button class="close" type="button" data-close-drawer aria-label="Đóng">×</button></header><div class="drawer-body" id="drawerBody"></div><footer class="drawer-actions" id="drawerActions"></footer></aside></div>
+  <div class="toast" id="toast" role="status" hidden></div>
+<script>
+/* ================== DỮ LIỆU MINH HỌA ================== */
+const TODAY='2026-09-11';
+const PEOPLE={operations:['Phạm Hoài Nam','phamhoainam54@gmail.com','VH'],intake:['Ngọc Hân','ngochan.sale@peopleone.vn','SA'],content:['Thu Trang','thutrang.nd@peopleone.vn','ND'],vtraining:['Hải Yến','haiyen.vt@peopleone.vn','VT'],manager:['Hoàng Long','hoanglong.ql@peopleone.vn','QL'],member:['Chiêu Anh','chieuanh.ctv@peopleone.vn','TV']};
+const MEMBERS=['Chiêu Anh','Minh Anh','Quốc Bảo'];
+const REVIEWER='Hoàng Long';
+const PROJECTS=[
+ {id:'EVNSPC-2026',name:'Đào tạo Trải nghiệm khách hàng EVNSPC 2026',customer:'EVNSPC',start:'2026-09-01',end:'2026-09-30'},
+ {id:'PPO_TEST',name:'Đào tạo Test',customer:'PeopleOne',start:'2026-10-01',end:'2026-10-10'}];
+const ACT_LABEL={VLEARNING:'VLearning',GAMIFICATION:'Game',DISCUSSION:'Thảo luận',ASSIGNMENT:'Thu hoạch',TEST:'Kiểm tra',VTRAINING:'Tài liệu'};
+const COURSES=[
+ {id:'CX-FOUNDATION',project:'EVNSPC-2026',name:'Trải nghiệm khách hàng',systems:'VLearning + VTraining',version:'Nội dung phiên bản 2',acts:{VLEARNING:1,GAMIFICATION:2,DISCUSSION:2,ASSIGNMENT:1,TEST:1,VTRAINING:4}},
+ {id:'PPO_TEST',project:'PPO_TEST',name:'Đào tạo Test',systems:'VLearning + VTraining',version:'Nội dung phiên bản 1',acts:{VLEARNING:1,VTRAINING:2}}];
+const CLASSES=[
+ {id:'TNKH01',course:'CX-FOUNDATION',name:'Lớp 01 · CSKH EVNSPC',start:'2026-09-01',end:'2026-09-05',learners:46,location:'Trung tâm đào tạo EVNSPC · TP.HCM'},
+ {id:'TNKH02',course:'CX-FOUNDATION',name:'Lớp 02 · CSKH EVNSPC',start:'2026-09-08',end:'2026-09-12',learners:47,location:'Trung tâm đào tạo EVNSPC · TP.HCM'},
+ {id:'TNKH03',course:'CX-FOUNDATION',name:'Lớp 03 · CSKH EVNSPC',start:'2026-09-15',end:'2026-09-19',learners:48,location:'Trung tâm đào tạo EVNSPC · TP.HCM'},
+ {id:'PPO_TEST-TNKH201',course:'PPO_TEST',name:'Lớp 01 · CSKH EVNSPC · Đợt 2',start:'2026-10-01',end:'2026-10-03',learners:40,location:'Văn phòng PeopleOne · Hà Nội'},
+ {id:'PPO_TEST-TNKH202',course:'PPO_TEST',name:'Lớp 02 · CSKH EVNSPC',start:'2026-10-08',end:'2026-10-10',learners:null,location:null}];
+
+/* Định nghĩa nguồn input dùng chung (D-code) */
+const SRC_DEF={
+ D03a:{title:'Thông tin lớp',level:'class',owner:'intake',fields:{
+  course_name:{label:'Khóa học',type:'text',req:true},class_code:{label:'Mã lớp',type:'text',req:true},class_name:{label:'Tên lớp',type:'text',req:true},
+  date_range:{label:'Thời gian tổ chức',type:'daterange',req:true},schedule:{label:'Lịch học',type:'text',req:true,ph:'VD: Sáng 08:00 – 11:30 mỗi ngày'},
+  location:{label:'Địa điểm',type:'text',req:true,ph:'VD: Trung tâm đào tạo · TP.HCM'},format:{label:'Hình thức',type:'select',req:true},
+  expected:{label:'Số học viên dự kiến',type:'number',req:true,ph:'VD: 40'},activity_count:{label:'Số lượng hoạt động',type:'counts',req:true},
+  contact:{label:'Đầu mối phía khách hàng',type:'text',req:false}}},
+ D03b:{title:'Danh sách học viên',level:'class',owner:'intake',fields:{
+  roster_file:{label:'File danh sách',type:'file-template',req:true,ph:'Tên file, VD: DS_hoc_vien.xlsx'},
+  learner_count:{label:'Số học viên',type:'derived',req:true,from:'roster_file'},
+  groups:{label:'Nhóm học viên',type:'derived',req:true,from:'roster_file'}}},
+ D04:{title:'Nội dung VLearning',level:'course',owner:'content',act:'VLEARNING',fields:{
+  content_name:{label:'Tên bộ nội dung',type:'text',req:true},eln_count:{label:'Số bài VLearning',type:'number',req:true},
+  eln_structure:{label:'Cấu trúc phần / bài',type:'text',req:true,ph:'VD: 03 phần · 08 bài'},vimeo_links:{label:'Link Vimeo',type:'link',req:false,ph:'https://vimeo.com/...'},
+  quiz_source:{label:'Nguồn quiz theo mã ELN',type:'library-ref',req:false}}},
+ D05:{title:'Gamification',level:'course',owner:'content',act:'GAMIFICATION',fields:{
+  game_count:{label:'Số game',type:'counts',req:true},game_contents:{label:'Game (theo số lượng)',type:'repeat',req:true,ph:'Dán link game'},
+  play_limit:{label:'Số lượt chơi',type:'number',req:true},schedule:{label:'Lịch áp dụng',type:'text',req:true}}},
+ D06:{title:'Thảo luận',level:'course',owner:'content',act:'DISCUSSION',fields:{
+  discussion_count:{label:'Số chủ đề',type:'counts',req:true},topics:{label:'Chủ đề từ thư viện',type:'repeat',req:true,ph:'Mã chủ đề trong thư viện'},
+  mode:{label:'Chế độ',type:'select',req:true},group_reference:{label:'Tham chiếu nhóm',type:'derived',req:true}}},
+ D07:{title:'Thu hoạch',level:'course',owner:'content',act:'ASSIGNMENT',fields:{
+  assignment_count:{label:'Số bài thu hoạch',type:'counts',req:true},assignment_brief:{label:'Đề & hướng dẫn',type:'file',req:true},
+  rubric_pass_score:{label:'Rubric / điểm đạt',type:'number',req:true},submission_rule:{label:'Quy tắc nộp bài',type:'text',req:true}}},
+ D08:{title:'Kiểm tra',level:'course',owner:'content',act:'TEST',fields:{
+  test_count:{label:'Số bài kiểm tra',type:'counts',req:true},question_bank:{label:'Bài kiểm tra',type:'library-ref',req:true},
+  test_structure:{label:'Cấu trúc',type:'text',req:true},test_rule:{label:'Thời lượng, lượt, điểm đạt',type:'text',req:true}}},
+ D09:{title:'Nguồn tài liệu VTraining',level:'course',owner:'content',act:'VTRAINING',fields:{
+  materials:{label:'Tài liệu (theo số lượng)',type:'repeat',req:true,ph:'Dán link hoặc tên file'},
+  class_ids:{label:'Lớp áp dụng',type:'derived',req:true},visible:{label:'Thời gian hiển thị',type:'daterange',req:true}}}
+};
+const OWNER_LABEL={intake:'Đầu mối / Sale',content:'Chuyên viên nội dung'};
+const TYPE_LABEL={text:'Form · chữ',number:'Form · số',daterange:'Form · khoảng ngày',select:'Form · lựa chọn',counts:'Lấy từ phạm vi khóa','file-template':'File theo mẫu',file:'File đính kèm',link:'Link','library-ref':'Chọn từ thư viện',repeat:'Nhóm lặp theo số lượng',derived:'Tự tính / tự gắn',datetime:'Form · ngày giờ'};
+
+/* Giá trị input: key = scopeId:code */
+const INPUTS={};
+function fmtD(iso){const [y,m,d]=iso.split('-');return `${d}/${m}`}
+function fmtDY(iso){const [y,m,d]=iso.split('-');return `${d}/${m}/${y}`}
+function addDays(iso,n){const d=new Date(iso+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)}
+function actCountText(acts){return Object.entries(acts).map(([k,v])=>`${ACT_LABEL[k]} ${v}`).join(' · ')}
+CLASSES.forEach(c=>{const course=COURSES.find(x=>x.id===c.course);const incomplete=c.id==='PPO_TEST-TNKH202';
+ INPUTS[c.id+':D03a']={ver:1,at:incomplete?'09/09 17:05':'25/08 09:15',by:'Ngọc Hân',values:{course_name:`${course.name} · ${course.id}`,class_code:c.id,class_name:c.name,date_range:`${fmtDY(c.start)} – ${fmtDY(c.end)}`,schedule:incomplete?null:'Sáng 08:00 – 11:30 mỗi ngày',location:c.location,format:'Kết hợp: trực tiếp + VLearning',expected:c.learners?String(c.learners):'40',activity_count:actCountText(course.acts),contact:course.project==='EVNSPC-2026'?'Phòng Tổ chức nhân sự EVNSPC':null}};
+ INPUTS[c.id+':D03b']=incomplete?{ver:0,at:'–',by:'–',values:{roster_file:null,learner_count:null,groups:null}}:{ver:c.id==='TNKH03'?2:1,at:c.id==='TNKH03'?'10/09 14:20':fmtD(addDays(c.start,-5))+' 10:00',by:'Ngọc Hân',values:{roster_file:{ic:'xlsx',name:`DS_hoc_vien_${c.id}.xlsx`,meta:`${c.learners} dòng hợp lệ · 0 lỗi · đúng mẫu`},learner_count:String(c.learners),groups:`Nhóm A: ${Math.ceil(c.learners/2)} · Nhóm B: ${Math.floor(c.learners/2)}`},note:c.id==='TNKH03'?'v1 có 45 học viên, v2 thêm 3':''};
+});
+Object.assign(INPUTS,{
+ 'CX-FOUNDATION:D04':{ver:1,at:'20/08 10:02',by:'Thu Trang',values:{content_name:'Trải nghiệm khách hàng',eln_count:'1',eln_structure:'03 phần · 08 bài',vimeo_links:'vimeo.com/showcase/cx-2026',quiz_source:'ELN-CX-01 · Quiz sau bài (10 câu)'}},
+ 'CX-FOUNDATION:D05':{ver:1,at:'20/08 15:40',by:'Thu Trang',values:{game_count:'2',game_contents:[{ic:'link',name:'Game 1 · Hành trình khách hàng',meta:'game.peopleone.vn/cx-2026/g1'},{ic:'link',name:'Game 2 · Ai là chuyên gia CSKH',meta:'game.peopleone.vn/cx-2026/g2'}],play_limit:'3 lượt / học viên',schedule:'Game 1 mở ngày 2 · Game 2 mở ngày 4'}},
+ 'CX-FOUNDATION:D06':{ver:1,at:'21/08 16:05',by:'Thu Trang',values:{discussion_count:'2',topics:[{ic:'lib',name:'TL-CX-07 · Xử lý khiếu nại mất điện',meta:'Đầu ra: 01 bản đề xuất / nhóm'},{ic:'lib',name:'TL-CX-12 · Giao tiếp khi cắt điện theo kế hoạch',meta:'Đầu ra: kịch bản 5 bước'}],mode:'Theo nhóm',group_reference:'Nhóm A · Nhóm B (từ D03b của từng lớp)'}},
+ 'CX-FOUNDATION:D07':{ver:2,at:'10/09 16:40',by:'Thu Trang',reason:'Khách hàng yêu cầu nâng chuẩn đầu ra',changes:{rubric_pass_score:'70 → 75'},values:{assignment_count:'1',assignment_brief:{ic:'docx',name:'De_thu_hoach_CX_2026.docx',meta:'2 trang · kèm tệp mẫu bài nộp'},rubric_pass_score:'75 / 100',submission_rule:'PDF · tối đa 10 MB · 01 lần'}},
+ 'CX-FOUNDATION:D08':{ver:1,at:'22/08 09:30',by:'Thu Trang',values:{test_count:'1',question_bank:'KT-CX-FINAL · Bộ đề cuối khóa CX (60 câu)',test_structure:'20 câu · trộn câu và đáp án',test_rule:'30 phút · 01 lượt · đạt 70%'}},
+ 'CX-FOUNDATION:D09':{ver:2,at:'09/09 11:10',by:'Thu Trang',reason:'Scope V2: tài liệu tăng từ 3 lên 4',values:{materials:[{ic:'pdf',name:'Slide bài giảng CX.pdf',meta:'6,2 MB'},{ic:'pdf',name:'So tay CSKH EVNSPC.pdf',meta:'3,1 MB'},{ic:'link',name:'Video tình huống mẫu',meta:'vimeo.com/…/cx-case'},null],class_ids:'Tự gắn theo lớp của công việc',visible:'Khai giảng → kết thúc + 7 ngày'}},
+ 'PPO_TEST:D04':{ver:1,at:'05/09 10:00',by:'Thu Trang',values:{content_name:'Đào tạo Test',eln_count:'1',eln_structure:null,vimeo_links:null,quiz_source:null}},
+ 'PPO_TEST:D09':{ver:1,at:'06/09 14:30',by:'Thu Trang',values:{materials:[{ic:'pdf',name:'Tai lieu tham chieu CSKH.pdf',meta:'2,4 MB'},null],class_ids:'Tự gắn theo lớp của công việc',visible:'Khai giảng → kết thúc + 7 ngày'}}
+});
+const REPEAT_COUNT={game_contents:'GAMIFICATION',topics:'DISCUSSION',materials:'VTRAINING'};
+
+/* Mẫu công việc + inputSpec */
+const TEMPLATES=[
+ {code:'T-101',group:'G-01',title:'Chuẩn bị thông tin lớp',off:3,anchor:'START',refs:['D03a.course_name','D03a.class_name','D03a.date_range','D03a.location','D03a.activity_count','D03b.roster_file'],
+  checklist:[['Có danh sách sơ bộ bằng file Excel','D03b.roster_file'],['Đủ tên khóa học, tên lớp, thời gian và địa điểm','D03a.location'],['Đã chốt số lượng từng loại hoạt động','D03a.activity_count']],out:'Thông tin lớp đã chốt với khách hàng'},
+ {code:'T-102',group:'G-02',title:'Khởi tạo lớp học',off:2,anchor:'START',deps:['T-101'],refs:['D03a.class_code','D03a.class_name','D03a.date_range','D03a.schedule','D03a.format'],
+  checklist:[['Đúng tên lớp','D03a.class_name'],['Đúng thời gian chạy lớp','D03a.date_range']],out:'Link lớp trên VTraining'},
+ {code:'T-103',group:'G-02',title:'Khởi tạo danh sách học viên',off:1,anchor:'START',deps:['T-102'],refs:['D03a.class_code','D03b.roster_file','D03b.learner_count','D03b.groups'],
+  checklist:[['Đúng số lượng học viên','D03b.learner_count'],['Tài khoản học viên thấy lớp',null],['Đủ 02 tài khoản test thuộc 02 nhóm','D03b.groups'],['Có 01 tài khoản test trước lớp và 01 tài khoản demo tại lớp',null]],out:'Danh sách tài khoản test theo nhóm'},
+ {code:'T-104',group:'G-02',title:'Khởi tạo hoạt động thảo luận',act:'DISCUSSION',off:2,anchor:'START',deps:['T-102'],refs:['D06.discussion_count','D06.topics','D06.mode','D06.group_reference'],
+  checklist:[['Chọn đúng thảo luận từ thư viện','D06.topics'],['Tài khoản test làm được và admin thấy kết quả',null],['Tài khoản học viên thấy thảo luận',null],['Đóng phát hành sau khi test',null]],out:'Thảo luận đã test, đã đóng phát hành'},
+ {code:'T-105',group:'G-02',title:'Khởi tạo bài kiểm tra',act:'TEST',off:2,anchor:'START',deps:['T-102'],refs:['D08.test_count','D08.question_bank','D08.test_structure','D08.test_rule'],
+  checklist:[['Chọn đúng bài kiểm tra từ thư viện','D08.question_bank'],['Đúng số câu và thời gian làm bài','D08.test_structure'],['Tài khoản test làm được và thấy kết quả',null],['Đóng phát hành sau khi test',null]],out:'Bài kiểm tra đã test, đã đóng phát hành'},
+ {code:'T-106',group:'G-02',title:'Khởi tạo bài thu hoạch',act:'ASSIGNMENT',off:2,anchor:'START',deps:['T-102'],refs:['D07.assignment_count','D07.assignment_brief','D07.rubric_pass_score','D07.submission_rule'],
+  checklist:[['Chọn đúng bài thu hoạch từ thư viện','D07.assignment_brief'],['Đúng yêu cầu đầu ra và rubric','D07.rubric_pass_score'],['Tài khoản test nộp được bài','D07.submission_rule'],['Đóng phát hành sau khi test',null]],out:'Bài thu hoạch đã test, đã đóng phát hành'},
+ {code:'T-107',group:'G-02',title:'Khởi tạo Ứng dụng học tập số / Gamification',act:'GAMIFICATION',off:2,anchor:'START',deps:['T-102'],refs:['D05.game_count','D05.game_contents','D05.play_limit','D05.schedule'],
+  checklist:[['Khởi tạo đúng ứng dụng học tập số','D05.game_contents'],['Tài khoản test làm thử thành công','D05.play_limit'],['Màn ranking có kết quả và reset được',null],['Tài khoản học viên thấy bài',null],['Đóng phát hành sau khi test',null]],out:'Game đã test, ranking đã reset'},
+ {code:'T-108',group:'G-02',title:'Khởi tạo bài tập VLearning',act:'VLEARNING',off:2,anchor:'START',deps:['T-102'],refs:['D04.content_name','D04.eln_count','D04.eln_structure','D04.vimeo_links','D04.quiz_source'],
+  checklist:[['Khởi tạo đúng bài tập','D04.eln_structure'],['Tài khoản test làm được và thấy kết quả',null],['Tài khoản học viên thấy bài trong lớp',null]],out:'Bài VLearning đã gắn vào lớp'},
+ {code:'T-109',group:'G-02',title:'Khởi tạo tài liệu',act:'VTRAINING',off:2,anchor:'START',deps:['T-102'],refs:['D09.materials','D09.class_ids','D09.visible','D03a.date_range'],
+  checklist:[['Khởi tạo đúng tài liệu','D09.materials'],['Tài khoản học viên thấy tài liệu','D09.visible'],['Tải thử tài liệu thành công',null]],out:'Tài liệu hiển thị đúng lớp'},
+ {code:'T-110',group:'G-03',title:'Mở phát hành các hoạt động',off:0,anchor:'START',depsGroup:'G-02',refs:[],local:true,
+  checklist:[['Phát hành bài VLearning','L.open_vlearning','VLEARNING'],['Phát hành Thảo luận','L.open_discussion','DISCUSSION'],['Phát hành Ứng dụng học tập số','L.open_game','GAMIFICATION'],['Phát hành Kiểm tra và Thu hoạch','L.open_test','TEST|ASSIGNMENT'],['Phát hành tài liệu','L.open_material','VTRAINING'],['Tài khoản học viên thấy các bài',null]],out:'Các hoạt động đã mở cho học viên'},
+ {code:'T-111',group:'G-03',title:'Xem kết quả các hoạt động',off:0,anchor:'END',deps:['T-110'],refs:['D08.test_rule','D07.rubric_pass_score'],local:true,
+  checklist:[['Xem kết quả VLearning',null,'VLEARNING'],['Xem kết quả Thảo luận',null,'DISCUSSION'],['Xem kết quả Ứng dụng học tập số',null,'GAMIFICATION'],['Xem kết quả Kiểm tra','D08.test_rule','TEST'],['Xem kết quả Thu hoạch','D07.rubric_pass_score','ASSIGNMENT'],['Gửi báo cáo kết quả','L.report_deadline']],out:'Báo cáo kết quả lớp'}
+];
+const GROUPS={'G-01':'Chuẩn bị thông tin','G-02':'Khởi tạo dữ liệu & test nội bộ','G-03':'Vận hành tại lớp'};
+
+/* Kế hoạch trạng thái đã tiến triển (các trạng thái còn lại được tính tự động từ input + việc trước) */
+const WHO_DEFAULT={'T-101':'Chiêu Anh','T-102':'Chiêu Anh','T-103':'Chiêu Anh','T-104':'Minh Anh','T-105':'Minh Anh','T-106':'Minh Anh','T-107':'Minh Anh','T-108':'Quốc Bảo','T-109':'Quốc Bảo','T-110':'Chiêu Anh','T-111':'Chiêu Anh'};
+const PLAN={
+ TNKH01:{all:'DONE',used:{D07:1,D09:1},over:{'T-111':{status:'IN_PROGRESS',done:[1,1,1,0,0,0]}}},
+ TNKH02:{all:'DONE',used:{D07:1,D09:1},over:{'T-111':{status:'IN_REVIEW',done:'all'}}},
+ TNKH03:{over:{'T-101':{status:'DONE'},'T-102':{status:'DONE'},'T-103':{status:'IN_PROGRESS',done:[1,0,0,0]},'T-106':{status:'IN_PROGRESS',done:[1,1,0,0],used:{D07:1}}}},
+ 'PPO_TEST-TNKH201':{who:{'T-101':'Chiêu Anh','T-102':'Chiêu Anh','T-103':'Chiêu Anh'},over:{'T-101':{status:'DONE'}}},
+ 'PPO_TEST-TNKH202':{who:{}}
+};
+
+/* ================== TIỆN ÍCH ================== */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const courseOf=c=>COURSES.find(x=>x.id===c.course);
+const projectOf=co=>PROJECTS.find(p=>p.id===co.project);
+const classById=id=>CLASSES.find(c=>c.id===id);
+const WD=['CN','T2','T3','T4','T5','T6','T7'];
+function wd(iso){return WD[new Date(iso+'T00:00:00Z').getUTCDay()]}
+function diffDays(a,b){return Math.round((new Date(b+'T00:00:00Z')-new Date(a+'T00:00:00Z'))/864e5)}
+const PROGRESSED=['DONE','IN_PROGRESS','IN_REVIEW','REWORK'];
+const STATUS_META={DONE:['Hoàn thành','done'],IN_PROGRESS:['Đang thực hiện','progress'],IN_REVIEW:['Chờ duyệt','review'],REWORK:['Cần làm lại','rework'],READY:['Sẵn sàng','ready'],WAITING_INPUT:['Chờ input','waiting'],WAITING:['Chờ việc trước','dep'],UNASSIGNED:['Chưa giao','unassigned']};
+
+/* ================== SỐ THỨ TỰ ================== */
+const STT={};
+PROJECTS.forEach((p,i)=>{STT['p:'+p.id]=`${i+1}`;COURSES.filter(c=>c.project===p.id).forEach((co,j)=>{STT['co:'+co.id]=`${i+1}.${j+1}`;CLASSES.filter(c=>c.course===co.id).sort((a,b)=>a.start.localeCompare(b.start)).forEach((c,k)=>STT[c.id]=`${i+1}.${j+1}.${k+1}`)})});
+
+function sttOf(o){return o.customer?STT['p:'+o.id]:o.acts?STT['co:'+o.id]:STT[o.id]}
+/* ================== TRẠNG THÁI LỚP ================== */
+function classState(c){
+  if(TODAY<c.start){const n=diffDays(TODAY,c.start);return {k:'upcoming',label:'Chưa chạy',sub:`còn ${n} ngày`,tag:'t-grey'}}
+  if(TODAY<=c.end){const n=diffDays(c.start,TODAY)+1,len=diffDays(c.start,c.end)+1;return {k:'running',label:'Đang chạy',sub:`ngày ${n}/${len}`,tag:'t-blue'}}
+  return {k:'ended',label:'Đã chạy',sub:`kết thúc ${fmtD(c.end)}`,tag:'t-green'};}
+
+/* ================== DỰNG CÔNG VIỆC ================== */
+function srcKey(ctx,code){return SRC_DEF[code].level==='class'?`${ctx.cls.id}:${code}`:`${ctx.course.id}:${code}`}
+function inputOf(ctx,code){return INPUTS[srcKey(ctx,code)]}
+function applicable(course,ref){if(!ref||ref.startsWith('L.'))return true;const def=SRC_DEF[ref.split('.')[0]];return !def.act||course.acts[def.act]}
+const TASKS=[];
+CLASSES.forEach(c=>{const course=courseOf(c);const plan=PLAN[c.id]||{};
+  TEMPLATES.filter(t=>!t.act||course.acts[t.act]).forEach(tpl=>{
+    const o=(plan.over||{})[tpl.code]||{};
+    const status=o.status||plan.all||null;
+    const checklist=tpl.checklist.filter(([, ,act])=>!act||act.split('|').some(a=>course.acts[a])).map(([text,ref])=>[text,applicable(course,ref)?ref:null]);
+    let done=checklist.map(()=>status==='DONE'?1:0);
+    if(o.done==='all')done=checklist.map(()=>1);else if(Array.isArray(o.done))done=checklist.map((_,i)=>o.done[i]||0);
+    const t={id:`${c.id}-${tpl.code}`,code:tpl.code,tpl,cls:c,course,who:plan.who?(plan.who[tpl.code]||null):WHO_DEFAULT[tpl.code],status,done,checklist,used:{},ack:{},refs:tpl.refs.filter(r=>applicable(course,r))};
+    t.local=buildLocal(t);
+    if(status)srcCodes(t).forEach(s=>t.used[s]=(o.used&&o.used[s])||(plan.used&&plan.used[s])||inputOf(t,s).ver);
+    TASKS.push(t);});});
+function srcCodes(t){return [...new Set(t.refs.map(r=>r.split('.')[0]))]}
+function buildLocal(t){const c=t.cls,a=t.course.acts;if(t.code==='T-110'){const l=[];
+    if(a.VLEARNING)l.push({key:'open_vlearning',label:'Giờ mở bài VLearning',value:`${fmtD(c.start)} · 08:00 (khai giảng)`});
+    if(a.DISCUSSION)l.push({key:'open_discussion',label:'Giờ mở Thảo luận',value:`${fmtD(addDays(c.start,1))} · 13:30 (ngày 2)`});
+    if(a.GAMIFICATION)l.push({key:'open_game',label:'Giờ mở Game',value:`Game 1: ${fmtD(addDays(c.start,1))} · Game 2: ${fmtD(addDays(c.start,3))}`,sub:'Mặc định lấy từ D05 · Lịch áp dụng'});
+    if(a.TEST||a.ASSIGNMENT)l.push({key:'open_test',label:'Giờ mở Kiểm tra và Thu hoạch',value:`Kiểm tra ${fmtD(c.end)} · 09:00 · Thu hoạch ${fmtD(c.end)} · 14:00`});
+    if(a.VTRAINING)l.push({key:'open_material',label:'Giờ hiển thị tài liệu',value:`${fmtD(c.start)} · 07:30`,sub:'Theo D09 · Thời gian hiển thị'});
+    return l}
+  if(t.code==='T-111')return [{key:'report_deadline',label:'Hạn chốt báo cáo kết quả',value:`${fmtD(c.end)} · 17:00`},{key:'report_to',label:'Gửi báo cáo cho',value:'Quản lý ekip · Đầu mối / Sale'}];
+  return null}
+const taskById=id=>TASKS.find(t=>t.id===id);
+const classTasks=c=>TASKS.filter(t=>t.cls.id===c.id);
+
+/* ================== TÍNH TRẠNG THÁI ================== */
+function split(ref){const [s,f]=ref.split('.');return {s,f,def:SRC_DEF[s].fields[f]}}
+function fieldMissing(ctx,s,f){const def=SRC_DEF[s].fields[f];const inp=inputOf(ctx,s);if(!inp)return true;const v=inp.values[f];
+  if(def.type==='repeat'){const n=ctx.course.acts[REPEAT_COUNT[f]]||0;return !Array.isArray(v)||v.length<n||v.slice(0,n).some(x=>!x)}
+  if(def.type==='derived'&&def.from)return !inp.values[def.from];
+  return v==null||v===''}
+function fieldState(t,ref){const {s,f,def}=split(ref);const inp=inputOf(t,s);const st=t.status;
+  const changed=inp&&inp.changes&&inp.changes[f]&&t.used[s]&&t.used[s]<inp.ver&&!(t.ack[s]>=inp.ver);
+  if(st==='DONE')return changed?'chg':'ok';
+  if(def.req&&fieldMissing(t,s,f))return 'miss';
+  if(changed&&PROGRESSED.includes(st))return 'chg';
+  if(!def.req&&fieldMissing(t,s,f))return 'opt';
+  return 'ok'}
+function missingRefs(t){return t.refs.filter(r=>fieldState(t,r)==='miss')}
+function chgRefs(t){return t.refs.filter(r=>fieldState(t,r)==='chg')}
+function depCodes(t){if(t.tpl.depsGroup)return classTasks(t.cls).filter(x=>x.tpl.group===t.tpl.depsGroup).map(x=>x.code);return (t.tpl.deps||[]).filter(code=>classTasks(t.cls).some(x=>x.code===code))}
+function openDeps(t){return depCodes(t).filter(code=>status(classTasks(t.cls).find(x=>x.code===code))!=='DONE')}
+function status(t){if(PROGRESSED.includes(t.status))return t.status;if(missingRefs(t).length)return 'WAITING_INPUT';if(openDeps(t).length)return 'WAITING';if(!t.who)return 'UNASSIGNED';return 'READY'}
+function isImpact(t){return t.status==='DONE'&&chgRefs(t).length&&classState(t.cls).k!=='ended'}
+function chgPending(t){return ['IN_PROGRESS','IN_REVIEW','REWORK'].includes(t.status)&&chgRefs(t).length>0}
+function due(t){const base=t.tpl.anchor==='END'?t.cls.end:t.cls.start;return addDays(base,-t.tpl.off)}
+function dueInfo(t){const d=due(t);const st=status(t);const n=diffDays(TODAY,d);
+  const rel=st==='DONE'?'đã xong':n<0?`quá hạn ${-n} ngày`:n===0?'hôm nay':`còn ${n} ngày`;
+  return {d,text:`${fmtD(d)} (${wd(d)})`,rel,cls:st==='DONE'?'':n<0?'red':n<=2?'amber':'',overdue:st!=='DONE'&&n<0}}
+function inputSummary(t){const st=status(t);const req=t.refs.filter(r=>split(r).def.req).length;
+  if(st==='DONE')return isImpact(t)?['Có phiên bản mới sau khi xong','t-purple','chg']:[t.refs.length?'Đủ · đã dùng':'Không cần input','t-green','ok'];
+  const miss=missingRefs(t).length;if(miss)return [`Thiếu ${miss} trường`,'t-amber','miss'];
+  if(chgRefs(t).length)return ['Có phiên bản mới','t-purple','chg'];
+  const dep=openDeps(t).length;
+  if(dep&&!t.refs.length)return [`Chờ ${dep} việc trước`,'t-teal','dep'];
+  if(dep)return [`Đủ ${req}/${req} · chờ ${dep} việc`,'t-teal','dep'];
+  if(!t.refs.length)return [t.local?'Đủ thiết lập':'Không cần input','t-green','ok'];
+  return [`Đủ ${req}/${req}`,'t-green','ok']}
+function classMetrics(c){const ts=classTasks(c);const done=ts.filter(t=>status(t)==='DONE').length;const overdue=ts.filter(t=>dueInfo(t).overdue);
+  const wait=ts.filter(t=>status(t)==='WAITING_INPUT').length;const unassigned=ts.filter(t=>status(t)==='UNASSIGNED').length;const chg=ts.filter(t=>chgPending(t)||isImpact(t)).length;
+  const open=ts.filter(t=>status(t)!=='DONE').sort((a,b)=>due(a).localeCompare(due(b)));
+  return {total:ts.length,done,overdue,wait,unassigned,chg,next:overdue[0]||open[0]||null}}
+function sumMetrics(classes){return classes.reduce((a,c)=>{const m=classMetrics(c);const k=classState(c).k;a.total+=m.total;a.done+=m.done;a.overdue+=m.overdue.length;a.wait+=m.wait;a.chg+=m.chg;a[k]++;return a},{total:0,done:0,overdue:0,wait:0,chg:0,upcoming:0,running:0,ended:0})}
+
+/* ================== HIỂN THỊ NHỎ ================== */
+const badge=t=>{const [l,c]=STATUS_META[status(t)];return `<span class="badge ${c}">${l}</span>`};
+const prog=(d,n,green)=>`<div class="prog"><span class="bar"><i class="${green?'g':''}" style="width:${n?Math.round(d/n*100):0}%"></i></span>${d}/${n}</div>`;
+function dlCell(t){if(!t)return '<span class="muted">–</span>';const i=dueInfo(t);return `<div class="dl ${i.cls}"><b>${t.code} · ${esc(t.tpl.title)}</b><small>${i.text} · ${i.rel}</small></div>`}
+function stateTag(c){const s=classState(c);return `<span class="tag ${s.tag}">${s.label} · ${s.sub}</span>`}
+function toast(m){const el=$('toast');el.textContent=m;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,3200)}
+
+/* ================== TRƯỜNG INPUT ================== */
+function canEditSource(code){return state.role===SRC_DEF[code].owner||state.role==='operations'}
+function fieldRow(ctx,ref,st,opts={}){const {s,f,def}=split(ref);const inp=inputOf(ctx,s)||{values:{}};const v=inp.values[f];const key=srcKey(ctx,s);
+  const edit=opts.editable&&canEditSource(s);let val='';
+  if(def.type==='file'||def.type==='file-template'){
+    val=v?`<div class="fileitem"><span class="ic ${v.ic}">${v.ic.toUpperCase()}</span><div><b>${esc(v.name)}</b><small>${esc(v.meta)}</small></div><button class="btn xs" type="button" data-toast="Mở xem trước ${esc(v.name)}">Xem</button></div>`
+      :edit?`<input class="inp" data-edit="${key}|${f}" placeholder="${esc(def.ph||'Tên file')}">${def.type==='file-template'?'<small>Tải mẫu Mau_DS_hoc_vien.xlsx · hệ thống đọc file, báo lỗi từng dòng</small>':''}`:`<b>Chưa có file</b><small>Chờ ${OWNER_LABEL[SRC_DEF[s].owner]} bổ sung</small>`}
+  else if(def.type==='repeat'){const n=ctx.course.acts[REPEAT_COUNT[f]]||0;const arr=Array.isArray(v)?v:[];
+    val=Array.from({length:n},(_,i)=>{const it=arr[i];return it?`<div class="fileitem"><span class="ic ${it.ic}">${it.ic==='lib'?'LIB':it.ic.toUpperCase()}</span><div><b>${esc(it.name)}</b><small>${esc(it.meta)}</small></div></div>`
+      :`<div class="fileitem need"><span class="ic none">${i+1}</span><div><b>Mục ${i+1} · chưa có</b><small>${esc(def.ph||'')}</small></div>${edit?`<input class="inp" style="max-width:180px" data-edit="${key}|${f}|${i}" placeholder="${esc(def.ph||'')}">`:''}</div>`}).join('')}
+  else if(def.type==='derived'&&def.from&&!inp.values[def.from])val=`<b>Chờ file</b><small>Tự đọc từ ${esc(SRC_DEF[s].fields[def.from].label)}</small>`;
+  else if(v==null||v==='')val=edit?`<input class="inp" data-edit="${key}|${f}" placeholder="${esc(def.ph||'Nhập giá trị')}">`:`<b>Chưa có</b><small>${def.req?`Chờ ${OWNER_LABEL[SRC_DEF[s].owner]} bổ sung`:'Không bắt buộc'}</small>`;
+  else{let sub='';if(def.type==='counts')sub='Lấy từ phạm vi khóa, không nhập tay';if(def.type==='derived'&&f==='class_ids')sub='';
+    if(inp.changes&&inp.changes[f])sub=`v${inp.ver-1} → v${inp.ver}: ${inp.changes[f]}`;if(f==='learner_count'&&inp.note)sub=inp.note;
+    val=`${def.type==='library-ref'?'<span class="tag t-amber" style="margin-right:5px">Thư viện</span>':''}<b>${esc(opts.inTask&&f==='class_ids'?ctx.cls.id:v)}</b>${sub?`<small>${esc(sub)}</small>`:''}`}
+  const tag=st==='miss'?'<span class="tag t-amber">Thiếu</span>':st==='chg'?'<span class="tag t-purple">Đã đổi</span>':st==='opt'?'<span class="tag t-grey">Tùy chọn</span>':'<span class="tag t-green">✓</span>';
+  return `<div class="field ${st==='miss'?'missing':''} ${st==='chg'?'changed':''}"><span class="lb">${esc(def.label)}${def.req?' <i>*</i>':''}<small>${TYPE_LABEL[def.type]}</small></span><span class="val">${val}</span>${tag}</div>`}
+function genericState(ctx,s,f){const def=SRC_DEF[s].fields[f];const inp=inputOf(ctx,s);if(def.req&&fieldMissing(ctx,s,f))return 'miss';if(inp&&inp.changes&&inp.changes[f])return 'chg';if(!def.req&&fieldMissing(ctx,s,f))return 'opt';return 'ok'}
+function saveSource(key,container){const inp=INPUTS[key];const code=key.split(':').pop();let filled=0;
+  container.querySelectorAll(`[data-edit^="${key}|"]`).forEach(el=>{const [,f,idx]=el.dataset.edit.split('|');const val=el.value.trim();if(!val)return;filled++;const def=SRC_DEF[code].fields[f];
+    if(def.type==='repeat'){if(!Array.isArray(inp.values[f]))inp.values[f]=[];inp.values[f][+idx]={ic:/^https?:|\.(vn|com)/.test(val)?'link':'pdf',name:val,meta:'vừa bổ sung'}}
+    else if(def.type==='file'||def.type==='file-template'){inp.values[f]={ic:/xlsx?$/i.test(val)?'xlsx':'pdf',name:val,meta:def.type==='file-template'?'Đã đọc theo mẫu · 42 dòng hợp lệ · 0 lỗi':'vừa tải lên'};
+      if(code==='D03b'){inp.values.learner_count='42';inp.values.groups='Nhóm A: 21 · Nhóm B: 21'}}
+    else inp.values[f]=val});
+  if(!filled){toast('Nhập ít nhất một giá trị trước khi lưu.');return false}
+  inp.ver+=1;inp.at='11/09 · vừa xong';inp.by=PEOPLE[state.role][0];
+  toast(`Đã lưu ${code} v${inp.ver}. Các công việc dùng ${code} được kiểm tra lại điều kiện.`);return true}
+
+/* ================== VAI TRÒ & ĐIỀU HƯỚNG ================== */
+const ROLES={
+ operations:{label:'Quản lý vận hành',def:'overview',groups:[['WORKSPACE',[['overview','Tổng quan'],['structure','Khóa / lớp'],['inputs','Input readiness']]],['CÔNG VIỆC',[['tasks','Công việc lớp'],['due','Việc cần xử lý']]],['QUẢN LÝ',[['team','Phân quyền khóa học'],['accounts','Ekip & tài khoản'],['change','Risk & Change'],['audit','Audit Log']]]]},
+ intake:{label:'Đầu mối / Sale',def:'inputs',groups:[['ĐẦU MỐI / SALE',[['inputs','Input lớp học'],['change','Yêu cầu thay đổi']]]]},
+ content:{label:'Chuyên viên nội dung',def:'requests',groups:[['WORKSPACE',[['overview','Tổng quan'],['structure','Khóa / lớp']]],['INPUT',[['requests','Yêu cầu bổ sung input'],['inputs','Input khóa học']]]]},
+ vtraining:{label:'Chuyên viên vận hành VTraining',def:'overview',groups:[['VẬN HÀNH VTRAINING',[['overview','Tổng quan'],['structure','Khóa / lớp']]],['INPUT',[['inputs','Input khóa học']]],['CÔNG VIỆC',[['tasks','Công việc lớp']]]]},
+ manager:{label:'Quản lý ekip',def:'due',groups:[['TỔNG QUAN',[['overview','Tổng quan']]],['CÔNG VIỆC',[['due','Việc cần tôi xử lý'],['tasks','Công việc lớp']]],['INPUT',[['inputs','Input công việc']]]]},
+ member:{label:'Thành viên ekip',def:'mine',groups:[['CÔNG VIỆC',[['mine','Việc của tôi']]]]}};
+const state={role:'operations',view:'overview',classId:'TNKH03',open:new Set(),sopen:new Set(['c:TNKH03']),search:'',ovTab:'table',sel:new Set(),drawer:null,editLocal:false};
+const ME=()=>PEOPLE[state.role][0];
+
+function navCount(view){
+  if(view==='due')return dueItems().total;
+  if(view==='mine')return TASKS.filter(t=>t.who==='Chiêu Anh'&&status(t)!=='DONE').length;
+  if(view==='requests')return requestGroups().length;
+  if(view==='inputs'){const keys=visibleSourceKeys();return keys.filter(k=>k.miss).length||''}
+  if(view==='tasks')return classTasks(classById(state.classId)).filter(t=>status(t)!=='DONE').length;
+  return ''}
+function renderSidebar(){const r=ROLES[state.role];
+  $('sidebarNav').innerHTML=r.groups.map(([label,items])=>`<section class="nav-group"><p class="nav-label">${label}</p>${items.map(([v,name])=>{const n=navCount(v);return `<button class="nav-button ${state.view===v?'active':''}" type="button" data-view="${v}"><span>${name}</span>${n?`<b class="nav-count">${n}</b>`:''}</button>`}).join('')}</section>`).join('');
+  $('sidebarNav').querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{go(b.dataset.view);$('sidebar').classList.remove('open')})}
+function go(view,extra={}){Object.assign(state,extra);state.view=view;state.sel.clear();render();window.scrollTo({top:0})}
+
+const pageHead=(eyebrow,title,desc,actions='')=>`<section class="project-card"><div><div class="eyebrow">${eyebrow}</div><h1>${title}</h1><p>${desc}</p></div><div class="scope-box">${actions}</div></section>`;
+
+/* ================== TỔNG QUAN (FEEDBACK 3) ================== */
+function overviewView(){const all=sumMetrics(CLASSES);
+  const kpis=`<div class="kpi-grid five" style="margin-top:14px"><article class="kpi blue"><span>Dự án · khóa · lớp</span><strong>${PROJECTS.length} · ${COURSES.length} · ${CLASSES.length}</strong><small>trong phạm vi được giao</small></article><article class="kpi green"><span>Lớp đã chạy</span><strong>${all.ended}</strong><small>đang chạy ${all.running} · chưa chạy ${all.upcoming}</small></article><article class="kpi red"><span>Việc quá hạn</span><strong>${all.overdue}</strong><small>trên tổng ${all.total} việc</small></article><article class="kpi amber"><span>Việc chờ input</span><strong>${all.wait}</strong><small>thiếu trường bắt buộc</small></article><article class="kpi"><span>Input đổi phiên bản</span><strong>${all.chg}</strong><small>việc cần xác nhận / xử lý tác động</small></article></div>`;
+  const tabs=`<div class="tabs"><button class="${state.ovTab==='table'?'on':''}" data-ovtab="table">Bảng</button><button class="${state.ovTab==='cal'?'on':''}" data-ovtab="cal">Lịch</button></div>`;
+  return `${pageHead('TỔNG QUAN VẬN HÀNH','Dự án, khóa học và lớp','Bấm dự án để mở khóa học, bấm khóa học để mở lớp, bấm lớp để vào công việc của lớp.')}${kpis}
+  <section class="page-surface"><header class="surface-head"><div><small>BẢNG NHIỀU TẦNG</small><h2>${state.ovTab==='table'?'Dự án › Khóa học › Lớp':'Lịch lớp'}</h2><p>Hôm nay ${fmtDY(TODAY)} · trạng thái lớp tự tính theo ngày học</p></div><div class="toolbar">${state.ovTab==='table'?`<input class="search" id="ovSearch" placeholder="Tìm mã hoặc tên dự án, khóa, lớp…" value="${esc(state.search)}"><button class="btn" data-expand="all">Mở tất cả</button><button class="btn" data-expand="none">Thu gọn</button>`:''}${tabs}</div></header>
+  <div class="summary-strip"><span class="tag t-green">${all.ended} lớp đã chạy</span><span class="tag t-blue">${all.running} lớp đang chạy</span><span class="tag t-grey">${all.upcoming} lớp chưa chạy</span>${all.overdue?`<span class="tag t-red">${all.overdue} việc quá hạn</span>`:''}${all.wait?`<span class="tag t-amber">${all.wait} việc chờ input</span>`:''}</div>
+  ${state.ovTab==='table'?treeTable('overview'):calendarList()}</section>`}
+
+function treeTable(mode){const S=mode==='structure';const q=S?'':state.search.trim().toLowerCase();
+  const match=(...xs)=>!q||xs.some(x=>String(x).toLowerCase().includes(q));
+  const openSet=S?state.sopen:state.open;
+  const head=S?'<tr><th>STT</th><th>Tên</th><th>Thời gian</th><th>Trạng thái</th><th>Tiến độ công việc</th><th>Deadline gần nhất</th><th>Thao tác</th></tr>':'<tr><th>STT</th><th>Tên</th><th>Thời gian</th><th>Lớp đã / đang / chưa chạy</th><th>Tiến độ công việc</th><th>Cảnh báo</th></tr>';
+  let rows='';
+  PROJECTS.forEach(p=>{const cos=COURSES.filter(c=>c.project===p.id);const pcls=CLASSES.filter(c=>cos.some(co=>co.id===c.course));
+    const hitP=match(p.id,p.name,p.customer);const hitCls=pcls.filter(c=>match(c.id,c.name));const hitCo=cos.filter(co=>match(co.id,co.name));
+    if(q&&!hitP&&!hitCls.length&&!hitCo.length)return;
+    const pOpen=q?true:(S||openSet.has('p:'+p.id));const m=sumMetrics(pcls);
+    rows+=`<tr class="lv1 clickable" data-toggle="p:${p.id}"><td class="stt"><button class="tog" type="button">${pOpen?'▾':'▸'}</button>${STT['p:'+p.id]}</td><td class="nm"><b>${esc(p.name)}</b><small>${p.id} · Khách hàng ${esc(p.customer)} · ${cos.length} khóa · ${pcls.length} lớp</small></td><td>${fmtD(p.start)} – ${fmtD(p.end)}</td>`+
+      (S?`<td><div class="pill-row">${m.ended?`<span class="tag t-green">${m.ended} đã chạy</span>`:''}${m.running?`<span class="tag t-blue">${m.running} đang chạy</span>`:''}${m.upcoming?`<span class="tag t-grey">${m.upcoming} chưa chạy</span>`:''}</div></td><td>${prog(m.done,m.total)}</td><td></td><td>${state.role==='operations'?`<button class="btn" data-toast="Tạo khóa học mới trong ${p.id}">+ Khóa học</button>`:''}</td>`
+        :`<td><div class="pill-row">${m.ended?`<span class="tag t-green">${m.ended} đã chạy</span>`:''}${m.running?`<span class="tag t-blue">${m.running} đang chạy</span>`:''}${m.upcoming?`<span class="tag t-grey">${m.upcoming} chưa chạy</span>`:''}</div></td><td>${prog(m.done,m.total)}</td><td>${alerts(m)}</td>`)+`</tr>`;
+    if(!pOpen)return;
+    cos.forEach(co=>{const ccls=CLASSES.filter(c=>c.course===co.id).sort((a,b)=>a.start.localeCompare(b.start));
+      if(q&&!hitP&&!match(co.id,co.name)&&!ccls.some(c=>match(c.id,c.name)))return;
+      const cOpen=q?true:(S||openSet.has('co:'+co.id));const cm=sumMetrics(ccls);
+      rows+=`<tr class="lv2 clickable" data-toggle="co:${co.id}"><td class="stt ind2"><button class="tog" type="button">${cOpen?'▾':'▸'}</button>${STT['co:'+co.id]}</td><td class="nm"><b>${esc(co.name)}</b><small>${co.id} · ${co.systems} · ${ccls.length} lớp · ${esc(actCountText(co.acts))}</small></td><td>${fmtD(ccls[0].start)} – ${fmtD(ccls[ccls.length-1].end)}</td>`+
+        `<td><div class="pill-row">${cm.ended?`<span class="tag t-green">${cm.ended}${S?' đã chạy':''}</span>`:''}${cm.running?`<span class="tag t-blue">${cm.running}${S?' đang chạy':''}</span>`:''}${cm.upcoming?`<span class="tag t-grey">${cm.upcoming}${S?' chưa chạy':''}</span>`:''}</div></td><td>${prog(cm.done,cm.total)}</td>`+
+        (S?`<td></td><td>${state.role==='operations'?`<button class="btn" data-toast="Nhân bản cấu hình khóa ${co.id}">Nhân bản</button> <button class="btn" data-toast="Thêm lớp vào ${co.id}">+ Lớp</button>`:''}</td>`:`<td>${alerts(cm)}</td>`)+`</tr>`;
+      if(!cOpen)return;
+      ccls.forEach(c=>{if(q&&!hitP&&!match(co.id,co.name)&&!match(c.id,c.name))return;const cmx=classMetrics(c);const sOpen=S&&state.sopen.has('c:'+c.id);
+        rows+=`<tr class="lv3 clickable" ${S?`data-toggle="c:${c.id}"`:`data-open-class="${c.id}"`}><td class="stt ind3">${S?`<button class="tog" type="button">${sOpen?'▾':'▸'}</button>`:''}${STT[c.id]}</td><td class="nm"><b>${esc(c.name)}</b><small>${c.id}</small></td><td>${fmtD(c.start)} – ${fmtD(c.end)}</td><td>${stateTag(c)}</td><td>${prog(cmx.done,cmx.total,classState(c).k==='ended')}${cmx.wait||cmx.overdue.length||cmx.chg?`<div class="pill-row" style="margin-top:4px">${cmx.overdue.length?`<span class="tag t-red">${cmx.overdue.length} quá hạn</span>`:''}${cmx.wait?`<span class="tag t-amber">${cmx.wait} chờ input</span>`:''}${cmx.chg?`<span class="tag t-purple">${cmx.chg} input đổi</span>`:''}</div>`:''}</td>`+
+          (S?`<td>${dlCell(cmx.next)}</td><td><button class="btn" data-open-class="${c.id}">Công việc</button></td>`:`<td>${cmx.overdue.length?`<span class="tag t-red">${cmx.overdue[0].code} ${dueInfo(cmx.overdue[0]).rel}</span>`:cmx.wait?`<span class="tag t-amber">${cmx.wait} việc chờ input</span>`:cmx.next?`<span class="muted">${cmx.next.code} · ${dueInfo(cmx.next).rel}</span>`:'<span class="muted">–</span>'}</td>`)+`</tr>`;
+        if(sOpen)rows+=`<tr class="sub"><td colspan="7"><table class="subtable"><thead><tr><th>Mã</th><th>Công việc của ${c.id}</th><th>Người thực hiện</th><th>Input</th><th>Deadline</th><th>Trạng thái</th></tr></thead><tbody>${classTasks(c).map(t=>{const i=dueInfo(t);const [il,ic]=inputSummary(t);return `<tr class="task-row" data-task="${t.id}"><td class="stt">${t.code}</td><td>${esc(t.tpl.title)}</td><td>${esc(t.who||'Chưa giao')}</td><td><span class="tag ${ic}">${il}</span></td><td class="dl ${i.cls}"><b>${i.text}</b><small>${i.rel}</small></td><td>${badge(t)}</td></tr>`}).join('')}</tbody></table></td></tr>`;
+      })})});
+  if(!rows)rows=`<tr><td colspan="7" class="empty-row">Không tìm thấy dự án, khóa hoặc lớp khớp “${esc(state.search)}”.</td></tr>`;
+  return `<div class="table-wrap"><table class="tree"><thead>${head}</thead><tbody>${rows}</tbody></table></div>`}
+function alerts(m){const a=[];if(m.overdue)a.push(`<span class="tag t-red">${m.overdue} quá hạn</span>`);if(m.wait)a.push(`<span class="tag t-amber">${m.wait} chờ input</span>`);if(m.chg)a.push(`<span class="tag t-purple">${m.chg} input đổi</span>`);return a.length?`<div class="pill-row">${a.join('')}</div>`:'<span class="muted">–</span>'}
+function calendarList(){const min='2026-09-01',max='2026-10-15',span=diffDays(min,max);
+  const todayPos=diffDays(min,TODAY)/span*100;
+  return `<div class="sched">${[...CLASSES].sort((a,b)=>a.start.localeCompare(b.start)).map(c=>{const co=courseOf(c);const l=diffDays(min,c.start)/span*100,w=Math.max(1.5,(diffDays(c.start,c.end)+1)/span*100);const k=classState(c).k;
+    return `<div class="sched-row" data-open-class="${c.id}"><time>${fmtD(c.start)} (${wd(c.start)}) – ${fmtD(c.end)}</time><div><b style="font-size:12px">${STT[c.id]} · ${esc(c.name)}</b> <small class="muted">${c.id} · ${co.id}</small><div class="timeline"><i style="left:${l}%;width:${w}%;background:${k==='ended'?'#20a06e':k==='running'?'var(--blue)':'#9aa8b8'}"></i><i style="left:${todayPos}%;width:2px;background:var(--brand)"></i></div></div>${stateTag(c)}</div>`}).join('')}<p class="note-foot">Thanh đỏ mảnh là ngày hôm nay · trục thời gian 01/09 – 15/10/2026</p></div>`}
+
+/* ================== KHÓA / LỚP (FEEDBACK 1) ================== */
+function structureView(){return `${pageHead('CẤU TRÚC TRIỂN KHAI','Khóa / lớp','Mỗi lớp hiện trạng thái, tiến độ công việc và deadline gần nhất. Bấm ▸ ở dòng lớp để xem công việc ngay bên dưới.')}
+  <section class="page-surface" style="margin-top:14px"><header class="surface-head"><div><small>KHÓA HỌC VÀ LỚP</small><h2>Trạng thái công việc và deadline theo từng lớp</h2><p>Deadline tính theo ngày khai giảng (hoặc kết thúc với T-111) trừ số ngày cấu hình · màu đỏ: quá hạn · màu vàng: còn ≤ 2 ngày</p></div></header>${treeTable('structure')}</section>`}
+
+/* ================== BẢN ĐỒ INPUT ================== */
+function inputMap(c){const ts=classTasks(c);const course=courseOf(c);const ctx={cls:c,course};
+  const codes=Object.keys(SRC_DEF).filter(s=>!SRC_DEF[s].act||course.acts[SRC_DEF[s].act]);
+  let blockTotal=0;
+  const rows=codes.map(s=>{const inp=inputOf(ctx,s);let block=0;const miss=Object.keys(SRC_DEF[s].fields).some(f=>SRC_DEF[s].fields[f].req&&fieldMissing(ctx,s,f));
+    const cells=ts.map(t=>{const refs=t.refs.filter(r=>r.startsWith(s+'.'));if(!refs.length)return '<td></td>';const sts=refs.map(r=>fieldState(t,r));
+      if(sts.includes('miss')){block++;return '<td><span class="dot miss">!</span></td>'}if(sts.includes('chg')){block++;return `<td><span class="dot chg">v${inp.ver}</span></td>`}return '<td><span class="dot ok">✓</span></td>'}).join('');
+    blockTotal+=block;
+    return `<tr><td class="src"><b>${s} · ${SRC_DEF[s].title} ${miss?'<span class="tag t-amber">Thiếu</span>':inp&&inp.changes?`<span class="tag t-purple">v${inp.ver} mới</span>`:`<span class="tag t-green">v${inp?inp.ver:0}</span>`}</b><small>${SRC_DEF[s].level==='class'?'Theo lớp':'Theo khóa'} · ${OWNER_LABEL[SRC_DEF[s].owner]}</small></td>${cells}<td>${block?`<span class="tag ${miss?'t-amber':'t-purple'}">${block}</span>`:'–'}</td></tr>`}).join('');
+  const depRow=`<tr><td class="src"><b>Kết quả việc trước</b><small>Tự động</small></td>${ts.map(t=>depCodes(t).length?(openDeps(t).length?'<td><span class="dot dep">→</span></td>':'<td><span class="dot ok">✓</span></td>'):'<td></td>').join('')}<td>${ts.filter(t=>depCodes(t).length&&openDeps(t).length).length||'–'}</td></tr>`;
+  const locRow=`<tr><td class="src"><b>Thiết lập riêng</b><small>Vận hành VTraining</small></td>${ts.map(t=>t.local?'<td><span class="dot ok">⚙</span></td>':'<td></td>').join('')}<td>–</td></tr>`;
+  return `<details class="mapbox" ${state.role==='manager'?'open':''}><summary><span class="l">Bản đồ input của lớp · nguồn nào đang chặn việc nào</span>${blockTotal?`<span class="tag t-amber">${blockTotal} ô cần xử lý</span>`:'<span class="tag t-green">Không có nguồn chặn</span>'}</summary><div class="table-wrap"><table class="matrix"><thead><tr><th>Nguồn input</th>${ts.map(t=>`<th class="tk">${t.code}</th>`).join('')}<th>Chặn</th></tr></thead><tbody>${rows}${depRow}${locRow}</tbody></table></div></details>`}
+
+/* ================== CÔNG VIỆC LỚP ================== */
+function tasksView(){const c=classById(state.classId);const co=courseOf(c);const p=projectOf(co);const m=classMetrics(c);const s=classState(c);
+  const canAssign=['operations','manager'].includes(state.role);const canAdd=['operations','manager','vtraining'].includes(state.role);
+  const crumbs=`<nav class="crumbs"><button data-go="overview">Tổng quan</button>›<button data-go="overview" data-openp="${p.id}">${STT['p:'+p.id]} ${p.id}</button>›<button data-go="overview" data-openco="${co.id}">${STT['co:'+co.id]} ${co.id}</button>›<b>${STT[c.id]} ${c.id}</b></nav>`;
+  const card=`<section class="class-card"><div><div class="eyebrow">${STT[c.id]} · ${c.id} · ${co.id}</div><h1>${esc(c.name)}</h1><p>${esc(p.name)} · ${fmtDY(c.start)} – ${fmtDY(c.end)}</p></div><div class="cell"><span>Trạng thái lớp</span>${stateTag(c)}</div><div class="cell"><span>Tiến độ công việc</span>${prog(m.done,m.total,s.k==='ended')}</div><div class="cell"><span>Deadline gần nhất</span>${dlCell(m.next)}</div><div class="cell"><span>Đổi lớp</span><select class="class-switch" id="classSwitch">${CLASSES.map(x=>`<option value="${x.id}" ${x.id===c.id?'selected':''}>${STT[x.id]} · ${x.id}</option>`).join('')}</select></div></section>`;
+  const groups=['G-01','G-02','G-03'].map(g=>{const list=classTasks(c).filter(t=>t.tpl.group===g);if(!list.length)return '';
+    return `<tr class="group-row"><td colspan="${canAssign?5:4}">${g} · ${GROUPS[g]}</td><td>${list.length} việc</td></tr>`+list.map(t=>taskRow(t,canAssign)).join('')}).join('');
+  return `${crumbs}${card}${inputMap(c)}<section class="page-surface"><header class="surface-head"><div><small>${c.id}</small><h2>Công việc của lớp</h2><p>${m.total} việc · ${m.done} hoàn thành · ${m.wait} chờ input${m.unassigned?` · ${m.unassigned} chưa giao`:''}</p></div><div class="head-actions"><button class="btn" type="button" onclick="window.print()">In danh sách</button>${canAdd?'<button class="btn primary" data-toast="Mở form thêm công việc: chọn mẫu việc, input cần dùng, deadline">+ Thêm công việc</button>':''}</div></header>
+  ${canAssign?`<div class="bulkbar"><label><input type="checkbox" id="selectAll"> <span>${state.sel.size} việc đã chọn</span></label><div class="toolbar" style="width:auto"><select class="class-switch" id="bulkWho"><option value="">Chọn người thực hiện</option>${MEMBERS.map(x=>`<option>${x}</option>`).join('')}</select><button class="btn assign-button" id="assignSelected" ${state.sel.size?'':'disabled'} type="button">Giao việc</button></div></div>`:''}
+  <div class="table-wrap"><table><thead><tr>${canAssign?'<th class="check-col"></th>':''}<th>Công việc</th><th>Input của việc</th><th>Deadline</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>${groups}</tbody></table></div></section>`}
+function taskRow(t,withCheck,showClass){const i=dueInfo(t);const [il,ic]=inputSummary(t);
+  return `<tr class="task-row" data-task="${t.id}">${withCheck?`<td class="check-col" onclick="event.stopPropagation()"><input type="checkbox" data-select-task="${t.id}" ${state.sel.has(t.id)?'checked':''} aria-label="Chọn ${esc(t.tpl.title)}"></td>`:''}<td><span class="task-title">${esc(t.tpl.title)}</span><span class="task-meta">${t.code} · ${showClass?`${t.cls.id} · `:''}${esc(t.who||'Chưa giao')}</span></td><td><span class="input-chip"><span class="tag ${ic}">${il}</span><small>${inputSources(t)}</small></span></td><td class="dl ${i.cls}"><b>${i.text}</b><small>${i.rel}</small></td><td>${badge(t)}</td><td><div class="row-actions"><button class="icon-btn" type="button" data-open-task="${t.id}">Chi tiết</button></div></td></tr>`}
+function inputSources(t){const s=srcCodes(t);const parts=[...s];if(depCodes(t).length)parts.push('việc trước');if(t.local)parts.push('thiết lập');return parts.join(' · ')||'–'}
+
+/* ================== VIỆC CỦA TÔI (THÀNH VIÊN) ================== */
+function mineView(){const mine=TASKS.filter(t=>t.who==='Chiêu Anh');const open=mine.filter(t=>status(t)!=='DONE').sort((a,b)=>due(a).localeCompare(due(b)));
+  const cnt=k=>open.filter(t=>status(t)===k).length;const over=open.filter(t=>dueInfo(t).overdue).length;
+  return `${pageHead('THÀNH VIÊN EKIP · CHIÊU ANH','Việc của tôi','Mọi input cần dùng nằm ngay trong từng việc. Việc chưa đủ input sẽ hiện rõ thiếu gì và ai bổ sung.')}
+  <div class="kpi-grid" style="margin-top:14px"><article class="kpi blue"><span>Đang thực hiện</span><strong>${cnt('IN_PROGRESS')+cnt('REWORK')}</strong><small>chờ duyệt ${cnt('IN_REVIEW')}</small></article><article class="kpi green"><span>Sẵn sàng</span><strong>${cnt('READY')}</strong><small>có thể bắt đầu</small></article><article class="kpi amber"><span>Chờ input / việc trước</span><strong>${cnt('WAITING_INPUT')+cnt('WAITING')}</strong><small>chưa thể bắt đầu</small></article><article class="kpi red"><span>Quá hạn</span><strong>${over}</strong><small>cần xử lý ngay</small></article></div>
+  <section class="page-surface"><header class="surface-head"><div><small>ASSIGNED TO ME</small><h2>${open.length} việc chưa hoàn thành</h2><p>Sắp theo deadline, quá hạn lên đầu</p></div></header><div class="table-wrap"><table><thead><tr><th>Công việc</th><th>Input của việc</th><th>Deadline</th><th>Trạng thái</th><th></th></tr></thead><tbody>${open.map(t=>taskRow(t,false,true)).join('')||'<tr><td colspan="5" class="empty-row">Không có việc</td></tr>'}</tbody></table></div></section>`}
+
+/* ================== INPUT ================== */
+function allSourceKeys(){const out=[];
+  CLASSES.forEach(c=>['D03a','D03b'].forEach(s=>out.push({key:`${c.id}:${s}`,code:s,ctx:{cls:c,course:courseOf(c)},scope:c})));
+  COURSES.forEach(co=>Object.keys(SRC_DEF).filter(s=>SRC_DEF[s].level==='course'&&co.acts[SRC_DEF[s].act]).forEach(s=>{const cls=CLASSES.find(c=>c.course===co.id);out.push({key:`${co.id}:${s}`,code:s,ctx:{cls,course:co},scope:co})}));
+  out.forEach(o=>{o.miss=Object.keys(SRC_DEF[o.code].fields).filter(f=>SRC_DEF[o.code].fields[f].req&&!SRC_DEF[o.code].fields[f].from&&fieldMissing(o.ctx,o.code,f)).length;o.inp=INPUTS[o.key];
+    o.users=TASKS.filter(t=>t.refs.some(r=>r.startsWith(o.code+'.'))&&srcKey(t,o.code)===o.key);o.blocking=o.users.filter(t=>t.refs.some(r=>r.startsWith(o.code+'.')&&['miss','chg'].includes(fieldState(t,r)))&&status(t)!=='DONE'||isImpact(t)&&t.refs.some(r=>r.startsWith(o.code+'.')))});
+  return out}
+function visibleSourceKeys(){const all=allSourceKeys();if(state.role==='intake')return all.filter(o=>SRC_DEF[o.code].owner==='intake');if(state.role==='content')return all.filter(o=>SRC_DEF[o.code].owner==='content');return all}
+function srcCard(o){const def=SRC_DEF[o.code];const inp=o.inp||{ver:0,values:{}};const edit=canEditSource(o.code);const chg=inp.changes;
+  const scopeLabel=def.level==='class'?`${sttOf(o.scope)} · ${o.scope.id} · ${esc(o.scope.name)}`:`${sttOf(o.scope)} · ${o.scope.id}`;
+  const fields=Object.keys(def.fields).map(f=>fieldRow(o.ctx,`${o.code}.${f}`,genericState(o.ctx,o.code,f),{editable:true})).join('');
+  const users=o.users.map(t=>t.code+(def.level==='course'?`·${t.cls.id.replace('PPO_TEST-','')}`:'')).slice(0,6).join(', ')+(o.users.length>6?` +${o.users.length-6}`:'');
+  return `<article class="src-card ${o.miss?'miss':chg?'chg':''}" data-card="${o.key}" id="card-${o.key.replace(/[^\w]/g,'_')}"><header><div><b>${o.code} · ${def.title}</b><small>${scopeLabel}</small><small>${inp.ver?`v${inp.ver} · ${esc(inp.by)} · ${inp.at}`:'Chưa có phiên bản'}${inp.reason?` · Lý do: ${esc(inp.reason)}`:''}</small></div>${o.miss?`<span class="tag t-amber">Thiếu ${o.miss} trường</span>`:chg?`<span class="tag t-purple">v${inp.ver} mới</span>`:'<span class="tag t-green">Đủ</span>'}</header><div class="body">${fields}</div>
+  <footer><span>Dùng cho ${o.users.length} việc: ${users||'–'}${o.blocking.length?` · <b style="color:var(--amber)">đang chặn ${o.blocking.length}</b>`:''}</span><span class="toolbar" style="width:auto">${edit&&o.miss?`<button class="btn primary" data-save="${o.key}">Lưu input ${o.code}</button>`:''}${edit&&!o.miss?`<button class="btn" data-toast="Mở form cập nhật ${o.code} v${inp.ver+1}: bắt buộc ghi lý do, hệ thống báo việc bị ảnh hưởng">Cập nhật phiên bản</button>`:''}</span></footer></article>`}
+function inputsView(){const keys=visibleSourceKeys();const r=state.role;
+  const title=r==='intake'?'Input lớp học':r==='content'?'Input khóa học':r==='manager'?'Input công việc':'Input readiness';
+  const desc=r==='intake'?'Thông tin lớp (D03a) và danh sách học viên theo file mẫu (D03b) cho từng lớp. Ô vàng là trường còn thiếu, nhập trực tiếp rồi bấm Lưu.':r==='content'?'Nội dung theo khóa (D04 – D09). Số ô trong nhóm lặp tự sinh theo số lượng hoạt động của khóa.':'Tình trạng từng nguồn input, việc đang dùng và việc đang bị chặn.';
+  const table=`<div class="table-wrap"><table><thead><tr><th>Nguồn</th><th>Phạm vi</th><th>Người sở hữu</th><th>Phiên bản</th><th>Tình trạng</th><th>Dùng cho</th><th>Đang chặn</th></tr></thead><tbody>${keys.map(o=>`<tr class="task-row" data-jump="${o.key}"><td><b>${o.code}</b> · ${SRC_DEF[o.code].title}</td><td>${sttOf(o.scope)} · ${o.scope.id}</td><td>${OWNER_LABEL[SRC_DEF[o.code].owner]}</td><td>${o.inp&&o.inp.ver?'v'+o.inp.ver:'–'}</td><td>${o.miss?`<span class="tag t-amber">Thiếu ${o.miss} trường</span>`:o.inp&&o.inp.changes?`<span class="tag t-purple">Có v${o.inp.ver} mới</span>`:'<span class="tag t-green">Đủ</span>'}</td><td>${o.users.length} việc</td><td>${o.blocking.length?`<span class="tag t-amber">${o.blocking.length} việc</span>`:'–'}</td></tr>`).join('')}</tbody></table></div>`;
+  const ready=keys.filter(o=>!o.miss).length;
+  let cards='';
+  if(r==='intake'){COURSES.forEach(co=>{cards+=`<p class="scope-title">${STT['co:'+co.id]} · ${co.id} · ${esc(co.name)}</p><div class="src-grid">${keys.filter(o=>o.ctx.course.id===co.id).map(srcCard).join('')}</div>`})}
+  else if(r==='content'){COURSES.forEach(co=>{cards+=`<p class="scope-title">${STT['co:'+co.id]} · ${co.id} · ${esc(co.name)} · ${esc(actCountText(co.acts))}</p><div class="src-grid">${keys.filter(o=>o.scope.id===co.id).map(srcCard).join('')}</div>`})}
+  else{const att=keys.filter(o=>o.miss||o.inp&&o.inp.changes);cards=`<p class="scope-title">Cần chú ý · ${att.length} nguồn</p><div class="src-grid">${att.map(srcCard).join('')}</div>`}
+  return `${pageHead('INPUT CONTROL',title,desc)}<section class="page-surface" style="margin-top:14px"><header class="surface-head"><div><small>TÌNH TRẠNG NGUỒN INPUT</small><h2>${ready}/${keys.length} nguồn đã đủ</h2><p>Bấm một dòng để xem chi tiết nguồn bên dưới</p></div></header>${table}</section><section class="page-surface" style="margin-top:14px">${cards}</section>`}
+
+/* ================== YÊU CẦU BỔ SUNG INPUT (NỘI DUNG) ================== */
+function requestGroups(){return allSourceKeys().filter(o=>SRC_DEF[o.code].owner==='content'&&o.miss)}
+function requestsView(){const gs=requestGroups();
+  return `${pageHead('CHUYÊN VIÊN NỘI DUNG · THU TRANG','Yêu cầu bổ sung input','Các nguồn nội dung đang thiếu trường và những công việc đang chờ. Bổ sung xong, công việc tự chuyển sang Sẵn sàng.')}
+  ${gs.map(o=>{const missF=Object.keys(SRC_DEF[o.code].fields).filter(f=>SRC_DEF[o.code].fields[f].req&&fieldMissing(o.ctx,o.code,f)).map(f=>SRC_DEF[o.code].fields[f].label);const waiting=o.users.filter(t=>status(t)==='WAITING_INPUT').sort((a,b)=>due(a).localeCompare(due(b)));
+    return `<section class="page-surface queue-sec" style="margin-top:14px"><h3><span>${o.code} · ${SRC_DEF[o.code].title} · ${o.scope.id}</span><span class="tag t-amber">Thiếu: ${esc(missF.join(', '))}</span></h3><div class="table-wrap"><table><thead><tr><th>Công việc đang chờ</th><th>Lớp</th><th>Deadline</th><th>Người thực hiện</th></tr></thead><tbody>${waiting.map(t=>{const i=dueInfo(t);return `<tr class="task-row" data-task="${t.id}"><td><b>${t.code}</b> · ${esc(t.tpl.title)}</td><td>${STT[t.cls.id]} · ${t.cls.id}</td><td class="dl ${i.cls}"><b>${i.text}</b><small>${i.rel}</small></td><td>${esc(t.who||'Chưa giao')}</td></tr>`}).join('')}</tbody></table></div><div class="src-grid" style="grid-template-columns:1fr">${srcCard(o)}</div></section>`}).join('')||'<section class="page-surface" style="margin-top:14px"><p class="empty-row">Không còn yêu cầu bổ sung. Mọi nguồn nội dung đã đủ.</p></section>'}`}
+
+/* ================== VIỆC CẦN XỬ LÝ (QUẢN LÝ) ================== */
+function dueItems(){const impact=TASKS.filter(isImpact),confirm=TASKS.filter(chgPending),review=TASKS.filter(t=>status(t)==='IN_REVIEW'),wait=TASKS.filter(t=>status(t)==='WAITING_INPUT'),unassigned=TASKS.filter(t=>status(t)==='UNASSIGNED'),over=TASKS.filter(t=>dueInfo(t).overdue);
+  return {impact,confirm,review,wait,unassigned,over,total:impact.length+review.length+wait.length+unassigned.length+over.length}}
+function queue(title,list,hint,action){return `<section class="page-surface queue-sec" style="margin-top:14px"><h3><span>${title}</span><span class="muted" style="font-weight:600">${list.length} việc · ${hint}</span></h3>${list.length?`<div class="table-wrap"><table><tbody>${list.map(t=>{const i=dueInfo(t);return `<tr class="task-row" data-task="${t.id}"><td style="width:40%"><span class="task-title">${esc(t.tpl.title)}</span><span class="task-meta">${t.code} · ${STT[t.cls.id]} ${t.cls.id} · ${esc(t.who||'Chưa giao')}</span></td><td><span class="tag ${inputSummary(t)[1]}">${inputSummary(t)[0]}</span></td><td class="dl ${i.cls}"><b>${i.text}</b><small>${i.rel}</small></td><td>${badge(t)}</td><td style="text-align:right"><button class="btn" data-open-task="${t.id}">${action}</button></td></tr>`}).join('')}</tbody></table></div>`:'<p class="empty-row">Không có việc.</p>'}</section>`}
+function dueView(){const d=dueItems();
+  return `${pageHead('HÀNG CHỜ ĐIỀU HÀNH','Việc cần tôi xử lý','Tác động khi input đổi phiên bản, duyệt kết quả, gỡ chặn input, phân công và việc quá hạn.')}
+  <div class="kpi-grid five" style="margin-top:14px"><article class="kpi"><span>Tác động input</span><strong>${d.impact.length+d.confirm.length}</strong><small>việc bị ảnh hưởng bởi phiên bản mới</small></article><article class="kpi blue"><span>Chờ duyệt</span><strong>${d.review.length}</strong><small>PASS / làm lại</small></article><article class="kpi amber"><span>Chờ input</span><strong>${d.wait.length}</strong><small>cần nhắc người sở hữu</small></article><article class="kpi"><span>Chưa giao</span><strong>${d.unassigned.length}</strong><small>đủ điều kiện, chưa có người</small></article><article class="kpi red"><span>Quá hạn</span><strong>${d.over.length}</strong><small>quá deadline</small></article></div>
+  ${queue('① Tác động input · việc đã xong nhưng input đổi',d.impact,'giữ nguyên hoặc mở lại','Xử lý')}
+  ${queue('② Đang làm nhưng input vừa đổi phiên bản',d.confirm,'chờ người thực hiện xác nhận','Xem')}
+  ${queue('③ Chờ duyệt',d.review,'duyệt PASS hoặc yêu cầu làm lại','Duyệt')}
+  ${queue('④ Quá hạn',d.over,'ưu tiên xử lý','Xem')}
+  ${queue('⑤ Chờ input',d.wait,'nhắc người sở hữu input','Nhắc')}
+  ${queue('⑥ Chưa giao',d.unassigned,'giao người thực hiện','Giao')}`}
+
+/* ================== QUẢN LÝ (giữ từ bản cũ) ================== */
+function teamView(){const rows=[['Đầu mối / Sale','Ngọc Hân','Theo khóa · nộp D03a, D03b'],['Chuyên viên nội dung','Thu Trang','Theo khóa · nộp D04 – D09'],['Chuyên viên vận hành VTraining','Hải Yến','Theo khóa · đặt thiết lập riêng, cấu hình việc'],['Quản lý ekip','Hoàng Long','Theo khóa · giao việc, duyệt, xử lý tác động input'],['Thành viên ekip','Chiêu Anh · Minh Anh · Quốc Bảo','Theo lớp và việc được giao']];
+  return `${pageHead('COURSE ACCESS','Phân quyền khóa học','Chỉ Quản lý vận hành quản lý role và phạm vi tài khoản.')}<section class="page-surface" style="margin-top:14px"><header class="surface-head"><div><small>COURSE ACCESS</small><h2>Vai trò trong khóa CX-FOUNDATION</h2><p>Quyền gắn theo khóa. Quyền sửa input gắn theo người sở hữu nguồn.</p></div><button class="btn primary" data-toast="Gán vai trò">+ Gán vai trò</button></header><div class="table-wrap"><table><thead><tr><th>Vai trò</th><th>Tài khoản</th><th>Phạm vi và quyền input</th><th>Trạng thái</th><th></th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td>${r[2]}</td><td><span class="badge done">Đang hoạt động</span></td><td><button class="btn" data-toast="Điều chỉnh quyền">Điều chỉnh</button></td></tr>`).join('')}</tbody></table></div></section>`}
+function accountsView(){return `${pageHead('ACCOUNT DIRECTORY','Ekip & tài khoản','Quản lý tài khoản vận hành và tập role được cấp.')}<section class="page-surface" style="margin-top:14px"><header class="surface-head"><div><small>ACCOUNT DIRECTORY</small><h2>Danh sách tài khoản</h2><p>Role hiện tại quyết định workspace và quyền thao tác.</p></div><button class="btn primary" data-toast="Tạo tài khoản">+ Tạo tài khoản</button></header><div class="table-wrap"><table><thead><tr><th>Người dùng</th><th>Email</th><th>Role</th><th>Phạm vi</th><th></th></tr></thead><tbody>${Object.entries(PEOPLE).map(([k,p])=>`<tr><td><b>${p[0]}</b></td><td>${p[1]}</td><td>${ROLES[k].label}</td><td>EVNSPC-2026 · PPO_TEST</td><td><button class="btn" data-toast="Mở tài khoản">Chi tiết</button></td></tr>`).join('')}</tbody></table></div></section>`}
+function changeView(){const canReq=['intake','operations'].includes(state.role);
+  return `${pageHead('CHANGE CONTROL',state.role==='intake'?'Yêu cầu thay đổi':'Risk & Change','Thay đổi phạm vi hoặc input được đánh giá tác động trước khi áp dụng.',canReq?'<button class="btn primary" data-toast="Tạo yêu cầu thay đổi">+ Yêu cầu thay đổi</button>':'')}<section class="page-surface" style="margin-top:14px"><div class="change-list">
+  <article class="change-row"><span class="badge done">Đã áp dụng</span><div><b>D07 Thu hoạch v1 → v2 · Rubric điểm đạt 70 → 75</b><p>CX-FOUNDATION · 10/09 16:40 · ảnh hưởng T-106 (TNKH02 đã xong, TNKH03 đang làm), T-111</p></div><span>Tác động: 4 việc</span><button class="btn" data-go="${['operations','manager'].includes(state.role)?'due':'change'}">Xem tác động</button></article>
+  <article class="change-row"><span class="badge done">Đã duyệt</span><div><b>Scope V2 · Tài liệu VTraining tăng từ 3 lên 4</b><p>CX-FOUNDATION · 09/09 · D09 cần thêm 1 tài liệu · T-109 của TNKH03 chuyển Chờ input</p></div><span>Tác động: 1 việc</span><button class="btn" data-toast="Mở yêu cầu">Chi tiết</button></article>
+  <article class="change-row"><span class="badge review">Chờ phê duyệt</span><div><b>Bổ sung 3 học viên lớp TNKH03</b><p>D03b v1 → v2 · 45 → 48 học viên · T-103 dùng v2</p></div><span>Không đổi phạm vi</span><button class="btn ${state.role==='operations'?'primary':''}" data-toast="Mở yêu cầu">${state.role==='operations'?'Review':'Chi tiết'}</button></article></div></section>`}
+function auditView(){const ev=[['D07 lên v2: Rubric điểm đạt 70 → 75','Thu Trang · Chuyên viên nội dung · input: CX-FOUNDATION:D07 · 10/09 16:40'],['D03b TNKH03 lên v2: 48 học viên','Ngọc Hân · Đầu mối / Sale · input: TNKH03:D03b · 10/09 14:20'],['T-102 TNKH03 được duyệt PASS','Hoàng Long · Quản lý ekip · task: TNKH03-T-102 · 10/09'],['Scope V2 được duyệt: tài liệu 3 → 4','Phạm Hoài Nam · Quản lý vận hành · course: CX-FOUNDATION · 09/09'],['T-101 TNKH03 hoàn thành, dùng D03a v1 · D03b v1','Chiêu Anh · Thành viên ekip · task: TNKH03-T-101 · 09/09']];
+  return `${pageHead('AUDIT LOG','Audit Log','Lịch sử không sửa được: ai làm gì, lúc nào, trên đối tượng nào, với phiên bản input nào.')}<section class="page-surface" style="margin-top:14px"><div class="audit-list">${ev.map(e=>`<div class="audit-row"><b>${e[0]}</b><small>${e[1]}</small></div>`).join('')}</div></section>`}
+
+/* ================== CHI TIẾT CÔNG VIỆC (DRAWER) ================== */
+function outText(t){if(t.code==='T-102')return `Link lớp trên VTraining: vtraining.vn/class/${t.cls.id}`;if(t.code==='T-103')return 'Tài khoản test: test.nhomA@… (trước lớp) · test.nhomB@… (demo tại lớp)';return t.tpl.out}
+function feeds(t){return classTasks(t.cls).filter(x=>depCodes(x).includes(t.code)).map(x=>x.code)}
+function openTask(id){state.drawer=id;state.editLocal=false;renderDrawer();$('taskDrawer').hidden=false}
+function closeDrawer(){state.drawer=null;$('taskDrawer').hidden=true}
+function renderDrawer(){const t=taskById(state.drawer);if(!t)return;const st=status(t);const i=dueInfo(t);const r=state.role;
+  const isMine=r==='member'&&t.who==='Chiêu Anh';const isMgr=['manager','operations'].includes(r);const canLocal=['vtraining','operations'].includes(r);
+  const verUsed=srcCodes(t).map(s=>`${s} v${t.used[s]||inputOf(t,s).ver}`).join(' · ')||'–';
+  $('drawerCode').textContent=`${t.code} · ${t.tpl.group} · ${STT[t.cls.id]} ${t.cls.id}`;$('drawerTitle').textContent=t.tpl.title;
+  const miss=missingRefs(t),chg=chgRefs(t);
+  const chgText=()=>[...new Set(chg.map(x=>x.split('.')[0]))].map(s=>{const inp=inputOf(t,s);return `<b>${s}</b> đã lên <b>v${inp.ver}</b> lúc ${inp.at} (${esc(inp.by)}): ${Object.entries(inp.changes).map(([f,v])=>`${SRC_DEF[s].fields[f].label} ${v}`).join('; ')}${inp.reason?`. Lý do: “${esc(inp.reason)}”`:''}. Việc đang dùng v${t.used[s]}.`}).join(' ');
+  let banner='';
+  if(isImpact(t))banner=`<div class="banner chg"><b>Việc đã hoàn thành, nhưng input vừa đổi.</b> ${chgText()}<div class="acts">${isMgr?'<button class="btn" data-act="ack">Giữ nguyên kết quả</button><button class="btn primary" data-act="reopen">Mở lại việc</button>':'Quản lý ekip quyết định giữ nguyên hay mở lại việc.'}</div></div>`;
+  else if(st==='DONE')banner=`<div class="banner ok"><b>Đã hoàn thành</b> với input ${verUsed}.</div>`;
+  else if(miss.length){const owners=[...new Set(miss.map(x=>SRC_DEF[x.split('.')[0]].owner))];const names=miss.map(x=>split(x).def.label).join(', ');
+    banner=`<div class="banner miss"><b>Chưa thể bắt đầu:</b> thiếu ${miss.length} trường bắt buộc (${esc(names)}). Người bổ sung: <b>${owners.map(o=>OWNER_LABEL[o]).join(', ')}</b>.<div class="acts">${owners.includes(r)||r==='operations'?'<span>Nhập trực tiếp vào ô màu vàng bên dưới rồi bấm “Lưu input”.</span>':isMgr?'<button class="btn soft" data-toast="Đã nhắc người sở hữu input bổ sung">Nhắc bổ sung</button><button class="btn" data-toast="Mở hộp thoại dời deadline, bắt buộc ghi lý do">Dời deadline</button>':'<button class="btn soft" data-toast="Đã gửi nhắc tới người sở hữu input">Nhắc bổ sung</button>'}</div></div>`}
+  else if(chgPending(t))banner=`<div class="banner chg"><b>Input vừa có phiên bản mới.</b> ${chgText()}<div class="acts">${isMine?'<button class="btn primary" data-act="apply">Xác nhận áp dụng phiên bản mới</button><button class="btn" data-toast="Đã báo Quản lý ekip: không áp dụng được phiên bản mới">Báo không áp dụng được</button>':isMgr?'<button class="btn primary" data-act="apply">Áp dụng phiên bản mới</button><button class="btn" data-act="ack">Giữ phiên bản cũ cho lớp này</button>':'Đang chờ người thực hiện xác nhận.'}</div></div>`;
+  else if(st==='WAITING'){const o=openDeps(t);banner=`<div class="banner dep"><b>Chờ việc trước:</b> còn ${o.length}/${depCodes(t).length} việc chưa hoàn thành (${o.join(', ')}). Việc tự chuyển sang Sẵn sàng khi các việc này xong.</div>`}
+  else if(st==='IN_REVIEW')banner=`<div class="banner rev"><b>Đã gửi duyệt.</b> Người duyệt: ${REVIEWER}.<div class="acts">${isMgr?'<button class="btn primary" data-act="pass">Duyệt PASS</button><button class="btn" data-act="rework">Yêu cầu làm lại</button>':''}</div></div>`;
+  else if(st==='UNASSIGNED')banner=`<div class="banner ok"><b>Đủ điều kiện</b> nhưng chưa có người thực hiện.${isMgr?`<div class="acts"><select class="class-switch" id="drawerWho">${MEMBERS.map(x=>`<option>${x}</option>`).join('')}</select><button class="btn primary" data-act="assign">Giao việc</button></div>`:''}</div>`;
+  else if(st==='READY')banner=`<div class="banner ok"><b>Đủ điều kiện.</b> Toàn bộ input bắt buộc đã có. Khi bắt đầu, hệ thống ghi lại phiên bản đang dùng: ${verUsed}.</div>`;
+  else banner=`<div class="banner ok"><b>Đủ input.</b> Việc đang làm với ${verUsed} (ghi lại khi bắt đầu).</div>`;
+  // ① input
+  let inp='';
+  srcCodes(t).forEach(s=>{const src=inputOf(t,s);const refs=t.refs.filter(x=>x.startsWith(s+'.'));const u=t.used[s];
+    inp+=`<div class="srchead"><span><b>${s} · ${SRC_DEF[s].title}</b> · ${SRC_DEF[s].level==='class'?'Theo lớp':'Theo khóa'} · v${src.ver}${u&&u<src.ver?` <span class="tag t-purple">việc đang dùng v${u}</span>`:''}</span><span>${esc(src.by)} (${OWNER_LABEL[SRC_DEF[s].owner]}) · ${src.at} · <u data-toast="Lịch sử ${s}: ${Array.from({length:src.ver},(_,k)=>'v'+(k+1)).join(' → ')||'chưa có'}">Lịch sử</u></span></div>`+
+      refs.map(x=>fieldRow(t,x,fieldState(t,x),{editable:true,inTask:true})).join('')+
+      (canEditSource(s)&&refs.some(x=>fieldState(t,x)==='miss')?`<div style="text-align:right;padding:6px 0"><button class="btn primary" data-save="${srcKey(t,s)}">Lưu input ${s}</button></div>`:'')});
+  if(depCodes(t).length){const dc=depCodes(t);inp+=`<div class="srchead"><span><b>Kết quả việc trước</b> · tự động</span><span>${dc.length-openDeps(t).length}/${dc.length} xong</span></div>`+dc.map(code=>{const d=classTasks(t.cls).find(x=>x.code===code);return `<div class="dep-row"><span><b>${code}</b> · ${esc(d.tpl.title)}${status(d)==='DONE'?`<small>Output: ${esc(outText(d))}</small>`:''}</span>${badge(d)}</div>`}).join('')}
+  if(t.local){inp+=`<div class="srchead"><span><b>Thiết lập riêng của việc</b> · Vận hành VTraining đặt</span>${canLocal&&!state.editLocal&&st!=='DONE'?'<button class="btn xs" data-act="editlocal">Sửa</button>':''}</div>`+t.local.map(l=>`<div class="field"><span class="lb">${esc(l.label)} <i>*</i><small>Form · ngày giờ</small></span><span class="val">${state.editLocal?`<input class="inp plain" data-local="${l.key}" value="${esc(l.value)}">`:`<b>${esc(l.value)}</b>${l.sub?`<small>${esc(l.sub)}</small>`:''}`}</span><span class="tag t-green">✓</span></div>`).join('')+(state.editLocal?'<div style="text-align:right;padding:6px 0"><button class="btn primary" data-act="savelocal">Lưu thiết lập</button></div>':'')}
+  if(!inp)inp='<p class="muted" style="font-size:11px">Việc này không cần input.</p>';
+  // ② checklist
+  const canTick=isMine&&['IN_PROGRESS','REWORK'].includes(st);
+  const chk=t.checklist.map(([text,ref],k)=>{let exp='';
+    if(ref&&ref.startsWith('L.')){const l=(t.local||[]).find(x=>x.key===ref.slice(2));if(l)exp=`Đối chiếu thiết lập: ${l.label} = ${l.value}`}
+    else if(ref){const {s,f,def}=split(ref);const v=inputOf(t,s).values[f];const val=typeof v==='string'?v:v&&v.name?v.name:Array.isArray(v)?v.filter(Boolean).map(x=>x.name.split(' · ')[0]).join(', '):'';exp=`Đối chiếu input: ${def.label} = ${val||'(chưa có)'}`}
+    const affected=ref&&chg.includes(ref);
+    return `<label class="chk"><input type="checkbox" data-chk="${k}" ${t.done[k]?'checked':''} ${canTick?'':'disabled'}><span>${esc(text)}${exp?`<span class="exp" ${affected?'style="color:var(--purple)"':''}>↳ ${esc(exp)}${affected?' · giá trị vừa đổi':''}</span>`:''}</span></label>`}).join('');
+  // ③ output
+  const fd=feeds(t);
+  const out=['DONE','IN_REVIEW'].includes(st)?`<b style="font-size:11.5px">${esc(outText(t))}</b>`:canTick?'<textarea class="note-field" placeholder="Nhập output, link minh chứng hoặc ghi chú bàn giao…"></textarea>':'<span class="muted" style="font-size:11px">Người thực hiện nộp output và minh chứng khi gửi duyệt.</span>';
+  $('drawerBody').innerHTML=`<div class="dmeta"><div class="meta-box"><span>Trạng thái</span><b>${badge(t)}</b></div><div class="meta-box"><span>Người thực hiện</span><b>${esc(t.who||'Chưa giao')}</b></div><div class="meta-box"><span>Người duyệt</span><b>${REVIEWER}</b></div><div class="meta-box"><span>Deadline</span><b style="${i.cls==='red'?'color:var(--red)':i.cls==='amber'?'color:var(--amber)':''}">${i.text} · ${i.rel}</b></div><div class="meta-box"><span>Input đang dùng</span><b>${verUsed}</b></div><div class="meta-box"><span>Lớp</span><b>${stateTag(t.cls)}</b></div></div>
+  ${banner}
+  <section class="sec"><header><span>① Input của công việc</span><span class="tag ${inputSummary(t)[1]}">${inputSummary(t)[0]}</span></header><div class="body">${inp}</div></section>
+  <section class="sec"><header><span>② Checklist nghiệm thu</span><span class="muted" style="font-weight:650">${t.done.filter(Boolean).length}/${t.checklist.length}</span></header><div class="body">${chk}</div></section>
+  <section class="sec"><header><span>③ Output &amp; minh chứng</span></header><div class="body" style="padding-top:8px">${out}${fd.length?`<p class="muted" style="font-size:10.5px;margin:6px 0 0">Output của việc này là input của: ${fd.join(', ')}</p>`:''}</div></section>`;
+  let foot='';
+  if(isMine){if(st==='READY')foot='<button class="btn primary" data-act="start">Bắt đầu thực hiện</button>';
+    else if(['IN_PROGRESS','REWORK'].includes(st))foot=`<button class="btn" data-toast="Đã báo input sai hoặc thiếu cho người sở hữu. Việc giữ trạng thái hiện tại">Báo input sai</button><button class="btn primary" data-act="submit" ${chgPending(t)?'disabled title="Cần xác nhận phiên bản input mới trước"':''}>Gửi duyệt</button>`}
+  if(isMgr&&!['DONE','UNASSIGNED'].includes(st))foot+=`<select class="class-switch" id="drawerWho">${MEMBERS.map(x=>`<option ${x===t.who?'selected':''}>${x}</option>`).join('')}</select><button class="btn" data-act="assign">Giao lại</button>`;
+  if(r==='vtraining')foot+='<button class="btn" data-toast="Mở cấu hình việc: input cần dùng (inputSpec), deadline, checklist">Cấu hình việc</button>';
+  $('drawerActions').innerHTML=foot+'<button class="btn" data-close-drawer>Đóng</button>'}
+
+function drawerAct(act){const t=taskById(state.drawer);if(!t)return;const chgSrc=[...new Set(chgRefs(t).map(x=>x.split('.')[0]))];
+  const uncheckAffected=()=>{const aff=chgRefs(t);t.checklist.forEach(([,ref],k)=>{if(ref&&aff.includes(ref))t.done[k]=0})};
+  if(act==='start'){t.status='IN_PROGRESS';srcCodes(t).forEach(s=>t.used[s]=inputOf(t,s).ver);toast(`${t.code} bắt đầu. Đã ghi lại phiên bản input đang dùng.`)}
+  if(act==='submit'){const left=t.done.filter(x=>!x).length;if(left){toast(`Còn ${left} mục checklist chưa tích.`);return}t.status='IN_REVIEW';toast(`${t.code} đã gửi duyệt cho ${REVIEWER}.`)}
+  if(act==='pass'){t.status='DONE';t.done=t.done.map(()=>1);toast(`${t.code} được duyệt PASS.`)}
+  if(act==='rework'){t.status='REWORK';toast(`${t.code} chuyển sang Cần làm lại.`)}
+  if(act==='apply'){uncheckAffected();chgSrc.forEach(s=>t.used[s]=inputOf(t,s).ver);if(t.status==='IN_REVIEW')t.status='REWORK';toast(`${t.code} dùng phiên bản mới. Mục checklist bị ảnh hưởng đã được bỏ tích để kiểm tra lại.`)}
+  if(act==='ack'){chgSrc.forEach(s=>t.ack[s]=inputOf(t,s).ver);toast(`${t.code} giữ kết quả theo phiên bản cũ. Đã ghi lý do vào Audit Log.`)}
+  if(act==='reopen'){uncheckAffected();chgSrc.forEach(s=>t.used[s]=inputOf(t,s).ver);t.status='REWORK';toast(`${t.code} được mở lại để làm theo phiên bản mới.`)}
+  if(act==='assign'){const w=$('drawerWho').value;t.who=w;toast(`${t.code} giao cho ${w}.`)}
+  if(act==='editlocal'){state.editLocal=true;renderDrawer();return}
+  if(act==='savelocal'){$('drawerBody').querySelectorAll('[data-local]').forEach(el=>{const l=t.local.find(x=>x.key===el.dataset.local);if(l&&el.value.trim())l.value=el.value.trim()});state.editLocal=false;toast('Đã lưu thiết lập riêng của việc.')}
+  render()}
+
+/* ================== RENDER & SỰ KIỆN ================== */
+const VIEW_FN={overview:overviewView,structure:structureView,tasks:tasksView,mine:mineView,inputs:inputsView,requests:requestsView,due:dueView,team:teamView,accounts:accountsView,change:changeView,audit:auditView};
+function viewLabel(v){for(const [,items] of ROLES[state.role].groups)for(const [k,n] of items)if(k===v)return n;return v==='tasks'?'Công việc lớp':'Tổng quan'}
+function render(){const p=PEOPLE[state.role];$('identityName').textContent=`${p[0]} · ${ROLES[state.role].label}`;$('identityMail').textContent=p[1];$('avatar').textContent=p[2];
+  $('breadcrumb').textContent=`VWORK / ${viewLabel(state.view).toUpperCase()}${state.view==='tasks'?' / '+state.classId:''}`;
+  renderSidebar();$('workspace').innerHTML=(VIEW_FN[state.view]||overviewView)();bindWorkspace();if(state.drawer)renderDrawer()}
+function bindWorkspace(){
+  const s=$('ovSearch');if(s)s.oninput=()=>{state.search=s.value;const pos=s.selectionStart;render();const n=$('ovSearch');n.focus();n.setSelectionRange(pos,pos)};
+  const cs=$('classSwitch');if(cs)cs.onchange=()=>go('tasks',{classId:cs.value});
+  const all=$('selectAll');if(all)all.onchange=()=>{classTasks(classById(state.classId)).forEach(t=>all.checked?state.sel.add(t.id):state.sel.delete(t.id));render()};
+  document.querySelectorAll('[data-select-task]').forEach(b=>b.onchange=()=>{b.checked?state.sel.add(b.dataset.selectTask):state.sel.delete(b.dataset.selectTask);render()});
+  const as=$('assignSelected');if(as)as.onclick=()=>{const w=$('bulkWho').value;if(!w){toast('Chọn người thực hiện trước.');return}state.sel.forEach(id=>taskById(id).who=w);toast(`Đã giao ${state.sel.size} việc cho ${w}.`);state.sel.clear();render()}}
+document.addEventListener('click',e=>{const el=e.target;
+  if(el.closest('[data-close-drawer]')){closeDrawer();return}
+  const act=el.closest('[data-act]');if(act){drawerAct(act.dataset.act);return}
+  const sv=el.closest('[data-save]');if(sv){const box=sv.closest('[data-card]')||$('drawerBody');if(saveSource(sv.dataset.save,box))render();return}
+  const tt=el.closest('[data-toast]');if(tt){toast(tt.dataset.toast);return}
+  const gt=el.closest('[data-go]');if(gt){if(gt.dataset.openp)state.open.add('p:'+gt.dataset.openp);if(gt.dataset.openco){const co=COURSES.find(c=>c.id===gt.dataset.openco);state.open.add('p:'+co.project);state.open.add('co:'+co.id)}go(gt.dataset.go);return}
+  const oc=el.closest('[data-open-class]');if(oc){go('tasks',{classId:oc.dataset.openClass});return}
+  const tg=el.closest('[data-toggle]');if(tg){const set=state.view==='structure'?state.sopen:state.open;const k=tg.dataset.toggle;set.has(k)?set.delete(k):set.add(k);if(state.view==='structure'&&!k.startsWith('c:'))return;render();return}
+  const ex=el.closest('[data-expand]');if(ex){state.open.clear();if(ex.dataset.expand==='all'){PROJECTS.forEach(p=>state.open.add('p:'+p.id));COURSES.forEach(c=>state.open.add('co:'+c.id))}render();return}
+  const ot=el.closest('[data-ovtab]');if(ot){state.ovTab=ot.dataset.ovtab;render();return}
+  const jp=el.closest('[data-jump]');if(jp){const c=document.getElementById('card-'+jp.dataset.jump.replace(/[^\w]/g,'_'));if(c){c.scrollIntoView({behavior:'smooth',block:'center'});c.style.boxShadow='0 0 0 3px rgba(200,16,46,.25)';setTimeout(()=>c.style.boxShadow='',1600)}else toast('Nguồn này đủ, không nằm trong nhóm cần chú ý.');return}
+  if(el.closest('input,select,textarea,label'))return;
+  const tk=el.closest('[data-open-task],[data-task]');if(tk){openTask(tk.dataset.openTask||tk.dataset.task)}});
+document.addEventListener('change',e=>{const c=e.target.closest('[data-chk]');if(c){const t=taskById(state.drawer);t.done[+c.dataset.chk]=c.checked?1:0;renderDrawer()}});
+$('taskDrawer').addEventListener('click',e=>{if(e.target===$('taskDrawer'))closeDrawer()});
+$('mobileMenu').onclick=()=>$('sidebar').classList.toggle('open');
+$('roleSelect').onchange=e=>{state.role=e.target.value;closeDrawer();go(ROLES[state.role].def);toast(`Đã chuyển sang vai trò ${ROLES[state.role].label}.`)};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();$('sidebar').classList.remove('open')}});
+render();
+
+</script>
+</body>
+</html>
