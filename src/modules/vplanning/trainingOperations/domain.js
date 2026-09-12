@@ -871,12 +871,13 @@ function createClassTask(state, payload, context) {
   const courseManager = context.role === 'manager'
     ? courseManagers.find((item) => actorMatches(context, item.accountId, item.accountEmail, item.accountName))
     : courseManagers[0];
-  if (courseManager) {
-    task.manager = courseManager.accountName || courseManager.accountEmail || courseManager.accountId;
-    task.managerId = courseManager.accountId || courseManager.accountEmail || task.manager;
-    task.reviewer = task.manager;
-    task.reviewerId = task.managerId;
+  if (!courseManager) {
+    throw domainError('COURSE_MANAGER_REQUIRED', 'Khóa học chưa có Quản lý ekip để làm Người xác nhận. Hãy gán vai trò trước khi tạo công việc.');
   }
+  task.manager = courseManager.accountName || courseManager.accountEmail || courseManager.accountId;
+  task.managerId = courseManager.accountId || courseManager.accountEmail || task.manager;
+  task.reviewer = task.manager;
+  task.reviewerId = task.managerId;
   state.tasks.push(task);
   refreshTaskReadiness(state, classItem.projectId, timestamp);
   appendAudit(state, auditEvent('CLASS_TASK_CREATED', `Thêm ${task.id} vào lớp ${classItem.code}.`, context, 'task', task.id, { classId: classItem.id, group, inputKey }));

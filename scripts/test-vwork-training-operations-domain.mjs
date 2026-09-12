@@ -313,6 +313,11 @@ assert.ok(duplicateState.auditEvents.some((item) => item.type === 'COURSE_DUPLIC
 
 // Class task maintenance — assigned managers may append, edit, reorder and soft-delete tasks.
 let taskMaintenanceState = createInitialTrainingOperationsState({ now: '2026-08-25T00:00:00.000Z' });
+assert.throws(
+  () => command(taskMaintenanceState, 'CREATE_CLASS_TASK', { classId: 'TNKH01', title: 'Thiếu người xác nhận', group: 'setup', checklistItems: ['Tiêu chí'] }, 'operations', 'Quản lý vận hành'),
+  /chưa có Quản lý ekip để làm Người xác nhận/,
+  'A task must not be created before the course manager/reviewer is assigned.',
+);
 taskMaintenanceState = command(taskMaintenanceState, 'ASSIGN_COURSE_ROLE', { courseId: 'CX-FOUNDATION', role: 'manager', accountId: 'manager-01', accountName: 'Ngọc Trần', accountEmail: 'manager@peopleone.vn' }, 'operations', 'Quản lý vận hành');
 const setupOrderBefore = Math.max(...taskMaintenanceState.tasks.filter((item) => item.classId === 'TNKH01' && item.group === 'setup').map((item) => item.sortOrder));
 taskMaintenanceState = commandAs(taskMaintenanceState, 'CREATE_CLASS_TASK', { classId: 'TNKH01', title: 'Việc mới A', group: 'setup', inputKey: 'roster', dueOffset: 1, checklistItems: ['Tiêu chí A'] }, 'manager', 'manager-01', 'Ngọc Trần');
