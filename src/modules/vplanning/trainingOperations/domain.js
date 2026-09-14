@@ -814,6 +814,7 @@ function updateTaskConfig(state, payload, context) {
   const allowedGroups = new Set(TRAINING_TASK_TEMPLATES.map((item) => item.group));
   if (payload.enabled !== undefined) task.status = payload.enabled ? 'WAITING_INPUT' : 'CANCELLED';
   if (payload.dueOffset !== undefined) task.dueOffset = Math.max(0, Number(payload.dueOffset) || 0);
+  if (payload.plannedDeadline !== undefined) task.plannedDeadline = payload.plannedDeadline ? dateText(payload.plannedDeadline, 'Deadline công việc') : null;
   if (payload.title !== undefined) task.title = requiredText(payload.title, 'Tên công việc');
   if (payload.group !== undefined) {
     const group = requiredText(payload.group, 'Nhóm công việc');
@@ -862,6 +863,7 @@ function createClassTask(state, payload, context) {
     input: inputKey,
     requiredInputCodes: taskRequiredInputs({ inputKey }),
     dueOffset: Math.max(0, Number(payload.dueOffset) || 0),
+    plannedDeadline: payload.deadline ? dateText(payload.deadline, 'Deadline công việc') : null,
     checklistItems,
     checklist: checklistItems.map(() => false),
     custom: true,
