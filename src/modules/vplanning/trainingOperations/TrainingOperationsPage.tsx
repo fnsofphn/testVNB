@@ -1,8 +1,8 @@
 // @ts-nocheck
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
-import { ArrowDown, ArrowUp, CopyPlus, Menu, MoreVertical, Pencil, Plus, Trash2, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, CopyPlus, Menu, MoreVertical, Pencil, Plus, Trash2, X } from 'lucide-react';
 import './TrainingOperationsPage.css';
 import {
   TRAINING_DEFAULT_CLASSES,
@@ -527,6 +527,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
     ? 'VWORK / RISK & CHANGE / YÊU CẦU THAY ĐỔI'
     : tab === 'accounts' ? 'VWORK / EKIP & TÀI KHOẢN'
     : tab === 'team' ? 'VWORK / GÁN VAI TRÒ'
+    : tab === 'overview' ? 'VWORK / TỔNG QUAN'
     : tab === 'inputs' ? ['VWORK', activeProject?.code, activeCourse?.name, 'INPUT'].filter(Boolean).join(' / ')
     : tab === 'tasks' ? ['VWORK', activeProject?.code, routeContext.courseId && activeCourse?.name, routeContext.classId && classes.find((item) => [item.id, item.code].includes(routeContext.classId))?.code, routeContext.classId && 'CÔNG VIỆC'].filter(Boolean).join(' / ')
     : tab === 'structure' ? 'VWORK / DANH SÁCH DỰ ÁN' : `VWORK / DỰ ÁN / ${activeProject?.code || ''}`;
@@ -538,10 +539,10 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
       <div className="brand"><span className="brand-mark">P1</span><div><strong>PeopleOne</strong><small>VWork Operations</small></div></div>
       <nav>
         {role === 'content' ? <><p>WORKSPACE</p><button className={tab === 'overview' ? 'active' : ''} onClick={() => setTab('overview')}>Tổng quan dự án</button><button className={tab === 'structure' ? 'active' : ''} onClick={() => setTab('structure')}>Khóa / lớp <b>{projectCourses.length}/{projectClasses.length}</b></button><p>INPUT</p><button className={tab === 'inputs' ? 'active' : ''} onClick={() => setTab('inputs')}>Input khóa học <b>{contentReadyCount}/{contentInputKeys.length}</b></button><p>CÔNG VIỆC</p><button className={tab === 'tasks' ? 'active' : ''} onClick={() => setTab('tasks')}>Việc của tôi <b>{contextTasks.filter((task) => !task.archivedAt).length}</b></button></> : role === 'intake' ? <><p>ĐẦU MỐI / SALE</p><button className={tab === 'inputs' ? 'active' : ''} onClick={() => setTab('inputs')}>Input lớp học <b>{saleUploadDone}/{saleUploadTotal}</b></button><button className={tab === 'change' ? 'active' : ''} onClick={() => setTab('change')}>Yêu cầu thay đổi</button></> : role === 'vtraining' ? <><p>VẬN HÀNH VTRAINING</p><button className={tab === 'overview' ? 'active' : ''} onClick={() => setTab('overview')}>Tổng quan dự án</button><button className={tab === 'structure' ? 'active' : ''} onClick={() => setTab('structure')}>Khóa / lớp <b>{projectCourses.length}/{projectClasses.length}</b></button><p>INPUT</p><button className={tab === 'inputs' ? 'active' : ''} onClick={() => setTab('inputs')}>Input khóa học <b>{readyCount}/{readyTotal}</b></button><p>CÔNG VIỆC</p><button className={tab === 'tasks' ? 'active' : ''} onClick={() => setTab('tasks')}>Việc của tôi <b>{contextTasks.filter((task) => !task.archivedAt).length}</b></button></> : <>
-          {!['manager', 'member'].includes(role) && <><p>WORKSPACE</p><button className={tab === 'overview' ? 'active' : ''} onClick={() => setTab('overview')}>Tổng quan dự án</button><button className={tab === 'structure' ? 'active' : ''} onClick={() => setTab('structure')}>Khóa / lớp <b>{projectCourses.length}/{projectClasses.length}</b></button><button className={tab === 'inputs' ? 'active' : ''} onClick={() => setTab('inputs')}>Input readiness <b>{readyCount}/{readyTotal}</b></button></>}
+          {!['manager', 'member'].includes(role) && <><p>WORKSPACE</p><button className={tab === 'overview' ? 'active' : ''} onClick={() => setTab('overview')}>Tổng quan</button><button className={tab === 'structure' ? 'active' : ''} onClick={() => setTab('structure')}>Khóa / lớp</button><button className={tab === 'inputs' ? 'active' : ''} onClick={() => setTab('inputs')}>Input readiness {readyTotal - readyCount > 0 && <b>{readyTotal - readyCount}</b>}</button></>}
           {['manager', 'member'].includes(role) && <><p>INPUT</p><button className={tab === 'inputs' ? 'active' : ''} onClick={() => setTab('inputs')}>Input công việc <b>{readyCount}/{readyTotal}</b></button></>}
-          <p>CÔNG VIỆC</p><button aria-label={role === 'member' ? 'Việc của tôi' : 'Công việc'} className={tab === 'tasks' ? 'active' : ''} onClick={() => setTab('tasks')}>{role === 'member' ? 'Việc của tôi' : 'Công việc'} <b>{contextTasks.filter((task) => !task.archivedAt).length}</b></button>{role === 'manager' && <button className={['due', 'review'].includes(tab) ? 'active' : ''} onClick={() => setTab('due')}>Việc cần tôi xử lý <b>{contextTasks.filter((task) => task.status !== 'DONE' && task.status !== 'CANCELLED').length}</b></button>}
-          {!['manager', 'member'].includes(role) && <><p>QUẢN LÝ</p>{role === 'operations' && <><button className={tab === 'team' ? 'active' : ''} onClick={() => setTab('team')}>Gán vai trò <b>{(workspaceState.teamAssignments || []).filter((item) => item.status !== 'ARCHIVED').length}</b></button><button className={tab === 'accounts' ? 'active' : ''} onClick={() => setTab('accounts')}>Ekip & tài khoản <b>{accountDirectory.length}</b></button></>}<button className={tab === 'change' ? 'active' : ''} onClick={() => setTab('change')}>Risk & Change</button><button className={tab === 'audit' ? 'active' : ''} onClick={() => setTab('audit')}>Audit Log</button></>}
+          <p>CÔNG VIỆC</p><button aria-label={role === 'member' ? 'Việc của tôi' : role === 'operations' ? 'Công việc lớp' : 'Công việc'} className={tab === 'tasks' ? 'active' : ''} onClick={() => setTab('tasks')}>{role === 'member' ? 'Việc của tôi' : role === 'operations' ? 'Công việc lớp' : 'Công việc'} <b>{contextTasks.filter((task) => !task.archivedAt).length}</b></button>{role === 'operations' && <button className={['due', 'review'].includes(tab) ? 'active' : ''} onClick={() => setTab('due')}>Việc cần xử lý <b>{contextTasks.filter((task) => !['DONE', 'CANCELLED'].includes(task.status)).length}</b></button>}{role === 'manager' && <button className={['due', 'review'].includes(tab) ? 'active' : ''} onClick={() => setTab('due')}>Việc cần tôi xử lý <b>{contextTasks.filter((task) => task.status !== 'DONE' && task.status !== 'CANCELLED').length}</b></button>}
+          {!['manager', 'member'].includes(role) && <><p>QUẢN LÝ</p>{role === 'operations' && <><button className={tab === 'team' ? 'active' : ''} onClick={() => setTab('team')}>Gán vai trò</button><button className={tab === 'accounts' ? 'active' : ''} onClick={() => setTab('accounts')}>Ekip & tài khoản</button></>}<button className={tab === 'change' ? 'active' : ''} onClick={() => setTab('change')}>Risk & Change</button><button className={tab === 'audit' ? 'active' : ''} onClick={() => setTab('audit')}>Audit Log</button></>}
         </>}
       </nav>
       <div className="sidebar-note"><span>VẬN HÀNH ĐÀO TẠO</span><p>Store và API riêng; VTraining, VLearning chỉ được tham chiếu qua mã nguồn dữ liệu.</p><small className={`sync-indicator ${syncState}`}>{syncState === 'loading' ? 'Đang tải dữ liệu…' : syncState === 'saving' ? 'Đang lưu…' : syncState === 'synced' ? `Đã đồng bộ · v${stateVersion}` : syncState === 'seed' ? 'Chưa có dữ liệu DB · đang dùng seed' : 'Lỗi đồng bộ'}</small>{onSignOut && <button type="button" onClick={onSignOut}>Đăng xuất</button>}</div>
@@ -550,7 +551,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
 
     <div className="main-shell">
       <header className="topbar"><div className="topbar-path"><button className="mobile-menu-button" type="button" aria-label="Mở menu điều hướng" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen(true)}><Menu size={19} aria-hidden="true" /></button><small>{topbarPath}</small></div><div className="role-switch"><div className="actor-identity"><b>{actor?.name || 'Đang xác định tài khoản'}</b><small>{actor?.email || ''}</small></div><span>{availableRoles.length > 1 ? 'Đang làm việc với vai trò' : 'Vai trò hiện tại'}</span>{availableRoles.length > 1 ? <select aria-label="Chọn vai trò làm việc" value={role} onChange={(event) => void switchRole(event.target.value)}>{TRAINING_ROLE_OPTIONS.filter(([value]) => availableRoles.includes(value)).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select> : <strong>{TRAINING_ROLE_OPTIONS.find(([value]) => value === role)?.[1] || 'Thành viên ekip'}</strong>}<div className="avatar" title={actor?.name || ''}>{initials(actor?.name || actor?.email)}</div></div></header>
-      {!['structure', 'team'].includes(tab) && <div className="training-context-bar" aria-label="Ngữ cảnh dự án khóa học lớp">
+      {!['overview', 'structure', 'team'].includes(tab) && <div className="training-context-bar" aria-label="Ngữ cảnh dự án khóa học lớp">
         <label>Dự án<select value={activeProject?.id || ''} onChange={(event) => { const projectId = event.target.value; const courseId = (workspaceState.courses || []).find((item) => item.projectId === projectId && item.status !== 'ARCHIVED')?.id || ''; writeRoute(tab, { projectId, courseId, classId: '', taskId: '' }); }}>
           {(workspaceState.projects || []).map((item) => <option value={item.id} key={item.id}>{item.code} · {item.name}</option>)}
         </select></label><span>›</span>
@@ -564,7 +565,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
       <main className={`workspace workspace-${tab}`}>
         {syncError && <div className="sync-error" role="alert"><span>{syncError}</span><button type="button" onClick={() => void loadWorkspace()}>Tải lại</button></div>}
         {syncState === 'synced' && !activeProject && <div className="sync-error scope-empty" role="status"><span>Bạn chưa được phân công vào khóa học nào trong dự án này. Quản lý ekip cần gán vai trò theo khóa trước khi bạn có thể xem input hoặc công việc.</span></div>}
-        {role !== 'intake' && !['accounts', 'team'].includes(tab) && !(role === 'content' && tab === 'inputs') && !(tab === 'change' && changeOpen) && <><section className="project-head"><div><div className="eyebrow"><span className="status-dot"></span>{activeCourse?.status || 'DECLARED'} · SCOPE V{activeScope?.version || 1}</div><h1>{activeProject?.name}</h1><p>{activeProject?.customerName} · {(workspaceState.courses || []).filter((item) => item.projectId === activeProject?.id).length} khóa học · {String((workspaceState.classes || []).filter((item) => item.projectId === activeProject?.id).length).padStart(2, '0')} lớp · {formatDate(activeProject?.startDate)} — {formatDate(activeProject?.deadline)}</p></div><div className="head-actions">{role === 'operations' && <button onClick={() => { setShowCreate(true); setCreateStep(1); }}>+ Tạo dự án</button>}{['operations', 'intake'].includes(role) && tab !== 'change' && <button className="primary" onClick={() => { setTab('change'); setChangeOpen(true); }}>+ Yêu cầu thay đổi</button>}</div></section></>}
+        {role !== 'intake' && !['accounts', 'overview', 'team'].includes(tab) && !(role === 'content' && tab === 'inputs') && !(tab === 'change' && changeOpen) && <><section className="project-head"><div><div className="eyebrow"><span className="status-dot"></span>{activeCourse?.status || 'DECLARED'} · SCOPE V{activeScope?.version || 1}</div><h1>{activeProject?.name}</h1><p>{activeProject?.customerName} · {(workspaceState.courses || []).filter((item) => item.projectId === activeProject?.id).length} khóa học · {String((workspaceState.classes || []).filter((item) => item.projectId === activeProject?.id).length).padStart(2, '0')} lớp · {formatDate(activeProject?.startDate)} — {formatDate(activeProject?.deadline)}</p></div><div className="head-actions">{role === 'operations' && <button onClick={() => { setShowCreate(true); setCreateStep(1); }}>+ Tạo dự án</button>}{['operations', 'intake'].includes(role) && tab !== 'change' && <button className="primary" onClick={() => { setTab('change'); setChangeOpen(true); }}>+ Yêu cầu thay đổi</button>}</div></section></>}
 
         {toast && <div className="toast" role="status">{toast}</div>}
         {tab === 'overview' && (
@@ -669,6 +670,105 @@ function buildCalendarWeeks(classes) {
 }
 
 function Overview({ tasks, classes = CLASS_META, project, course, projects = [], courses = [], allClasses = [], onTasks, onOpenClass }) {
+  const [mode, setMode] = useState('table');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [openProjects, setOpenProjects] = useState(() => new Set());
+  const [openCourses, setOpenCourses] = useState(() => new Set());
+  const scopedProjects = projects.length ? projects.filter((item) => item.status !== 'ARCHIVED') : [project].filter(Boolean);
+  const scopedCourses = (courses.length ? courses : [course].filter(Boolean)).filter((item) => item.status !== 'ARCHIVED');
+  const scopedClasses = allClasses.length ? allClasses : classes;
+  const searchToken = normalizeSearchText(searchQuery);
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const visibleTasks = tasks.filter((item) => !item.archivedAt && item.group !== 'change');
+
+  function classRunState(classItem) {
+    if (classItem.endDate && classItem.endDate < todayIso) return 'ended';
+    if (classItem.startDate && classItem.startDate <= todayIso) return 'running';
+    return 'upcoming';
+  }
+
+  function metricsFor(classItems) {
+    const classIds = new Set(classItems.flatMap((item) => [item.id, item.code]).filter(Boolean));
+    const relatedTasks = visibleTasks.filter((item) => classIds.has(item.classId) || classIds.has(item.classCode));
+    return {
+      ended: classItems.filter((item) => classRunState(item) === 'ended').length,
+      running: classItems.filter((item) => classRunState(item) === 'running').length,
+      upcoming: classItems.filter((item) => classRunState(item) === 'upcoming').length,
+      done: relatedTasks.filter((item) => item.status === 'DONE').length,
+      total: relatedTasks.length,
+      overdue: relatedTasks.filter((item) => !['DONE', 'CANCELLED'].includes(item.status) && dueDate(item) < new Date()).length,
+      waiting: relatedTasks.filter((item) => item.status === 'WAITING_INPUT').length,
+      changed: relatedTasks.filter((item) => item.inputImpact?.decision === 'PENDING').length,
+    };
+  }
+
+  const totals = metricsFor(scopedClasses);
+  const allProjectIds = scopedProjects.map((item) => item.id);
+  const allCourseIds = scopedCourses.map((item) => item.id);
+  function toggleSet(setter, key) {
+    setter((current) => {
+      const next = new Set(current);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  }
+  function matches(...values) { return !searchToken || normalizeSearchText(values.filter(Boolean).join(' ')).includes(searchToken); }
+  function shortDate(isoDate) {
+    if (!isoDate) return '—';
+    const [, month, day] = String(isoDate).split('-');
+    return day && month ? `${day}/${month}` : String(isoDate);
+  }
+  function statePills(metric, includeLabels = true) {
+    return <div className="overview-pill-row">{metric.ended > 0 && <span className="ended">{metric.ended}{includeLabels ? ' đã chạy' : ''}</span>}{metric.running > 0 && <span className="running">{metric.running}{includeLabels ? ' đang chạy' : ''}</span>}{metric.upcoming > 0 && <span className="upcoming">{metric.upcoming}{includeLabels ? ' chưa chạy' : ''}</span>}</div>;
+  }
+  function progress(metric) {
+    const percent = metric.total ? Math.round(metric.done / metric.total * 100) : 0;
+    return <div className="overview-progress"><i><span style={{ width: `${percent}%` }}/></i><b>{metric.done}/{metric.total}</b></div>;
+  }
+  function alerts(metric) {
+    if (!metric.overdue && !metric.waiting && !metric.changed) return <span className="overview-muted">—</span>;
+    return <div className="overview-alerts">{metric.overdue > 0 && <span className="overview-alert overdue">{metric.overdue} quá hạn</span>}{metric.waiting > 0 && <span className="overview-alert waiting">{metric.waiting} chờ input</span>}{metric.changed > 0 && <span className="overview-alert changed">{metric.changed} input đổi</span>}</div>;
+  }
+
+  return <section className="operations-overview">
+    <header className="overview-page-head"><div><small>TỔNG QUAN VẬN HÀNH</small><h1>Dự án, khóa học và lớp</h1><p>Bấm dự án để mở khóa học, bấm khóa học để mở lớp, bấm lớp để vào công việc của lớp.</p></div></header>
+    <div className="overview-kpis">
+      <article className="blue"><span>Dự án · khóa · lớp</span><strong>{scopedProjects.length} · {scopedCourses.length} · {scopedClasses.length}</strong><small>trong phạm vi được giao</small></article>
+      <article className="green"><span>Lớp đã chạy</span><strong>{totals.ended}</strong><small>đang chạy {totals.running} · chưa chạy {totals.upcoming}</small></article>
+      <article className="red"><span>Việc quá hạn</span><strong>{totals.overdue}</strong><small>trên tổng {totals.total} việc</small></article>
+      <article className="amber"><span>Việc chờ input</span><strong>{totals.waiting}</strong><small>thiếu trường bắt buộc</small></article>
+      <article><span>Input đổi phiên bản</span><strong>{totals.changed}</strong><small>việc cần xác nhận / xử lý tác động</small></article>
+    </div>
+    <section className="overview-surface">
+      <header className="overview-surface-head"><div><small>BẢNG NHIỀU TẦNG</small><h2>{mode === 'table' ? 'Dự án › Khóa học › Lớp' : 'Lịch lớp'}</h2><p>Hôm nay {new Intl.DateTimeFormat('vi-VN').format(new Date())} · trạng thái lớp tự tính theo ngày học</p></div><div className="overview-toolbar">{mode === 'table' && <><input aria-label="Tìm dự án, khóa học hoặc lớp" placeholder="Tìm mã hoặc tên dự án, khóa, lớp…" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)}/><button type="button" onClick={() => { setOpenProjects(new Set(allProjectIds)); setOpenCourses(new Set(allCourseIds)); }}>Mở tất cả</button><button type="button" onClick={() => { setOpenProjects(new Set()); setOpenCourses(new Set()); }}>Thu gọn</button></>}<div className="overview-tabs" role="group" aria-label="Chế độ xem tổng quan"><button type="button" className={mode === 'table' ? 'active' : ''} onClick={() => setMode('table')}>Bảng</button><button type="button" className={mode === 'calendar' ? 'active' : ''} onClick={() => setMode('calendar')}>Lịch</button></div></div></header>
+      <div className="overview-summary-strip">{statePills(totals)}{totals.overdue > 0 && <span className="overdue">{totals.overdue} việc quá hạn</span>}{totals.waiting > 0 && <span className="waiting">{totals.waiting} việc chờ input</span>}</div>
+      {mode === 'table' ? <div className="overview-table-wrap"><table className="overview-tree-table"><thead><tr><th>STT</th><th>Tên</th><th>Thời gian</th><th>Lớp đã / đang / chưa chạy</th><th>Tiến độ công việc</th><th>Cảnh báo</th></tr></thead><tbody>{scopedProjects.map((projectItem, projectIndex) => {
+        const projectCourses = scopedCourses.filter((item) => !item.projectId || item.projectId === projectItem.id);
+        const projectClasses = scopedClasses.filter((item) => projectCourses.some((courseItem) => courseItem.id === item.courseId));
+        const matched = matches(projectItem.id, projectItem.code, projectItem.name, projectItem.customerName) || projectCourses.some((item) => matches(item.id, item.code, item.name)) || projectClasses.some((item) => matches(item.id, item.code, item.name));
+        if (!matched) return null;
+        const projectOpen = Boolean(searchToken) || openProjects.has(projectItem.id);
+        const projectMetric = metricsFor(projectClasses);
+        return <Fragment key={projectItem.id || projectItem.code}><tr className="project-row"><td><button type="button" aria-label={`${projectOpen ? 'Thu gọn' : 'Mở'} dự án ${projectItem.name}`} onClick={() => toggleSet(setOpenProjects, projectItem.id)}>{projectOpen ? <ChevronDown size={13}/> : <ChevronRight size={13}/>}</button>{projectIndex + 1}</td><td><button type="button" className="overview-tree-name" onClick={() => toggleSet(setOpenProjects, projectItem.id)}><b>{projectItem.name}</b><small>{projectItem.code || projectItem.id} · Khách hàng {projectItem.customerName || '—'} · {projectCourses.length} khóa · {projectClasses.length} lớp</small></button></td><td>{shortDate(projectItem.startDate)} – {shortDate(projectItem.deadline)}</td><td>{statePills(projectMetric)}</td><td>{progress(projectMetric)}</td><td>{alerts(projectMetric)}</td></tr>{projectOpen && projectCourses.map((courseItem, courseIndex) => {
+          const courseClasses = projectClasses.filter((item) => item.courseId === courseItem.id);
+          if (searchToken && !matches(projectItem.id, projectItem.name, courseItem.id, courseItem.code, courseItem.name) && !courseClasses.some((item) => matches(item.id, item.code, item.name))) return null;
+          const courseOpen = Boolean(searchToken) || openCourses.has(courseItem.id);
+          const courseMetric = metricsFor(courseClasses);
+          const courseStart = [...courseClasses].sort((a, b) => String(a.startDate).localeCompare(String(b.startDate)))[0]?.startDate;
+          const courseEnd = [...courseClasses].sort((a, b) => String(b.endDate).localeCompare(String(a.endDate)))[0]?.endDate;
+          return <Fragment key={courseItem.id}><tr className="course-row"><td><button type="button" aria-label={`${courseOpen ? 'Thu gọn' : 'Mở'} khóa ${courseItem.name}`} onClick={() => toggleSet(setOpenCourses, courseItem.id)}>{courseOpen ? <ChevronDown size={13}/> : <ChevronRight size={13}/>}</button>{projectIndex + 1}.{courseIndex + 1}</td><td><button type="button" className="overview-tree-name" onClick={() => toggleSet(setOpenCourses, courseItem.id)}><b>{courseItem.name}</b><small>{courseItem.code || courseItem.id} · {(courseItem.systems || []).join(' + ') || 'VTraining + VLearning'} · {courseClasses.length} lớp</small></button></td><td>{shortDate(courseStart)} – {shortDate(courseEnd)}</td><td>{statePills(courseMetric, false)}</td><td>{progress(courseMetric)}</td><td>{alerts(courseMetric)}</td></tr>{courseOpen && courseClasses.map((classItem, classIndex) => {
+            if (searchToken && !matches(projectItem.id, projectItem.name, courseItem.id, courseItem.name, classItem.id, classItem.code, classItem.name)) return null;
+            const classMetric = metricsFor([classItem]);
+            const runState = classRunState(classItem);
+            return <tr className="class-row" key={classItem.id || classItem.code}><td>{projectIndex + 1}.{courseIndex + 1}.{classIndex + 1}</td><td><button type="button" className="overview-tree-name" onClick={() => onOpenClass?.(classItem)}><b>{classItem.name}</b><small>{classItem.code || classItem.id}</small></button></td><td>{shortDate(classItem.startDate)} – {shortDate(classItem.endDate)}</td><td><span className={`overview-class-state ${runState}`}>{runState === 'ended' ? 'Đã chạy' : runState === 'running' ? 'Đang chạy' : 'Chưa chạy'}</span></td><td>{progress(classMetric)}</td><td>{alerts(classMetric)}</td></tr>;
+          })}</Fragment>;
+        })}</Fragment>;
+      })}</tbody></table>{searchToken && !scopedProjects.some((projectItem) => matches(projectItem.id, projectItem.code, projectItem.name, projectItem.customerName) || scopedCourses.some((item) => item.projectId === projectItem.id && matches(item.id, item.code, item.name)) || scopedClasses.some((item) => item.projectId === projectItem.id && matches(item.id, item.code, item.name))) && <div className="overview-no-results">Không tìm thấy dự án, khóa học hoặc lớp phù hợp.</div>}</div> : <CalendarOverview tasks={tasks} classes={classes} project={project} course={course} projects={projects} courses={courses} allClasses={allClasses} onTasks={onTasks} onOpenClass={onOpenClass}/>}
+    </section>
+  </section>;
+}
+
+function CalendarOverview({ tasks, classes = CLASS_META, project, course, projects = [], courses = [], allClasses = [], onTasks, onOpenClass }) {
   const weeks = useMemo(() => buildCalendarWeeks(classes), [classes]);
   const firstClassDate = classes[0]?.startDate || weeks[0][0][0];
   const firstDate = new Date(`${firstClassDate}T00:00:00Z`);
@@ -711,9 +811,7 @@ function Overview({ tasks, classes = CLASS_META, project, course, projects = [],
     if (matchingClass) setSelectedClass(matchingClass.code);
   }
 
-  return <section className="calendar-overview">
-    <OverviewHierarchy projects={projects.length ? projects : [project].filter(Boolean)} courses={courses.length ? courses : [course].filter(Boolean)} classes={allClasses.length ? allClasses : classes} tasks={tasks} onOpenClass={onOpenClass}/>
-    <ProjectTimeline project={project} courses={courses} classes={allClasses.length ? allClasses : classes}/>
+  return <section className="calendar-overview embedded-calendar-overview">
     <div className="calendar-head">
       <div>
         <small>TỔNG QUAN THEO LỊCH</small>
