@@ -197,7 +197,7 @@ function resolveTrainingOperationsRole(profile: AuthProfile | null) {
 }
 
 function StaticVWorkTrainingOperationsPage() {
-  const { loading, session, profile, signOut } = useAuth();
+  const { loading, session, profile } = useAuth();
   if (loading) return <AppSplash />;
   if (!session) return <Navigate to="/login?next=%2Fvwork%2Ftraining-operations" replace />;
   if (!canAccessVPlanning(profile) && !hasTrainingOperationsProfileAccess(profile)) return <Navigate to="/login" replace />;
@@ -209,7 +209,6 @@ function StaticVWorkTrainingOperationsPage() {
       <VWorkTrainingOperationsPage
         initialRole={resolveTrainingOperationsRole(profile)}
         allowRolePreview={import.meta.env.DEV}
-        onSignOut={signOut}
       />
     </Suspense>
   );

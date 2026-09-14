@@ -112,6 +112,15 @@ const VIEW_TO_TAB = { work: 'tasks', config: 'tasks', workflow: 'tasks' };
 const TAB_TO_VIEW = { tasks: 'work' };
 const ACTIVE_ROLE_STORAGE_PREFIX = 'vwork-training-operations.active-role:';
 
+function roleCanAccessTab(role, tab) {
+  if (['overview', 'tasks'].includes(tab)) return true;
+  if (['structure'].includes(tab)) return ['operations', 'content', 'vtraining'].includes(role);
+  if (tab === 'inputs') return !['manager', 'member'].includes(role);
+  if (['due', 'review'].includes(tab)) return ['operations', 'manager'].includes(role);
+  if (tab === 'change') return ['operations', 'intake'].includes(role);
+  return role === 'operations' && ['team', 'accounts', 'audit'].includes(tab);
+}
+
 function activeRoleStorageKey(actor) {
   const identity = String(actor?.id || actor?.email || '').trim().toLowerCase();
   return identity ? `${ACTIVE_ROLE_STORAGE_PREFIX}${identity}` : '';
@@ -139,19 +148,22 @@ function readTrainingRoute(search) {
     courseId: params.get('courseId') || '',
     classId: params.get('classId') || '',
     taskId: params.get('taskId') || '',
+    scope: params.get('scope') || '',
   };
 }
 
-export default function TrainingOperationsPage({ initialRole = 'operations', allowRolePreview = import.meta.env.DEV, onSignOut }) {
+export default function TrainingOperationsPage({ initialRole = 'operations', allowRolePreview = import.meta.env.DEV }) {
   const location = useLocation();
   const navigate = useNavigate();
   const routeContext = useMemo(() => readTrainingRoute(location.search), [location.search]);
   const [role, setRole] = useState(initialRole);
   const [availableRoles, setAvailableRoles] = useState(() => allowRolePreview ? TRAINING_ROLE_OPTIONS.map(([value]) => value) : [initialRole]);
-  const [tab, setTabState] = useState(() => VIEW_TO_TAB[routeContext.view] || routeContext.view || 'overview');
+  const [tab, setTabState] = useState(() => {
+    const requestedTab = VIEW_TO_TAB[routeContext.view] || routeContext.view || 'overview';
+    return roleCanAccessTab(initialRole, requestedTab) ? requestedTab : 'overview';
+  });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [workspaceState, setWorkspaceState] = useState(INITIAL_WORKSPACE);
-  const [stateVersion, setStateVersion] = useState(0);
   const versionRef = useRef(0);
   const savingRef = useRef(false);
   const roleRestoreAttemptedRef = useRef(false);
@@ -200,10 +212,23 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
   const readyTotal = selectedCourseProgress?.total ?? INPUT_TOTAL;
   const contentInputKeys = ['vlearning', 'game', 'discussion', 'assignment', 'test', 'material'].filter((key) => scopedInputRecords.some((item) => item.key === key && item.required !== false));
   const contentReadyCount = contentInputKeys.filter((key) => inputs[key]).length;
-  const contextTasks = tasks.filter((task) => (!activeProject?.id || task.projectId === activeProject.id)
-    && (!activeCourse?.id || task.courseId === activeCourse.id)
-    && (!routeContext.classId || [task.classId, task.classCode].includes(routeContext.classId)));
+  const contextTasks = tasks.filter((task) => {
+    if (['due', 'review'].includes(tab) && routeContext.scope) {
+      if (routeContext.scope === 'all') return true;
+      if (routeContext.scope === 'project') return !routeContext.projectId || task.projectId === routeContext.projectId;
+      if (routeContext.scope === 'course') return (!routeContext.projectId || task.projectId === routeContext.projectId) && (!routeContext.courseId || task.courseId === routeContext.courseId);
+    }
+    return (!activeProject?.id || task.projectId === activeProject.id)
+      && (!activeCourse?.id || task.courseId === activeCourse.id)
+      && (!routeContext.classId || [task.classId, task.classCode].includes(routeContext.classId));
+  });
   const contextSelectedTask = contextTasks.find((task) => task.id === selectedTaskId) || null;
+  const actionScopeLabel = routeContext.scope === 'all'
+    ? 'Tất cả dự án · khóa học · lớp'
+    : routeContext.scope === 'project' ? activeProject?.name
+    : routeContext.scope === 'course' ? `${activeProject?.name} · ${activeCourse?.name}`
+    : routeContext.scope === 'class' ? `${activeProject?.name} · ${activeCourse?.name} · ${classes.find((item) => [item.id, item.code].includes(routeContext.classId))?.name || routeContext.classId}`
+    : '';
   const kpis = useMemo(() => ({ waiting: tasks.filter((task) => task.status === 'WAITING_INPUT').length, active: tasks.filter((task) => ['READY', 'IN_PROGRESS'].includes(task.status)).length, review: tasks.filter((task) => task.status === 'IN_REVIEW').length, done: tasks.filter((task) => task.status === 'DONE').length, rework: tasks.filter((task) => task.status === 'REWORK').length }), [tasks]);
 
   function notify(message) { setToast(message); window.setTimeout(() => setToast(''), 3200); }
@@ -212,20 +237,27 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
     const params = new URLSearchParams();
     params.set('view', TAB_TO_VIEW[nextTab] || nextTab);
     const merged = { ...routeContext, projectId: routeContext.projectId || activeProject?.id, courseId: routeContext.courseId || activeCourse?.id, ...context };
-    for (const key of ['projectId', 'courseId', 'classId', 'taskId']) if (merged[key]) params.set(key, merged[key]);
+    for (const key of ['projectId', 'courseId', 'classId', 'taskId', 'scope']) if (merged[key]) params.set(key, merged[key]);
     navigate({ pathname: location.pathname, search: `?${params.toString()}` }, { replace });
   }
 
   function setTab(nextTab) {
     const normalized = VIEW_TO_TAB[nextTab] || nextTab;
+    const allowedTab = roleCanAccessTab(role, normalized) ? normalized : 'overview';
     setSidebarOpen(false);
-    setTabState(normalized);
-    writeRoute(normalized);
+    setTabState(allowedTab);
+    writeRoute(allowedTab, ['due', 'review'].includes(allowedTab) ? {} : { scope: '' });
   }
 
   function navigateWork(context = {}, options = {}) {
     setTabState('tasks');
-    writeRoute('tasks', context, options);
+    writeRoute('tasks', { scope: '', ...context }, options);
+  }
+
+  function navigateDue(context = {}) {
+    setSelectedTaskId('');
+    setTabState('due');
+    writeRoute('due', { taskId: '', ...context });
   }
 
   function hydrate(response) {
@@ -233,7 +265,6 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
     setWorkspaceState(state);
     const nextVersion = Number(response?.version || 0);
     versionRef.current = nextVersion;
-    setStateVersion(nextVersion);
     const grantedRoles = Array.isArray(response?.availableRoles) && response.availableRoles.length
       ? response.availableRoles
       : allowRolePreview ? TRAINING_ROLE_OPTIONS.map(([value]) => value) : [response?.role || initialRole];
@@ -325,9 +356,14 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
 
   useEffect(() => { void loadWorkspace({ requestedRole: initialRole }); }, []);
   useEffect(() => {
-    const nextTab = VIEW_TO_TAB[routeContext.view] || routeContext.view || 'overview';
+    const requestedTab = VIEW_TO_TAB[routeContext.view] || routeContext.view || 'overview';
+    const nextTab = roleCanAccessTab(role, requestedTab) ? requestedTab : 'overview';
     setTabState(nextTab);
     setSelectedTaskId(routeContext.taskId || '');
+    if (nextTab !== requestedTab) {
+      writeRoute('overview', { scope: '', taskId: '' }, { replace: true });
+      return;
+    }
     if (['workflow', 'config'].includes(routeContext.view)) {
       navigateWork({
         projectId: routeContext.projectId,
@@ -336,7 +372,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
         taskId: routeContext.taskId,
       }, { replace: true });
     }
-  }, [location.search]);
+  }, [location.search, role]);
 
   async function runCommand(type, payload, successMessage) {
     if (savingRef.current) return null;
@@ -545,13 +581,13 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
         {role === 'manager' && <button className={['due', 'review'].includes(tab) ? 'active' : ''} onClick={() => setTab('due')}>Việc cần tôi xử lý <b>{contextTasks.filter((task) => !['DONE', 'CANCELLED'].includes(task.status)).length}</b></button>}
         {role === 'operations' && <><p>QUẢN LÝ</p><button className={tab === 'team' ? 'active' : ''} onClick={() => setTab('team')}>Gán vai trò</button><button className={tab === 'accounts' ? 'active' : ''} onClick={() => setTab('accounts')}>Ekip & tài khoản</button><button className={tab === 'change' ? 'active' : ''} onClick={() => setTab('change')}>Risk & Change</button><button className={tab === 'audit' ? 'active' : ''} onClick={() => setTab('audit')}>Audit Log</button></>}
       </nav>
-      <div className="sidebar-note"><span>VẬN HÀNH ĐÀO TẠO</span><p>Store và API riêng; VTraining, VLearning chỉ được tham chiếu qua mã nguồn dữ liệu.</p><small className={`sync-indicator ${syncState}`}>{syncState === 'loading' ? 'Đang tải dữ liệu…' : syncState === 'saving' ? 'Đang lưu…' : syncState === 'synced' ? `Đã đồng bộ · v${stateVersion}` : syncState === 'seed' ? 'Chưa có dữ liệu DB · đang dùng seed' : 'Lỗi đồng bộ'}</small>{onSignOut && <button type="button" onClick={onSignOut}>Đăng xuất</button>}</div>
     </aside>
     {sidebarOpen && <button className="mobile-nav-backdrop" type="button" aria-label="Đóng menu điều hướng" onClick={() => setSidebarOpen(false)} />}
 
     <div className="main-shell">
       <header className="topbar"><div className="topbar-path"><button className="mobile-menu-button" type="button" aria-label="Mở menu điều hướng" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen(true)}><Menu size={19} aria-hidden="true" /></button><small>{topbarPath}</small></div><div className="role-switch"><div className="actor-identity"><b>{actor?.name || 'Đang xác định tài khoản'}</b><small>{actor?.email || ''}</small></div><span>{availableRoles.length > 1 ? 'Đang làm việc với vai trò' : 'Vai trò hiện tại'}</span>{availableRoles.length > 1 ? <select aria-label="Chọn vai trò làm việc" value={role} onChange={(event) => void switchRole(event.target.value)}>{TRAINING_ROLE_OPTIONS.filter(([value]) => availableRoles.includes(value)).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select> : <strong>{TRAINING_ROLE_OPTIONS.find(([value]) => value === role)?.[1] || 'Thành viên ekip'}</strong>}<div className="avatar" title={actor?.name || ''}>{initials(actor?.name || actor?.email)}</div></div></header>
-      {!['overview', 'structure', 'team'].includes(tab) && <div className="training-context-bar" aria-label="Ngữ cảnh dự án khóa học lớp">
+      {['due', 'review'].includes(tab) && routeContext.scope && <div className="training-context-bar action-scope-bar" aria-label="Phạm vi công việc từ Tổng quan"><label>PHẠM VI TỪ TỔNG QUAN<strong>{actionScopeLabel}</strong></label><button type="button" onClick={() => setTab('overview')}>Đổi phạm vi</button></div>}
+      {!['overview', 'structure', 'team'].includes(tab) && !(['due', 'review'].includes(tab) && routeContext.scope) && <div className="training-context-bar" aria-label="Ngữ cảnh dự án khóa học lớp">
         <label>Dự án<select value={activeProject?.id || ''} onChange={(event) => { const projectId = event.target.value; const courseId = (workspaceState.courses || []).find((item) => item.projectId === projectId && item.status !== 'ARCHIVED')?.id || ''; writeRoute(tab, { projectId, courseId, classId: '', taskId: '' }); }}>
           {(workspaceState.projects || []).map((item) => <option value={item.id} key={item.id}>{item.code} · {item.name}</option>)}
         </select></label><span>›</span>
@@ -565,7 +601,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
       <main className={`workspace workspace-${tab}`}>
         {syncError && <div className="sync-error" role="alert"><span>{syncError}</span><button type="button" onClick={() => void loadWorkspace()}>Tải lại</button></div>}
         {syncState === 'synced' && !activeProject && <div className="sync-error scope-empty" role="status"><span>Bạn chưa được phân công vào khóa học nào trong dự án này. Quản lý ekip cần gán vai trò theo khóa trước khi bạn có thể xem input hoặc công việc.</span></div>}
-        {role !== 'intake' && !['accounts', 'overview', 'team'].includes(tab) && !(role === 'content' && tab === 'inputs') && !(tab === 'change' && changeOpen) && <><section className="project-head"><div><div className="eyebrow"><span className="status-dot"></span>{activeCourse?.status || 'DECLARED'} · SCOPE V{activeScope?.version || 1}</div><h1>{activeProject?.name}</h1><p>{activeProject?.customerName} · {(workspaceState.courses || []).filter((item) => item.projectId === activeProject?.id).length} khóa học · {String((workspaceState.classes || []).filter((item) => item.projectId === activeProject?.id).length).padStart(2, '0')} lớp · {formatDate(activeProject?.startDate)} — {formatDate(activeProject?.deadline)}</p></div><div className="head-actions">{role === 'operations' && <button onClick={() => { setShowCreate(true); setCreateStep(1); }}>+ Tạo dự án</button>}{['operations', 'intake'].includes(role) && tab !== 'change' && <button className="primary" onClick={() => { setTab('change'); setChangeOpen(true); }}>+ Yêu cầu thay đổi</button>}</div></section></>}
+        {role !== 'intake' && !['accounts', 'overview', 'team'].includes(tab) && !(role === 'content' && tab === 'inputs') && !(tab === 'change' && changeOpen) && !(['due', 'review'].includes(tab) && routeContext.scope) && <><section className="project-head"><div><div className="eyebrow"><span className="status-dot"></span>{activeCourse?.status || 'DECLARED'} · SCOPE V{activeScope?.version || 1}</div><h1>{activeProject?.name}</h1><p>{activeProject?.customerName} · {(workspaceState.courses || []).filter((item) => item.projectId === activeProject?.id).length} khóa học · {String((workspaceState.classes || []).filter((item) => item.projectId === activeProject?.id).length).padStart(2, '0')} lớp · {formatDate(activeProject?.startDate)} — {formatDate(activeProject?.deadline)}</p></div><div className="head-actions">{role === 'operations' && <button onClick={() => { setShowCreate(true); setCreateStep(1); }}>+ Tạo dự án</button>}{['operations', 'intake'].includes(role) && tab !== 'change' && <button className="primary" onClick={() => { setTab('change'); setChangeOpen(true); }}>+ Yêu cầu thay đổi</button>}</div></section></>}
 
         {toast && <div className="toast" role="status">{toast}</div>}
         {tab === 'overview' && (
@@ -581,6 +617,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
             canRequestChange={['operations', 'intake'].includes(role)}
             onCreateProject={() => { setShowCreate(true); setCreateStep(1); }}
             onRequestChange={() => { setTab('change'); setChangeOpen(true); }}
+            onOpenDue={navigateDue}
             onTasks={(classItem) => classItem
               ? navigateWork({ projectId: activeProject?.id, courseId: activeCourse?.id, classId: classItem.id || classItem.code })
               : setTab('tasks')}
@@ -623,7 +660,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
         />}
         {tab === 'inputs' && !['manager', 'member'].includes(role) && <Inputs role={role} activeCourse={activeCourse} courses={projectCourses} inputs={inputs} inputRecords={projectInputs} courseInputProgress={workspaceState.courseInputProgress || []} tasks={tasks} classes={projectClasses} uploadStep={uploadStep} setUploadStep={setUploadStep} submitInput={submitInput} onSelectCourse={(courseId) => writeRoute('inputs', { projectId: activeProject?.id, courseId, classId: '', taskId: '' })}/>}
         {tab === 'tasks' && <LayeredTasks role={role} tasks={contextTasks} classes={classes} inputRecords={projectInputs} directory={directory} teamAssignments={workspaceState.teamAssignments || []} directoryLoading={syncState === 'loading'} actor={actor} project={activeProject} course={activeCourse} routeContext={routeContext} onNavigate={navigateWork} selectedTask={contextSelectedTask} setSelectedTaskId={setSelectedTaskId} updateTask={updateTask} createClassTask={createClassTask} moveClassTask={moveClassTask} archiveTask={archiveTask} assignTasks={assignTasks} toggleChecklist={toggleChecklist}/>}
-        {['due', 'review'].includes(tab) && <WorkActionInbox role={role} tasks={contextTasks} classes={classes} inputRecords={projectInputs} directory={directory} actor={actor} project={activeProject} course={activeCourse} selectedTask={contextSelectedTask} setSelectedTaskId={setSelectedTaskId} updateTask={updateTask} assignTasks={assignTasks} toggleChecklist={toggleChecklist} initialTab={tab === 'review' ? 'acceptance' : 'tracking'}/>}
+        {['due', 'review'].includes(tab) && <WorkActionInbox role={role} tasks={contextTasks} classes={classes} inputRecords={projectInputs} directory={directory} actor={actor} project={activeProject} course={activeCourse} scopeLabel={actionScopeLabel} selectedTask={contextSelectedTask} setSelectedTaskId={setSelectedTaskId} updateTask={updateTask} assignTasks={assignTasks} toggleChecklist={toggleChecklist} initialTab={tab === 'review' ? 'acceptance' : 'tracking'}/>}
         {tab === 'accounts' && <AccountsPanel directory={accountDirectory} provisionAccount={provisionAccount} restoreExistingLoginAccess={restoreExistingLoginAccess}/>}
         {tab === 'change' && <ChangePanel role={role} open={changeOpen} setOpen={setChangeOpen} counts={scopeCounts} submit={submitScopeChange} requests={changeRequests} onRequest={requestChange} onApprove={approveChange} onInputUpdate={(label, type, objectKey, reason) => { if (objectKey === 'learner') { setChangeOpen(false); setTab('inputs'); return; } const inputKey = objectKey === 'exercise' ? 'vlearning' : objectKey; void submitInput(inputKey, { data: { label, changeType: type, updatedAt: new Date().toISOString() }, reason: reason || `${label} · ${type}` }).then((response) => { if (response) setChangeOpen(false); }); }}/>} {tab === 'audit' && <Audit entries={audit}/>}</main>
     </div>
@@ -667,7 +704,7 @@ function buildCalendarWeeks(classes) {
   return weeks.length ? weeks : [[['2026-09-01', 'T3', '01']]];
 }
 
-function Overview({ tasks, classes = CLASS_META, project, course, projects = [], courses = [], allClasses = [], canCreateProject = false, canRequestChange = false, onCreateProject, onRequestChange, onTasks, onOpenClass }) {
+function Overview({ tasks, classes = CLASS_META, project, course, projects = [], courses = [], allClasses = [], canCreateProject = false, canRequestChange = false, onCreateProject, onRequestChange, onOpenDue, onTasks, onOpenClass }) {
   const [mode, setMode] = useState('table');
   const [searchQuery, setSearchQuery] = useState('');
   const [projectFilter, setProjectFilter] = useState('all');
@@ -707,7 +744,7 @@ function Overview({ tasks, classes = CLASS_META, project, course, projects = [],
       upcoming: classItems.filter((item) => classRunState(item) === 'upcoming').length,
       done: relatedTasks.filter((item) => item.status === 'DONE').length,
       total: relatedTasks.length,
-      overdue: relatedTasks.filter((item) => !['DONE', 'CANCELLED'].includes(item.status) && dueDate(item) < new Date()).length,
+      overdue: relatedTasks.filter((item) => !['DONE', 'CANCELLED'].includes(item.status) && taskDeadlineIso(item) < todayIso).length,
       waiting: relatedTasks.filter((item) => item.status === 'WAITING_INPUT').length,
       changed: relatedTasks.filter((item) => item.inputImpact?.decision === 'PENDING').length,
     };
@@ -736,10 +773,24 @@ function Overview({ tasks, classes = CLASS_META, project, course, projects = [],
     const percent = metric.total ? Math.round(metric.done / metric.total * 100) : 0;
     return <div className="overview-progress"><i><span style={{ width: `${percent}%` }}/></i><b>{metric.done}/{metric.total}</b></div>;
   }
-  function alerts(metric) {
-    if (!metric.overdue && !metric.waiting && !metric.changed) return <span className="overview-muted">—</span>;
-    return <div className="overview-alerts">{metric.overdue > 0 && <span className="overview-alert overdue">{metric.overdue} quá hạn</span>}{metric.waiting > 0 && <span className="overview-alert waiting">{metric.waiting} chờ input</span>}{metric.changed > 0 && <span className="overview-alert changed">{metric.changed} input đổi</span>}</div>;
+  function openDue(context) {
+    if (!onOpenDue) return;
+    const classId = context?.classId || '';
+    const courseId = context?.courseId || '';
+    const projectId = context?.projectId || '';
+    const scope = classId ? 'class' : courseId ? 'course' : projectId ? 'project' : 'all';
+    onOpenDue({ projectId, courseId, classId, scope });
   }
+  function alerts(metric, context) {
+    if (!metric.overdue && !metric.waiting && !metric.changed) return <span className="overview-muted">—</span>;
+    return <div className="overview-alerts">{metric.overdue > 0 && <button type="button" className="overview-alert overdue" onClick={() => openDue(context)} aria-label={`Xem ${metric.overdue} việc quá hạn`}>{metric.overdue} quá hạn</button>}{metric.waiting > 0 && <span className="overview-alert waiting">{metric.waiting} chờ input</span>}{metric.changed > 0 && <span className="overview-alert changed">{metric.changed} input đổi</span>}</div>;
+  }
+
+  const totalDueContext = {
+    projectId: effectiveProjectId || '',
+    courseId: effectiveCourseId || '',
+    classId: classFilter === 'all' ? '' : classFilter,
+  };
 
   return <section className="operations-overview">
     <header className="overview-page-head"><div><small>TỔNG QUAN VẬN HÀNH</small><h1>Dự án, khóa học và lớp</h1><p>Bộ lọc áp dụng cho toàn bộ KPI, bảng và lịch bên dưới.</p></div><div className="overview-page-actions">{canCreateProject && <button type="button" onClick={onCreateProject}>+ Tạo dự án</button>}{canRequestChange && <button type="button" className="primary" onClick={onRequestChange}>+ Yêu cầu thay đổi</button>}</div></header>
@@ -751,12 +802,12 @@ function Overview({ tasks, classes = CLASS_META, project, course, projects = [],
     <div className="overview-kpis">
       <article className="blue"><span>Dự án · khóa · lớp</span><strong>{scopedProjects.length} · {scopedCourses.length} · {scopedClasses.length}</strong><small>trong phạm vi được giao</small></article>
       <article className="green"><span>Lớp đã chạy</span><strong>{totals.ended}</strong><small>đang chạy {totals.running} · chưa chạy {totals.upcoming}</small></article>
-      <article className="red"><span>Việc quá hạn</span><strong>{totals.overdue}</strong><small>trên tổng {totals.total} việc</small></article>
+      <article className="red"><button type="button" className="overview-kpi-drilldown" onClick={() => openDue(totalDueContext)} disabled={!totals.overdue} aria-label={`Xem ${totals.overdue} việc quá hạn trong phạm vi hiện tại`}><span>Việc quá hạn</span><strong>{totals.overdue}</strong><small>{totals.overdue ? 'Bấm để xem danh sách' : `trên tổng ${totals.total} việc`}</small></button></article>
       <article className="amber"><span>Việc chờ input</span><strong>{totals.waiting}</strong><small>thiếu trường bắt buộc</small></article>
     </div>
     <section className="overview-surface">
       <header className="overview-surface-head"><div><small>BẢNG NHIỀU TẦNG</small><h2>{mode === 'table' ? 'Dự án › Khóa học › Lớp' : 'Lịch lớp'}</h2><p>Hôm nay {new Intl.DateTimeFormat('vi-VN').format(new Date())} · trạng thái lớp tự tính theo ngày học</p></div><div className="overview-toolbar">{mode === 'table' && <><input aria-label="Tìm dự án, khóa học hoặc lớp" placeholder="Tìm mã hoặc tên dự án, khóa, lớp…" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)}/><button type="button" onClick={() => { setOpenProjects(new Set(allProjectIds)); setOpenCourses(new Set(allCourseIds)); }}>Mở tất cả</button><button type="button" onClick={() => { setOpenProjects(new Set()); setOpenCourses(new Set()); }}>Thu gọn</button></>}<div className="overview-tabs" role="group" aria-label="Chế độ xem tổng quan"><button type="button" className={mode === 'table' ? 'active' : ''} onClick={() => setMode('table')}>Bảng</button><button type="button" className={mode === 'calendar' ? 'active' : ''} onClick={() => setMode('calendar')}>Lịch</button></div></div></header>
-      <div className="overview-summary-strip">{statePills(totals)}{totals.overdue > 0 && <span className="overdue">{totals.overdue} việc quá hạn</span>}{totals.waiting > 0 && <span className="waiting">{totals.waiting} việc chờ input</span>}</div>
+      <div className="overview-summary-strip"><span className="overview-class-total"><b>{scopedClasses.length}</b> lớp</span>{statePills(totals)}{totals.overdue > 0 && <button type="button" className="overview-alert overdue" onClick={() => openDue(totalDueContext)}>{totals.overdue} việc quá hạn</button>}{totals.waiting > 0 && <span className="waiting">{totals.waiting} việc chờ input</span>}</div>
       {mode === 'table' ? <div className="overview-table-wrap"><table className="overview-tree-table"><thead><tr><th>Cấu trúc</th><th>Tên</th><th>Thời gian</th><th>Lớp đã / đang / chưa chạy</th><th>Tiến độ công việc</th><th>Cảnh báo</th></tr></thead><tbody>{scopedProjects.map((projectItem) => {
         const projectCourses = scopedCourses.filter((item) => !item.projectId || item.projectId === projectItem.id);
         const projectClasses = scopedClasses.filter((item) => projectCourses.some((courseItem) => courseItem.id === item.courseId));
@@ -764,18 +815,18 @@ function Overview({ tasks, classes = CLASS_META, project, course, projects = [],
         if (!matched) return null;
         const projectOpen = Boolean(searchToken) || openProjects.has(projectItem.id);
         const projectMetric = metricsFor(projectClasses);
-        return <Fragment key={projectItem.id || projectItem.code}><tr className="project-row"><td className="tree-level-cell project"><button type="button" aria-label={`${projectOpen ? 'Thu gọn' : 'Mở'} dự án ${projectItem.name}`} onClick={() => toggleSet(setOpenProjects, projectItem.id)}>{projectOpen ? <ChevronDown size={13}/> : <ChevronRight size={13}/>}</button><FolderKanban size={17} aria-hidden="true"/><span className="sr-only">Dự án</span></td><td><button type="button" className="overview-tree-name" onClick={() => toggleSet(setOpenProjects, projectItem.id)}><b>{projectItem.name}</b><small>{projectItem.code || projectItem.id} · Khách hàng {projectItem.customerName || '—'} · {projectCourses.length} khóa · {projectClasses.length} lớp</small></button></td><td>{shortDate(projectItem.startDate)} – {shortDate(projectItem.deadline)}</td><td>{statePills(projectMetric)}</td><td>{progress(projectMetric)}</td><td>{alerts(projectMetric)}</td></tr>{projectOpen && projectCourses.map((courseItem) => {
+        return <Fragment key={projectItem.id || projectItem.code}><tr className="project-row"><td className="tree-level-cell project"><button type="button" aria-label={`${projectOpen ? 'Thu gọn' : 'Mở'} dự án ${projectItem.name}`} onClick={() => toggleSet(setOpenProjects, projectItem.id)}>{projectOpen ? <ChevronDown size={13}/> : <ChevronRight size={13}/>}</button><FolderKanban size={17} aria-hidden="true"/><span className="sr-only">Dự án</span></td><td><button type="button" className="overview-tree-name" onClick={() => toggleSet(setOpenProjects, projectItem.id)}><span className="overview-tree-title"><b>{projectItem.name}</b><em>{projectClasses.length} lớp</em></span><small>{projectItem.code || projectItem.id} · Khách hàng {projectItem.customerName || '—'} · {projectCourses.length} khóa</small></button></td><td>{shortDate(projectItem.startDate)} – {shortDate(projectItem.deadline)}</td><td>{statePills(projectMetric)}</td><td>{progress(projectMetric)}</td><td>{alerts(projectMetric, { projectId: projectItem.id })}</td></tr>{projectOpen && projectCourses.map((courseItem) => {
           const courseClasses = projectClasses.filter((item) => item.courseId === courseItem.id);
           if (searchToken && !matches(projectItem.id, projectItem.name, courseItem.id, courseItem.code, courseItem.name) && !courseClasses.some((item) => matches(item.id, item.code, item.name))) return null;
           const courseOpen = Boolean(searchToken) || openCourses.has(courseItem.id);
           const courseMetric = metricsFor(courseClasses);
           const courseStart = [...courseClasses].sort((a, b) => String(a.startDate).localeCompare(String(b.startDate)))[0]?.startDate;
           const courseEnd = [...courseClasses].sort((a, b) => String(b.endDate).localeCompare(String(a.endDate)))[0]?.endDate;
-          return <Fragment key={courseItem.id}><tr className="course-row"><td className="tree-level-cell course"><CornerDownRight size={16} aria-hidden="true"/><button type="button" aria-label={`${courseOpen ? 'Thu gọn' : 'Mở'} khóa ${courseItem.name}`} onClick={() => toggleSet(setOpenCourses, courseItem.id)}>{courseOpen ? <ChevronDown size={13}/> : <ChevronRight size={13}/>}</button><BookOpen size={16} aria-hidden="true"/><span className="sr-only">Khóa học</span></td><td><button type="button" className="overview-tree-name" onClick={() => toggleSet(setOpenCourses, courseItem.id)}><b>{courseItem.name}</b><small>{courseItem.code || courseItem.id} · {(courseItem.systems || []).join(' + ') || 'VTraining + VLearning'} · {courseClasses.length} lớp</small></button></td><td>{shortDate(courseStart)} – {shortDate(courseEnd)}</td><td>{statePills(courseMetric, false)}</td><td>{progress(courseMetric)}</td><td>{alerts(courseMetric)}</td></tr>{courseOpen && courseClasses.map((classItem) => {
+          return <Fragment key={courseItem.id}><tr className="course-row"><td className="tree-level-cell course"><CornerDownRight size={16} aria-hidden="true"/><button type="button" aria-label={`${courseOpen ? 'Thu gọn' : 'Mở'} khóa ${courseItem.name}`} onClick={() => toggleSet(setOpenCourses, courseItem.id)}>{courseOpen ? <ChevronDown size={13}/> : <ChevronRight size={13}/>}</button><BookOpen size={16} aria-hidden="true"/><span className="sr-only">Khóa học</span></td><td><button type="button" className="overview-tree-name" onClick={() => toggleSet(setOpenCourses, courseItem.id)}><span className="overview-tree-title"><b>{courseItem.name}</b><em>{courseClasses.length} lớp</em></span><small>{courseItem.code || courseItem.id} · {(courseItem.systems || []).join(' + ') || 'VTraining + VLearning'}</small></button></td><td>{shortDate(courseStart)} – {shortDate(courseEnd)}</td><td>{statePills(courseMetric, false)}</td><td>{progress(courseMetric)}</td><td>{alerts(courseMetric, { projectId: projectItem.id, courseId: courseItem.id })}</td></tr>{courseOpen && courseClasses.map((classItem) => {
             if (searchToken && !matches(projectItem.id, projectItem.name, courseItem.id, courseItem.name, classItem.id, classItem.code, classItem.name)) return null;
             const classMetric = metricsFor([classItem]);
             const runState = classRunState(classItem);
-            return <tr className={`class-row state-${runState}`} key={classItem.id || classItem.code}><td className="tree-level-cell class"><CornerDownRight size={16} aria-hidden="true"/><UsersRound size={16} aria-hidden="true"/><span className="sr-only">Lớp</span></td><td><button type="button" className="overview-tree-name" onClick={() => onOpenClass?.(classItem)}><b>{classItem.name}</b><small>{classItem.code || classItem.id}</small></button></td><td>{shortDate(classItem.startDate)} – {shortDate(classItem.endDate)}</td><td><span className={`overview-class-state ${runState}`}>{runState === 'ended' ? 'Đã chạy' : runState === 'running' ? 'Đang chạy' : 'Chưa chạy'}</span></td><td>{progress(classMetric)}</td><td>{alerts(classMetric)}</td></tr>;
+            return <tr className={`class-row state-${runState}`} key={classItem.id || classItem.code}><td className="tree-level-cell class"><CornerDownRight size={16} aria-hidden="true"/><UsersRound size={16} aria-hidden="true"/><span className="sr-only">Lớp</span></td><td><button type="button" className="overview-tree-name" onClick={() => onOpenClass?.(classItem)}><b>{classItem.name}</b><small>{classItem.code || classItem.id}</small></button></td><td>{shortDate(classItem.startDate)} – {shortDate(classItem.endDate)}</td><td><span className={`overview-class-state ${runState}`}>{runState === 'ended' ? 'Đã chạy' : runState === 'running' ? 'Đang chạy' : 'Chưa chạy'}</span></td><td>{progress(classMetric)}</td><td>{alerts(classMetric, { projectId: projectItem.id, courseId: courseItem.id, classId: classItem.id || classItem.code })}</td></tr>;
           })}</Fragment>;
         })}</Fragment>;
       })}</tbody></table>{searchToken && !scopedProjects.some((projectItem) => matches(projectItem.id, projectItem.code, projectItem.name, projectItem.customerName) || scopedCourses.some((item) => item.projectId === projectItem.id && matches(item.id, item.code, item.name)) || scopedClasses.some((item) => item.projectId === projectItem.id && matches(item.id, item.code, item.name))) && <div className="overview-no-results">Không tìm thấy dự án, khóa học hoặc lớp phù hợp.</div>}</div> : <CalendarOverview tasks={tasks} classes={scopedClasses} project={project} course={course} projects={scopedProjects} courses={scopedCourses} allClasses={scopedClasses} onTasks={onTasks} onOpenClass={onOpenClass}/>}
@@ -1725,7 +1776,7 @@ function AssigneePickerDialog({ open, directory, loading, taskCount, selectedId 
   </section></div>);
 }
 
-function Tasks({ role, tasks, inputRecords = [], directory = [], actor, project, course, selectedTask, setSelectedTaskId, updateTask, assignTasks, toggleChecklist, view = 'due' }) {
+function Tasks({ role, tasks, inputRecords = [], directory = [], actor, project, course, scopeLabel = '', selectedTask, setSelectedTaskId, updateTask, assignTasks, toggleChecklist, view = 'due' }) {
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkAssignee, setBulkAssignee] = useState('');
   const baseVisible = tasks.filter((task) => !task.archivedAt);
@@ -1745,7 +1796,7 @@ function Tasks({ role, tasks, inputRecords = [], directory = [], actor, project,
     setSelectedIds([]);
   }
   return <div className={`task-layout${view === 'due' && !selectedTask ? ' single' : ''}`}><section className="card task-table">
-    <div className="page-title"><div><small>TASK MANAGEMENT · {project?.code || project?.id || 'DỰ ÁN'} · {course?.code || course?.id || 'KHÓA HỌC'}</small><h2>{view === 'due' ? 'Việc cần xử lý' : 'Công việc'}</h2><p>{view === 'due' ? 'Theo dõi đầy đủ công việc quá hạn và sắp đến hạn; phân công được thực hiện tại màn Công việc.' : 'Công việc trong đúng dự án, khóa học và lớp đang chọn.'}</p></div></div>
+    <div className="page-title"><div><small>{scopeLabel ? `PHẠM VI · ${scopeLabel}` : `TASK MANAGEMENT · ${project?.code || project?.id || 'DỰ ÁN'} · ${course?.code || course?.id || 'KHÓA HỌC'}`}</small><h2>{view === 'due' ? 'Việc cần xử lý' : 'Công việc'}</h2><p>{view === 'due' ? `Có ${taskGroups.find(([label]) => label === 'QUÁ HẠN')?.[1]?.length || 0} việc quá hạn trong đúng phạm vi đã chọn; phân công được thực hiện tại màn Công việc.` : 'Công việc trong đúng dự án, khóa học và lớp đang chọn.'}</p></div></div>
     {canAssign && <div className="bulk-assign"><label><input type="checkbox" checked={selectedIds.length === visible.length && visible.length > 0} onChange={() => setSelectedIds(selectedIds.length === visible.length ? [] : visible.map((task) => task.id))}/> Chọn tất cả</label><span>{selectedIds.length} việc đã chọn</span><select value={bulkAssignee} onChange={(event) => setBulkAssignee(event.target.value)}><option value="">Chọn CTV</option>{directory.filter((item) => item.active !== false).map((item) => <option value={item.id} key={item.id}>{item.name}</option>)}</select><button className="primary" disabled={!selectedIds.length || !bulkAssignee || !reviewerId} onClick={assignSelected}>Giao cho CTV</button></div>}
     <div className={canAssign ? 'table-head with-select' : 'table-head'}>{canAssign && <span>Chọn</span>}<span>Công việc</span><span>Input</span><span>Deadline</span><span>Trạng thái</span></div>
     {!visible.length && <div className="empty"><strong>Không có công việc trong phạm vi này</strong><p>Hãy kiểm tra lại dự án, khóa học hoặc lớp đang chọn.</p></div>}
