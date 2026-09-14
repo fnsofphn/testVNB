@@ -646,3 +646,37 @@
 .vwork-training-operations .sale-course-controls{display:flex;align-items:flex-end;gap:14px}.vwork-training-operations .sale-course-controls>strong{display:grid;color:#173453;font-size:17px;text-align:right}.vwork-training-operations .sale-course-controls>strong small{color:var(--muted);font-size:9px;font-weight:600}.vwork-training-operations .sale-course-controls label{display:grid;gap:4px;color:var(--muted);font-size:9px;font-weight:800}.vwork-training-operations .sale-course-controls select{min-width:190px;padding:8px 10px;font-size:10px}
 .vwork-training-operations .task-input-detail{display:grid;gap:8px;margin-top:9px;padding:10px;border:1px solid #e1e6ed;border-radius:8px;background:#fafbfd}.vwork-training-operations .input-current-version{display:grid;gap:9px}.vwork-training-operations .input-current-version-head{display:flex;justify-content:space-between;gap:10px}.vwork-training-operations .input-current-version dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:0}.vwork-training-operations .input-current-version dl>div{min-width:0;padding:8px;border-radius:6px;background:#fff}.vwork-training-operations .input-current-version dt{color:#7b8798;font-size:8px;font-weight:800}.vwork-training-operations .input-current-version dd{overflow-wrap:anywhere;margin:3px 0 0;color:#2d4059;font-size:9px}.vwork-training-operations .input-version-files{display:flex;flex-wrap:wrap;gap:6px}.vwork-training-operations .input-version-files button{padding:6px 8px;color:var(--blue);font-size:9px}
 @media(max-width:760px){.vwork-training-operations .overview-page-head{align-items:flex-start;flex-direction:column;gap:14px}.vwork-training-operations .overview-page-actions{width:100%}.vwork-training-operations .overview-page-actions button{flex:1}.vwork-training-operations .overview-filters{grid-template-columns:1fr}.vwork-training-operations .overview-filters>span{display:none}.vwork-training-operations .inline-course-form .form-grid{grid-template-columns:1fr}.vwork-training-operations .sale-course-controls{width:100%;align-items:stretch;flex-direction:column}.vwork-training-operations .sale-course-controls>strong{text-align:left}.vwork-training-operations .sale-course-controls select{width:100%}.vwork-training-operations .input-current-version dl{grid-template-columns:1fr}}
+
+/* Compact browser and tablet widths need the off-canvas shell before content becomes cramped. */
+@media(max-width:1100px){
+  .vwork-training-operations.app-shell{display:block}
+  .vwork-training-operations .sidebar{position:fixed;inset:0 auto 0 0;z-index:60;width:min(292px,84vw);height:100dvh;padding:20px 16px;overflow-y:auto;transform:translateX(-105%);transition:transform .2s ease;box-shadow:14px 0 38px #08192e42}
+  .vwork-training-operations .sidebar.open{transform:translateX(0)}
+  .vwork-training-operations .sidebar nav{display:block;padding-top:14px}
+  .vwork-training-operations .sidebar-note{display:block;margin-top:28px}
+  .vwork-training-operations .mobile-nav-backdrop{position:fixed;inset:0;z-index:55;display:block;padding:0;border:0;border-radius:0;background:#0b17274d}
+  .vwork-training-operations .mobile-menu-button{display:inline-grid;flex:none;width:36px;height:36px;place-items:center;padding:0;border-color:#d6dde7;background:#fff}
+  .vwork-training-operations .topbar{height:58px;padding:0 14px;gap:10px}
+  .vwork-training-operations .topbar-path{min-width:0;flex:1}
+  .vwork-training-operations .topbar-path small{font-size:9px}
+  .vwork-training-operations .actor-identity,.vwork-training-operations .role-switch>span{display:none}
+  .vwork-training-operations .role-switch{flex:none;gap:6px}
+  .vwork-training-operations .role-switch select{max-width:170px;padding:8px 7px;font-size:10px}
+  .vwork-training-operations .avatar{width:30px;height:30px;font-size:10px}
+  .vwork-training-operations .workspace{padding:18px 16px 40px}
+}
+
+@media(max-width:1200px){
+  .vwork-training-operations .actor-identity,.vwork-training-operations .role-switch>span{display:none}
+  .vwork-training-operations .role-switch{flex:none;gap:6px}
+  .vwork-training-operations .role-switch select{max-width:210px;padding:8px 7px;font-size:10px}
+}
+
+@media(max-width:960px){
+  .vwork-training-operations .overview-page-head{min-height:0;align-items:flex-start;flex-direction:column;gap:14px;padding:18px}
+  .vwork-training-operations .overview-page-actions{width:100%}
+  .vwork-training-operations .overview-page-actions button{flex:1}
+  .vwork-training-operations .overview-filters{grid-template-columns:1fr}
+  .vwork-training-operations .overview-filters>span{display:none}
+  .vwork-training-operations .overview-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+}

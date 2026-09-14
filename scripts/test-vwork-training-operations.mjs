@@ -158,6 +158,8 @@ assert(databaseGuards.includes('GUARD_STALE_CLIENT_ACCEPTED') && databaseGuards.
 assert(databaseGuards.includes('GUARD_LATE_FAILURE_CHANGED_TASK') && databaseGuards.trimEnd().endsWith('rollback;'), 'Database guard smoke must prove transaction rollback without leaving test rows.');
 
 assert(css.includes('.vwork-training-operations.app-shell'), 'Training Operations CSS must be rooted at its isolated module class.');
+assert(css.includes('@media(max-width:1100px)') && css.includes('.vwork-training-operations .sidebar.open{transform:translateX(0)}') && css.includes('.vwork-training-operations .mobile-menu-button{display:inline-grid'), 'Compact and tablet widths must switch to operable off-canvas navigation before the workspace becomes cramped.');
+assert(css.includes('@media(max-width:960px)') && css.includes('.vwork-training-operations .overview-filters{grid-template-columns:1fr}') && css.includes('.vwork-training-operations .overview-kpis{grid-template-columns:repeat(2,minmax(0,1fr))'), 'Narrow overview layouts must stack filters and retain readable two-column KPIs.');
 assert(css.includes('.account-form-actions button:disabled') && css.includes('cursor:not-allowed;opacity:.45'), 'Disabled account submission must be visually distinguishable from an actionable primary button.');
 assert(css.includes('.account-role-matrix') && css.includes('.account-role-badges'), 'The account role matrix and directory role badges must be styled.');
 assert(css.includes('min-height:350px') && css.includes('.calendar-dialog.task-preview .check-row input{width:16px;height:16px'), 'Overview calendar must be reduced by about one third and task-preview checkboxes must keep a stable popup layout.');
