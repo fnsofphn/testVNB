@@ -1,6 +1,6 @@
 # Design QA — VWork feedback 11/09
 
-- Source visual truth: `C:\Users\Nam\AppData\Local\Temp\codex-clipboard-bb939e37-66eb-4a04-bb83-25db7050abce.png`, `C:\Users\Nam\AppData\Local\Temp\codex-clipboard-c0b6574b-45e5-4954-9c0d-a585eec32ec7.png`, `C:\Users\Nam\AppData\Local\Temp\codex-clipboard-cca31b99-b3d9-428f-895e-ccf7ed9cfa89.png`, `C:\Users\Nam\AppData\Local\Temp\codex-clipboard-0d63c691-2e68-48f1-a59f-de3e37bec356.png`, `C:\Users\Nam\AppData\Local\Temp\codex-clipboard-52170ef4-36a6-4d05-8987-5cfd08065adc.png`, `C:\Users\Nam\AppData\Local\Temp\codex-clipboard-e8e0d649-19c3-434a-b632-b1d2e9668fd8.png`, `C:\Users\Nam\AppData\Local\Temp\codex-clipboard-c58be1bc-2178-4fba-9b01-8a7fba3f2182.png`, `C:\Users\Nam\AppData\Local\Temp\codex-clipboard-e5414bfc-2360-499c-a02d-913839434039.png`, and `D:\04. Code\Vwork\VWork-Van-Hanh-Gui-Sep-v2.html`
+- Source visual truth: `C:\Users\Nam\AppData\Local\Temp\codex-clipboard-bb939e37-66eb-4a04-bb83-25db7050abce.png`, `C:\Users\Nam\AppData\Local\Temp\codex-clipboard-c0b6574b-45e5-4954-9c0d-a585eec32ec7.png`, `C:\Users\Nam\AppData\Local\Temp\codex-clipboard-cca31b99-b3d9-428f-895e-ccf7ed9cfa89.png`, `C:\Users\Nam\AppData\Local\Temp\codex-clipboard-0d63c691-2e68-48f1-a59f-de3e37bec356.png`, `C:\Users\Nam\AppData\Local\Temp\codex-clipboard-52170ef4-36a6-4d05-8987-5cfd08065adc.png`, `C:\Users\Nam\AppData\Local\Temp\codex-clipboard-e8e0d649-19c3-434a-b632-b1d2e9668fd8.png`, `C:\Users\Nam\AppData\Local\Temp\codex-clipboard-c58be1bc-2178-4fba-9b01-8a7fba3f2182.png`, `C:\Users\Nam\AppData\Local\Temp\codex-clipboard-e5414bfc-2360-499c-a02d-913839434039.png`, `C:\Users\Nam\AppData\Local\Temp\codex-clipboard-54dc7d61-7091-4c6c-b9a0-747307dcb06f.png`, and `D:\04. Code\Vwork\VWork-Van-Hanh-Gui-Sep-v2.html`
 - Implementation: `http://127.0.0.1:4173/vwork/training-operations`
 - Implementation screenshot evidence: browser-rendered Codex in-app browser captures recorded in the implementation task (desktop overview/table/calendar/structure/due/task detail and mobile overview/navigation). The browser surface does not expose a filesystem path for captures.
 - Desktop viewport: 1265 × 713 CSS px, device scale factor 1
@@ -26,6 +26,7 @@ The rendered implementation retains the reference composition and visual hierarc
 - Role navigation: Operations retains Workspace, Work, and Management; Member verification shows only Workspace and Work (`Tổng quan`, `Việc của tôi`) and no Management heading or controls. Forbidden management routes are normalized back to Overview.
 - Overdue drill-down: KPI, summary badge, and row alert are actionable and retain all/project/course/class scope in the URL. The final browser pass showed `30` on the KPI and exactly `30` rows in the `QUÁ HẠN` group; a deadline equal to today remains in `SẮP ĐẾN HẠN` on both surfaces.
 - Class configuration: the modal now names its purpose, explains immediate persistence, labels task applicability, confirms destructive disable actions, exposes task status, and provides both row-level and footer navigation into the class work screen.
+- Task deadline status: class rows and detail headers show the persisted workflow state first and an independent red `Quá hạn X ngày` badge beneath it. At the 14/09/2026 QA date, the 30/08/2026 task visibly showed `Chưa sẵn sàng` plus `Quá hạn 15 ngày` in both the row and drawer.
 
 ## Findings and iteration history
 
@@ -39,6 +40,7 @@ The rendered implementation retains the reference composition and visual hierarc
 8. Role-navigation pass — P1: hiding the Management group was not enough because a stale/direct URL could still briefly open a management tab for another role. Added one role-to-tab access rule used by initialization, role switching, and URL restoration. Post-fix Member browser evidence contains exactly two navigation groups and no Management controls.
 9. Overdue pass — P1: Overview compared deadlines with the current timestamp while the detail list compared with the start of today, so a task due today appeared overdue only in the KPI. Both now compare ISO business dates. The drill-down persists its source scope in the URL and displays the matching scope label; post-fix evidence shows KPI `30`, summary `30`, and `30` detailed overdue rows.
 10. Final pass: no actionable P0/P1/P2 visual mismatches remain. Typography and wrapping remain consistent with the existing product; spacing preserves the dense operations table rhythm; colors use existing semantic tokens; icons come from the installed Lucide library; copy now states purpose and consequences. No raster imagery is present in these two surfaces.
+11. Deadline-state pass — P1: class detail exposed only workflow readiness, so the overdue summary could not be reconciled with individual tasks. Added a reusable two-line status stack across task rows, calendar agenda/preview, due lists, and drawer headers. Completed and cancelled tasks are explicitly exempt, and deadlines equal to today are not overdue. Post-fix desktop evidence shows `Chưa sẵn sàng` with `Quá hạn 15 ngày` on the 30/08/2026 task; the same pair remains readable at 820 × 844 with document width 805 px inside an 820 px viewport and no horizontal overflow.
 
 ## Primary interactions tested
 
@@ -57,6 +59,7 @@ The rendered implementation retains the reference composition and visual hierarc
 - Open the overdue KPI at all-project scope and verify the URL scope, visible scope label, overdue group count, and row count all match (`30`).
 - Open class configuration, cancel a disable confirmation, open a task by name, and verify the resulting class/task route.
 - Switch to Content and verify the configuration dialog has no applicability checkboxes and clearly says “Chế độ chỉ xem”.
+- Verify workflow and deadline badges together in the TNKH01 task table and task drawer; verify overdue day counts (29/08 → 16 days, 30/08 → 15 days on 14/09/2026) and the DONE/CANCELLED exclusion rule in code guards.
 - Browser console errors checked: none.
 
 ## Residual test constraint

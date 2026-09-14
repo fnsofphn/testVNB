@@ -576,6 +576,7 @@
   .vwork-training-operations .review-actions{display:grid;grid-template-columns:1fr 1fr;justify-content:stretch}
 }
 .vwork-training-operations .badge.REWORK{background:#fde7eb;color:#b4233c;border:1px solid #f3b5c0}
+.vwork-training-operations .task-status-stack{display:inline-flex;min-width:0;align-items:flex-start;flex-direction:column;gap:4px}.vwork-training-operations .deadline-overdue{display:inline-flex;width:max-content;align-items:center;padding:4px 7px;border:1px solid #f3b5c0;border-radius:11px;background:#fde7eb;color:#b4233c;font-size:9px;font-weight:850;line-height:1;white-space:nowrap}.vwork-training-operations .task-row>.task-status-stack{font-size:10px}.vwork-training-operations .drawer-head-actions .task-status-stack{align-items:flex-end}
 .vwork-training-operations .input-card.partial>div:first-child>b{background:#fff1d6;color:#895c13}
 .vwork-training-operations .roster-class-progress{display:grid;gap:5px;margin:12px 0;padding:10px;border:1px solid #e1e5eb;border-radius:8px;background:#fafbfc}
 .vwork-training-operations .roster-class-progress>div{display:grid;grid-template-columns:18px minmax(70px,.55fr) 1fr;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid #eaedf1}
