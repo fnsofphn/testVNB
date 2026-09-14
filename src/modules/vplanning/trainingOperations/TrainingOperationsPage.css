@@ -35,6 +35,56 @@
 
 @media(max-width:900px){.vwork-training-operations .sale-roster-grid{grid-template-columns:1fr}.vwork-training-operations .deadline-anchor{align-items:flex-start;flex-wrap:wrap}.vwork-training-operations .deadline-anchor div{width:100%}.vwork-training-operations .workflow-task{grid-template-columns:28px 1fr}.vwork-training-operations .workflow-task>label:last-child{grid-column:2}.vwork-training-operations .workflow-group-head{align-items:flex-start;flex-direction:column}.vwork-training-operations .workflow-group-head label{width:100%}}
 
+/* Course access — faithful to the approved VWork reference flow. */
+.vwork-training-operations .workspace-team{padding-top:22px}
+.vwork-training-operations .course-access-workspace{display:grid;gap:14px}
+.vwork-training-operations .course-access-hero{min-height:96px;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:18px 20px;border:1px solid var(--border);border-radius:14px;background:#fff}
+.vwork-training-operations .course-access-hero>div{min-width:0}
+.vwork-training-operations .course-access-hero small,.vwork-training-operations .course-access-surface-head small{display:block;color:var(--primary);font-size:9px;font-weight:850;letter-spacing:.09em}
+.vwork-training-operations .course-access-hero h1{margin:5px 0 3px;color:#1d324d;font-size:20px;letter-spacing:-.02em}
+.vwork-training-operations .course-access-hero p,.vwork-training-operations .course-access-surface-head p{margin:0;color:var(--muted);font-size:11px;line-height:1.45}
+.vwork-training-operations .course-access-hero label{flex:0 1 390px;display:grid;gap:5px;min-width:300px;color:#8a95a4;font-size:9px;font-weight:800;text-transform:uppercase}
+.vwork-training-operations .course-access-hero select{width:100%;font-size:11px;font-weight:750;text-transform:none}
+.vwork-training-operations .course-access-surface{padding:0;overflow:hidden}
+.vwork-training-operations .course-access-surface-head{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 18px;border-bottom:1px solid var(--border)}
+.vwork-training-operations .course-access-surface-head h2{margin:3px 0 2px;color:#1d324d;font-size:17px}
+.vwork-training-operations .course-access-surface-head button{white-space:nowrap}
+.vwork-training-operations .course-access-rule{margin:12px 18px 0!important;padding:10px 12px;border-radius:7px;background:#f5f7fa;color:#516075!important;font-size:10.5px!important}
+.vwork-training-operations .course-access-table-wrap{overflow-x:auto}
+.vwork-training-operations .course-access-table{width:100%;margin-top:12px;border-collapse:collapse}
+.vwork-training-operations .course-access-table th{padding:9px 12px;border-block:1px solid var(--border);background:#f7f9fb;color:#78869a;font-size:9px;font-weight:850;letter-spacing:.03em;text-align:left;white-space:nowrap}
+.vwork-training-operations .course-access-table td{padding:12px;border-bottom:1px solid #edf0f4;color:#3d4d61;font-size:11px;vertical-align:middle}
+.vwork-training-operations .course-access-table td:first-child{width:180px;color:#263a54}
+.vwork-training-operations .course-access-table td:nth-child(2){min-width:245px}
+.vwork-training-operations .course-access-table td:nth-child(3){min-width:260px}
+.vwork-training-operations .course-access-table td:last-child{text-align:right}
+.vwork-training-operations .course-role-members{display:flex;flex-wrap:wrap;gap:6px}
+.vwork-training-operations .course-role-member{display:inline-flex;align-items:center;gap:6px;padding:5px 7px 5px 9px;border:1px solid var(--border);border-radius:999px;background:#f8fafc;color:#34465d;font-size:10px;font-weight:750}
+.vwork-training-operations .course-role-member button{width:18px;height:18px;display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:#e9edf2;color:#7b8796;line-height:1}
+.vwork-training-operations .course-role-member button:hover{background:var(--primary);color:#fff}
+.vwork-training-operations .course-role-empty{color:#9d6815;font-size:10px;font-weight:700}
+.vwork-training-operations .course-role-status{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:9px;font-weight:800;white-space:nowrap}
+.vwork-training-operations .course-role-status.active{background:#daf1e6;color:#08764e}
+.vwork-training-operations .course-role-status.missing{background:#f4ead7;color:#98630f}
+.vwork-training-operations .course-role-add{min-width:118px;padding:7px 10px;font-size:10px;white-space:nowrap}
+.vwork-training-operations .course-role-dialog{width:min(620px,96vw)}
+.vwork-training-operations .course-role-dialog-body{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:19px 24px}
+.vwork-training-operations .course-role-dialog-body label{display:grid;gap:5px;color:#59697c;font-size:10px}
+.vwork-training-operations .course-role-dialog-body label.wide,.vwork-training-operations .course-role-dialog-body p{grid-column:1/-1}
+.vwork-training-operations .course-role-dialog-body input,.vwork-training-operations .course-role-dialog-body select{width:100%}
+.vwork-training-operations .course-role-dialog-body input:disabled{color:#687588;background:#f3f5f7}
+.vwork-training-operations .course-role-dialog-body p{margin:0;color:var(--muted);font-size:10.5px}
+
+@media(max-width:760px){
+  .vwork-training-operations .workspace-team{padding-top:14px}
+  .vwork-training-operations .course-access-hero,.vwork-training-operations .course-access-surface-head{align-items:flex-start;flex-direction:column}
+  .vwork-training-operations .course-access-hero label{flex:auto;width:100%;min-width:0}
+  .vwork-training-operations .course-access-surface-head button{width:100%}
+  .vwork-training-operations .course-access-table{min-width:860px}
+  .vwork-training-operations .course-role-dialog-body{grid-template-columns:1fr;padding:16px}
+  .vwork-training-operations .course-role-dialog-body label.wide,.vwork-training-operations .course-role-dialog-body p{grid-column:auto}
+}
+
 /* Combined v01-v03: persistent project-course-class hierarchy and class-owned tasks */
 .vwork-training-operations .structure-journey>button{display:flex;align-items:center;gap:9px;min-width:130px;border:0;background:transparent;padding:0;text-align:left}.vwork-training-operations .structure-journey>button:hover span{color:var(--blue)}.vwork-training-operations .structure-journey>button.current b{background:#dceafb;color:var(--blue)}.vwork-training-operations .structure-workspace{padding:20px}.vwork-training-operations .hierarchy-strip{display:flex;align-items:stretch;margin-top:18px;border:1px solid #dbe4ee;background:#f8fafc;border-radius:10px;padding:12px}.vwork-training-operations .hierarchy-strip article{display:flex;flex:1;min-width:0;flex-direction:column;padding:7px 10px}.vwork-training-operations .hierarchy-strip article span{font-size:9px;letter-spacing:.1em;color:#6f8197;font-weight:850}.vwork-training-operations .hierarchy-strip article b{font-size:12px;color:#233b58;margin:4px 0}.vwork-training-operations .hierarchy-strip article small{font-size:10px;color:var(--muted)}.vwork-training-operations .hierarchy-strip i{align-self:center;width:22px;height:1px;background:#bfcddd;position:relative}.vwork-training-operations .hierarchy-strip i:after{content:'›';position:absolute;right:-1px;top:-9px;color:#8294a8;font-style:normal}.vwork-training-operations .class-structure-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}.vwork-training-operations .class-structure-card{display:flex;flex-direction:column;align-items:stretch;text-align:left;padding:14px;border:1px solid var(--border);background:#fff}.vwork-training-operations .class-structure-card:hover,.vwork-training-operations .class-structure-card.selected{border-color:#73a2d5;background:#f3f8fe;box-shadow:0 0 0 2px #dbeaf9}.vwork-training-operations .class-structure-card>div{display:flex;justify-content:space-between;align-items:center}.vwork-training-operations .class-structure-card span{font-size:10px;color:#5e7792;font-weight:850}.vwork-training-operations .class-structure-card em{font-size:8px;font-style:normal;color:#2b659d;background:#e7f1fc;border-radius:10px;padding:4px 6px}.vwork-training-operations .class-structure-card b{font-size:14px;color:#253b56;margin:11px 0 5px}.vwork-training-operations .class-structure-card small{font-size:10px;color:var(--muted)}.vwork-training-operations .class-config-panel{margin-top:14px;border:1px solid var(--border);border-radius:10px;overflow:hidden}.vwork-training-operations .class-config-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;padding:16px 18px;background:#f8fafc;border-bottom:1px solid var(--border)}.vwork-training-operations .class-config-head small{font-size:9px;letter-spacing:.1em;color:#718399;font-weight:850}.vwork-training-operations .class-config-head h3{font-size:17px;margin:4px 0;color:#213a57}.vwork-training-operations .class-config-head p{margin:0;font-size:11px;color:var(--muted)}.vwork-training-operations .clone-controls{display:flex;gap:8px;align-items:flex-end}.vwork-training-operations .clone-controls label{display:flex;flex-direction:column;gap:4px;font-size:10px;color:var(--muted)}.vwork-training-operations .clone-controls select,.vwork-training-operations .clone-controls button{padding:8px 10px;font-size:11px}.vwork-training-operations .class-task-head,.vwork-training-operations .class-task-row{display:grid;grid-template-columns:42px minmax(250px,1.6fr) minmax(155px,.8fr) 145px 155px;gap:10px;align-items:center;padding:9px 16px}.vwork-training-operations .class-task-head{background:#f4f7fa;border-bottom:1px solid var(--border);font-size:9px;color:#718196;font-weight:850}.vwork-training-operations .class-task-row{border-bottom:1px solid #edf0f4}.vwork-training-operations .class-task-row:last-child{border-bottom:0}.vwork-training-operations .class-task-row.disabled{opacity:.5;background:#f7f8fa}.vwork-training-operations .class-task-row>div{display:flex;flex-direction:column}.vwork-training-operations .class-task-row b{font-size:11px;color:#2b405a}.vwork-training-operations .class-task-row small{font-size:9px;color:#8491a1;margin-top:2px}.vwork-training-operations .class-task-row>span{font-size:10px;color:#596b80}.vwork-training-operations .class-task-row select{padding:7px;font-size:10px}.vwork-training-operations .class-task-row input{width:15px;height:15px}.vwork-training-operations .structure-rule{display:flex;gap:12px;align-items:flex-start;margin-top:14px;padding:12px 14px;border-left:3px solid var(--green);background:#f2fbf7;border-radius:7px}.vwork-training-operations .structure-rule b{font-size:11px;color:#167753;white-space:nowrap}.vwork-training-operations .structure-rule span{font-size:11px;color:#496559;line-height:1.45}.vwork-training-operations .workflow-class-picker{display:flex;flex-direction:column;gap:5px;min-width:285px;font-size:10px;color:var(--muted)}
 
@@ -536,4 +586,24 @@
 .vwork-training-operations .roster-class-progress>div.ready>span,.vwork-training-operations .roster-class-progress>div.ready>small{color:#08794f}
 @media(max-width:1100px){.vwork-training-operations .layer-table-head.course-layer{grid-template-columns:1.5fr 1fr .7fr 82px}.vwork-training-operations .layer-table-head.course-layer span:nth-child(4){display:none}.vwork-training-operations .layer-course-open{grid-template-columns:1.5fr 1fr .7fr}.vwork-training-operations .layer-course-open em{display:none}}
 @media(max-width:760px){.vwork-training-operations .layer-page-title,.vwork-training-operations .layer-head-actions{align-items:stretch;flex-direction:column}.vwork-training-operations .layer-add-button{justify-content:center}.vwork-training-operations .layer-table-head.course-layer{grid-template-columns:1fr 70px}.vwork-training-operations .layer-table-head.course-layer span:not(:first-child):not(:last-child){display:none}.vwork-training-operations .layer-course-entry{grid-template-columns:minmax(0,1fr) 70px}.vwork-training-operations .layer-course-open{grid-template-columns:1fr;padding:12px}.vwork-training-operations .layer-course-open>span,.vwork-training-operations .layer-course-open em{display:none}.vwork-training-operations .layer-row-actions{padding:6px;gap:3px}.vwork-training-operations .course-management-body{padding:14px}.vwork-training-operations .course-management-modal{width:100%}}
+
+/* Mobile shell follows the reference flow: compact header and off-canvas navigation. */
+.vwork-training-operations .topbar-path{display:flex;min-width:0;align-items:center;gap:10px}
+.vwork-training-operations .topbar-path small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vwork-training-operations .mobile-menu-button,.vwork-training-operations .mobile-nav-backdrop{display:none}
+@media(max-width:760px){
+  .vwork-training-operations.app-shell{display:block}
+  .vwork-training-operations .sidebar{position:fixed;inset:0 auto 0 0;z-index:60;width:min(292px,84vw);height:100dvh;padding:20px 16px;overflow-y:auto;transform:translateX(-105%);transition:transform .2s ease;box-shadow:14px 0 38px #08192e42}
+  .vwork-training-operations .sidebar.open{transform:translateX(0)}
+  .vwork-training-operations .sidebar nav{display:block;padding-top:14px}
+  .vwork-training-operations .sidebar-note{display:block;margin-top:28px}
+  .vwork-training-operations .mobile-nav-backdrop{position:fixed;inset:0;z-index:55;display:block;padding:0;border:0;border-radius:0;background:#0b17274d}
+  .vwork-training-operations .mobile-menu-button{display:inline-grid;flex:none;width:36px;height:36px;place-items:center;padding:0;border-color:#d6dde7;background:#fff}
+  .vwork-training-operations .topbar{height:58px;padding:0 12px;gap:8px}
+  .vwork-training-operations .topbar-path{min-width:0;flex:1}
+  .vwork-training-operations .topbar-path small{font-size:9px}
+  .vwork-training-operations .role-switch{gap:6px}
+  .vwork-training-operations .role-switch select{max-width:126px;padding:8px 7px;font-size:10px}
+  .vwork-training-operations .avatar{width:30px;height:30px;font-size:10px}
+}
 .vwork-training-operations .hint.ready{color:#08764e}

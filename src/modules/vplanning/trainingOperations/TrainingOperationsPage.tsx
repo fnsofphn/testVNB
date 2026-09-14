@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
-import { ArrowDown, ArrowUp, CopyPlus, MoreVertical, Pencil, Plus, Trash2, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, CopyPlus, Menu, MoreVertical, Pencil, Plus, Trash2, X } from 'lucide-react';
 import './TrainingOperationsPage.css';
 import {
   TRAINING_DEFAULT_CLASSES,
@@ -149,6 +149,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
   const [role, setRole] = useState(initialRole);
   const [availableRoles, setAvailableRoles] = useState(() => allowRolePreview ? TRAINING_ROLE_OPTIONS.map(([value]) => value) : [initialRole]);
   const [tab, setTabState] = useState(() => VIEW_TO_TAB[routeContext.view] || routeContext.view || 'overview');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [workspaceState, setWorkspaceState] = useState(INITIAL_WORKSPACE);
   const [stateVersion, setStateVersion] = useState(0);
   const versionRef = useRef(0);
@@ -218,6 +219,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
 
   function setTab(nextTab) {
     const normalized = VIEW_TO_TAB[nextTab] || nextTab;
+    setSidebarOpen(false);
     setTabState(normalized);
     writeRoute(normalized);
   }
@@ -524,7 +526,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
   const topbarPath = tab === 'change' && changeOpen
     ? 'VWORK / RISK & CHANGE / YÊU CẦU THAY ĐỔI'
     : tab === 'accounts' ? 'VWORK / EKIP & TÀI KHOẢN'
-    : tab === 'team' ? ['VWORK', activeProject?.code, activeCourse?.name, 'GÁN VAI TRÒ'].filter(Boolean).join(' / ')
+    : tab === 'team' ? 'VWORK / GÁN VAI TRÒ'
     : tab === 'inputs' ? ['VWORK', activeProject?.code, activeCourse?.name, 'INPUT'].filter(Boolean).join(' / ')
     : tab === 'tasks' ? ['VWORK', activeProject?.code, routeContext.courseId && activeCourse?.name, routeContext.classId && classes.find((item) => [item.id, item.code].includes(routeContext.classId))?.code, routeContext.classId && 'CÔNG VIỆC'].filter(Boolean).join(' / ')
     : tab === 'structure' ? 'VWORK / DANH SÁCH DỰ ÁN' : `VWORK / DỰ ÁN / ${activeProject?.code || ''}`;
@@ -532,7 +534,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
   const managedProject = courseDialog.mode === 'new' ? activeProject : (workspaceState.projects || []).find((item) => item.id === managedCourse?.projectId) || activeProject;
 
   return <div className="vwork-training-operations app-shell">
-    <aside className="sidebar">
+    <aside className={`sidebar${sidebarOpen ? ' open' : ''}`}>
       <div className="brand"><span className="brand-mark">P1</span><div><strong>PeopleOne</strong><small>VWork Operations</small></div></div>
       <nav>
         {role === 'content' ? <><p>WORKSPACE</p><button className={tab === 'overview' ? 'active' : ''} onClick={() => setTab('overview')}>Tổng quan dự án</button><button className={tab === 'structure' ? 'active' : ''} onClick={() => setTab('structure')}>Khóa / lớp <b>{projectCourses.length}/{projectClasses.length}</b></button><p>INPUT</p><button className={tab === 'inputs' ? 'active' : ''} onClick={() => setTab('inputs')}>Input khóa học <b>{contentReadyCount}/{contentInputKeys.length}</b></button><p>CÔNG VIỆC</p><button className={tab === 'tasks' ? 'active' : ''} onClick={() => setTab('tasks')}>Việc của tôi <b>{contextTasks.filter((task) => !task.archivedAt).length}</b></button></> : role === 'intake' ? <><p>ĐẦU MỐI / SALE</p><button className={tab === 'inputs' ? 'active' : ''} onClick={() => setTab('inputs')}>Input lớp học <b>{saleUploadDone}/{saleUploadTotal}</b></button><button className={tab === 'change' ? 'active' : ''} onClick={() => setTab('change')}>Yêu cầu thay đổi</button></> : role === 'vtraining' ? <><p>VẬN HÀNH VTRAINING</p><button className={tab === 'overview' ? 'active' : ''} onClick={() => setTab('overview')}>Tổng quan dự án</button><button className={tab === 'structure' ? 'active' : ''} onClick={() => setTab('structure')}>Khóa / lớp <b>{projectCourses.length}/{projectClasses.length}</b></button><p>INPUT</p><button className={tab === 'inputs' ? 'active' : ''} onClick={() => setTab('inputs')}>Input khóa học <b>{readyCount}/{readyTotal}</b></button><p>CÔNG VIỆC</p><button className={tab === 'tasks' ? 'active' : ''} onClick={() => setTab('tasks')}>Việc của tôi <b>{contextTasks.filter((task) => !task.archivedAt).length}</b></button></> : <>
@@ -544,10 +546,11 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
       </nav>
       <div className="sidebar-note"><span>VẬN HÀNH ĐÀO TẠO</span><p>Store và API riêng; VTraining, VLearning chỉ được tham chiếu qua mã nguồn dữ liệu.</p><small className={`sync-indicator ${syncState}`}>{syncState === 'loading' ? 'Đang tải dữ liệu…' : syncState === 'saving' ? 'Đang lưu…' : syncState === 'synced' ? `Đã đồng bộ · v${stateVersion}` : syncState === 'seed' ? 'Chưa có dữ liệu DB · đang dùng seed' : 'Lỗi đồng bộ'}</small>{onSignOut && <button type="button" onClick={onSignOut}>Đăng xuất</button>}</div>
     </aside>
+    {sidebarOpen && <button className="mobile-nav-backdrop" type="button" aria-label="Đóng menu điều hướng" onClick={() => setSidebarOpen(false)} />}
 
     <div className="main-shell">
-      <header className="topbar"><div><small>{topbarPath}</small></div><div className="role-switch"><div className="actor-identity"><b>{actor?.name || 'Đang xác định tài khoản'}</b><small>{actor?.email || ''}</small></div><span>{availableRoles.length > 1 ? 'Đang làm việc với vai trò' : 'Vai trò hiện tại'}</span>{availableRoles.length > 1 ? <select aria-label="Chọn vai trò làm việc" value={role} onChange={(event) => void switchRole(event.target.value)}>{TRAINING_ROLE_OPTIONS.filter(([value]) => availableRoles.includes(value)).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select> : <strong>{TRAINING_ROLE_OPTIONS.find(([value]) => value === role)?.[1] || 'Thành viên ekip'}</strong>}<div className="avatar" title={actor?.name || ''}>{initials(actor?.name || actor?.email)}</div></div></header>
-      {tab !== 'structure' && <div className="training-context-bar" aria-label="Ngữ cảnh dự án khóa học lớp">
+      <header className="topbar"><div className="topbar-path"><button className="mobile-menu-button" type="button" aria-label="Mở menu điều hướng" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen(true)}><Menu size={19} aria-hidden="true" /></button><small>{topbarPath}</small></div><div className="role-switch"><div className="actor-identity"><b>{actor?.name || 'Đang xác định tài khoản'}</b><small>{actor?.email || ''}</small></div><span>{availableRoles.length > 1 ? 'Đang làm việc với vai trò' : 'Vai trò hiện tại'}</span>{availableRoles.length > 1 ? <select aria-label="Chọn vai trò làm việc" value={role} onChange={(event) => void switchRole(event.target.value)}>{TRAINING_ROLE_OPTIONS.filter(([value]) => availableRoles.includes(value)).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select> : <strong>{TRAINING_ROLE_OPTIONS.find(([value]) => value === role)?.[1] || 'Thành viên ekip'}</strong>}<div className="avatar" title={actor?.name || ''}>{initials(actor?.name || actor?.email)}</div></div></header>
+      {!['structure', 'team'].includes(tab) && <div className="training-context-bar" aria-label="Ngữ cảnh dự án khóa học lớp">
         <label>Dự án<select value={activeProject?.id || ''} onChange={(event) => { const projectId = event.target.value; const courseId = (workspaceState.courses || []).find((item) => item.projectId === projectId && item.status !== 'ARCHIVED')?.id || ''; writeRoute(tab, { projectId, courseId, classId: '', taskId: '' }); }}>
           {(workspaceState.projects || []).map((item) => <option value={item.id} key={item.id}>{item.code} · {item.name}</option>)}
         </select></label><span>›</span>
@@ -561,7 +564,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
       <main className={`workspace workspace-${tab}`}>
         {syncError && <div className="sync-error" role="alert"><span>{syncError}</span><button type="button" onClick={() => void loadWorkspace()}>Tải lại</button></div>}
         {syncState === 'synced' && !activeProject && <div className="sync-error scope-empty" role="status"><span>Bạn chưa được phân công vào khóa học nào trong dự án này. Quản lý ekip cần gán vai trò theo khóa trước khi bạn có thể xem input hoặc công việc.</span></div>}
-        {role !== 'intake' && tab !== 'accounts' && !(role === 'content' && tab === 'inputs') && !(tab === 'change' && changeOpen) && <><section className="project-head"><div><div className="eyebrow"><span className="status-dot"></span>{activeCourse?.status || 'DECLARED'} · SCOPE V{activeScope?.version || 1}</div><h1>{activeProject?.name}</h1><p>{activeProject?.customerName} · {(workspaceState.courses || []).filter((item) => item.projectId === activeProject?.id).length} khóa học · {String((workspaceState.classes || []).filter((item) => item.projectId === activeProject?.id).length).padStart(2, '0')} lớp · {formatDate(activeProject?.startDate)} — {formatDate(activeProject?.deadline)}</p></div><div className="head-actions">{role === 'operations' && <button onClick={() => { setShowCreate(true); setCreateStep(1); }}>+ Tạo dự án</button>}{['operations', 'intake'].includes(role) && tab !== 'change' && <button className="primary" onClick={() => { setTab('change'); setChangeOpen(true); }}>+ Yêu cầu thay đổi</button>}</div></section></>}
+        {role !== 'intake' && !['accounts', 'team'].includes(tab) && !(role === 'content' && tab === 'inputs') && !(tab === 'change' && changeOpen) && <><section className="project-head"><div><div className="eyebrow"><span className="status-dot"></span>{activeCourse?.status || 'DECLARED'} · SCOPE V{activeScope?.version || 1}</div><h1>{activeProject?.name}</h1><p>{activeProject?.customerName} · {(workspaceState.courses || []).filter((item) => item.projectId === activeProject?.id).length} khóa học · {String((workspaceState.classes || []).filter((item) => item.projectId === activeProject?.id).length).padStart(2, '0')} lớp · {formatDate(activeProject?.startDate)} — {formatDate(activeProject?.deadline)}</p></div><div className="head-actions">{role === 'operations' && <button onClick={() => { setShowCreate(true); setCreateStep(1); }}>+ Tạo dự án</button>}{['operations', 'intake'].includes(role) && tab !== 'change' && <button className="primary" onClick={() => { setTab('change'); setChangeOpen(true); }}>+ Yêu cầu thay đổi</button>}</div></section></>}
 
         {toast && <div className="toast" role="status">{toast}</div>}
         {tab === 'overview' && (
@@ -603,10 +606,12 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
         />}
         {tab === 'team' && role === 'operations' && <CourseTeamWorkspace
           course={activeCourse}
+          courses={projectCourses}
           directory={accountDirectory.length ? accountDirectory : directory}
           assignments={workspaceState.teamAssignments || []}
           assignCourseRole={assignCourseRole}
           removeCourseRole={removeCourseRole}
+          onSelectCourse={(courseId) => writeRoute('team', { projectId: activeProject?.id, courseId, classId: '', taskId: '' })}
         />}
         {tab === 'inputs' && <Inputs role={role} activeCourse={activeCourse} courses={projectCourses} inputs={inputs} inputRecords={projectInputs} courseInputProgress={workspaceState.courseInputProgress || []} tasks={tasks} classes={projectClasses} uploadStep={uploadStep} setUploadStep={setUploadStep} submitInput={submitInput} onSelectCourse={(courseId) => writeRoute('inputs', { projectId: activeProject?.id, courseId, classId: '', taskId: '' })}/>}
         {tab === 'tasks' && <LayeredTasks role={role} tasks={contextTasks} classes={classes} directory={directory} teamAssignments={workspaceState.teamAssignments || []} directoryLoading={syncState === 'loading'} actor={actor} project={activeProject} course={activeCourse} routeContext={routeContext} onNavigate={navigateWork} selectedTask={contextSelectedTask} setSelectedTaskId={setSelectedTaskId} updateTask={updateTask} createClassTask={createClassTask} moveClassTask={moveClassTask} archiveTask={archiveTask} assignTasks={assignTasks} toggleChecklist={toggleChecklist}/>}
@@ -906,34 +911,66 @@ const RoleSummaryText = {
   vtraining: 'Vận hành lớp trên VTraining', manager: 'Nhận nhóm và giao việc', member: 'Thực hiện task được giao',
 };
 
+const CourseRoleScopeText = {
+  intake: 'Nộp D03a, D03b',
+  content: 'Nộp D04 – D09',
+  vtraining: 'Thiết lập riêng, cấu hình việc',
+  manager: 'Giao việc, xác nhận, duyệt và xử lý tác động input',
+  member: 'Thực hiện công việc được giao',
+};
+
 function normalizeSearchText(value) {
   return String(value || '').trim().toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
 }
 
 function RoleSummary({ role }) { const copy = { operations: ['Giao nhóm việc cho Quản lý ekip', 'Duyệt yêu cầu trước khi tạo task'], intake: ['Chỉ nộp danh sách theo từng lớp', 'Tạo yêu cầu thay đổi, không tự tạo task'], content: ['Nộp 5 nhóm input nội dung', 'Theo dõi phiên bản độc lập'], vtraining: ['Theo dõi 03 nhóm VTraining', 'Tùy chỉnh checklist và deadline'], manager: ['Nhận nhóm việc và giao CTV', 'Xác nhận PASS / REWORK'], member: ['Thực hiện checklist chi tiết', 'Gửi yêu cầu xác nhận hoàn thành'] }[role]; return <ul className="role-summary">{copy.map((item) => <li key={item}>{item}</li>)}</ul>; }
 
-function CourseTeamWorkspace({ course, directory, assignments, assignCourseRole, removeCourseRole }) {
+function CourseTeamWorkspace({ course, courses = [], directory, assignments, assignCourseRole, removeCourseRole, onSelectCourse }) {
   const [accountId, setAccountId] = useState('');
   const [courseRole, setCourseRole] = useState('member');
+  const [assignmentOpen, setAssignmentOpen] = useState(false);
   const courseAssignments = assignments
     .filter((item) => item.courseId === course?.id && item.status !== 'ARCHIVED')
     .sort((a, b) => Number(a.role !== 'manager') - Number(b.role !== 'manager') || String(a.accountName).localeCompare(String(b.accountName), 'vi'));
+  const courseRoles = TRAINING_ROLE_OPTIONS.filter(([value]) => value !== 'operations');
 
-  useEffect(() => { setAccountId(''); }, [course?.id]);
+  useEffect(() => { setAccountId(''); setAssignmentOpen(false); }, [course?.id]);
+
+  function openAssignment(role = 'member') {
+    setCourseRole(role);
+    setAccountId('');
+    setAssignmentOpen(true);
+  }
 
   async function submitAssignment() {
     const person = directory.find((item) => item.id === accountId);
     if (!person || !course?.id) return;
     const response = await assignCourseRole({ courseId: course.id, accountId: person.id, accountName: person.name, accountEmail: person.email, role: courseRole });
-    if (response) setAccountId('');
+    if (response) {
+      setAccountId('');
+      setAssignmentOpen(false);
+    }
   }
 
   if (!course) return <section className="card full"><div className="empty"><strong>Chưa có khóa học</strong><p>Chọn dự án và khóa học trước khi gán vai trò.</p></div></section>;
-  return <section className="card full course-team-workspace">
-    <div className="page-title"><div><small>QUẢN LÝ · VAI TRÒ THEO KHÓA</small><h2>Gán vai trò theo khóa học</h2><p>Gán hoặc gỡ vai trò trong phạm vi {course.code} · {course.name}. Tài khoản gốc không bị xóa khi gỡ khỏi khóa.</p></div><span className="queue-count">{courseAssignments.length}</span></div>
-    <div className="course-role-assignment course-role-assignment-page"><div><strong>Gán vai trò cho thành viên</strong><small>Mỗi khóa có một Quản lý ekip đang chịu trách nhiệm xác nhận công việc.</small></div><label><span>Tài khoản</span><select aria-label="Tài khoản nhận vai trò trong khóa" value={accountId} onChange={(event) => setAccountId(event.target.value)}><option value="">Chọn tài khoản</option>{directory.map((item) => <option value={item.id} key={item.id}>{item.name}</option>)}</select></label><label><span>Vai trò</span><select aria-label="Vai trò trong khóa" value={courseRole} onChange={(event) => setCourseRole(event.target.value)}>{TRAINING_ROLE_OPTIONS.filter(([value]) => value !== 'operations').map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label><button type="button" className="primary" disabled={!accountId} onClick={() => void submitAssignment()}>Gán vai trò</button></div>
-    <div className="course-team-heading"><div><h3>Thành viên đang hoạt động</h3><p>Quản lý ekip được đồng bộ làm Người xác nhận cho các công việc của khóa.</p></div><span>{courseAssignments.length} vai trò</span></div>
-    {courseAssignments.length ? <div className="course-team-list course-team-list-page">{courseAssignments.map((item) => <div className="course-team-row" key={item.id}><div><b>{item.accountName}</b><small>{item.accountEmail || item.accountId}</small></div><span>{TRAINING_ROLE_OPTIONS.find(([value]) => value === item.role)?.[1] || item.role}</span><button type="button" className="danger-action" aria-label={`Gỡ ${item.accountName} khỏi khóa`} onClick={() => void removeCourseRole(item)}><Trash2 size={14}/>Gỡ khỏi khóa</button></div>)}</div> : <p className="course-team-empty">Khóa học chưa có thành viên được gán vai trò.</p>}
+  return <section className="course-access-workspace">
+    <header className="course-access-hero">
+      <div><small>COURSE ACCESS</small><h1>Gán vai trò theo khóa học</h1><p>Quản lý tập trung người tham gia và quyền của từng khóa. Người xác nhận công việc được lấy trực tiếp từ vai trò Quản lý ekip.</p></div>
+      <label><span>Khóa học</span><select aria-label="Chọn khóa học để gán vai trò" value={course.id} onChange={(event) => onSelectCourse?.(event.target.value)}>{courses.map((item, index) => <option value={item.id} key={item.id}>{index + 1}.1 · {item.code} · {item.name}</option>)}</select></label>
+    </header>
+    <div className="card course-access-surface">
+      <div className="course-access-surface-head"><div><small>COURSE ACCESS</small><h2>{course.code} · {course.name}</h2><p>Thêm hoặc gỡ tài khoản ngay trên từng vai trò. Thay đổi được đồng bộ vào dữ liệu vận hành.</p></div><button type="button" className="primary" onClick={() => openAssignment()}>+ Gán vai trò</button></div>
+      <p className="course-access-rule"><b>Luồng đồng nhất:</b> tài khoản đầu tiên ở vai trò Quản lý ekip là Người xác nhận hiển thị trong chi tiết công việc của khóa này.</p>
+      <div className="course-access-table-wrap"><table className="course-access-table"><thead><tr><th>Vai trò</th><th>Tài khoản</th><th>Phạm vi và quyền</th><th>Trạng thái</th><th></th></tr></thead><tbody>{courseRoles.map(([roleValue, roleLabel]) => {
+        const roleAssignments = courseAssignments.filter((item) => item.role === roleValue);
+        return <tr key={roleValue}><td><b>{roleLabel}</b></td><td>{roleAssignments.length ? <div className="course-role-members">{roleAssignments.map((item) => <span className="course-role-member" key={item.id}>{item.accountName}<button type="button" aria-label={`Gỡ ${item.accountName} khỏi vai trò ${roleLabel}`} title="Gỡ khỏi vai trò" onClick={() => void removeCourseRole(item)}><X size={11} aria-hidden="true" /></button></span>)}</div> : <span className="course-role-empty">Chưa gán tài khoản</span>}</td><td>Theo khóa · {CourseRoleScopeText[roleValue]}</td><td><span className={`course-role-status ${roleAssignments.length ? 'active' : 'missing'}`}>{roleAssignments.length ? 'Đang hoạt động' : 'Cần bổ sung'}</span></td><td><button type="button" className="course-role-add" onClick={() => openAssignment(roleValue)}>+ Thêm tài khoản</button></td></tr>;
+      })}</tbody></table></div>
+    </div>
+    {assignmentOpen && renderTrainingOverlay(<div className="modal-backdrop course-role-dialog-backdrop" onMouseDown={() => setAssignmentOpen(false)}><section className="modal course-role-dialog" role="dialog" aria-modal="true" aria-labelledby="course-role-dialog-title" onMouseDown={(event) => event.stopPropagation()}>
+      <div className="modal-head"><div><small>COURSE ACCESS</small><h2 id="course-role-dialog-title">Gán vai trò trong khóa học</h2></div><button type="button" aria-label="Đóng popup gán vai trò" onClick={() => setAssignmentOpen(false)}><X size={16} aria-hidden="true" /></button></div>
+      <div className="course-role-dialog-body"><label className="wide">Khóa học<input value={`${course.code} · ${course.name}`} disabled/></label><label>Tài khoản<select aria-label="Tài khoản nhận vai trò trong khóa" value={accountId} onChange={(event) => setAccountId(event.target.value)}><option value="">Chọn tài khoản</option>{directory.map((item) => <option value={item.id} key={item.id}>{item.name} · {item.email || item.id}</option>)}</select></label><label>Vai trò<select aria-label="Vai trò trong khóa" value={courseRole} onChange={(event) => setCourseRole(event.target.value)}>{courseRoles.map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label><p>Nếu tài khoản đã có vai trò này, hệ thống giữ nguyên và không tạo bản ghi trùng.</p></div>
+      <div className="modal-actions"><button type="button" onClick={() => setAssignmentOpen(false)}>Hủy</button><button type="button" className="primary" disabled={!accountId} onClick={() => void submitAssignment()}>Gán vai trò</button></div>
+    </section></div>)}
   </section>;
 }
 
