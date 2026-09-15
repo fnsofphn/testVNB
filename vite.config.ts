@@ -213,7 +213,14 @@ export default defineConfig(({ mode }) => {
       },
     },
     server: {
+      fs: {
+        deny: ['.env', '.env.*', '*.{crt,pem}', '**/.git/**', '**/.cache/**', `${normalizeFilePath(path.resolve(__dirname, 'vcoaching'))}/**`],
+      },
       proxy: {
+        '/vc-api': {
+          target: 'http://127.0.0.1:8766',
+          changeOrigin: false,
+        },
         '/vuni-api': {
           target: 'https://vuniversity-api.southeastasia.cloudapp.azure.com',
           changeOrigin: true,

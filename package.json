@@ -4,6 +4,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "vcoaching:dev": "node scripts/vcoaching-dev.mjs",
+    "vcoaching:seed": "node --env-file=.env.local scripts/vcoaching-seed.mjs",
+    "test:vcoaching:seed": "node scripts/test-vcoaching-seed.mjs",
     "dev": "vite --port=3000 --host=0.0.0.0",
     "dev:stable": "powershell -ExecutionPolicy Bypass -File scripts/dev-watchdog.ps1",
     "check:text-encoding": "node scripts/check-text-encoding.mjs",

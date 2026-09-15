@@ -2,6 +2,7 @@ import { BrowserRouter, Link, Navigate, Route, Routes, useLocation, useParams } 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Suspense, lazy, useEffect, type ReactNode } from 'react';
 import { AuthProvider } from '@/contexts/AuthContext';
+const VCoachingPage = lazy(() => import('@/modules/vcoaching/VCoachingPage'));
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppSplash } from '@/components/system/AppSplash';
 import { SuniTrainingRoleLayout } from '@/components/training/SuniTrainingRoleLayout';
@@ -319,6 +320,7 @@ export default function App() {
           fallback={<AppSplash />}
         >
           <Routes>
+            <Route path="/vcoaching" element={<VCoachingPage />} />
             <Route path="/v-events/join" element={<PublicVEventPage />} />
             <Route path="/v-events/join/:code" element={<PublicVEventPage />} />
             <Route path="/v-events/present/:eventId" element={<PublicVEventPresentPage />} />
@@ -401,7 +403,6 @@ export default function App() {
                     <Route path="/vtraining/collaborators" element={<SuniTrainingRoleLayout><SuniTrainingResourcesPage kind="collaborators" /></SuniTrainingRoleLayout>} />
                     <Route path="/vtraining/learners" element={<SuniTrainingRoleLayout><SuniTrainingResourcesPage kind="learners" /></SuniTrainingRoleLayout>} />
                     <Route path="/vtraining/*" element={<Navigate to="/vtraining" replace />} />
-                    <Route path="/vcoaching" element={<VCulturePage />} />
                     <Route path="/vculture" element={<ProductPageShell product="VCulture" title="VCulture" pageKey="vculture"><VCulturePage /></ProductPageShell>} />
                     <Route path="/vculture/plx-ceo-playbook" element={<ProductPageShell product="VCulture" title="PLX CEO Playbook" pageKey="vculture"><PlxCeoPlaybookPage /></ProductPageShell>} />
                     <Route path="/vdiscussion" element={<SuniTrainingRoleLayout><VDiscussionEventsPage /></SuniTrainingRoleLayout>} />
