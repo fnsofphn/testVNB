@@ -151,6 +151,29 @@ node --env-file=.env.local scripts/test-vcoaching-admin-live.mjs
 - Cloud đã kiểm thử với Supabase thật từ backend local; còn cần người dùng deploy
   commit mới và kiểm tra đăng nhập/upload/export trên domain production thực tế.
 - Chưa kiểm thử tự động hết các thao tác UI trên mọi kích thước màn hình. Báo cáo
-  hiện là JSON. Phần chưa mapping cần chuyên viên xem và xác nhận, không tự kết luận thiếu.
+  hiển thị dạng bảng và tải xuống JSON. Phần chưa mapping cần chuyên viên xem và xác nhận, không tự kết luận thiếu.
 
 Không gọi toàn bộ sản phẩm đã nghiệm thu khi các mục trên chưa xử lý.
+
+## Giao diện theo mockup ngày 15/09/2026
+
+Nguồn đối chiếu: `D:/04. Code/Vcoaching/V-Coaching-VNPT-Rising-Mockup (1).html`.
+CSS gốc được áp dụng riêng cho V-Coaching: Arial 14 px, sidebar 185 px,
+header, banner gradient, bảng, bộ lọc, thẻ số liệu, màu sáng/tối theo hệ thống.
+Menu theo năm vai trò, Trang 00 và thanh 00–08 được nối với dữ liệu thật.
+Bước 07 giữ đúng ba ô WS1b: 7A hành vi, 7B cơ chế, 7C kết quả.
+Nhận xét có cột nguồn đối chiếu; quản lý tài khoản dùng bảng và hộp thoại;
+báo cáo, nhật ký hiển thị bảng thay cho JSON thô.
+
+Các khác biệt có chủ đích so với bản trình diễn: bỏ nhãn dữ liệu giả lập và
+menu trải nghiệm demo, giữ đăng xuất và phạm vi Admin tổng, không tạo số liệu giả.
+Bộ lọc loại đơn vị/mặt trận chưa có danh mục đã xác nhận nên chưa cho chọn;
+AI chưa cấu hình hiển thị trạng thái thực. Không dùng số liệu minh họa làm kết luận.
+
+Đã kiểm tra trên Chrome: tổng quan so cạnh mockup, danh sách ba hồ sơ CLSP thật,
+tìm kiếm không có kết quả, mở Trang 00 và trục bước 07. Console không có lỗi
+ứng dụng; còn cảnh báo deprecation lock của Supabase Auth dùng chung.
+TypeScript, kiểm tra encoding và build production đều đạt.
+Chưa xác nhận pixel-perfect toàn bộ màn hình; viewport override của extension
+không áp dụng kích thước điện thoại nên chưa ghi nhận kiểm thử mobile là pass.
+Giao diện cần được người dùng push/deploy commit mới; quyền Admin tổng đã có hiệu lực.

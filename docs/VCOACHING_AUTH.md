@@ -63,3 +63,12 @@ tạo/sửa/khóa/mở khóa/xóa tài khoản tạm, thu hồi quyền với ph
 được xóa sau kiểm thử; năm tài khoản chính được giữ.
 
 Xem `docs/VCOACHING_IMPLEMENTATION.md` để chạy ứng dụng và đọc giới hạn nghiệm thu.
+
+## Admin tổng bổ sung ngày 15/09/2026
+
+Theo yêu cầu chủ tài khoản, `phamhoainamk54@gmail.com` đã được cấp quyền
+V-Coaching Admin tổng (`role=system`, `super_admin=true`, `active=true`).
+Đã xác minh Auth khớp hồ sơ đang hoạt động trước khi cập nhật riêng
+`app_metadata.vcoaching`; giữ nguyên mật khẩu, hồ sơ và metadata module khác.
+Đã tải lại `/vcoaching` trên production và thấy Admin tổng cùng bộ chuyển vai trò,
+không còn thông báo quyền bị thu hồi. Không cần tạo lại tài khoản hoặc đổi mật khẩu.
