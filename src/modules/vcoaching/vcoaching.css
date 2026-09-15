@@ -54,8 +54,9 @@
 .vc-root .vc-steps{display:flex;gap:5px;flex-wrap:wrap;margin:16px 0}
 .vc-root .vc-steps button{min-width:54px;padding:8px 10px;color:var(--vc-blue)}
 .vc-root .vc-steps button.active{background:var(--vc-blue);color:light-dark(white,#102332)}
-.vc-root .vc-steps button.bottleneck{border-color:var(--vc-warnink);color:var(--vc-warnink)}
-.vc-root .vc-steps button.bottleneck.active{background:var(--vc-warn)}
+.vc-root .vc-steps button.needs-review{border-color:var(--vc-warnink);color:var(--vc-warnink)}
+.vc-root .vc-steps button.needs-review.active{background:var(--vc-warn)}
+.vc-root .vc-heat button.good{background:var(--vc-green);color:light-dark(#206a50,#8bddb7)}
 .vc-root .vc-steps small{display:block;font-size:11px}
 .vc-root .vc-split{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;align-items:start}
 .vc-root .quote{border-left:3px solid var(--vc-line);padding:10px 14px;background:var(--vc-bg);white-space:pre-wrap}
