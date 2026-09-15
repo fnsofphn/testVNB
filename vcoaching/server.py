@@ -152,6 +152,8 @@ def step_set(r, key):
 
 def visible_initiative(a, r, units=None):
     result = copy.deepcopy(r)
+    if re.fullmatch(r'SK-\d+',result.get('tracking_code','')):
+        result['tracking_code']=f"SK-{int(result['tracking_code'][3:]):03d}"
     # Reporting identity does not change the authorization scope on stored records.
     units=rows('unit') if units is None else units
     unit_key=lambda name: ' '.join(re.findall(r'[a-z0-9]+',re.sub(r'\([^)]*\)','',norm(name))))
@@ -599,7 +601,7 @@ def api(op=None):
         for record in sorted(all_records,key=lambda r:r['id']):
             if record.get('merged_into') or record.get('conversion_pending') or not can(a,record): continue
             if not record.get('tracking_code'):
-                sequence['value']+=1;record['tracking_code']=f"SK-{sequence['value']:06d}"
+                sequence['value']+=1;record['tracking_code']=f"SK-{sequence['value']:03d}"
             peers=[other for other in all_records if other['id']!=record['id'] and not other.get('merged_into')
                    and not other.get('conversion_pending') and other['project']==record['project']
                    and norm(other['unit_name'])==norm(record['unit_name'])

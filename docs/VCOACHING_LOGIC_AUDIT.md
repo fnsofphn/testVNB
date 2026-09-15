@@ -128,7 +128,7 @@ nhận xét hoặc nộp vẫn được bảo vệ; không tự sửa dữ liệ
 - Giao diện nhận đúng ID kết quả từ API; không liệt kê mọi sáng kiến chỉ vì cùng
   dùng file Master. Lịch sử nguồn đã tổng hợp được giữ; không xóa nguồn cũ khi
   phân tích lại một phần. Đây là cập nhật bổ sung, không phải thay thế lịch sử.
-- Thêm `tracking_code` dạng SK-000001 cấp theo bộ đếm trong giao dịch ghi chung,
+- Thêm `tracking_code` dạng SK-001 cấp theo bộ đếm trong giao dịch ghi chung,
   không đặt lại ở mỗi đợt nhập. Mã `code` trong tài liệu vẫn nguyên bản. Các số
   của hồ sơ đã ghép không được tái sử dụng; có thể có khoảng trống trong dãy số.
 - Khi phân tích, cấp mã cho hồ sơ đã công bố trong phạm vi được phép nhưng chưa
