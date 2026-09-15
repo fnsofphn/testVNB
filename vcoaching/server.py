@@ -797,14 +797,18 @@ def api(op=None):
         if not isinstance(ratings, dict) or not set(ratings) <= {'gate', 'criteria'}: raise Problem('Bộ tự đánh giá không hợp lệ')
         for group, values in ratings.items():
             if not isinstance(values, dict) or not set(values) <= {str(i) for i in range(1, 6 if group == 'gate' else 11)} or any(v not in ('Đạt', 'Chưa đạt', 'Chưa rõ', '') for v in values.values()): raise Problem('Giá trị tự đánh giá không hợp lệ')
+        bottleneck_check = body.get('bottleneck_check', {})
+        if not isinstance(bottleneck_check, dict) or (bottleneck_check and response_step != '4') or not set(bottleneck_check) <= {str(i) for i in range(1, 6)} or any(value not in ('Có', 'Không', 'Chưa rõ', '') for value in bottleneck_check.values()): raise Problem('Tự đánh giá điểm nghẽn không hợp lệ')
         response = {'id': ident(), 'at': now(), 'by': a['id'], 'agreement': body['agreement'], 'reason': reason,
                     'step': response_step, 'revisions': revisions, 'evidence': body.get('evidence', ''), 'support': body.get('support', ''), 'unclear': body.get('unclear', ''),
-                    'self_rating': ratings, 'submitted': bool(body.get('submit'))}
+                    'self_rating': ratings, 'bottleneck_check': bottleneck_check, 'submitted': bool(body.get('submit'))}
         r['responses'].append(response)
         r['status'] = 'self_review'
         if body.get('submit'):
             v = copy.deepcopy(version); v.update(number=version['number'] + 1, at=now(), confirmed=False)
-            v['revisions'].update(revisions); v['self_rating'] = ratings; r['versions'].append(v); r['status'] = 'submitted'
+            v['revisions'].update(revisions); v['self_rating'] = ratings
+            if response_step == '4': v['bottleneck_check'] = bottleneck_check
+            r['versions'].append(v); r['status'] = 'submitted'
             if response_step:
                 r['submitted_steps'] = sorted(set(r.get('submitted_steps', [])) | {response_step})
                 r['status'] = 'submitted' if step_set(r,'released_steps') <= set(r['submitted_steps']) else 'self_review'

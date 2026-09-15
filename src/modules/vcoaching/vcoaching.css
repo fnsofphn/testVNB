@@ -41,6 +41,11 @@
 .vc-root .good{background:var(--vc-green);color:light-dark(#206a50,#8bddb7)}
 .vc-root .vc-info{background:var(--vc-soft);border-left:3px solid var(--vc-blue);padding:12px 15px;margin:12px 0;border-radius:4px}
 .vc-root .vc-info.warn{background:var(--vc-warn);border-color:var(--vc-warnink);color:var(--vc-warnink)}
+.vc-root .vc-bottleneck-questions{background:var(--vc-panel);border:1px solid var(--vc-line);border-radius:11px;padding:16px 18px;margin:14px 0}
+.vc-root .vc-bottleneck-questions ol{padding-left:23px;margin:10px 0 0}
+.vc-root .vc-bottleneck-questions li{padding:4px 0}
+.vc-root .vc-bottleneck-check{border-bottom:1px solid var(--vc-line);padding-bottom:16px;margin-bottom:16px}
+.vc-root .vc-bottleneck-check label{display:block;margin-top:12px}
 .vc-root .vc-table{overflow-x:auto}
 .vc-root .vc-layer table{table-layout:fixed;min-width:680px}
 .vc-root .vc-layer th:first-child{width:44px}

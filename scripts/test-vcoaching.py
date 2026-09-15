@@ -98,6 +98,23 @@ class Workflow(unittest.TestCase):
   self.request('respond',role='unit',step='2',agreement='agree',revisions={'2':'Bản sửa 2'},submit=True)
   self.assertEqual(s.get(self.iid)['status'],'submitted')
   self.assertEqual(s.get(self.iid)['versions'][-1]['revisions'],{'1':'Bản sửa 1','2':'Bản sửa 2'})
+ def test_bottleneck_self_assessment_is_saved_with_step_four(self):
+  self.request('edit',reason='Đối chiếu',resolve_issues=True)
+  self.request('confirm',reason='Đủ căn cứ')
+  item=s.get(self.iid); item['experts']=['expert']; item['comments']=[]; s.put('initiative',item)
+  self.request('comment',role='expert',step='4',problem='Điểm nghẽn cần soi',why='Căn cứ nguồn',question='Điều gì lặp lại?',internal=False)
+  comment=s.get(self.iid)['comments'][-1]
+  self.request('review',role='expert',comment_id=comment['id'],state='approved',internal=False)
+  self.request('lock',role='expert',step='4')
+  self.request('release',role='project',step='4')
+  revisions={'4':'Đơn vị bổ sung điểm nghẽn'}
+  self.request('respond',role='unit',step='4',agreement='agree',revisions=revisions,bottleneck_check={'1':'Có','2':'Chưa rõ'},submit=False)
+  self.assertEqual(s.get(self.iid)['responses'][-1]['bottleneck_check'],{'1':'Có','2':'Chưa rõ'})
+  self.request('respond',role='expert',step='4',agreement='agree',revisions=revisions,bottleneck_check={'1':'Có'},status=403)
+  self.request('respond',role='unit',step='4',agreement='agree',revisions=revisions,bottleneck_check={'6':'Có'},status=400)
+  self.request('respond',role='unit',step='4',agreement='agree',revisions=revisions,bottleneck_check={'1':'Có','2':'Không','3':'Có','4':'Có','5':'Có'},submit=True)
+  self.assertEqual(s.get(self.iid)['versions'][-1]['bottleneck_check']['2'],'Không')
+  self.request('respond',role='unit',step='4',agreement='agree',revisions=revisions,bottleneck_check={'1':'Có'},status=400)
  def test_extraction_correction_preserves_original_and_scope(self):
   r=s.get(self.iid); b=r['versions'][-1]['blocks'][0]; original=b['text']
   self.request('edit',reason='Sửa lỗi trích xuất theo nguồn',corrections={b['id']:'Đã đối chiếu'})
