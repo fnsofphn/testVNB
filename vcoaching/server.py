@@ -177,42 +177,23 @@ def add_candidate(c, file):
     scope = {'project': file['project'], 'unit': file['unit']}
     existing = [r for r in rows('initiative') if not r.get('merged_into') and r['project'] == file['project'] and r['unit'] == file['unit']
                 and business_code(r['code']) == business_code(c['code']) and c['code']]
-    def title_key(name):
-        value = norm(name).rstrip('.')
-        # Only trim an explicitly declared unit alias, e.g. '(Ban PTTT)'.
-        import re
-        for alias in re.findall(r'\(([^)]+)\)', c['unit_name']):
-            prefix = norm(alias) + ' '
-            if value.startswith(prefix): value = value[len(prefix):]
-        return value
-    exact = [r for r in existing if title_key(r['name']) == title_key(c['name'])]
-    if len(exact) == 1 and not c['issues'] and exact[0]['status']=='pending' and not exact[0].get('released') and not exact[0]['versions'][-1].get('revisions') and not any(cm.get('rule')=='EXPERT' and not cm.get('stale') for cm in exact[0]['comments']):
-        r = exact[0]
-        old = r['versions'][-1]
-        fields = {s: old['fields'][s] + c['fields'][s] for s in STEPS}
-        r['versions'].append(new_version(old['blocks'] + c['blocks'], fields, old['number'] + 1))
-        r['files'] = list(dict.fromkeys(r['files'] + [file['id']]))
-        r['forms'] = list(dict.fromkeys(r['forms'] + [c['form']]))
-        r['issues'] = list(dict.fromkeys(r['issues'] + ['sources_need_comparison']))
-        for cm in r['comments']: cm['stale'] = True
-        r['status'], r['released'] = 'pending', False
-        r['locked_steps'], r['released_steps'], r['submitted_steps'] = [], [], []
-    else:
-        issues = c['issues'] + (['code_conflict'] if existing else [])
-        r = {'id': c['id'], 'type': 'initiative', **scope, 'name': c['name'], 'code': c['code'],
-             'unit_name': c['unit_name'] or get(file['unit'])['name'], 'source_unit_name': c['unit_name'],
-             'files': [file['id']], 'forms': [c['form']], 'issues': issues, 'experts': [],
-             'status': 'pending', 'released': False, 'comments': [], 'responses': [],
-             'versions': [new_version(c['blocks'], c['fields'])], 'test_fixture': False}
+    issues = c['issues'] + (['code_conflict'] if existing else [])
+    r = {'id': c['id'], 'type': 'initiative', **scope, 'name': c['name'], 'code': c['code'],
+         'unit_name': c['unit_name'] or get(file['unit'])['name'], 'source_unit_name': c['unit_name'],
+         'files': [file['id']], 'forms': [c['form']], 'issues': issues, 'experts': [],
+         'status': 'pending', 'released': False, 'comments': [], 'responses': [],
+         'versions': [new_version(c['blocks'], c['fields'])], 'test_fixture': False, 'conversion_pending': True}
     r['comments'].extend(rules(r))
     put('initiative', r)
     return r['id']
 
 
-def reconcile_sources(project, unit):
-    if any(f['project']==project and f['unit']==unit and f['status'] in ('queued','reading') for f in rows('file')):
+def reconcile_sources(project, unit, selected_ids=None):
+    selected_ids = set(selected_ids) if selected_ids is not None else None
+    if any((selected_ids is None or f['id'] in selected_ids) and f['project']==project and f['unit']==unit and f['status'] in ('queued','reading') for f in rows('file')):
         return False
     candidates = [r for r in rows('initiative') if r['project']==project and r['unit']==unit
+                  and (selected_ids is None or set(r['files']) <= selected_ids)
                   and not r.get('merged_into') and not r.get('released') and r['status']=='pending'
                   and not r['versions'][-1].get('revisions')
                   and not any(c.get('rule')=='EXPERT' and not c.get('stale') for c in r['comments'])]
@@ -232,7 +213,7 @@ def reconcile_sources(project, unit):
             source = get(rid, 'initiative'); source['merged_into'] = combined['id']; put('initiative', source)
         put('initiative', combined)
     for f in rows('file'):
-        if f['project']==project and f['unit']==unit and f.get('progress') and not f.get('attachment') and f['status'] not in ('uploading','queued','reading','error'):
+        if (selected_ids is None or f['id'] in selected_ids) and f['project']==project and f['unit']==unit and f.get('progress') and not f.get('attachment') and f['status'] not in ('uploading','queued','reading','error'):
             for phase in ('merge','check'): f['progress'][phase]={'status':'done','at':now()}
             f['progress']['result']={'status':'done' if f['status']=='parsed' else 'partial','at':now()}
             put('file',f)
@@ -285,10 +266,9 @@ def process_file(file):
                         r['comments'] = [c for c in r['comments'] if c['rule'] not in ('EMPTY_LAYER_V1', 'BASELINE_REVIEW_V1', 'OWNER_V1')]
                         put('initiative', r)
                 put('file', file)
-                reconciled = reconcile_sources(file['project'], file['unit'])
-                file['progress']['merge'] = {'status':'done' if reconciled else 'waiting','at':now()}
-                file['progress']['check'] = {'status':'done','at':now()}
-                file['progress']['result'] = {'status':('done' if file['status']=='parsed' else 'partial') if reconciled else 'waiting','at':now()}
+                # Extraction is ready; synthesis starts with the selected input set.
+                for phase in ('merge','check','result'):
+                    file['progress'][phase] = {'status':'awaiting_selection','at':now()}
                 put('file',file)
                 DB.execute('COMMIT')
             except Exception:
@@ -463,7 +443,7 @@ def api(op=None):
         put('config', item); audit(a, 'config', item, before=previous, after=item)
         return jsonify(ok=True)
     if op == 'workspace':
-        initiatives = [visible_initiative(a, r) for r in rows('initiative') if not r.get('merged_into') and can(a, r)]
+        initiatives = [visible_initiative(a, r) for r in rows('initiative') if not r.get('merged_into') and not r.get('conversion_pending') and can(a, r)]
         search = norm(request.args.get('q', ''))
         if search: initiatives = [r for r in initiatives if search in norm(r['name'] + ' ' + r['code'])]
         files = [f for f in rows('file') if can(a, f)]
@@ -559,7 +539,7 @@ def api(op=None):
         return jsonify(ok=True)
     if op == 'report':
         require(a, ('project','system'))
-        records = [r for r in rows('initiative') if not r.get('merged_into') and can(a, r)]
+        records = [r for r in rows('initiative') if not r.get('merged_into') and not r.get('conversion_pending') and can(a, r)]
         report = {'at': now(), 'scope': a['projects'], 'total': len(records),
                   'items': [{'code': r['code'], 'name': r['name'], 'unit': r['unit_name'], 'status': r['status'],
                              'versions': len(r['versions']), 'confirmed': r['versions'][-1]['confirmed'],
@@ -578,8 +558,11 @@ def api(op=None):
         files = [scoped(a, fid, 'file') for fid in ids]
         if any(f['status'] in ('uploading','queued','reading') for f in files): raise Problem('Tài liệu đang được xử lý',409)
         for project, unit in {(f['project'],f['unit']) for f in files}:
-            if not reconcile_sources(project,unit): raise Problem('Đang chờ các tệp còn lại của đơn vị được xử lý',409)
+            if not reconcile_sources(project,unit,ids): raise Problem('Đang chờ các tệp còn lại của đơn vị được xử lý',409)
         records = [r for r in rows('initiative') if not r.get('merged_into') and can(a,r) and set(r['files']) & set(ids)]
+        for record in records:
+            if not set(record['files']) <= set(ids): raise Problem('Hồ sơ đã tổng hợp chứa tệp khác; chọn đủ các tệp nguồn của hồ sơ để phân tích lại',409)
+            record['conversion_pending']=False; put('initiative',record)
         audit(a, 'convert_sources', after={'files':ids,'initiatives':[r['id'] for r in records]})
         return jsonify(initiatives=[r['id'] for r in records])
     if op == 'mapped-export':

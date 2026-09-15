@@ -67,3 +67,19 @@ của người dùng: chỉ dùng màu cảnh báo khi có trạng thái cần k
    của commit mới; build đạt không chứng minh production hoạt động đầy đủ.
 
 Không khẳng định hoàn thiện 100% logic mockup hoặc mọi loại tài liệu.
+
+## Điều chỉnh bộ tài liệu đầu vào và tên sáng kiến
+
+- Tải lên chỉ đọc/trích xuất; người dùng chọn tệp đã tải trong cùng đơn vị rồi
+  bấm **Phân tích & tổng hợp**. Bản trích xuất mới chưa hiện trong Sáng kiến.
+- Tổng hợp chỉ xét các tệp được chọn, không lấy tệp khác của đơn vị. Hồ sơ đã
+  tổng hợp trước đó chứa thêm tệp thì yêu cầu chọn đủ nguồn, không lặng lẽ dùng
+  tệp ngoài lựa chọn. Không sửa bản đã được nhận xét/nộp.
+- Ghép được cả nhiều bản tổng hợp hoặc nhiều bản chi tiết không có Mẫu 01.
+  Chuẩn hóa dấu/ký tự, các viết tắt CSKH/CNTT/KH/DN/NL/CBNV; hỗ trợ chữ cái đầu
+  của toàn tên. Tên gần giống phải có nội dung tương đồng; tên số khác, khác
+  đơn vị hoặc nhiều nhóm phù hợp không tự ghép theo chuỗi nối tiếp.
+- Không phải mô hình hiểu mọi cách diễn đạt: viết tắt lạ hoặc tên đổi hoàn toàn
+  vẫn có thể chưa ghép được. Nguồn gốc/khác biệt được giữ, không bịa nội dung.
+- 17 kiểm thử nghiệp vụ đạt, gồm phạm vi tệp chọn, chạy lại không nhân phiên bản,
+  tên viết tắt/sai dấu, chi tiết không có master và bộ tài liệu thật.

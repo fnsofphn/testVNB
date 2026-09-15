@@ -316,25 +316,43 @@ def rules(record):
 
 def mapped_outputs(records):
     """Build export-only projections; never overwrite reviewed or source records."""
+    from difflib import SequenceMatcher
     def title(r):
-        return norm(re.split(r'\n\s*Phạm vi', r['name'], flags=re.I)[0]).rstrip('.')
-    def anchor(r): return re.split(r'\s+[–—-]\s+', title(r))[0]
+        text = norm(re.split(r'\n\s*Phạm vi', r['name'], flags=re.I)[0]).rstrip('.')
+        aliases = {'cskh':'cham soc khach hang','cntt':'cong nghe thong tin','kh':'khach hang',
+                   'dn':'doanh nghiep','nl':'nhan luc','cbnv':'can bo nhan vien'}
+        return ' '.join(aliases.get(w,w) for w in re.findall(r'[a-z0-9]+',text))
+    def anchor(r): return norm(re.split(r'\s+[–—-]\s+', r['name'])[0])
     def related(a, b):
-        return (a['project'], a['unit']) == (b['project'], b['unit']) and (
-            title(a) == title(b) or len(anchor(a).split()) >= 2 and anchor(a) == anchor(b))
-    masters = [r for r in records if 'master' in r['forms']]
-    groups = {r['id']: [r] for r in masters}
-    for r in records:
-        if r in masters: continue
-        matches = [m for m in masters if related(m, r)]
-        if len(matches) == 1: groups[matches[0]['id']].append(r)
-        else: groups[r['id']] = [r]
+        if (a['project'],a['unit']) != (b['project'],b['unit']): return False
+        x,y=title(a),title(b)
+        if not x or not y: return False
+        if x==y: return True
+        if re.findall(r'\d+',x)!=re.findall(r'\d+',y): return False
+        if len(anchor(a).split())>=2 and anchor(a)==anchor(b): return True
+        # Acronyms must represent the whole title, not a generic shared keyword.
+        initials=lambda t: ''.join(w[0] for w in t.split())
+        if len(x)>=4 and ' ' not in x and x==initials(y): return True
+        if len(y)>=4 and ' ' not in y and y==initials(x): return True
+        if min(len(x.split()),len(y.split()))<4: return False
+        ratio=SequenceMatcher(None,x,y).ratio()
+        def content(r):
+            return set(re.findall(r'[a-z0-9]+', norm(' '.join(v['text'] for v in r['versions'][-1]['blocks'] if len(v['text'])>30))))
+        u,v=content(a),content(b)
+        overlap=len(u&v)/max(1,len(u|v))
+        return ratio>=0.94 and overlap>=0.35 or ratio>=0.82 and overlap>=0.65
+    # Match against every member: do not join separate initiatives via a vague bridge.
+    groups = {}
+    for r in sorted(records,key=lambda r: ('master' not in r['forms'],r['id'])):
+        matches=[key for key,items in groups.items() if all(related(item,r) for item in items)]
+        if len(matches)==1: groups[matches[0]].append(r)
+        else: groups[r['id']]=[r]
     result = []
     for group in groups.values():
         r = deepcopy(group[0]); v = r['versions'][-1]
         notes = ['Nội dung được tự ánh xạ từ nguồn; các ô không có thông tin được để trống.']
         if len(group) > 1:
-            notes.append('Tổng hợp theo tên chủ đề sáng kiến; mã/tên hiển thị theo Mẫu 01. Danh tính và nội dung từng nguồn được giữ trong phụ lục.')
+            notes.append('Tổng hợp theo tên chủ đề sáng kiến; ưu tiên mã/tên trong Mẫu 01 nếu có. Danh tính và nội dung từng nguồn được giữ trong phụ lục.')
         for other in group[1:]:
             ov = other['versions'][-1]
             v['blocks'].extend(deepcopy(ov['blocks']))

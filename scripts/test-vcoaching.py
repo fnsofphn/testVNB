@@ -193,8 +193,9 @@ class Workflow(unittest.TestCase):
   done=s.get('source','file')
   self.assertEqual(done['status'],'parsed')
   self.assertEqual(done['progress']['extract']['status'],'done')
-  self.assertEqual(done['progress']['merge']['status'],'waiting')
-  self.request('convert',files=['source'],status=409)
+  self.assertEqual(done['progress']['merge']['status'],'awaiting_selection')
+  self.request('convert',files=['source','waiting'],status=409)
+  self.request('convert',files=['source'])
   waiting['status']='error'; s.put('file',waiting)
   self.request('convert',files=['source'])
   self.assertEqual(s.get('source','file')['progress']['result']['status'],'done')
@@ -219,11 +220,40 @@ class Workflow(unittest.TestCase):
   self.assertEqual(next(r for r in results if r['unit']=='other-unit')['files'],['other-file'])
   self.assertEqual(set(next(r for r in results if r['unit']==master['unit'])['files']),set(master['files']+['detail-file']))
   duplicate=copy.deepcopy(master); duplicate['id']='ambiguous-master'
-  self.assertEqual(len(mapped_outputs([master,duplicate,detail])),3)
+  self.assertEqual(len(mapped_outputs([master,duplicate,detail])),1)
   f=s.get('source','file'); f['status']='reading'; s.put('file',f)
   with patch.object(s,'actor',return_value=who('unit')):
    response=self.client.get('/vc-api/mapped-export?files=source')
   self.assertEqual(response.status_code,409)
+ def test_selected_files_only_and_repeat_conversion(self):
+  original=s.get(self.iid)
+  selected=copy.deepcopy(original); selected.update(id='selected',files=['selected-file'],forms=['detail'])
+  unselected=copy.deepcopy(original); unselected.update(id='unselected',files=['unselected-file'],forms=['detail'])
+  for r in (selected,unselected):
+   for block in r['versions'][-1]['blocks']: block['id']=r['id']+block['id']
+   s.put('initiative',r)
+   s.put('file',{**s.get('source','file'),'id':r['files'][0]})
+  before=s.get('unselected')
+  self.request('convert',files=['source','selected-file'])
+  active=[r for r in s.rows('initiative') if not r.get('merged_into') and not r.get('conversion_pending')]
+  self.assertEqual(len(active),1)
+  self.assertEqual(set(active[0]['files']),{'source','selected-file'})
+  self.assertEqual(s.get('unselected'),before)
+  version=active[0]['versions'][-1]['number']
+  self.request('convert',files=['source','selected-file'])
+  self.assertEqual(s.get(active[0]['id'])['versions'][-1]['number'],version)
+  self.request('convert',files=['source'],status=409)
+ def test_abbreviations_typos_and_detail_only_grouping(self):
+  base=s.get(self.iid); base.update(forms=['detail'],name='Nâng cao chất lượng chăm sóc khách hàng doanh nghiệp')
+  alias=copy.deepcopy(base); alias.update(id='alias',files=['alias-file'],name='Nâng cao chất lượng CSKH DN')
+  typo=copy.deepcopy(base); typo.update(id='typo',files=['typo-file'],name='Nâng cao chất lương chăm sóc khách hàng doanh nghiệp')
+  self.assertEqual(len(mapped_outputs([base,alias,typo])),1)
+  different=copy.deepcopy(base); different.update(id='different',name='Nâng cao chất lượng đào tạo nhân lực')
+  self.assertEqual(len(mapped_outputs([base,different])),2)
+  other=copy.deepcopy(alias); other.update(id='other',unit='another-unit')
+  self.assertEqual(len(mapped_outputs([base,other])),2)
+  numbered=copy.deepcopy(base); numbered.update(id='numbered',name=base['name']+' 2')
+  self.assertEqual(len(mapped_outputs([base,numbered])),2)
  def test_fresh_grant_and_switch_rejects_forgery(self):
   user={'id':'admin','email':'admin@test.invalid','app_metadata':{'vcoaching':{'active':True,'role':'system','super_admin':True,'projects':[],'units':[]}}}
   def auth(path,**kwargs):
@@ -264,7 +294,7 @@ class Corpus(unittest.TestCase):
    s.DB.execute("DELETE FROM records WHERE kind='initiative'")
    f={'id':filename,'project':'vcoaching-test','unit':'vcoaching-test-unit','name':filename,'sha256':result['sha256']}
    for c in result['candidates']:s.add_candidate(c,f)
-   self.assertEqual(len(s.rows('initiative')),unique,filename)
+   self.assertEqual(len(mapped_outputs(s.rows('initiative'))),unique,filename)
   for p in CORPUS.rglob('*.docx'):
    if 'SK05' in p.name:
     result=parse(p)
