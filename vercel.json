@@ -9,6 +9,10 @@
   "functions": {
     "api/**/*.js": {
       "maxDuration": 60
+    },
+    "api/vcoaching.py": {
+      "maxDuration": 300,
+      "excludeFiles": "{.env*,node_modules/**,src/**,public/**,dist/**,scripts/**,docs/**,tools/**,.cache/**,.git/**,project content/**,supabase/**}"
     }
   },
   "env": {
@@ -44,6 +48,10 @@
     }
   ],
   "rewrites": [
+    {
+      "source": "/vc-api/:op",
+      "destination": "/api/vcoaching?op=:op"
+    },
     {
       "source": "/api/(.*)",
       "destination": "/api/$1"
@@ -124,5 +132,6 @@
       "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "framework": "vite"
 }

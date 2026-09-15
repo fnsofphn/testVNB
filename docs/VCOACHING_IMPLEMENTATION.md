@@ -1,5 +1,54 @@
 # V-Coaching — triển khai và kiểm chứng ngày 15/09/2026
 
+## Triển khai Vercel production
+
+Bản cloud dùng Vercel Python Function `api/vcoaching.py`, Supabase Postgres và
+bucket riêng `vcoaching-private`. Không cần chạy worker trên máy cá nhân.
+Migration `20260915050959_vcoaching_cloud_runtime.sql` đã áp dụng vào project
+Test-Vinabrain `npazlysytrqhnwezugcs` ngày 15/09/2026. Production và Preview có
+namespace riêng; không tự sao chép dữ liệu SQLite cục bộ lên cloud.
+
+Vercel project: `test-vinabrian`; domain: `https://test-vinabrain.vercel.app`.
+Đã kiểm tra trên dashboard: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
+`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` tồn tại cho Production và Preview.
+Không cần đưa service-role key vào biến `VITE_*`.
+
+**Production vẫn theo nhánh `codex/vwork-isolated`; push `main` chỉ tạo Preview.**
+Người dùng triển khai commit mới vào môi trường **Production**, có build lại
+bằng biến Production, rồi mở `/vcoaching`. Không redeploy commit lỗi `4d3f984`.
+Chưa xác minh deployment cloud mới ở trạng thái Ready vì người dùng tự deploy.
+
+- `vercel.json` giữ framework Vite, thêm rewrite `/vc-api/:op` tới Python Function.
+  Runtime Python 3.12, dependency được khóa trong requirements, template WS1b kèm repo.
+- Vercel Fluid Compute đã bật (đã xác minh trên dashboard) (Function tối đa 300 giây). Tải tệp đi trực tiếp
+  vào Supabase qua URL ký, tối đa 30 MB/tệp; không đi qua giới hạn body của Function.
+- Mỗi thao tác đọc/ghi kiểm tra Auth grant mới và scope. Client không có quyền
+  trực tiếp vào bảng cloud; RLS bật, quyền anon/authenticated bị thu hồi.
+- Kho nguồn là private, kiểm tra SHA-256 trước parse, không upsert tệp gốc.
+  Tệp xuất cũng private, trả URL ký có hạn 60 giây sau kiểm tra quyền.
+- Lease và RPC commit ghi nhiều record trong một transaction, chặn ghi đè từ
+  instance khác. Job có claim riêng; khôi phục job gián đoạn, tối đa 3 lần thử.
+- Supabase Cron `vcoaching-dispatch` kiểm tra mỗi phút, chỉ gọi Function nếu
+  có job chờ/gián đoạn. Bearer riêng nằm trong Vault. Đã cấu hình target production;
+  cron chỉ xử lý được sau khi commit cloud được deploy vào domain production.
+- Preview xử lý ngay sau upload trong trình duyệt; cron nền chỉ gắn với production.
+  Nếu đóng Preview sớm, job chờ được giữ lại nhưng chưa có lịch riêng cho Preview.
+- Đổi service-role key phải chạy lại `python scripts/vcoaching-cloud-setup.py --apply`
+  bằng cấu hình mới để cập nhật secret worker. Chạy không `--apply` để dry-run.
+
+Kiểm chứng cloud bằng `scripts/test-vcoaching-cloud.py` (bật `VCOACHING_CLOUD_TEST=1`):
+Auth thật; signed upload/download DOCX trên 5 MB; chống trùng, khôi phục job gián đoạn; đọc 3 sáng kiến CLSP; DOCX xuất đúng package;
+lease loại trừ ghi đồng thời. Dữ liệu E2E tạo trong namespace UUID riêng và dọn
+ở `finally`. Không chạy seed hoặc test Auth CRUD trên production.
+
+Advisor chỉ báo INFO `RLS Enabled No Policy` cho bảng V-Coaching: đây là thiết kế
+server-only có thu hồi quyền client; không thêm policy public để dập cảnh báo.
+Tham khảo: https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy
+
+Rollback ứng dụng: redeploy commit trước. Giữ nguyên bảng/bucket/Vault để bảo toàn
+nguồn và phiên bản; nếu cần dừng worker, pause riêng cron `vcoaching-dispatch`.
+Không drop bảng hoặc xóa bucket để rollback code.
+
 ## Chạy tại máy này
 
 Từ `D:\02. Github\02. Test-Vinabrain\testVNB`:
@@ -10,8 +59,7 @@ node scripts/vcoaching-dev.mjs
 
 Mở `http://127.0.0.1:3000/vcoaching`. Lệnh chạy Vite và worker Python tại
 `127.0.0.1:8766`; đóng trình duyệt không hủy hàng đợi. Khởi động lại worker sẽ
-phục hồi các file đang đọc dở. Đây là bản chạy cục bộ; chưa triển khai website
-Vercel. Tài khoản Auth dùng Supabase test đã được người dùng xác nhận.
+phục hồi các file đang đọc dở. Đây là chế độ phát triển cục bộ; chế độ Vercel dùng backend cloud bên trên. Tài khoản Auth dùng Supabase test đã được người dùng xác nhận.
 
 Python cần các gói trong `vcoaching/requirements.txt`. Script tự dùng Python
 bundled của Codex nếu có và thư viện tại `.cache/vcoaching-deps`. Có thể chọn
@@ -29,9 +77,9 @@ Admin giữ mật khẩu cũ. Không commit các file này. Chi tiết: `VCOACHI
 - Quản trị Auth và profile: tạo/sửa/cấp mật khẩu/khóa/mở khóa/xóa, bảo vệ Admin
   cuối cùng, giữ quyền module khác, rollback khi đồng bộ profile thất bại.
 - Danh mục chương trình/đơn vị/phiên/thư viện; phân công chuyên gia theo sáng kiến.
-- Upload nhiều DOCX/PDF, hàng đợi và dữ liệu SQLite bền vững, SHA-256, người tải,
+- Upload nhiều DOCX/PDF, hàng đợi và dữ liệu bền vững (SQLite local / Supabase cloud), SHA-256, người tải,
   thời gian, file gốc bất biến, phát hiện tải trùng trong cùng phạm vi.
-- Parse cục bộ, không gửi tài liệu cho AI hoặc lưu nội dung lên Supabase. PDF
+- Parse tại backend, không gửi tài liệu cho AI; cloud lưu nguồn riêng trên Supabase. PDF
   không đọc đủ có trạng thái OCR; tài liệu phụ trợ có phân loại riêng.
 - Tách nhiều biểu trong một file; Master/chi tiết chỉ ghép khi mã và tên khớp
   bằng quy tắc bảo thủ. Có xử lý alias đơn vị khai báo trong tài liệu. Mâu thuẫn
@@ -100,8 +148,8 @@ node --env-file=.env.local scripts/test-vcoaching-admin-live.mjs
   file URLs. Đã thử file chooser; không ghi nhận upload UI là pass. API thật pass.
 - DOCX đã kiểm tra OOXML/nội dung/package preservation, nhưng renderer báo thiếu
   `soffice.exe`. Chưa có PDF/ảnh từng trang và chưa nghiệm thu bố cục bản in.
-- Bản này cần worker và volume SQLite cục bộ. Không thể chỉ đẩy frontend lên Vercel
-  rồi dùng đủ chức năng; triển khai máy chủ/volume và TLS cần công việc riêng.
+- Cloud đã kiểm thử với Supabase thật từ backend local; còn cần người dùng deploy
+  commit mới và kiểm tra đăng nhập/upload/export trên domain production thực tế.
 - Chưa kiểm thử tự động hết các thao tác UI trên mọi kích thước màn hình. Báo cáo
   hiện là JSON. Phần chưa mapping cần chuyên viên xem và xác nhận, không tự kết luận thiếu.
 

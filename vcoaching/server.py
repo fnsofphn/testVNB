@@ -1,11 +1,13 @@
 """Persistent local worker and API. Supabase is the sole authentication authority.
 
-All application data stays on the configured local volume. No document text is
-sent to Supabase or any AI service. Run only behind the same-origin Vite proxy.
+Local mode keeps documents on disk; cloud mode uses private Supabase storage.
+No document content is sent to an AI service. Auth is checked on every request.
 """
 import base64
 import copy
 import hashlib
+import hmac
+import tempfile
 import io
 import json
 import os
@@ -20,6 +22,7 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 from flask import Flask, request, jsonify, send_file, g
+from cloud import CloudDB, CloudError
 from documents import STEPS, parse, norm, business_code, rules, export_docx, assessment_schema
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,21 +30,25 @@ for line in (ROOT / '.env.local').read_text('utf-8-sig').splitlines() if (ROOT /
     if '=' in line and not line.startswith('#'):
         key, val = line.split('=', 1)
         os.environ.setdefault(key, val.strip().strip('"'))
-DATA = Path(os.environ.get('VCOACHING_DATA_DIR', ROOT / '.cache/vcoaching/data'))
+CLOUD = os.environ.get('VERCEL') == '1' or os.environ.get('VCOACHING_CLOUD') == '1'
+DATA = Path(os.environ.get('VCOACHING_DATA_DIR', Path(tempfile.gettempdir()) / 'vcoaching' if CLOUD else ROOT / '.cache/vcoaching/data'))
 DATA.mkdir(parents=True, exist_ok=True)
 (DATA / 'sources').mkdir(exist_ok=True)
 (DATA / 'exports').mkdir(exist_ok=True)
-TEMPLATE = Path(os.environ.get('VCOACHING_WS1B_TEMPLATE', r'D:\04. Code\Vcoaching\WS1b_Phiếu thực hành_Tự soi 01 SK_VNPT TP. HCM.docx'))
-URL = os.environ.get('SUPABASE_URL', '').rstrip('/')
+TEMPLATE = Path(os.environ.get('VCOACHING_WS1B_TEMPLATE', str(ROOT / 'vcoaching/templates/WS1b.docx')))
+URL = (os.environ.get('SUPABASE_URL') or os.environ.get('VITE_SUPABASE_URL', '')).rstrip('/')
 KEY = os.environ.get('SUPABASE_SERVICE_ROLE_KEY', '')
 ROLES = {'expert': 'Giảng viên / chuyên gia', 'data': 'Chuyên viên dữ liệu',
          'project': 'Quản trị dự án', 'system': 'Quản trị hệ thống', 'unit': 'Đơn vị VNPT'}
 LOCK = threading.RLock()
-DB = sqlite3.connect(DATA / 'vcoaching.sqlite3', check_same_thread=False, isolation_level=None)
-DB.execute('PRAGMA journal_mode=WAL')
-DB.execute('PRAGMA busy_timeout=10000')
-DB.execute('CREATE TABLE IF NOT EXISTS records (id TEXT PRIMARY KEY, kind TEXT NOT NULL, data TEXT NOT NULL)')
-DB.execute('CREATE INDEX IF NOT EXISTS record_kind ON records(kind)')
+if CLOUD:
+    DB = CloudDB(URL, KEY, os.environ.get('VCOACHING_NAMESPACE') or os.environ.get('VERCEL_ENV', 'cloud-development'))
+else:
+    DB = sqlite3.connect(DATA / 'vcoaching.sqlite3', check_same_thread=False, isolation_level=None)
+    DB.execute('PRAGMA journal_mode=WAL')
+    DB.execute('PRAGMA busy_timeout=10000')
+    DB.execute('CREATE TABLE IF NOT EXISTS records (id TEXT PRIMARY KEY, kind TEXT NOT NULL, data TEXT NOT NULL)')
+    DB.execute('CREATE INDEX IF NOT EXISTS record_kind ON records(kind)')
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 80 * 1024 * 1024
 
@@ -196,10 +203,26 @@ def add_candidate(c, file):
 
 def process_file(file):
     try:
-        result = parse(DATA / 'sources' / file['stored'], file['name'])
+        if CLOUD:
+            source = DB.download(file['stored'])
+            if len(source)>30*1024*1024 or hashlib.sha256(source).hexdigest()!=file['sha256']: raise ValueError('Nội dung tệp không khớp SHA-256 hoặc vượt giới hạn')
+            path = DATA / 'sources' / (file['id'] + '-' + file['claim'] + Path(file['name']).suffix.lower())
+            path.write_bytes(source)
+        else: path = DATA / 'sources' / file['stored']
+        result = parse(path, file['name']) if not file.get('attachment') else None
         with LOCK:
             DB.execute('BEGIN IMMEDIATE')
             try:
+                if CLOUD and get(file['id'], 'file').get('claim') != file.get('claim'):
+                    DB.execute('ROLLBACK'); return
+                file['verified'] = True
+                if file.get('attachment'):
+                    attachment = get(file['attachment'], 'initiative')
+                    attachment['files'] = list(dict.fromkeys(attachment['files'] + [file['id']]))
+                    attachment.setdefault('attachments', []).append({'file': file['id'], 'at': now(), 'uploader': file['uploader']})
+                    put('initiative', attachment)
+                    file.update(status='evidence', category='evidence', initiatives=[attachment['id']])
+                    put('file', file); DB.execute('COMMIT'); return
                 file.update(status=result['status'], category=result['category'], pages=result['pages'],
                             ocr_pages=result['ocr_pages'], unassigned=result['unassigned'], forms=len(result['candidates']))
                 file['initiatives'] = [add_candidate(c, file) for c in result['candidates']]
@@ -212,9 +235,101 @@ def process_file(file):
                 DB.execute('COMMIT')
             except Exception:
                 DB.execute('ROLLBACK'); raise
+    except CloudError:
+        # A transient cloud failure leaves the claim recoverable by the scheduler.
+        raise
     except Exception as e:
-        file.update(status='error', error=str(e)[:300])
-        put('file', file)
+        with LOCK:
+            DB.execute('BEGIN IMMEDIATE')
+            try:
+                current = get(file['id'], 'file')
+                if not CLOUD or current.get('claim') == file.get('claim'):
+                    current.update(status='error', error='Không đọc được tệp; kiểm tra định dạng và tải lại.' if CLOUD else str(e)[:300])
+                    put('file', current)
+                DB.execute('COMMIT')
+            except Exception:
+                DB.execute('ROLLBACK'); raise
+    finally:
+        if CLOUD and 'path' in locals(): path.unlink(missing_ok=True)
+
+
+def cloud_upload(op, a, body):
+    require(a, ('unit', 'data', 'project'))
+    if op == 'upload-complete':
+        f = scoped(a, body.get('id'), 'file')
+        if f['uploader'] != a['id']: raise Problem('Chỉ người tải được hoàn tất tệp', 403)
+        if f['status'] == 'uploading':
+            f['status'] = 'queued'; put('file', f)
+            audit(a, 'upload_complete', f)
+        return jsonify(id=f['id'], status=f['status'])
+    unit = scoped(a, body.get('unit'), 'unit')
+    attachment = scoped(a, body['initiative'], 'initiative') if body.get('initiative') else None
+    if attachment and attachment['unit'] != unit['id']: raise Problem('Bằng chứng phải cùng đơn vị')
+    if attachment and not a['super'] and a['role'] == 'unit' and attachment['status'] not in ('released', 'self_review'):
+        raise Problem('Chưa mở hiệu chỉnh để đính kèm bằng chứng')
+    name = Path(str(body.get('name', '')).replace('\\', '/')).name
+    suffix = Path(name).suffix.lower()
+    size, digest = body.get('size'), body.get('sha256', '')
+    if suffix not in ('.docx', '.pdf') or not isinstance(size, int) or not 0 < size <= 30*1024*1024:
+        raise Problem('Chọn tệp DOCX hoặc PDF không quá 30 MB')
+    if not re.fullmatch('[a-f0-9]{64}', str(digest)): raise Problem('Thiếu mã kiểm tra tệp')
+    duplicate = next((f for f in rows('file') if f.get('sha256') == digest and f.get('verified') and
+                      f['project'] == unit['project'] and f['unit'] == unit['id'] and f['status'] != 'error'), None)
+    if duplicate:
+        if attachment:
+            attachment['files'] = list(dict.fromkeys(attachment['files']+[duplicate['id']]))
+            duplicate['initiatives'] = list(dict.fromkeys(duplicate['initiatives']+[attachment['id']]))
+            put('initiative', attachment); put('file', duplicate)
+        return jsonify(id=duplicate['id'], duplicate=True)
+    fid, bid = ident(), ident()
+    f = {'id':fid, 'type':'file', 'project':unit['project'], 'unit':unit['id'], 'name':name,
+         'sha256':digest, 'size':size, 'uploader':a['id'], 'at':now(), 'batch':bid,
+         'status':'uploading', 'forms':0, 'initiatives':[], 'stored':DB.namespace+'/sources/'+fid+suffix,
+         'attachment':attachment['id'] if attachment else None}
+    url = DB.sign_upload(f['stored'])
+    put('file', f)
+    batch = {'id':bid,'type':'batch','project':f['project'],'unit':f['unit'],'at':now(),'uploader':a['id'],'files':[{'id':fid,'duplicate':False}]}
+    put('batch', batch); audit(a, 'upload_init', batch)
+    return jsonify(id=fid, url=url, duplicate=False)
+
+
+def worker_secret(namespace):
+    return hmac.new(KEY.encode(), ('vcoaching-worker-v1:'+namespace).encode(), hashlib.sha256).hexdigest()
+
+
+def cloud_process(op):
+    if request.method != 'POST': raise Problem('Chỉ chấp nhận POST', 405)
+    body = request.get_json(silent=True) or {}
+    a = None
+    if op == 'tick':
+        if not KEY or body.get('namespace') != DB.namespace or not hmac.compare_digest(
+            request.headers.get('Authorization',''), 'Bearer '+worker_secret(DB.namespace)):
+            raise Problem('Không được gọi worker', 403)
+    else:
+        a = actor(); require(a, ('unit','data','project'))
+        scoped(a, body.get('id'), 'file')
+    claimed = None
+    with LOCK:
+        DB.execute('BEGIN IMMEDIATE')
+        try:
+            candidates = [get(body['id'], 'file')] if a else rows('file')
+            for f in candidates:
+                if f['status'] != 'queued' and not (f['status']=='reading' and f.get('claim_until',0)<time.time()): continue
+                if f.get('attempts',0)>=3:
+                    f.update(status='error',error='Đọc tệp đã bị gián đoạn 3 lần; vui lòng tải lại.'); put('file',f); continue
+                f.update(status='reading',claim=ident(),claim_until=time.time()+330,attempts=f.get('attempts',0)+1)
+                put('file', f); claimed=f; break
+            DB.execute('COMMIT')
+        except Exception:
+            DB.execute('ROLLBACK'); raise
+    if claimed: process_file(claimed)
+    return jsonify(ok=True, processed=claimed['id'] if claimed else None)
+
+
+def cloud_export(content, filename, a):
+    key = DB.namespace+'/exports/'+a['id']+'/'+ident()+'/'+filename
+    DB.upload(key, content)
+    return jsonify(url=DB.sign_download(key, filename), filename=filename)
 
 
 def worker():
@@ -227,12 +342,15 @@ def worker():
         time.sleep(.5)
 
 
+@app.errorhandler(CloudError)
 @app.errorhandler(Problem)
 def problem(e): return jsonify(error=e.message), e.status
 @app.before_request
 def serialize_mutations():
     # Serialize read-modify-write operations with the background importer.
-    if request.method == 'POST':
+    op = (request.view_args or {}).get('op') or request.args.get('op', 'me')
+    if request.method == 'POST' and op not in ('tick','process'):
+        if CLOUD: g.vc_actor = actor()
         LOCK.acquire(); g.mutation_lock = True
         DB.execute('BEGIN IMMEDIATE')
 @app.teardown_request
@@ -255,15 +373,18 @@ def response_headers(response):
     return response
 
 
+@app.route('/api/vcoaching', methods=['GET', 'POST'])
 @app.route('/vc-api/<op>', methods=['GET', 'POST'])
-def api(op):
-    a = actor()
+def api(op=None):
+    op = op or request.args.get('op', 'me')
+    if op in ('tick','process') and CLOUD: return cloud_process(op)
+    a = getattr(g, 'vc_actor', None) or actor()
     body = request.get_json(silent=True) or {}
     write_ops = {'catalog', 'upload', 'edit', 'merge', 'confirm', 'assign', 'comment', 'review',
-                 'lock', 'unlock', 'release', 'respond', 'finalize', 'account', 'switch-audit', 'recheck', 'classify'}
+                 'lock', 'unlock', 'release', 'respond', 'finalize', 'account', 'switch-audit', 'recheck', 'classify', 'upload-init', 'upload-complete'}
     if op in write_ops and request.method != 'POST': raise Problem('Chỉ chấp nhận POST', 405)
     if op == 'me':
-        return jsonify(actor=a, roles=ROLES, steps=STEPS,
+        return jsonify(actor=a, roles=ROLES, steps=STEPS, storage='supabase' if CLOUD else 'local',
                        ai={'enabled': False, 'message': 'Chưa cấu hình đánh giá ngữ nghĩa. Chỉ kiểm tra quy tắc; chuyên gia đánh giá nội dung.'})
     if op == 'switch-audit':
         audit(a, 'switch_role', after={'role': a['role'], 'projects': a['projects'], 'units': a['units']})
@@ -296,6 +417,8 @@ def api(op):
         if r.get('unit') and kind != 'unit': scoped(a, r['unit'], 'unit')
         put(kind, r); audit(a, 'catalog_' + kind, r, after=r)
         return jsonify(item=r)
+    if op in ('upload-init', 'upload-complete') and CLOUD: return cloud_upload(op, a, body)
+    if op == 'upload' and CLOUD: raise Problem('Sử dụng upload trực tiếp lên kho riêng', 400)
     if op == 'upload':
         require(a, ('unit', 'data', 'project'))
         unit = scoped(a, body.get('unit'), 'unit')
@@ -346,6 +469,7 @@ def api(op):
         if op == 'unassigned': return jsonify(blocks=f.get('unassigned', []))
         if not f.get('stored'): raise Problem('Tệp không đọc được', 404)
         audit(a, 'download_source', f, after={'file': f['id']})
+        if CLOUD: return jsonify(url=DB.sign_download(f['stored'], f['name']), filename=f['name'])
         return send_file(DATA / 'sources' / f['stored'], as_attachment=True, download_name=f['name'])
     if op == 'classify':
         require(a, ('data', 'project'))
@@ -382,14 +506,21 @@ def api(op):
             if not r['unit_name'] or r['unit_name'].startswith('Đơn vị kiểm thử'):
                 raise Problem('Cần xác nhận tên đơn vị trước khi xuất')
             code = re.sub(r'[^A-Za-z0-9._-]', '_', r['code'])[:80] or 'WS1b'
-            dest = DATA / 'exports' / (code + '-' + r['id'] + '-v' + str(r['versions'][-1]['number']) + '.docx')
+            dest = DATA / 'exports' / (code + '-' + r['id'] + '-v' + str(r['versions'][-1]['number']) + '-' + ident() + '.docx')
             export_docx(r, TEMPLATE, dest); output.append(dest)
             audit(a, 'export_ws1b', r, after={'version': r['versions'][-1]['number']})
-        if len(output) == 1: return send_file(output[0], as_attachment=True)
+        if len(output) == 1:
+            if CLOUD:
+                content = output[0].read_bytes(); output[0].unlink(missing_ok=True)
+                return cloud_export(content, output[0].name, a)
+            return send_file(output[0], as_attachment=True)
         memory = io.BytesIO()
         with zipfile.ZipFile(memory, 'w', zipfile.ZIP_DEFLATED) as z:
             for f in output: z.write(f, f.name)
         memory.seek(0)
+        if CLOUD:
+            for f in output: f.unlink(missing_ok=True)
+            return cloud_export(memory.getvalue(), 'WS1b.zip', a)
         return send_file(memory, as_attachment=True, download_name='WS1b.zip', mimetype='application/zip')
     r = scoped(a, body.get('id') or request.args.get('id'), 'initiative')
     if op == 'detail': return jsonify(initiative=visible_initiative(a, r))
@@ -437,8 +568,8 @@ def api(op):
         ids = body.get('experts', [])
         for uid in ids:
             expert = sb('/auth/v1/admin/users/' + uid); expert = expert.get('user', expert)
-            g = expert.get('app_metadata', {}).get('vcoaching', {})
-            if not g.get('active') or g.get('role') != 'expert' or r['project'] not in g.get('projects', []): raise Problem('Chuyên gia chưa có quyền dự án')
+            expert_grant = expert.get('app_metadata', {}).get('vcoaching', {})
+            if not expert_grant.get('active') or expert_grant.get('role') != 'expert' or r['project'] not in expert_grant.get('projects', []): raise Problem('Chuyên gia chưa có quyền dự án')
         r['experts'] = ids
     elif op == 'comment':
         require(a, ('expert',))
@@ -598,5 +729,5 @@ def accounts(op, a, body):
 if __name__ == '__main__':
     if not URL or not KEY: raise SystemExit('Thiếu cấu hình Supabase phía máy chủ')
     ensure_seed()
-    threading.Thread(target=worker, daemon=True).start()
+    if not CLOUD: threading.Thread(target=worker, daemon=True).start()
     app.run(host='127.0.0.1', port=int(os.environ.get('VCOACHING_PORT', '8766')), threaded=True, debug=False)

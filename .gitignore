@@ -11,6 +11,8 @@ coverage
 .superpowers/
 *.log
 *.tsbuildinfo
+__pycache__/
+*.pyc
 modules/
 !src/modules/
 !src/modules/**
