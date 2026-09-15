@@ -209,6 +209,27 @@ def add_candidate(c, file):
     return r['id']
 
 
+def reconcile_sources(project, unit):
+    candidates = [r for r in rows('initiative') if r['project']==project and r['unit']==unit
+                  and not r.get('merged_into') and not r.get('released') and r['status']=='pending'
+                  and not r['versions'][-1].get('revisions')]
+    for combined in mapped_outputs(candidates):
+        members = combined.pop('contributing_ids')
+        if len(members) < 2: continue
+        original = get(combined['id'], 'initiative')
+        version = combined['versions'][-1]
+        version.update(number=original['versions'][-1]['number']+1, at=now())
+        combined['versions'] = original['versions'] + [version]
+        combined['forms'] = list(dict.fromkeys(form for rid in members for form in get(rid)['forms']))
+        combined['issues'] = list(dict.fromkeys(combined['issues'] + ['sources_need_comparison']))
+        combined['comments'] = [{**c, 'stale':True} for c in original['comments']]
+        combined['comments'].extend(rules(combined))
+        for rid in members:
+            if rid == combined['id']: continue
+            source = get(rid, 'initiative'); source['merged_into'] = combined['id']; put('initiative', source)
+        put('initiative', combined)
+
+
 def process_file(file):
     try:
         if CLOUD:
@@ -240,6 +261,7 @@ def process_file(file):
                         r['comments'] = [c for c in r['comments'] if c['rule'] not in ('EMPTY_LAYER_V1', 'BASELINE_REVIEW_V1', 'OWNER_V1')]
                         put('initiative', r)
                 put('file', file)
+                reconcile_sources(file['project'], file['unit'])
                 DB.execute('COMMIT')
             except Exception:
                 DB.execute('ROLLBACK'); raise
@@ -389,7 +411,7 @@ def api(op=None):
     a = getattr(g, 'vc_actor', None) or actor()
     body = request.get_json(silent=True) or {}
     write_ops = {'catalog', 'upload', 'edit', 'merge', 'confirm', 'assign', 'comment', 'review',
-                 'lock', 'unlock', 'release', 'respond', 'finalize', 'account', 'switch-audit', 'recheck', 'classify', 'config', 'compare-review', 'upload-init', 'upload-complete'}
+                 'lock', 'unlock', 'release', 'respond', 'finalize', 'account', 'switch-audit', 'recheck', 'classify', 'config', 'compare-review', 'convert', 'upload-init', 'upload-complete'}
     if op in write_ops and request.method != 'POST': raise Problem('Chỉ chấp nhận POST', 405)
     if op == 'me':
         return jsonify(actor=a, roles=ROLES, steps=STEPS, storage='supabase' if CLOUD else 'local',
@@ -518,6 +540,16 @@ def api(op=None):
         require(a, ('project', 'system', 'data', 'expert'))
         return jsonify(items=[r for r in rows('audit') if (a['super'] or r.get('project') in a['projects'] and (not r.get('unit') or r['unit'] in a['units'])) and (a['role'] not in ('data','expert') or (r['action'] in ('edit','merge','confirm','finalize','upload','classify_file') if a['role']=='data' else r['actor']==a['id'] and r['action'] in ('comment','review','lock','unlock'))) ][-500:])
     if op in ('accounts', 'account'): return accounts(op, a, body)
+    if op == 'convert':
+        require(a, ('data','project','unit','system'))
+        ids = body.get('files', [])
+        if not isinstance(ids,list) or not 1 <= len(ids) <= 100: raise Problem('Chọn từ 1 đến 100 tệp')
+        files = [scoped(a, fid, 'file') for fid in ids]
+        if any(f['status'] in ('uploading','queued','reading') for f in files): raise Problem('Tài liệu đang được xử lý',409)
+        for project, unit in {(f['project'],f['unit']) for f in files}: reconcile_sources(project,unit)
+        records = [r for r in rows('initiative') if not r.get('merged_into') and can(a,r) and set(r['files']) & set(ids)]
+        audit(a, 'convert_sources', after={'files':ids,'initiatives':[r['id'] for r in records]})
+        return jsonify(initiatives=[r['id'] for r in records])
     if op == 'mapped-export':
         ids = list(dict.fromkeys(request.args.get('files', '').split(',')))
         if not ids or not all(ids) or len(ids) > 100: raise Problem('Chọn từ 1 đến 100 tệp')

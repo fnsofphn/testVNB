@@ -262,3 +262,6 @@ chính + 1 đề xuất thêm) mà không gọi thao tác ghép hoặc xác nh�
 tệp của đơn vị khác. Giữ giới hạn AI/OCR và nghiệm thu bố cục Word đã nêu ở trên.
 
 Kiểm tra bổ sung: 12 kiểm thử đạt; trùng mã giữa đơn vị vẫn tách riêng, nhiều Mẫu 01 cùng khớp tên không bị ghép tùy ý, API chặn xuất khi tệp còn đang đọc. TypeScript/build đạt; đã xem màn nhập mới trên Chrome local. Chưa kiểm thử lại thao tác upload-to-download trên production.
+
+## Điều chỉnh kết quả trong ứng dụng
+Theo yêu cầu mới nhất: bỏ tự tải ZIP. Màn Chuyển đổi hiển thị sáu bước tự động và liên kết tới kết quả tại Sáng kiến. Worker và API convert lưu hồ sơ tổng hợp, giữ nguồn gốc/phiên bản; chạy lại không tạo bản trùng. Hồ sơ được duyệt hoặc có hiệu chỉnh không bị tự ghép lại. Trục 00–08 hiển thị nội dung đã mapping; xuất Word là tùy chọn. Kiểm thử 5 DOCX Ban Nhân lực xác nhận 4 hồ sơ tồn tại trong workspace, phiên bản không tăng khi convert lặp lại. 12 kiểm thử đạt. Chưa deploy trong phiên này.

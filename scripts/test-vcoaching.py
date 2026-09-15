@@ -132,7 +132,7 @@ class Workflow(unittest.TestCase):
    anchor=master['name'].split(' – ')[0]
    detail=next(r for r in details if r['name'].startswith(anchor))
    self.iid=master['id']
-   self.request('merge',other=detail['id'],reason='Đã đối chiếu nội dung; lấy chương trình tổng hợp làm chuẩn')
+   self.request('convert',files=[f['id'] for f in s.rows('file')])
    merged=s.get(self.iid)
    self.assertEqual(set(merged['forms']),{'master','detail'})
    self.assertEqual(len(merged['files']),2)
@@ -144,6 +144,12 @@ class Workflow(unittest.TestCase):
   proposal=next(r for r in active if r['name'].startswith('AI-Ready'))
   self.assertEqual(len(proposal['files']),1)
   self.assertIn('missing_code',proposal['issues'])
+  versions={r['id']:len(r['versions']) for r in active}
+  self.request('convert',files=[f['id'] for f in s.rows('file')])
+  self.assertEqual(versions,{r['id']:len(r['versions']) for r in s.rows('initiative') if not r.get('merged_into')})
+  with patch.object(s,'actor',return_value=who('data')):
+   workspace=self.client.get('/vc-api/workspace').get_json()
+  self.assertEqual(len(workspace['initiatives']),4)
  def test_scope_and_forged_mapping(self):
   item=s.get(self.iid)
   self.assertFalse(s.can(who('unit',unit='other'),item))

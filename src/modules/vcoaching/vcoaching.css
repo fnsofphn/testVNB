@@ -68,6 +68,7 @@
 .vc-root .chips button{font-size:12px;padding:6px 9px}
 .vc-root .steps{display:flex;gap:6px;flex-wrap:wrap;margin:15px 0 22px}
 .vc-root .steps button{flex:1;min-width:110px;font-size:12px}
+.vc-root .steps>div{flex:1;min-width:110px;font-size:12px;padding:10px;border:1px solid var(--vc-line);border-radius:8px;background:var(--vc-panel)}
 .vc-root .steps .active{background:var(--vc-blue);color:light-dark(white,#102332)}
 .vc-root .drop{padding:26px;border:2px dashed var(--vc-line);border-radius:12px;text-align:center;background:var(--vc-bg);margin:15px 0}
 .vc-root .drop input{max-width:450px}

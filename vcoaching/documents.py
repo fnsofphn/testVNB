@@ -328,7 +328,9 @@ def mapped_outputs(records):
         used = {i for ids in v['fields'].values() for i in ids}
         remaining = [b for b in v['blocks'] if b['id'] not in used and not blank(b['text'])]
         if remaining: notes.append(f'{len(remaining)} đoạn chưa xác định ô phù hợp; giữ nguyên trong phụ lục nguồn.')
-        r['mapping_notes'] = notes; result.append(r)
+        r['mapping_notes'] = notes
+        r['contributing_ids'] = [item['id'] for item in group]
+        result.append(r)
     return result
 
 
