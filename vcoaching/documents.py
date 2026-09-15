@@ -293,6 +293,45 @@ def rules(record):
     return comments
 
 
+def mapped_outputs(records):
+    """Build export-only projections; never overwrite reviewed or source records."""
+    def title(r):
+        return norm(re.split(r'\n\s*Phạm vi', r['name'], flags=re.I)[0]).rstrip('.')
+    def anchor(r): return re.split(r'\s+[–—-]\s+', title(r))[0]
+    def related(a, b):
+        return (a['project'], a['unit']) == (b['project'], b['unit']) and (
+            title(a) == title(b) or len(anchor(a).split()) >= 2 and anchor(a) == anchor(b))
+    masters = [r for r in records if 'master' in r['forms']]
+    groups = {r['id']: [r] for r in masters}
+    for r in records:
+        if r in masters: continue
+        matches = [m for m in masters if related(m, r)]
+        if len(matches) == 1: groups[matches[0]['id']].append(r)
+        else: groups[r['id']] = [r]
+    result = []
+    for group in groups.values():
+        r = deepcopy(group[0]); v = r['versions'][-1]
+        notes = ['Nội dung được tự ánh xạ từ nguồn; các ô không có thông tin được để trống.']
+        if len(group) > 1:
+            notes.append('Tổng hợp theo tên chủ đề sáng kiến; mã/tên hiển thị theo Mẫu 01. Danh tính và nội dung từng nguồn được giữ trong phụ lục.')
+        for other in group[1:]:
+            ov = other['versions'][-1]
+            v['blocks'].extend(deepcopy(ov['blocks']))
+            for step in STEPS: v['fields'][step].extend(ov['fields'][step])
+            r['files'] = list(dict.fromkeys(r['files'] + other['files']))
+            if other['code'] != r['code'] or title(other) != title(r):
+                notes.append(f"Khác biệt nhận diện: {other['code'] or 'Nguồn không ghi mã'} — {other['name']}.")
+        # Report original-source mappings without substituting a unit's revisions.
+        v['revisions'] = {}; v['confirmed'] = False
+        missing = [step for step in STEPS if not v['fields'][step]]
+        if missing: notes.append('Chưa có đoạn nguồn ánh xạ cho ô: ' + ', '.join(missing))
+        used = {i for ids in v['fields'].values() for i in ids}
+        remaining = [b for b in v['blocks'] if b['id'] not in used and not blank(b['text'])]
+        if remaining: notes.append(f'{len(remaining)} đoạn chưa xác định ô phù hợp; giữ nguyên trong phụ lục nguồn.')
+        r['mapping_notes'] = notes; result.append(r)
+    return result
+
+
 def export_docx(record, template, destination):
     """Patch only document.xml. Preserve every other original package member."""
     ns = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
@@ -349,7 +388,7 @@ def export_docx(record, template, destination):
         body = xml.find('w:body', ns)
         status = etree.Element(w + 'p')
         status_run = etree.SubElement(status, w + 'r')
-        etree.SubElement(status_run, w + 't').text = ('PHIẾU ĐÃ XÁC NHẬN' if version.get('confirmed') else 'PHIẾU NHÁP — CẦN ĐỐI CHIẾU NGUỒN')
+        etree.SubElement(status_run, w + 't').text = ('KẾT QUẢ TỰ ÁNH XẠ TỪ TÀI LIỆU NGUỒN' if record.get('mapping_notes') else 'PHIẾU ĐÃ XÁC NHẬN' if version.get('confirmed') else 'PHIẾU NHÁP — CẦN ĐỐI CHIẾU NGUỒN')
         body.insert(0, status)
         def paragraph(text, page_break=False):
             p = etree.Element(w + 'p')
@@ -360,6 +399,7 @@ def export_docx(record, template, destination):
         paragraph(('PHIẾU ĐÃ XÁC NHẬN' if version.get('confirmed') else 'PHIẾU NHÁP') +
                   f" — {record['code']} — Phiên bản {version['number']}", True)
         paragraph('PHỤ LỤC ĐỐI CHIẾU NGUỒN NGUYÊN VĂN')
+        for note in record.get('mapping_notes', []): paragraph(note)
         paragraph('Chi tiết dưới đây được bảo toàn để đối chiếu; không phải nhận xét nội bộ hoặc kết quả đã kiểm chứng.')
         for b in blocks.values():
             if blank(b['text']): continue

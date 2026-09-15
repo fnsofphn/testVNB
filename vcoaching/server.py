@@ -23,7 +23,7 @@ from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 from flask import Flask, request, jsonify, send_file, g
 from cloud import CloudDB, CloudError
-from documents import STEPS, parse, norm, business_code, rules, export_docx, assessment_schema
+from documents import STEPS, parse, norm, business_code, rules, export_docx, assessment_schema, mapped_outputs
 
 ROOT = Path(__file__).resolve().parents[1]
 for line in (ROOT / '.env.local').read_text('utf-8-sig').splitlines() if (ROOT / '.env.local').exists() else []:
@@ -518,6 +518,34 @@ def api(op=None):
         require(a, ('project', 'system', 'data', 'expert'))
         return jsonify(items=[r for r in rows('audit') if (a['super'] or r.get('project') in a['projects'] and (not r.get('unit') or r['unit'] in a['units'])) and (a['role'] not in ('data','expert') or (r['action'] in ('edit','merge','confirm','finalize','upload','classify_file') if a['role']=='data' else r['actor']==a['id'] and r['action'] in ('comment','review','lock','unlock'))) ][-500:])
     if op in ('accounts', 'account'): return accounts(op, a, body)
+    if op == 'mapped-export':
+        ids = list(dict.fromkeys(request.args.get('files', '').split(',')))
+        if not ids or not all(ids) or len(ids) > 100: raise Problem('Chọn từ 1 đến 100 tệp')
+        files = [scoped(a, fid, 'file') for fid in ids]
+        if any(f['status'] in ('uploading','queued','reading') for f in files): raise Problem('Tài liệu đang được xử lý', 409)
+        scopes = {(f['project'], f['unit']) for f in files}
+        records = [r for r in rows('initiative') if not r.get('merged_into') and can(a, r) and (r['project'],r['unit']) in scopes]
+        outputs = [r for r in mapped_outputs(records) if set(r['files']) & set(ids)]
+        memory = io.BytesIO()
+        with tempfile.TemporaryDirectory(dir=DATA / 'exports') as directory, zipfile.ZipFile(memory, 'w', zipfile.ZIP_DEFLATED) as archive:
+            summary = ['KẾT QUẢ TỰ ÁNH XẠ V-COACHING', f'{len(files)} tệp đầu vào; {len(outputs)} phiếu WS1b.', '']
+            for index, r in enumerate(outputs, 1):
+                code = re.sub(r'[^A-Za-z0-9._-]', '_', r['code'])[:60] or 'Chua-co-ma'
+                path = Path(directory) / f'{index:02d}-{code}-WS1b.docx'
+                export_docx(r, TEMPLATE, path); archive.write(path, path.name)
+                summary.extend([f"{index}. {r['code']} — {r['name']}", *r['mapping_notes'], ''])
+            for f in files:
+                summary.append(f"Tệp: {f['name']} — {f['status']}")
+                if f.get('error'): summary.append(f['error'])
+                if f.get('ocr_pages'): summary.append('Trang cần OCR: ' + ', '.join(map(str,f['ocr_pages'])))
+                if not f.get('initiatives'): summary.append('Chưa xác định được sáng kiến từ tệp này; không coi là đã ánh xạ đầy đủ.')
+                for b in f.get('unassigned', []):
+                    if b.get('text', '').strip(): summary.append(str(b.get('locator', {})) + ': ' + b['text'])
+            archive.writestr('Tong-hop-ket-qua.txt', '\n'.join(summary))
+        audit(a, 'export_mapping', after={'files':ids,'outputs':len(outputs)})
+        if CLOUD: return cloud_export(memory.getvalue(), 'VCoaching-ket-qua.zip', a)
+        memory.seek(0)
+        return send_file(memory, as_attachment=True, download_name='VCoaching-ket-qua.zip', mimetype='application/zip')
     if op == 'export':
         ids = request.args.get('ids', '').split(',')
         if not ids or len(ids) > 100: raise Problem('Chọn tối đa 100 sáng kiến')

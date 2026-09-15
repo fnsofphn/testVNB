@@ -238,3 +238,27 @@ Kiểm thử cô lập xác nhận kết quả sau ba lần ghép: 3 hồ sơ ch
 sau ghép; ô còn lại cần chuyên viên đối chiếu, không tự sinh dữ kiện để điền đủ.
 Ghép giữ lịch sử nhận diện nguồn; hồ sơ đã ghép không bị chọn lại khi nhập bổ sung.
 Các tệp có thể thuộc nhiều lô, nhưng phải chọn cùng ban/dự án khi nhập.
+
+
+## Luồng đơn giản theo yêu cầu mới — 15/09/2026
+
+Yêu cầu mới thay thế luồng nhập sáu bước: người dùng chọn nhiều tệp, hệ thống tự
+đọc và xuất file, không yêu cầu ghép/xác nhận/chọn đoạn mapping. Màn nhập chỉ có
+chọn tệp, tiến độ và tải kết quả. Trình duyệt tự tải ZIP khi xử lý xong; nút tải
+lại luôn có khi kết quả sẵn sàng. Danh sách tệp lần nhập gần nhất lưu theo tài
+khoản trên trình duyệt để mở lại tiến độ; tệp nguồn vẫn lưu ở máy chủ.
+
+API `mapped-export` kiểm tra quyền từng tệp và hồ sơ. Kết quả gồm các phiếu WS1b
+theo mẫu gốc và `Tong-hop-ket-qua.txt`, ghi tệp lỗi/cần OCR/không xác định được
+sáng kiến, các ô thiếu và nguồn chưa ánh xạ. Không gọi những tệp này là đã đọc đủ.
+Gom nguồn theo tên đầy đủ hoặc tên chủ đề duy nhất trong cùng đơn vị/dự án; không
+ghép chỉ vì trùng mã. Nếu nhiều hồ sơ Mẫu 01 cùng phù hợp, giữ hồ sơ riêng.
+Mã/tên khác nhau được ghi chú ngay trong kết quả; nội dung gốc nằm ở phụ lục.
+
+Đây là bản tổng hợp để xuất, không ghi đè các hồ sơ đã duyệt hoặc tự chấm thay
+đơn vị. Màn đối chiếu chuyên viên vẫn có khi cần, nhưng không phải điều kiện
+để nhận file. Kiểm thử API bằng 5 tệp Ban Nhân lực xuất được 4 DOCX (3 sáng kiến
+chính + 1 đề xuất thêm) mà không gọi thao tác ghép hoặc xác nhận; chặn truy cập
+tệp của đơn vị khác. Giữ giới hạn AI/OCR và nghiệm thu bố cục Word đã nêu ở trên.
+
+Kiểm tra bổ sung: 12 kiểm thử đạt; trùng mã giữa đơn vị vẫn tách riêng, nhiều Mẫu 01 cùng khớp tên không bị ghép tùy ý, API chặn xuất khi tệp còn đang đọc. TypeScript/build đạt; đã xem màn nhập mới trên Chrome local. Chưa kiểm thử lại thao tác upload-to-download trên production.

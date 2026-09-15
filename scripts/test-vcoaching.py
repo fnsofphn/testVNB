@@ -7,7 +7,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'vcoaching'))
 TEMP = tempfile.TemporaryDirectory(prefix='vcoaching-test-')
 os.environ['VCOACHING_DATA_DIR'] = TEMP.name
 import server as s
-from documents import parse, STEPS, norm, business_code, export_docx
+from documents import parse, STEPS, norm, business_code, export_docx, mapped_outputs
 CORPUS = Path(r'D:\03. Data\2026\V-Coaching\Tài liệu\2. WS1A_CHI TIẾT THEO PHIÊN')
 MASTER = Path(r'D:\04. Code\Vcoaching\CLSP_Mau_01_Master_CTHD_VNPT_Rising_2026_2028.docx')
 
@@ -112,6 +112,22 @@ class Workflow(unittest.TestCase):
   masters=[r for r in records if 'master' in r['forms']]
   details=[r for r in records if 'detail' in r['forms']]
   self.assertEqual(len(masters),3);self.assertEqual(len(details),4)
+  before=copy.deepcopy(records)
+  automatic=mapped_outputs(records)
+  self.assertEqual(records,before)
+  self.assertEqual(len(automatic),4)
+  self.assertEqual(sorted(len(r['files']) for r in automatic),[1,2,2,2])
+  self.assertTrue(any('Khác biệt nhận diện' in n for r in automatic for n in r['mapping_notes']))
+  with patch.object(s,'actor',return_value=who('unit')):
+   output=self.client.get('/vc-api/mapped-export?files='+','.join(f['id'] for f in s.rows('file')))
+  self.assertEqual(output.status_code,200)
+  import io
+  with ZipFile(io.BytesIO(output.data)) as z:
+   self.assertEqual(len([n for n in z.namelist() if n.endswith('.docx')]),4)
+   self.assertIn('AI-Ready',z.read('Tong-hop-ket-qua.txt').decode())
+  with patch.object(s,'actor',return_value=who('unit',unit='other')):
+   denied=self.client.get('/vc-api/mapped-export?files='+s.rows('file')[0]['id'])
+  self.assertEqual(denied.status_code,403)
   for master in masters:
    anchor=master['name'].split(' – ')[0]
    detail=next(r for r in details if r['name'].startswith(anchor))
@@ -136,6 +152,20 @@ class Workflow(unittest.TestCase):
   fields={k:[] for k in STEPS}; fields['1']=['foreign-block']
   self.request('edit',status=400,fields=fields,reason='bad')
   self.request('account',role='system',status=403)
+ def test_automatic_mapping_separates_units_and_ambiguous_names(self):
+  master=s.get(self.iid)
+  detail=copy.deepcopy(master); detail.update(id='detail',forms=['detail'],files=['detail-file'])
+  other=copy.deepcopy(master); other.update(id='other-unit',unit='other-unit',files=['other-file'])
+  results=mapped_outputs([master,detail,other])
+  self.assertEqual(len(results),2)
+  self.assertEqual(next(r for r in results if r['unit']=='other-unit')['files'],['other-file'])
+  self.assertEqual(set(next(r for r in results if r['unit']==master['unit'])['files']),set(master['files']+['detail-file']))
+  duplicate=copy.deepcopy(master); duplicate['id']='ambiguous-master'
+  self.assertEqual(len(mapped_outputs([master,duplicate,detail])),3)
+  f=s.get('source','file'); f['status']='reading'; s.put('file',f)
+  with patch.object(s,'actor',return_value=who('unit')):
+   response=self.client.get('/vc-api/mapped-export?files=source')
+  self.assertEqual(response.status_code,409)
  def test_fresh_grant_and_switch_rejects_forgery(self):
   user={'id':'admin','email':'admin@test.invalid','app_metadata':{'vcoaching':{'active':True,'role':'system','super_admin':True,'projects':[],'units':[]}}}
   def auth(path,**kwargs):
