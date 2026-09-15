@@ -98,3 +98,24 @@ khác mã/đơn vị/thiếu bằng chứng đạt; 18 ca kiểm thử nghiệp 
 Để áp dụng cho dữ liệu đã tải, triển khai commit mới rồi chọn lại bộ tệp nguồn
 và bấm Phân tích & tổng hợp. Không cần xóa/tải lại. Hồ sơ đã được người dùng
 nhận xét hoặc nộp vẫn được bảo vệ; không tự sửa dữ liệu production trong đợt này.
+
+## Tiến độ và danh mục nhiều đơn vị
+
+- Admin tổng có mục Tiến độ đơn vị. Bảng hiển thị loại hình, số sáng kiến,
+  xác nhận dữ liệu và mở góp ý; phân biệt chưa nhập/chờ kiểm tra/đã xác nhận,
+  chưa mở/mở một phần/đã mở. Không coi một hồ sơ mở một bước là mở toàn bộ.
+- Danh mục mặc định gồm 29 tên cụ thể lấy từ thư mục tài liệu người dùng;
+  `unit_catalog.json` giữ đường dẫn nguồn và tên viết tắt. Mục “29 VNPT TTP
+  còn lại” không bị biến thành 29 tên tự suy đoán. Danh mục không tự nhập hồ sơ.
+- Danh mục mặc định được phục vụ cùng các mục đã lưu; chỉnh sửa của quản trị
+  theo cùng ID được ưu tiên. Không cần migration hoặc ghi hàng loạt production.
+- `report_unit` chỉ nhóm/bộ lọc theo tên nguồn (kể cả tên viết tắt); trường unit
+  cấp quyền gốc được giữ nguyên. Tài khoản đơn vị không tự được mở quyền sang
+  danh mục mới. Hồ sơ không xác định được tên vẫn giữ đơn vị gốc.
+- Bộ lọc đơn vị dùng cùng danh tính với bảng tiến độ; thêm tìm không dấu, xóa
+  bộ lọc, số kết quả. Mặt trận lấy từ trường liên kết chính có trong nguồn.
+- Khi nhập với nhiều đơn vị được cấp, phải chọn đơn vị nhận tài liệu. Tệp cũ
+  vẫn nằm trong phạm vi nhận ban đầu; không tự di chuyển nguồn giữa các ban.
+- Kiểm thử: 19 ca Python; test-vcoaching-units.mjs kiểm tra bảng rỗng/hỗn hợp,
+  mở góp ý một phần, bộ lọc kết hợp, tìm không dấu, nhóm hồ sơ cũ và menu admin.
+  TypeScript và build được kiểm tra. Chưa kiểm thử trình duyệt trên production.

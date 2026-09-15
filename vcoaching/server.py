@@ -55,10 +55,19 @@ app.config['MAX_CONTENT_LENGTH'] = 80 * 1024 * 1024
 
 def now(): return datetime.now(timezone.utc).isoformat()
 def ident(): return str(uuid.uuid4())
+UNIT_CATALOG = json.loads((ROOT / 'vcoaching/unit_catalog.json').read_text('utf-8'))
+
 def rows(kind):
-    with LOCK: return [json.loads(r[0]) for r in DB.execute('SELECT data FROM records WHERE kind=?', (kind,))]
+    with LOCK: records = [json.loads(r[0]) for r in DB.execute('SELECT data FROM records WHERE kind=?', (kind,))]
+    if kind == 'unit':
+        existing={r['id'] for r in records}
+        records.extend(copy.deepcopy(r) for r in UNIT_CATALOG if r['id'] not in existing)
+    return records
 def get(key, kind=None):
     with LOCK: row = DB.execute('SELECT kind,data FROM records WHERE id=?', (key,)).fetchone()
+    if row is None and kind in (None,'unit'):
+        catalog=next((r for r in UNIT_CATALOG if r['id']==key),None)
+        if catalog: return copy.deepcopy(catalog)
     if row is None or kind and row[0] != kind: raise Problem('Không tìm thấy dữ liệu', 404)
     return json.loads(row[1])
 def put(kind, data):
@@ -141,8 +150,21 @@ def step_set(r, key):
     if key == 'released_steps': return set(STEPS) if r.get('released') else set()
     return set(STEPS) if r.get('status') in ('locked', 'released', 'self_review', 'submitted', 'rechecked', 'complete') else set()
 
-def visible_initiative(a, r):
+def visible_initiative(a, r, units=None):
     result = copy.deepcopy(r)
+    # Reporting identity does not change the authorization scope on stored records.
+    units=rows('unit') if units is None else units
+    unit_key=lambda name: ' '.join(re.findall(r'[a-z0-9]+',re.sub(r'\([^)]*\)','',norm(name))))
+    matches=[u for u in units if u['project']==r['project'] and unit_key(r['unit_name']) in [unit_key(n) for n in [u['name']]+u.get('aliases',[])]]
+    unit=matches[0] if len(matches)==1 else next((u for u in units if u['id']==r['unit']),None)
+    if unit:
+        result['report_unit']=unit['id']
+        result['unit_type']=result.get('unit_type') or unit.get('unit_type','')
+    if not result.get('front'):
+        for block in r['versions'][-1]['blocks']:
+            if 'lien ket chinh' in norm(block['label']): result['front']=block['text'].strip(); break
+            match=re.search(r'Liên kết chính:\s*([^\n]+)',block['text'],re.I)
+            if match: result['front']=match[1].strip(); break
     result['locked_steps'] = sorted(step_set(r, 'locked_steps'))
     result['released_steps'] = sorted(step_set(r, 'released_steps'))
     if not internal(a):
@@ -443,13 +465,14 @@ def api(op=None):
         put('config', item); audit(a, 'config', item, before=previous, after=item)
         return jsonify(ok=True)
     if op == 'workspace':
-        initiatives = [visible_initiative(a, r) for r in rows('initiative') if not r.get('merged_into') and not r.get('conversion_pending') and can(a, r)]
+        catalog_units=rows('unit')
+        initiatives = [visible_initiative(a, r, catalog_units) for r in rows('initiative') if not r.get('merged_into') and not r.get('conversion_pending') and can(a, r)]
         search = norm(request.args.get('q', ''))
         if search: initiatives = [r for r in initiatives if search in norm(r['name'] + ' ' + r['code'])]
         files = [f for f in rows('file') if can(a, f)]
         safe_files = [{k: v for k, v in f.items() if k not in ('stored', 'unassigned')} for f in files]
         return jsonify(configs=[r for r in rows('config') if can(a, r)] if a['super'] or a['role']=='system' else [], schema=assessment_schema(str(TEMPLATE)), projects=[r for r in rows('project') if can(a, r)],
-                       units=[r for r in rows('unit') if can(a, r)],
+                       units=[r for r in catalog_units if can(a, r)],
                        sessions=[r for r in rows('session') if can(a, r)],
                        library=[r for r in rows('library') if can(a, r)] if internal(a) else [],
                        initiatives=initiatives, files=safe_files,

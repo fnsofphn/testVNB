@@ -1,0 +1,347 @@
+[
+  {
+    "id": "vcoaching-unit-0b12415f4e1a",
+    "type": "unit",
+    "unit": "vcoaching-unit-0b12415f4e1a",
+    "project": "vcoaching-test",
+    "name": "Ban Nhân lực",
+    "unit_type": "Ban chức năng",
+    "aliases": [
+      "Ban NL"
+    ],
+    "source_path": "2. WS1A_CHI TIẾT THEO PHIÊN\\2. Phiên 1 (Ban NL, Ban TT, Ban Chất lượng, Văn phòng, Công đoàn)\\2. CTHĐ từng Ban (mỗi Ban gồm CTHĐ + SK)\\1. Ban Nhân lực",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-d1dfc8b304af",
+    "type": "unit",
+    "unit": "vcoaching-unit-d1dfc8b304af",
+    "project": "vcoaching-test",
+    "name": "Ban Chất lượng",
+    "unit_type": "Ban chức năng",
+    "aliases": [],
+    "source_path": "2. WS1A_CHI TIẾT THEO PHIÊN\\2. Phiên 1 (Ban NL, Ban TT, Ban Chất lượng, Văn phòng, Công đoàn)\\2. CTHĐ từng Ban (mỗi Ban gồm CTHĐ + SK)\\2. Ban Chất lượng",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-bc428785bf6c",
+    "type": "unit",
+    "unit": "vcoaching-unit-bc428785bf6c",
+    "project": "vcoaching-test",
+    "name": "Ban Truyền thông",
+    "unit_type": "Ban chức năng",
+    "aliases": [
+      "Ban TT"
+    ],
+    "source_path": "2. WS1A_CHI TIẾT THEO PHIÊN\\2. Phiên 1 (Ban NL, Ban TT, Ban Chất lượng, Văn phòng, Công đoàn)\\2. CTHĐ từng Ban (mỗi Ban gồm CTHĐ + SK)\\4. Ban Truyền thông",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-6e0c55472f78",
+    "type": "unit",
+    "unit": "vcoaching-unit-6e0c55472f78",
+    "project": "vcoaching-test",
+    "name": "Văn phòng Tập đoàn",
+    "unit_type": "Ban chức năng",
+    "aliases": [],
+    "source_path": "2. WS1A_CHI TIẾT THEO PHIÊN\\2. Phiên 1 (Ban NL, Ban TT, Ban Chất lượng, Văn phòng, Công đoàn)\\2. CTHĐ từng Ban (mỗi Ban gồm CTHĐ + SK)\\5. Văn phòng Tập đoàn",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-564379859e7f",
+    "type": "unit",
+    "unit": "vcoaching-unit-564379859e7f",
+    "project": "vcoaching-test",
+    "name": "Ban Chiến lược Sản phẩm",
+    "unit_type": "Ban chức năng",
+    "aliases": [
+      "Ban CLSP"
+    ],
+    "source_path": "2. WS1A_CHI TIẾT THEO PHIÊN\\3. Phiên 2 (Ban CLSP, Ban CN, Ban PTTT, Ban HTQT)\\2. CTHĐ từng Ban (mỗi Ban gồm CTHĐ + SK)\\1. Ban Chiến lược Sản phẩm",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-dcb32cad0814",
+    "type": "unit",
+    "unit": "vcoaching-unit-dcb32cad0814",
+    "project": "vcoaching-test",
+    "name": "Ban Hợp tác quốc tế",
+    "unit_type": "Ban chức năng",
+    "aliases": [
+      "Ban HTQT"
+    ],
+    "source_path": "2. WS1A_CHI TIẾT THEO PHIÊN\\3. Phiên 2 (Ban CLSP, Ban CN, Ban PTTT, Ban HTQT)\\2. CTHĐ từng Ban (mỗi Ban gồm CTHĐ + SK)\\2. Ban Hợp tác quốc tế",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-eb7fe4000c3a",
+    "type": "unit",
+    "unit": "vcoaching-unit-eb7fe4000c3a",
+    "project": "vcoaching-test",
+    "name": "Ban Phát triển thị trường",
+    "unit_type": "Ban chức năng",
+    "aliases": [
+      "Ban PTTT"
+    ],
+    "source_path": "2. WS1A_CHI TIẾT THEO PHIÊN\\3. Phiên 2 (Ban CLSP, Ban CN, Ban PTTT, Ban HTQT)\\2. CTHĐ từng Ban (mỗi Ban gồm CTHĐ + SK)\\3. Ban Phát triển thị trường",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-1780518a8a51",
+    "type": "unit",
+    "unit": "vcoaching-unit-1780518a8a51",
+    "project": "vcoaching-test",
+    "name": "Ban Kiểm soát nội bộ",
+    "unit_type": "Ban chức năng",
+    "aliases": [
+      "Ban KSNB"
+    ],
+    "source_path": "2. WS1A_CHI TIẾT THEO PHIÊN\\4. Phiên 3 (Ban KTTC, Ban KHĐT, Ban PCTT, Ban KSNB, Ban TCCL)\\2. CTHĐ từng Ban (bao gồm CTHĐ + SK)\\Ban Kiểm soát nội bộ",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-7edec2f906f6",
+    "type": "unit",
+    "unit": "vcoaching-unit-7edec2f906f6",
+    "project": "vcoaching-test",
+    "name": "Ban Pháp chế Thanh tra",
+    "unit_type": "Ban chức năng",
+    "aliases": [
+      "Ban PCTT"
+    ],
+    "source_path": "2. WS1A_CHI TIẾT THEO PHIÊN\\4. Phiên 3 (Ban KTTC, Ban KHĐT, Ban PCTT, Ban KSNB, Ban TCCL)\\2. CTHĐ từng Ban (bao gồm CTHĐ + SK)\\Ban Pháp chế Thanh tra",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-4f297bbb5692",
+    "type": "unit",
+    "unit": "vcoaching-unit-4f297bbb5692",
+    "project": "vcoaching-test",
+    "name": "Ban Tài chính Chiến lược",
+    "unit_type": "Ban chức năng",
+    "aliases": [
+      "Ban TCCL"
+    ],
+    "source_path": "2. WS1A_CHI TIẾT THEO PHIÊN\\4. Phiên 3 (Ban KTTC, Ban KHĐT, Ban PCTT, Ban KSNB, Ban TCCL)\\2. CTHĐ từng Ban (bao gồm CTHĐ + SK)\\Ban Tài chính Chiến lược",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-fcd8ca834bae",
+    "type": "unit",
+    "unit": "vcoaching-unit-fcd8ca834bae",
+    "project": "vcoaching-test",
+    "name": "Công đoàn",
+    "unit_type": "Ban chức năng",
+    "aliases": [],
+    "source_path": "2. WS1A_CHI TIẾT THEO PHIÊN\\2. Phiên 1 (Ban NL, Ban TT, Ban Chất lượng, Văn phòng, Công đoàn)",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-328008d5e834",
+    "type": "unit",
+    "unit": "vcoaching-unit-328008d5e834",
+    "project": "vcoaching-test",
+    "name": "Ban CN",
+    "unit_type": "Ban chức năng",
+    "aliases": [],
+    "source_path": "2. WS1A_CHI TIẾT THEO PHIÊN\\3. Phiên 2 (Ban CLSP, Ban CN, Ban PTTT, Ban HTQT)",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-cc1e23130efe",
+    "type": "unit",
+    "unit": "vcoaching-unit-cc1e23130efe",
+    "project": "vcoaching-test",
+    "name": "Ban KTTC",
+    "unit_type": "Ban chức năng",
+    "aliases": [],
+    "source_path": "2. WS1A_CHI TIẾT THEO PHIÊN\\4. Phiên 3 (Ban KTTC, Ban KHĐT, Ban PCTT, Ban KSNB, Ban TCCL)",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-fc8c5e15cbc0",
+    "type": "unit",
+    "unit": "vcoaching-unit-fc8c5e15cbc0",
+    "project": "vcoaching-test",
+    "name": "Ban KHĐT",
+    "unit_type": "Ban chức năng",
+    "aliases": [],
+    "source_path": "2. WS1A_CHI TIẾT THEO PHIÊN\\4. Phiên 3 (Ban KTTC, Ban KHĐT, Ban PCTT, Ban KSNB, Ban TCCL)",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-a4bd59512759",
+    "type": "unit",
+    "unit": "vcoaching-unit-a4bd59512759",
+    "project": "vcoaching-test",
+    "name": "VNPT TP HCM",
+    "unit_type": "VNPT tỉnh, thành phố",
+    "aliases": [
+      "VNPT TP. Hồ Chí Minh",
+      "VNPT TP.HCM"
+    ],
+    "source_path": "3. WS1B_CHI TIẾT THEO PHIÊN\\Phiên 1. VNPT TP HCM",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-7492f66807a2",
+    "type": "unit",
+    "unit": "vcoaching-unit-7492f66807a2",
+    "project": "vcoaching-test",
+    "name": "VNPT Đồng Tháp",
+    "unit_type": "VNPT tỉnh, thành phố",
+    "aliases": [],
+    "source_path": "3. WS1B_CHI TIẾT THEO PHIÊN\\Phiên 10. VNPT Đồng Tháp",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-ba2256d8ae46",
+    "type": "unit",
+    "unit": "vcoaching-unit-ba2256d8ae46",
+    "project": "vcoaching-test",
+    "name": "VNPT Sơn La",
+    "unit_type": "VNPT tỉnh, thành phố",
+    "aliases": [],
+    "source_path": "3. WS1B_CHI TIẾT THEO PHIÊN\\Phiên 11. VNPT Sơn La",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-50c9e60eb34d",
+    "type": "unit",
+    "unit": "vcoaching-unit-50c9e60eb34d",
+    "project": "vcoaching-test",
+    "name": "VNPT Hà Nội",
+    "unit_type": "VNPT tỉnh, thành phố",
+    "aliases": [],
+    "source_path": "3. WS1B_CHI TIẾT THEO PHIÊN\\Phiên 2. VNPT Hà Nội",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-086c091a6e03",
+    "type": "unit",
+    "unit": "vcoaching-unit-086c091a6e03",
+    "project": "vcoaching-test",
+    "name": "VNPT-Net",
+    "unit_type": "Tổng công ty/Công ty",
+    "aliases": [],
+    "source_path": "3. WS1B_CHI TIẾT THEO PHIÊN\\Phiên 3. VNPT-Net (VNPT Technology dự thính)",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-486babcc8faf",
+    "type": "unit",
+    "unit": "vcoaching-unit-486babcc8faf",
+    "project": "vcoaching-test",
+    "name": "VNPT Technology",
+    "unit_type": "Tổng công ty/Công ty",
+    "aliases": [],
+    "source_path": "3. WS1B_CHI TIẾT THEO PHIÊN\\Phiên 3. VNPT-Net (VNPT Technology dự thính)",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-26e397e3ac4b",
+    "type": "unit",
+    "unit": "vcoaching-unit-26e397e3ac4b",
+    "project": "vcoaching-test",
+    "name": "VNPT AI",
+    "unit_type": "Đơn vị khác",
+    "aliases": [],
+    "source_path": "3. WS1B_CHI TIẾT THEO PHIÊN\\Phiên 4. VNPT AI, TT PTNNL, TT R&D",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-bfd8fdfeebdd",
+    "type": "unit",
+    "unit": "vcoaching-unit-bfd8fdfeebdd",
+    "project": "vcoaching-test",
+    "name": "TT PTNNL",
+    "unit_type": "Đơn vị khác",
+    "aliases": [
+      "TT HRDC",
+      "Trung tâm Phát triển nguồn nhân lực"
+    ],
+    "source_path": "3. WS1B_CHI TIẾT THEO PHIÊN\\Phiên 4. VNPT AI, TT PTNNL, TT R&D",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-84682541bb36",
+    "type": "unit",
+    "unit": "vcoaching-unit-84682541bb36",
+    "project": "vcoaching-test",
+    "name": "TT R&D",
+    "unit_type": "Đơn vị khác",
+    "aliases": [],
+    "source_path": "3. WS1B_CHI TIẾT THEO PHIÊN\\Phiên 4. VNPT AI, TT PTNNL, TT R&D",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-d3e0f89878cc",
+    "type": "unit",
+    "unit": "vcoaching-unit-d3e0f89878cc",
+    "project": "vcoaching-test",
+    "name": "VNPT Media",
+    "unit_type": "Tổng công ty/Công ty",
+    "aliases": [
+      "VNPT-Media"
+    ],
+    "source_path": "3. WS1B_CHI TIẾT THEO PHIÊN\\Phiên 5. VNPT Media (ANSV dự thính)",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-8cad172bfefe",
+    "type": "unit",
+    "unit": "vcoaching-unit-8cad172bfefe",
+    "project": "vcoaching-test",
+    "name": "ANSV",
+    "unit_type": "Tổng công ty/Công ty",
+    "aliases": [],
+    "source_path": "3. WS1B_CHI TIẾT THEO PHIÊN\\Phiên 5. VNPT Media (ANSV dự thính)",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-c0394d9db90a",
+    "type": "unit",
+    "unit": "vcoaching-unit-c0394d9db90a",
+    "project": "vcoaching-test",
+    "name": "VNPT-Vinaphone",
+    "unit_type": "Tổng công ty/Công ty",
+    "aliases": [],
+    "source_path": "3. WS1B_CHI TIẾT THEO PHIÊN\\Phiên 6. VNPT-Vinaphone",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-7502e47a494e",
+    "type": "unit",
+    "unit": "vcoaching-unit-7502e47a494e",
+    "project": "vcoaching-test",
+    "name": "VNPT-I",
+    "unit_type": "Tổng công ty/Công ty",
+    "aliases": [],
+    "source_path": "3. WS1B_CHI TIẾT THEO PHIÊN\\Phiên 7. VNPT-I",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-d5ca6af3fa84",
+    "type": "unit",
+    "unit": "vcoaching-unit-d5ca6af3fa84",
+    "project": "vcoaching-test",
+    "name": "VNPT IT",
+    "unit_type": "Tổng công ty/Công ty",
+    "aliases": [
+      "VNPT-IT"
+    ],
+    "source_path": "3. WS1B_CHI TIẾT THEO PHIÊN\\Phiên 8. VNPT IT",
+    "catalog_source": "user_documents"
+  },
+  {
+    "id": "vcoaching-unit-fecb1592367a",
+    "type": "unit",
+    "unit": "vcoaching-unit-fecb1592367a",
+    "project": "vcoaching-test",
+    "name": "VNPT Quảng Trị",
+    "unit_type": "VNPT tỉnh, thành phố",
+    "aliases": [],
+    "source_path": "3. WS1B_CHI TIẾT THEO PHIÊN\\Phiên 9. VNPT Quảng Trị",
+    "catalog_source": "user_documents"
+  }
+]

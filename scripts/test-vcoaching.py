@@ -284,6 +284,27 @@ class Workflow(unittest.TestCase):
   # If both full titles themselves match, they are one source group; otherwise
   # the short title must not choose arbitrarily between distinct groups.
   self.assertTrue(all(len(r['contributing_ids'])!=2 or original[1]['id'] not in r['contributing_ids'] for r in result))
+ def test_catalog_and_legacy_reporting_preserve_authorization(self):
+  units=s.rows('unit'); names={u['name'] for u in units}
+  self.assertTrue({'Ban Nhân lực','Ban Truyền thông','VNPT Hà Nội'}<=names)
+  communication=next(u for u in units if u['name']=='Ban Truyền thông')
+  self.assertEqual(s.get(communication['id'],'unit')['name'],'Ban Truyền thông')
+  r=s.get(self.iid); r['unit_name']='Ban Truyền thông'
+  before=copy.deepcopy(r)
+  visible=s.visible_initiative(who('data'),r)
+  self.assertEqual(visible['report_unit'],communication['id'])
+  self.assertEqual(visible['unit'],r['unit'])
+  self.assertEqual(visible['unit_type'],'Ban chức năng')
+  self.assertEqual(r,before)
+  self.assertFalse(s.can(who('unit'),communication))
+  self.assertTrue(s.can(who('project'),communication))
+  # Catalog metadata never grants a data/unit account access to a new unit.
+  with s.app.test_request_context():
+   with self.assertRaises(s.Problem):s.scoped(who('unit'),communication['id'],'unit')
+  s.put('unit',{**communication,'name':'Tên quản trị đã sửa'})
+  self.assertEqual(len([u for u in s.rows('unit') if u['id']==communication['id']]),1)
+  self.assertEqual(s.get(communication['id'])['name'],'Tên quản trị đã sửa')
+  s.DB.execute('DELETE FROM records WHERE id=?',(communication['id'],))
  def test_fresh_grant_and_switch_rejects_forgery(self):
   user={'id':'admin','email':'admin@test.invalid','app_metadata':{'vcoaching':{'active':True,'role':'system','super_admin':True,'projects':[],'units':[]}}}
   def auth(path,**kwargs):
