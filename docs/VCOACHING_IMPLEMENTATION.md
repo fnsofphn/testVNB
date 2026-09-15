@@ -177,3 +177,19 @@ TypeScript, kiểm tra encoding và build production đều đạt.
 Chưa xác nhận pixel-perfect toàn bộ màn hình; viewport override của extension
 không áp dụng kích thước điện thoại nên chưa ghi nhận kiểm thử mobile là pass.
 Giao diện cần được người dùng push/deploy commit mới; quyền Admin tổng đã có hiệu lực.
+
+## Luồng sau tải tài liệu — 15/09/2026
+
+Màn Nhập & chuyển đổi dữ liệu có sáu bước theo mockup: Tiếp nhận, Ghép sáng kiến,
+Trích xuất gốc, Đối chiếu & sửa, Ánh xạ 8 bước, Xác nhận. Mỗi lô có nút tiếp tục;
+chọn từng hồ sơ trong lô để kiểm tra, kể cả một tệp tạo nhiều sáng kiến.
+Bước 4 sửa thông tin nhận diện qua API edit có phiên bản/lý do; bước 5 lưu ánh xạ
+vào 10 ô của trục 8 bước; bước 6 gọi confirm và hiển thị trạng thái Chờ chuyên gia.
+Không tự xác nhận khi đọc file xong. API giữ nguyên kiểm tra quyền và ngoại lệ.
+Khi sửa nhận diện hoặc ánh xạ chưa lưu, khóa chuyển bước/đổi hồ sơ; cho bỏ bản sửa.
+Tệp nguồn có nút mở từng hồ sơ liên quan. Màn Chưa mapping hiển thị đoạn nguồn,
+không còn dùng nhầm bảng nhật ký.
+
+Kiểm tra Chrome local với lô CLSP ba hồ sơ: sáu bước, chọn hồ sơ, trích xuất gốc,
+đối chiếu, ánh xạ, chặn chuyển bước với bản chưa lưu, bỏ bản sửa, điều kiện xác nhận.
+Không có console error. Không chỉnh hoặc xác nhận dữ liệu production trong lần QA này.
