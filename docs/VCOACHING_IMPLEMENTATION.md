@@ -151,7 +151,7 @@ node --env-file=.env.local scripts/test-vcoaching-admin-live.mjs
 - Cloud đã kiểm thử với Supabase thật từ backend local; còn cần người dùng deploy
   commit mới và kiểm tra đăng nhập/upload/export trên domain production thực tế.
 - Chưa kiểm thử tự động hết các thao tác UI trên mọi kích thước màn hình. Báo cáo
-  hiển thị dạng bảng và tải xuống JSON. Phần chưa mapping cần chuyên viên xem và xác nhận, không tự kết luận thiếu.
+  hiển thị dạng bảng, xem trước và tải xuống HTML. Phần chưa mapping cần chuyên viên xem và xác nhận, không tự kết luận thiếu.
 
 Không gọi toàn bộ sản phẩm đã nghiệm thu khi các mục trên chưa xử lý.
 
@@ -167,7 +167,7 @@ báo cáo, nhật ký hiển thị bảng thay cho JSON thô.
 
 Các khác biệt có chủ đích so với bản trình diễn: bỏ nhãn dữ liệu giả lập và
 menu trải nghiệm demo, giữ đăng xuất và phạm vi Admin tổng, không tạo số liệu giả.
-Bộ lọc loại đơn vị/mặt trận chưa có danh mục đã xác nhận nên chưa cho chọn;
+Bộ lọc loại đơn vị/mặt trận lấy từ dữ liệu nhận diện và danh mục đã nhập;
 AI chưa cấu hình hiển thị trạng thái thực. Không dùng số liệu minh họa làm kết luận.
 
 Đã kiểm tra trên Chrome: tổng quan so cạnh mockup, danh sách ba hồ sơ CLSP thật,
@@ -193,3 +193,48 @@ không còn dùng nhầm bảng nhật ký.
 Kiểm tra Chrome local với lô CLSP ba hồ sơ: sáu bước, chọn hồ sơ, trích xuất gốc,
 đối chiếu, ánh xạ, chặn chuyển bước với bản chưa lưu, bỏ bản sửa, điều kiện xác nhận.
 Không có console error. Không chỉnh hoặc xác nhận dữ liệu production trong lần QA này.
+
+
+## Bổ sung theo đợt rà soát toàn bộ mockup — 15/09/2026
+
+- Trang 00: thông tin nhận diện, owner, phối hợp, liên kết Rising/HEART, thời gian,
+  nội dung thay đổi, ba tầng cơ chế–hành vi–kết quả và chất lượng từng bước.
+- Trục 01–08: câu hỏi phương pháp, ba bảng bước 07, điều kiện thực thi bước 08,
+  đánh dấu nội dung đã sửa, mở nguồn đối chiếu.
+- Chuyên gia: phân loại, trạng thái chất lượng, thư viện nhận định, giả thuyết nội bộ,
+  sửa bản nháp, lưu và chuyển sáng kiến tiếp theo tại cùng bước.
+- Công bố và khóa theo từng ô WS1b; đơn vị chỉ thấy góp ý đã duyệt và đã mở.
+  Đơn vị phản hồi theo từng bước, nộp một bước không khóa bước khác còn mở.
+  Góp ý đã công bố được giữ để đối chiếu sau hiệu chỉnh; giả thuyết nội bộ vẫn ẩn.
+- So sánh: ma trận 8 bước, kết quả đánh giá kèm lý do và phiên bản; sửa văn bản
+  không tự được coi là cải thiện chất lượng.
+- Quản lý: thư viện có lọc/sửa/ưu tiên/ngừng dùng; cấu hình 6 công đoạn; danh mục,
+  lịch phiên, báo cáo có bộ lọc, xem trước và xuất HTML; nhật ký theo quyền.
+- Nhập liệu: sửa từng đoạn trích xuất có lý do và giữ nguyên bản, bảng tổng hợp
+  mapping, loại đơn vị và mặt trận. Word xuất kèm nguyên văn trước hiệu chỉnh.
+
+Kiểm tra: TypeScript, encoding và build production; 11 kiểm thử Python với cơ sở
+dữ liệu tạm và tài liệu thật; kiểm tra render 10 màn hình với dữ liệu cô lập và
+escaping HTML nguồn. Chrome local đã kiểm tra Trang 00/bước 07 với hồ sơ CLSP thật.
+Không sửa dữ liệu production trong đợt kiểm tra này. Người dùng tự push/deploy.
+
+Phạm vi chưa nghiệm thu: chưa so ảnh từng pixel ở mọi vai trò/kích thước; các bảng
+ba tầng hiển thị nội dung nguồn tổng hợp, chưa tự suy diễn nguồn thành các hàng
+chuẩn hóa chi tiết. AI ngữ nghĩa/OCR và bố cục in Word vẫn có giới hạn nêu trên.
+Không gọi đây là chứng nhận khớp 100% toàn bộ mockup trên production.
+
+
+### Nhận nhiều tệp cho cùng ban
+
+Kiểm thử bằng 5 DOCX trong thư mục Ban Nhân lực: chương trình tổng hợp có 3 sáng
+kiến, 3 biểu chi tiết tương ứng và AI-Ready Workforce đề xuất thêm. Mã trong nguồn
+chưa nhất quán, nên UI gợi ý theo tên chủ đề và yêu cầu đối chiếu trước khi ghép.
+Không tự lấy mã tên file thay cho mã nội dung. Khi ghép một Mẫu 01 với một bản chi
+tiết, UI chọn hồ sơ Mẫu 01 làm hồ sơ đích và hiển thị mã/tên sẽ giữ trước xác nhận.
+Người dùng có thể sửa mã/tên ở bước Đối chiếu sau đó.
+
+Kiểm thử cô lập xác nhận kết quả sau ba lần ghép: 3 hồ sơ chính, mỗi hồ sơ có đủ
+2 nguồn và không mất đoạn nguồn; 1 đề xuất thêm giữ riêng. 9/10 ô có nội dung nguồn
+sau ghép; ô còn lại cần chuyên viên đối chiếu, không tự sinh dữ kiện để điền đủ.
+Ghép giữ lịch sử nhận diện nguồn; hồ sơ đã ghép không bị chọn lại khi nhập bổ sung.
+Các tệp có thể thuộc nhiều lô, nhưng phải chọn cùng ban/dự án khi nhập.

@@ -46,6 +46,88 @@ class Workflow(unittest.TestCase):
   self.request('recheck',role='data')
   self.request('unlock',role='project',target='unit',reason='Cho đơn vị bổ sung nguồn')
   self.assertEqual(s.get(self.iid)['status'],'released')
+ def test_partial_step_release_and_private_fields(self):
+  self.request('edit',reason='Đối chiếu',resolve_issues=True)
+  self.request('confirm',reason='Đủ căn cứ')
+  item=s.get(self.iid); item['experts']=['expert']; item['comments']=[]; s.put('initiative',item)
+  for step in ('1','2'):
+   self.request('comment',role='expert',step=step,problem='Nhận định',why='Nguồn',question='Câu hỏi?',hypothesis='PRIVATE',internal=False)
+  for c in s.get(self.iid)['comments']:
+   self.request('review',role='expert',comment_id=c['id'],state='approved',internal=False)
+  self.request('lock',role='expert',step='1')
+  self.request('release',role='system',step='2',status=400)
+  self.request('release',role='system',step='1')
+  visible=s.visible_initiative(who('unit'),s.get(self.iid))
+  self.assertEqual([c['step'] for c in visible['comments']],['1'])
+  self.assertNotIn('hypothesis',visible['comments'][0])
+  self.request('respond',role='unit',agreement='agree',revisions={'2':'Không được sửa'},status=403)
+  self.request('comment',role='expert',step='2',problem='Còn mở',why='Nguồn',question='Câu hỏi?')
+  self.request('comment',role='expert',step='1',problem='Đã khóa',why='Nguồn',question='?',status=400)
+  self.request('unlock',role='expert',step='1',reason='Kiểm tra lại')
+  self.assertEqual(s.visible_initiative(who('unit'),s.get(self.iid))['comments'],[])
+ def test_submission_locks_only_selected_step(self):
+  self.request('edit',reason='Đối chiếu',resolve_issues=True)
+  self.request('confirm',reason='Đủ căn cứ')
+  item=s.get(self.iid); item['experts']=['expert']; item['comments']=[]; s.put('initiative',item)
+  for step in ('1','2'):
+   self.request('comment',role='expert',step=step,problem='Nhận định',why='Nguồn',question='Câu hỏi?',internal=False)
+  for c in s.get(self.iid)['comments']:
+   self.request('review',role='expert',comment_id=c['id'],state='approved',internal=False)
+  for step in ('1','2'):
+   self.request('lock',role='expert',step=step)
+   self.request('release',role='project',step=step)
+  self.request('respond',role='unit',step='1',agreement='agree',revisions={'1':'Bản sửa 1'},submit=True)
+  self.assertEqual(s.get(self.iid)['status'],'self_review')
+  self.assertEqual(s.get(self.iid)['submitted_steps'],['1'])
+  self.assertEqual(len(s.visible_initiative(who('unit'),s.get(self.iid))['comments']),2)
+  self.request('respond',role='unit',step='1',agreement='agree',revisions={'1':'Nộp lại'},submit=True,status=403)
+  self.request('respond',role='unit',step='2',agreement='agree',revisions={'2':'Bản sửa 2'},submit=True)
+  self.assertEqual(s.get(self.iid)['status'],'submitted')
+  self.assertEqual(s.get(self.iid)['versions'][-1]['revisions'],{'1':'Bản sửa 1','2':'Bản sửa 2'})
+ def test_extraction_correction_preserves_original_and_scope(self):
+  r=s.get(self.iid); b=r['versions'][-1]['blocks'][0]; original=b['text']
+  self.request('edit',reason='Sửa lỗi trích xuất theo nguồn',corrections={b['id']:'Đã đối chiếu'})
+  after=s.get(self.iid); changed=after['versions'][-1]['blocks'][0]
+  self.assertEqual(changed['original_text'],original)
+  self.assertEqual(after['versions'][0]['blocks'][0]['text'],original)
+  self.request('edit',reason='Sai phạm vi',corrections={'foreign':'bad'},status=400)
+  self.request('edit',role='unit',reason='Không đúng quyền',corrections={b['id']:'bad'},status=403)
+ def test_config_and_comparison_permissions(self):
+  self.request('config',role='unit',project='vcoaching-test',stage='Trích xuất',text='Giữ nguồn',status=403)
+  self.request('config',role='system',project='vcoaching-test',stage='Trích xuất',text='Giữ nguồn')
+  self.assertEqual(s.rows('config')[0]['text'],'Giữ nguồn')
+  self.request('compare-review',role='unit',step='1',label='Rõ hơn',reason='Bằng chứng',status=403)
+  self.request('compare-review',role='project',step='1',label='Rõ hơn',reason='Bằng chứng')
+  self.assertEqual(s.get(self.iid)['comparison']['1']['version'],1)
+ def test_hr_multiple_files_keep_three_initiatives_and_extra_proposal(self):
+  s.DB.execute("DELETE FROM records WHERE kind NOT IN ('project','unit')")
+  directory=next(p for p in CORPUS.rglob('1. Ban Nhân lực') if p.is_dir())
+  expected={}
+  for path in sorted(directory.glob('*.docx')):
+   parsed=parse(path); f={'id':path.stem,'type':'file','project':'vcoaching-test','unit':'vcoaching-test-unit','name':path.name,'sha256':parsed['sha256'],'status':'parsed'}
+   s.put('file',f)
+   for candidate in parsed['candidates']:
+    rid=s.add_candidate(candidate,f); expected[rid]={b['id'] for b in candidate['blocks']}
+  records=s.rows('initiative')
+  masters=[r for r in records if 'master' in r['forms']]
+  details=[r for r in records if 'detail' in r['forms']]
+  self.assertEqual(len(masters),3);self.assertEqual(len(details),4)
+  for master in masters:
+   anchor=master['name'].split(' – ')[0]
+   detail=next(r for r in details if r['name'].startswith(anchor))
+   self.iid=master['id']
+   self.request('merge',other=detail['id'],reason='Đã đối chiếu nội dung; lấy chương trình tổng hợp làm chuẩn')
+   merged=s.get(self.iid)
+   self.assertEqual(set(merged['forms']),{'master','detail'})
+   self.assertEqual(len(merged['files']),2)
+   self.assertEqual(merged['code'],master['code'])
+   self.assertEqual({b['id'] for b in merged['versions'][-1]['blocks']},expected[master['id']]|expected[detail['id']])
+   self.assertTrue(all(merged['versions'][-1]['fields'][k] for k in ('1','2','3','4','6','7A','7B','7C','8')))
+  active=[r for r in s.rows('initiative') if not r.get('merged_into')]
+  self.assertEqual(len(active),4)
+  proposal=next(r for r in active if r['name'].startswith('AI-Ready'))
+  self.assertEqual(len(proposal['files']),1)
+  self.assertIn('missing_code',proposal['issues'])
  def test_scope_and_forged_mapping(self):
   item=s.get(self.iid)
   self.assertFalse(s.can(who('unit',unit='other'),item))

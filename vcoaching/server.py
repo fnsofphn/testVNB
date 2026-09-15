@@ -135,13 +135,20 @@ def scoped(a, key, kind):
     r = get(key, kind)
     if not can(a, r): raise Problem('Ngoài phạm vi được cấp', 403)
     return r
-def internal(a): return a['super'] or a['role'] in ('expert', 'project')
+def internal(a): return a['super'] or a['role'] in ('expert', 'project', 'system')
+def step_set(r, key):
+    if key in r: return set(r[key])
+    if key == 'released_steps': return set(STEPS) if r.get('released') else set()
+    return set(STEPS) if r.get('status') in ('locked', 'released', 'self_review', 'submitted', 'rechecked', 'complete') else set()
+
 def visible_initiative(a, r):
     result = copy.deepcopy(r)
+    result['locked_steps'] = sorted(step_set(r, 'locked_steps'))
+    result['released_steps'] = sorted(step_set(r, 'released_steps'))
     if not internal(a):
         result['comments'] = [{k: v for k, v in c.items() if k not in ('notes', 'hypothesis')}
             for c in result['comments'] if a['role'] == 'unit' and r.get('released') and
-            c['state'] == 'approved' and not c.get('internal') and not c.get('stale')]
+            c['state'] == 'approved' and c['step'] in step_set(r, 'released_steps') and not c.get('internal') and (c.get('published_at') or not c.get('stale'))]
     return result
 def audit(a, action, r=None, before=None, after=None, reason=''):
     put('audit', {'id': ident(), 'at': now(), 'actor': a['id'], 'email': a['email'], 'role': a['role'],
@@ -168,7 +175,7 @@ def new_version(blocks, fields, number=1):
 def add_candidate(c, file):
     for b in c['blocks']: b.update(file_id=file['id'], file_name=file['name'], file_sha256=file['sha256'])
     scope = {'project': file['project'], 'unit': file['unit']}
-    existing = [r for r in rows('initiative') if r['project'] == file['project'] and r['unit'] == file['unit']
+    existing = [r for r in rows('initiative') if not r.get('merged_into') and r['project'] == file['project'] and r['unit'] == file['unit']
                 and business_code(r['code']) == business_code(c['code']) and c['code']]
     def title_key(name):
         value = norm(name).rstrip('.')
@@ -189,6 +196,7 @@ def add_candidate(c, file):
         r['issues'] = list(dict.fromkeys(r['issues'] + ['sources_need_comparison']))
         for cm in r['comments']: cm['stale'] = True
         r['status'], r['released'] = 'pending', False
+        r['locked_steps'], r['released_steps'], r['submitted_steps'] = [], [], []
     else:
         issues = c['issues'] + (['code_conflict'] if existing else [])
         r = {'id': c['id'], 'type': 'initiative', **scope, 'name': c['name'], 'code': c['code'],
@@ -381,7 +389,7 @@ def api(op=None):
     a = getattr(g, 'vc_actor', None) or actor()
     body = request.get_json(silent=True) or {}
     write_ops = {'catalog', 'upload', 'edit', 'merge', 'confirm', 'assign', 'comment', 'review',
-                 'lock', 'unlock', 'release', 'respond', 'finalize', 'account', 'switch-audit', 'recheck', 'classify', 'upload-init', 'upload-complete'}
+                 'lock', 'unlock', 'release', 'respond', 'finalize', 'account', 'switch-audit', 'recheck', 'classify', 'config', 'compare-review', 'upload-init', 'upload-complete'}
     if op in write_ops and request.method != 'POST': raise Problem('Chỉ chấp nhận POST', 405)
     if op == 'me':
         return jsonify(actor=a, roles=ROLES, steps=STEPS, storage='supabase' if CLOUD else 'local',
@@ -389,13 +397,25 @@ def api(op=None):
     if op == 'switch-audit':
         audit(a, 'switch_role', after={'role': a['role'], 'projects': a['projects'], 'units': a['units']})
         return jsonify(ok=True)
+    if op == 'config':
+        require(a, ('system',))
+        project = body.get('project')
+        if project not in a['projects'] and not a['super']: raise Problem('Ngoài dự án', 403)
+        get(project, 'project')
+        stages = ('Trích xuất','Chuẩn hóa 8 bước','Tạo Trang 00','Kiểm tra logic','Kiểm tra sau hiệu chỉnh','Phân tích trước – sau')
+        if body.get('stage') not in stages or not body.get('text', '').strip(): raise Problem('Chọn công đoạn và nhập chỉ dẫn')
+        key = project + ':ai:' + str(stages.index(body['stage']))
+        previous = next((x for x in rows('config') if x['id'] == key), None)
+        item = {'id': key, 'type': 'config', 'project': project, 'stage': body['stage'], 'text': body['text'].strip(), 'at': now(), 'by': a['id']}
+        put('config', item); audit(a, 'config', item, before=previous, after=item)
+        return jsonify(ok=True)
     if op == 'workspace':
         initiatives = [visible_initiative(a, r) for r in rows('initiative') if not r.get('merged_into') and can(a, r)]
         search = norm(request.args.get('q', ''))
         if search: initiatives = [r for r in initiatives if search in norm(r['name'] + ' ' + r['code'])]
         files = [f for f in rows('file') if can(a, f)]
         safe_files = [{k: v for k, v in f.items() if k not in ('stored', 'unassigned')} for f in files]
-        return jsonify(schema=assessment_schema(str(TEMPLATE)), projects=[r for r in rows('project') if can(a, r)],
+        return jsonify(configs=[r for r in rows('config') if can(a, r)] if a['super'] or a['role']=='system' else [], schema=assessment_schema(str(TEMPLATE)), projects=[r for r in rows('project') if can(a, r)],
                        units=[r for r in rows('unit') if can(a, r)],
                        sessions=[r for r in rows('session') if can(a, r)],
                        library=[r for r in rows('library') if can(a, r)] if internal(a) else [],
@@ -414,6 +434,8 @@ def api(op=None):
         rid = body.get('id') or ident()
         r = {'id': rid, 'type': kind, 'name': body['name'].strip(), 'project': project if kind != 'project' else rid,
              'unit': rid if kind == 'unit' else body.get('unit'), 'time': body.get('time'), 'details': body.get('details', '')}
+        for key in ('step','category','priority','active','question','why','unit_type','front'):
+            if key in body: r[key] = body[key]
         if r.get('unit') and kind != 'unit': scoped(a, r['unit'], 'unit')
         put(kind, r); audit(a, 'catalog_' + kind, r, after=r)
         return jsonify(item=r)
@@ -483,7 +505,7 @@ def api(op=None):
         put('file', f); audit(a, 'classify_file', f, before=before, after=category, reason=body['reason'])
         return jsonify(ok=True)
     if op == 'report':
-        require(a, ('project',))
+        require(a, ('project','system'))
         records = [r for r in rows('initiative') if not r.get('merged_into') and can(a, r)]
         report = {'at': now(), 'scope': a['projects'], 'total': len(records),
                   'items': [{'code': r['code'], 'name': r['name'], 'unit': r['unit_name'], 'status': r['status'],
@@ -493,9 +515,8 @@ def api(op=None):
         audit(a, 'export_report', after={'count': len(records)})
         return jsonify(report)
     if op == 'audit':
-        require(a, ('project', 'system'))
-        return jsonify(items=[r for r in rows('audit') if a['super'] or r.get('project') in a['projects'] and
-                              (not r.get('unit') or r['unit'] in a['units'])][-500:])
+        require(a, ('project', 'system', 'data', 'expert'))
+        return jsonify(items=[r for r in rows('audit') if (a['super'] or r.get('project') in a['projects'] and (not r.get('unit') or r['unit'] in a['units'])) and (a['role'] not in ('data','expert') or (r['action'] in ('edit','merge','confirm','finalize','upload','classify_file') if a['role']=='data' else r['actor']==a['id'] and r['action'] in ('comment','review','lock','unlock'))) ][-500:])
     if op in ('accounts', 'account'): return accounts(op, a, body)
     if op == 'export':
         ids = request.args.get('ids', '').split(',')
@@ -536,9 +557,10 @@ def api(op=None):
         ov = other['versions'][-1]
         v = new_version(version['blocks'] + ov['blocks'], {s: version['fields'][s] + ov['fields'][s] for s in STEPS}, version['number'] + 1)
         r['versions'].append(v); r['files'] = list(set(r['files'] + other['files'])); r['forms'] = list(set(r['forms'] + other['forms']))
-        r.setdefault('merge_origins', []).append({'id': other['id'], 'at': now(), 'by': a['id'], 'reason': reason})
+        r.setdefault('merge_origins', []).append({'id': other['id'], 'code': other['code'], 'name': other['name'], 'files': other['files'], 'at': now(), 'by': a['id'], 'reason': reason})
         r['issues'] = ['sources_need_comparison']; other['merged_into'] = r['id']; put('initiative', other)
         r['released'], r['status'] = False, 'pending'
+        r['locked_steps'], r['released_steps'], r['submitted_steps'] = [], [], []
         for c in r['comments']: c['stale'] = True
         r['comments'].extend(rules(r))
     elif op == 'edit':
@@ -549,11 +571,17 @@ def api(op=None):
         if set(fields) != set(STEPS) or any(not isinstance(v, list) or not set(v) <= allowed for v in fields.values()):
             raise Problem('Mapping phải tham chiếu đoạn nguồn thuộc hồ sơ')
         v = copy.deepcopy(version); v.update(number=version['number'] + 1, fields=fields, at=now(), confirmed=False)
+        corrections = body.get('corrections', {})
+        if not isinstance(corrections, dict) or not set(corrections) <= allowed or any(not isinstance(t,str) for t in corrections.values()): raise Problem('Hiệu chỉnh phải gắn đoạn nguồn của hồ sơ')
+        for block in v['blocks']:
+            if block['id'] in corrections:
+                block.setdefault('original_text', block['text']); block['text'] = corrections[block['id']]
         r['versions'].append(v)
-        for key in ('name', 'code', 'unit_name'):
+        for key in ('name', 'code', 'unit_name', 'unit_type', 'front'):
             if key in body: r[key] = str(body[key]).strip()
         r['issues'] = [] if body.get('resolve_issues') else r['issues']
         r['status'], r['released'] = 'pending', False
+        r['locked_steps'], r['released_steps'], r['submitted_steps'] = [], [], []
         for c in r['comments']: c['stale'] = True
         r['comments'].extend(rules(r))
     elif op in ('confirm', 'finalize'):
@@ -573,37 +601,60 @@ def api(op=None):
         r['experts'] = ids
     elif op == 'comment':
         require(a, ('expert',))
-        if r['status'] not in ('pending', 'review', 'rechecked'): raise Problem('Nhận xét đã khóa; cần mở khóa có lý do')
+        if body.get('step') in step_set(r, 'locked_steps') or r['status'] in ('submitted','complete'): raise Problem('Nhận xét đã khóa; cần mở khóa có lý do')
         if body.get('step') not in STEPS or not all(body.get(k, '').strip() for k in ('problem', 'why', 'question')): raise Problem('Nhập bước, nhận định, lý do và câu hỏi')
-        c = {k: body.get(k, '') for k in ('step', 'problem', 'why', 'question', 'notes', 'hypothesis')}
+        c = {k: body.get(k, '') for k in ('step', 'problem', 'why', 'question', 'notes', 'hypothesis', 'quality', 'category', 'extra')}
         c.update(id=ident(), version=version['number'], rule='EXPERT', author=a['id'], state='pending',
                  priority=body.get('priority', 'medium'), internal=bool(body.get('internal', True)),
                  stale=False, evidence=[b for b in version['blocks'] if b['id'] in version['fields'][c['step']]])
-        r['comments'].append(c)
+        if body.get('comment_id'):
+            prior = next((x for x in r['comments'] if x['id']==body['comment_id'] and x.get('author')==a['id'] and not x.get('stale') and x.get('rule')=='EXPERT' and x['step']==body['step']), None)
+            if not prior: raise Problem('Không tìm thấy bản nháp của bạn', 403)
+            prior.update(c, id=prior['id'])
+        else: r['comments'].append(c)
     elif op == 'review':
         require(a, ('expert', 'project'))
-        if r['status'] not in ('pending', 'review', 'rechecked'): raise Problem('Nhận xét đang khóa')
         c = next((c for c in r['comments'] if c['id'] == body.get('comment_id')), None)
         if not c or c.get('stale'): raise Problem('Nhận xét không còn hiệu lực trên phiên bản hiện tại')
+        if c['step'] in step_set(r,'locked_steps'): raise Problem('Nhận xét đang khóa')
         if body.get('state') not in ('approved', 'rejected'): raise Problem('Trạng thái duyệt không hợp lệ')
         c.update(state=body['state'], reviewer=a['id'], reviewed_at=now(), internal=bool(body.get('internal', True)))
     elif op == 'lock':
         require(a, ('expert', 'project'))
-        if r['status'] not in ('review', 'rechecked') or any(c['state'] == 'pending' and not c.get('stale') for c in r['comments']): raise Problem('Cần xác nhận dữ liệu và duyệt/bác nhận xét trước khi khóa')
-        r['status'] = 'locked'; r['locked_by'] = a['id']
+        targets = {body['step']} if body.get('step') else set(STEPS)
+        if not targets <= set(STEPS) or not version['confirmed']: raise Problem('Cần xác nhận dữ liệu và chọn bước hợp lệ')
+        comments = [c for c in r['comments'] if c['step'] in targets and not c.get('stale')]
+        if not comments or any(c['state']=='pending' for c in comments): raise Problem('Cần duyệt hoặc bác nhận xét của bước trước khi khóa')
+        r['locked_steps'] = sorted(step_set(r,'locked_steps') | targets)
+        if not r.get('released'): r['status'] = 'locked'
+        r['locked_by'] = a['id']
     elif op == 'unlock':
         require(a, ('expert', 'project'))
         if not reason: raise Problem('Bắt buộc nhập lý do mở khóa')
         if body.get('target') == 'unit':
-            require(a, ('project',))
+            require(a, ('project', 'system'))
             if r['status'] not in ('submitted', 'rechecked', 'complete'): raise Problem('Chưa có bản nộp để mở lại')
             r['status'], r['released'] = 'released', True
+            r['submitted_steps'] = []
         else:
-            r['status'], r['released'] = 'review', False
+            targets = {body['step']} if body.get('step') else set(STEPS)
+            if not targets <= set(STEPS): raise Problem('Bước không hợp lệ')
+            r['locked_steps'] = sorted(step_set(r,'locked_steps') - targets)
+            r['released_steps'] = sorted(step_set(r,'released_steps') - targets)
+            r['released'] = bool(r['released_steps'])
+            r['status'] = 'released' if r['released'] else 'review'
     elif op == 'release':
-        require(a, ('project',))
-        if r['status'] != 'locked': raise Problem('Chỉ mở góp ý sau khi khóa nhận xét')
+        require(a, ('project', 'system'))
+        targets = {body['step']} if body.get('step') else step_set(r,'locked_steps')
+        if not targets or not targets <= step_set(r,'locked_steps'): raise Problem('Chỉ mở các bước đã khóa nhận xét')
+        r['released_steps'] = sorted(step_set(r,'released_steps') | targets)
+        for c in r['comments']:
+            if c['step'] in targets and c['state']=='approved' and not c.get('internal') and not c.get('stale'): c['published_at'] = now()
         r['released'], r['status'] = True, 'released'
+    elif op == 'compare-review':
+        require(a, ('expert', 'project'))
+        if body.get('step') not in STEPS or body.get('label') not in ('Rõ hơn','Không thay đổi','Còn yếu','Cần xác minh') or not reason: raise Problem('Chọn bước, kết quả và căn cứ đánh giá')
+        r.setdefault('comparison', {})[body['step']] = {'label': body['label'], 'reason': reason, 'by': a['id'], 'at': now(), 'version': version['number']}
     elif op == 'respond':
         require(a, ('unit',))
         if not r['released'] or r['status'] not in ('released', 'self_review'): raise Problem('Chưa mở góp ý hoặc đã nộp và khóa')
@@ -611,19 +662,28 @@ def api(op=None):
         if body['agreement'] != 'agree' and not reason: raise Problem('Cần giải thích khi không hoàn toàn đồng ý')
         revisions = body.get('revisions', {})
         if not isinstance(revisions, dict) or not set(revisions) <= set(STEPS) or any(not isinstance(v, str) for v in revisions.values()): raise Problem('Nội dung hiệu chỉnh không hợp lệ')
+        if not set(revisions) <= step_set(r,'released_steps'): raise Problem('Chỉ hiệu chỉnh các bước đã mở góp ý', 403)
+        if set(revisions) & set(r.get('submitted_steps', [])): raise Problem('Bước đã nộp và khóa', 403)
+        response_step = body.get('step')
+        if response_step and (response_step not in step_set(r,'released_steps') or response_step in r.get('submitted_steps', [])): raise Problem('Bước chưa mở hoặc đã nộp và khóa', 403)
+        if response_step and set(revisions) != {response_step}: raise Problem('Chỉ nộp nội dung của bước đang chọn')
         ratings = body.get('self_rating', {})
         if not isinstance(ratings, dict) or not set(ratings) <= {'gate', 'criteria'}: raise Problem('Bộ tự đánh giá không hợp lệ')
         for group, values in ratings.items():
             if not isinstance(values, dict) or not set(values) <= {str(i) for i in range(1, 6 if group == 'gate' else 11)} or any(v not in ('Đạt', 'Chưa đạt', 'Chưa rõ', '') for v in values.values()): raise Problem('Giá trị tự đánh giá không hợp lệ')
         response = {'id': ident(), 'at': now(), 'by': a['id'], 'agreement': body['agreement'], 'reason': reason,
-                    'revisions': revisions, 'evidence': body.get('evidence', ''), 'support': body.get('support', ''),
+                    'step': response_step, 'revisions': revisions, 'evidence': body.get('evidence', ''), 'support': body.get('support', ''), 'unclear': body.get('unclear', ''),
                     'self_rating': ratings, 'submitted': bool(body.get('submit'))}
         r['responses'].append(response)
         r['status'] = 'self_review'
         if body.get('submit'):
             v = copy.deepcopy(version); v.update(number=version['number'] + 1, at=now(), confirmed=False)
             v['revisions'].update(revisions); v['self_rating'] = ratings; r['versions'].append(v); r['status'] = 'submitted'
-            for c in r['comments']: c['stale'] = True
+            if response_step:
+                r['submitted_steps'] = sorted(set(r.get('submitted_steps', [])) | {response_step})
+                r['status'] = 'submitted' if step_set(r,'released_steps') <= set(r['submitted_steps']) else 'self_review'
+            for c in r['comments']:
+                if not response_step or c['step'] == response_step: c['stale'] = True
     elif op == 'recheck':
         require(a, ('expert', 'data', 'project'))
         if r['status'] != 'submitted': raise Problem('Chỉ kiểm tra lại bản đã nộp')

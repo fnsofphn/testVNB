@@ -42,6 +42,10 @@
 .vc-root .vc-info{background:var(--vc-soft);border-left:3px solid var(--vc-blue);padding:12px 15px;margin:12px 0;border-radius:4px}
 .vc-root .vc-info.warn{background:var(--vc-warn);border-color:var(--vc-warnink);color:var(--vc-warnink)}
 .vc-root .vc-table{overflow-x:auto}
+.vc-root .vc-layer table{table-layout:fixed;min-width:680px}
+.vc-root .vc-layer th:first-child{width:44px}
+.vc-root .vc-layer td{overflow-wrap:anywhere}
+.vc-root .vc-layer td .vc-sub{display:block;margin-bottom:8px}
 .vc-root table{border-collapse:collapse;width:100%;font-size:13px;text-align:left}
 .vc-root th{font-weight:500;background:var(--vc-bg);color:var(--vc-muted)}
 .vc-root td,.vc-root th{padding:11px 10px;border-bottom:1px solid var(--vc-line);vertical-align:top}
@@ -120,7 +124,7 @@
 .vc-root .vc-table .vc-link{padding:0;border:0;background:none;text-align:left}
 .vc-root .vc-table td button{margin:2px}
 .vc-root .vc-badge.pending,.vc-root .vc-badge.error,.vc-root .vc-badge.needs_ocr{background:var(--vc-warn);color:var(--vc-warnink)}
-.vc-root .vc-badge.parsed,.vc-root .vc-badge.complete,.vc-root .vc-badge.approved{background:var(--vc-green);color:#206a50}
+.vc-root .vc-badge.parsed,.vc-root .vc-badge.complete,.vc-root .vc-badge.approved{background:var(--vc-green);color:light-dark(#206a50,#8bddb7)}
 .vc-root .vc-warning{color:var(--vc-warnink)}
 .vc-root .vc-drop{display:flex;flex-direction:column;gap:10px;text-align:center;border:2px dashed var(--vc-line);padding:28px;border-radius:10px;background:var(--vc-bg)}
 .vc-root .vc-drop input{max-width:460px}
@@ -148,3 +152,5 @@
 
 .vc-root .vc-account-dialog{background:var(--vc-panel);color:var(--vc-ink);border:1px solid var(--vc-line);border-radius:13px;width:min(700px,calc(100vw - 32px));max-height:85vh;overflow:auto;padding:24px;margin:auto;box-shadow:0 15px 50px #00182f33}
 .vc-root .vc-account-dialog::backdrop{background:#04182c88}
+
+.vc-root .vc-row>select{width:auto;max-width:100%}.vc-root .vc-drop{align-items:center}.vc-root .vc-toolbar{margin-bottom:16px}.vc-root .vc-heat td button{width:100%}.vc-root .vc-card textarea{min-height:110px}

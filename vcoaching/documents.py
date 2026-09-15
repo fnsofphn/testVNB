@@ -197,7 +197,7 @@ def parse(path, filename=None):
                 if name_i is None: continue
                 name_raw = values[name_i]
                 match = re.search(r'(?:Tên SK|Tên sáng kiến/nhiệm vụ|Tên sáng kiến)\s*:\s*(.*?)(?=\n\s*[-–]?\s*Phạm vi|$)', name_raw, re.S | re.I)
-                name = match[1].strip() if match else name_raw.strip()
+                name = match[1].strip() if match else re.split(r'\n\s*[-–]?\s*Phạm vi\s*:', name_raw, maxsplit=1, flags=re.I)[0].strip()
                 if blank(name): continue
                 current = new_candidate('master', values[0].strip(), name)
                 candidates.append(current)
@@ -365,6 +365,9 @@ def export_docx(record, template, destination):
             if blank(b['text']): continue
             paragraph(b.get('file_name', '') + ' — ' + b['label'] + ' — ' + str(b['locator']))
             for line in b['text'].split('\n'): paragraph(line)
+            if 'original_text' in b:
+                paragraph('Nguyên văn trước hiệu chỉnh:')
+                for line in b['original_text'].split('\n'): paragraph(line)
         with ZipFile(destination, 'w') as zout:
             for info in zin.infolist():
                 zout.writestr(info, etree.tostring(xml, xml_declaration=True, encoding='UTF-8', standalone=True)
