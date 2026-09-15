@@ -256,6 +256,22 @@ def parse(path, filename=None):
             'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
 
 
+def numeric_conflicts(record):
+    """Flag comparable fields, without choosing a winning source or value."""
+    groups = {}
+    for b in record['versions'][-1]['blocks']:
+        if not b.get('file_id') or not re.search(r'\d', b['text']): continue
+        label = norm(b['label'])
+        if label in ('ma','ma sang kien/nhiem vu','stt','chi tiet chua xac nhan mapping'): continue
+        groups.setdefault(label, []).append(b)
+    result = []
+    for blocks in groups.values():
+        if len({b['file_id'] for b in blocks}) < 2: continue
+        values = {tuple(re.sub(r'\s+','',n) for n in re.findall(r'(?<!\w)[<>≤≥]?\s*\d+(?:[.,]\d+)*(?:\s*%)?',b['text'])) for b in blocks}
+        if len(values) > 1: result.append(blocks)
+    return result
+
+
 def rules(record):
     version = record['versions'][-1]
     blocks = {b['id']: b for b in version['blocks']}
@@ -266,6 +282,11 @@ def rules(record):
             'problem': problem, 'why': why, 'question': question, 'evidence': evidence,
             'priority': 'medium', 'rule': rule, 'state': 'pending', 'reviewer': None,
             'reviewed_at': None, 'internal': True, 'stale': False})
+    for evidence in numeric_conflicts(record):
+        step = next((key for key,ids in fields.items() if any(b['id'] in ids for b in evidence)), '3')
+        issue('NUMERIC_SOURCE_DIFFERENCE_V1',step,'Giá trị số khác nhau giữa nguồn: '+evidence[0]['label'],
+              'Có thể khác kỳ đo hoặc phạm vi; hệ thống giữ cả hai, chưa kết luận nguồn nào đúng.',
+              'Các giá trị có cùng kỳ đo, đối tượng và đơn vị tính không?', evidence)
     for step in ('7A', '7B', '7C'):
         if not fields.get(step) and not version.get('revisions', {}).get(step) and step not in version.get('not_applicable', []):
             ev = [b for b in blocks.values() if norm(STEPS[step].replace(' mới', '')) in norm(b['label'])]

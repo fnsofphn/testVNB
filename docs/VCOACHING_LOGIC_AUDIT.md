@@ -18,19 +18,52 @@ Mockup HTML vẫn gắn lớp bottleneck cố định cho bước 04 ở hàm ta
 không đủ làm nguồn cho logic vận hành. Quy tắc mới thực hiện yêu cầu trực tiếp
 của người dùng: chỉ dùng màu cảnh báo khi có trạng thái cần kiểm chứng.
 
-## Chưa thể coi là hoàn thiện toàn bộ logic
+## Bổ sung kiểm tra vận hành ngày 15/09/2026
 
-1. Tiến trình chuyển đổi: máy chủ có trạng thái theo tệp, chưa lưu thời điểm và
-   lỗi riêng cho từng công đoạn. Thanh sáu bước hiện chưa phải nhật ký từng bước.
-2. Tổng hợp nguồn: nhận diện theo cấu trúc/mã/tên và tên chủ đề duy nhất, chưa có
-   đối chiếu ngữ nghĩa đầy đủ hoặc phát hiện mọi mâu thuẫn số liệu giữa nhiều tệp.
-3. Bảng ba tầng: còn trình bày nguồn tổng hợp; chưa chuẩn hóa đầy đủ mọi hàng cơ
-   chế/hành vi/kết quả và quan hệ giữa các hàng của từng loại biểu.
-4. Cấu hình AI: lưu được chỉ dẫn nhưng chưa nối mô hình xử lý; không gọi việc
-   lưu cấu hình là đã phân tích nội dung bằng AI.
-5. Báo cáo cấp hệ thống: có thống kê thật, chưa tự kết luận điểm nghẽn lặp lại
-   hoặc mức độ cải thiện chất lượng khi chưa có đánh giá có căn cứ.
+- Không công bố lại góp ý để mở bản đã nộp hoặc đặt lại tiến độ nộp từng bước.
+- Nộp một bước giữ hiệu lực nhận xét chưa sửa ở các bước khác trên phiên bản mới.
+- Kiểm tra lại mở quyền duyệt nhận xét mới; xác nhận dữ liệu giữ trạng thái kiểm tra
+  lại; hoàn tất bị chặn nếu còn nhận xét chờ xử lý. Admin hệ thống mở lại bản nộp
+  có lý do đúng quyền, chuyên gia không được tự mở bản đã nộp.
+- Tải nguồn trùng không ghi đè hồ sơ đã xác nhận/nhận xét/hiệu chỉnh/nộp. Nguồn mới
+  được giữ riêng để đối chiếu trong trường hợp này. Luồng tự ghép vẫn áp dụng với
+  hồ sơ mới chưa được xử lý bởi con người.
+- Chờ các tệp đã tiếp nhận đang xếp hàng/đọc trong cùng đơn vị trước khi tổng hợp.
+  API không báo hoàn tất khi còn chờ. Tệp chưa tải xong không khóa cả đơn vị.
+- Lưu công đoạn theo tệp ở máy chủ, có trạng thái/thời điểm và lỗi đọc. Giao diện
+  dùng trạng thái đó; hồ sơ cũ không có nhật ký được ghi rõ. Các công đoạn sau đọc
+  được lưu trong cùng giao dịch, không mô phỏng phần trăm hay thời lượng.
+- Nếu tải một tệp lỗi, các tệp trước đã tiếp nhận vẫn được gửi xử lý. Lỗi xử lý
+  một tệp không ngăn yêu cầu xử lý những tệp tiếp theo.
+- So sánh chuỗi giá trị số ở các trường cùng nhãn, khác tệp; tạo dấu hiệu cần đối
+  chiếu kèm cả hai nguồn. Không tự chọn số đúng hoặc kết luận có mâu thuẫn nghiệp vụ.
+- Bảng ba tầng liên kết hiện trạng/KPI theo định danh tệp + bảng + hàng; không lấy
+  baseline chung cho mọi hàng. Thiếu trường tương ứng thì ghi thiếu, không suy đoán.
 
-Kiểm tra đợt này: 13 kiểm tra logic màu/trạng thái, TypeScript và build.
-Không thay đổi dữ liệu production. Không khẳng định sản phẩm đã khớp toàn bộ
-logic mockup chỉ vì nhóm kiểm tra này đạt.
+### Bằng chứng kiểm tra
+
+- 15 ca kiểm thử Python đạt: tài liệu thật, phân quyền, bảo mật nhận xét, nộp từng
+  bước, kiểm tra lại/hoàn tất/mở lại, bảo vệ bản nộp khi tải thêm, công đoạn xử lý,
+  khác biệt số liệu, giữ nguyên bản và xuất Word.
+- Bộ Ban Nhân lực: ba sáng kiến chính kết hợp nguồn tổng hợp/chi tiết; đề xuất thứ
+  tư riêng; gọi chuyển đổi lại không nhân phiên bản khi không có dữ liệu mới.
+- 13 kiểm tra trạng thái/màu đạt. Kiểm tra render bảng với tệp cùng tên nhưng khác
+  định danh/hàng đạt. TypeScript và build đạt.
+- Kiểm thử chạy trên cơ sở dữ liệu tạm. Không cập nhật production, chưa xác minh
+  vòng upload thật qua trình duyệt trên Vercel ở đợt này.
+
+## Phạm vi còn chưa được bảo đảm
+
+1. Nhận diện theo cấu trúc/mã/tên/chủ đề duy nhất; chưa nhận diện ngữ nghĩa mọi
+   biến thể tên hoặc mọi mâu thuẫn. Nguồn không xác định chắc vẫn được giữ riêng.
+2. PDF scan cần OCR; chưa có dịch vụ OCR hoạt động để bảo đảm đọc mọi tệp scan.
+3. Cấu hình AI mới lưu chỉ dẫn, chưa nối mô hình. Không coi lưu cấu hình là đã
+   phân tích hoặc kiểm chứng nội dung bằng AI.
+4. Mốc công đoạn không phải hàng đợi độc lập cho cả sáu bước. Chọn tệp đang xem
+   lưu theo trình duyệt; chưa có lô đa tệp dùng chung qua các thiết bị.
+5. Báo cáo có thống kê dữ liệu thật, chưa tự suy ra điểm nghẽn lặp lại hay mức độ
+   cải thiện khi chưa có đánh giá có căn cứ.
+6. Cần kiểm thử tích hợp upload/storage/worker/quyền thực tế trên bản triển khai
+   của commit mới; build đạt không chứng minh production hoạt động đầy đủ.
+
+Không khẳng định hoàn thiện 100% logic mockup hoặc mọi loại tài liệu.

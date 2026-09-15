@@ -7,7 +7,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'vcoaching'))
 TEMP = tempfile.TemporaryDirectory(prefix='vcoaching-test-')
 os.environ['VCOACHING_DATA_DIR'] = TEMP.name
 import server as s
-from documents import parse, STEPS, norm, business_code, export_docx, mapped_outputs
+from documents import parse, STEPS, norm, business_code, export_docx, mapped_outputs, numeric_conflicts, rules
 CORPUS = Path(r'D:\03. Data\2026\V-Coaching\Tài liệu\2. WS1A_CHI TIẾT THEO PHIÊN')
 MASTER = Path(r'D:\04. Code\Vcoaching\CLSP_Mau_01_Master_CTHD_VNPT_Rising_2026_2028.docx')
 
@@ -43,8 +43,19 @@ class Workflow(unittest.TestCase):
   self.request('respond',role='unit',status=400,agreement='partial',reason='')
   self.request('respond',role='unit',agreement='agree',revisions={'7A':'Đơn vị tự hiệu chỉnh'},self_rating={'gate':{'1':'Đạt'}},submit=True)
   self.request('respond',role='unit',status=400,agreement='agree',submit=True)
+  self.request('release',role='project',status=400)
+  self.request('confirm',reason='Không được bỏ qua bản nộp',status=400)
+  self.request('unlock',role='expert',reason='Không được mở bản nộp',status=400)
   self.request('recheck',role='data')
-  self.request('unlock',role='project',target='unit',reason='Cho đơn vị bổ sung nguồn')
+  self.assertEqual(s.get(self.iid)['locked_steps'],[])
+  self.request('finalize',reason='Chưa duyệt nhận xét mới',status=400)
+  for c in s.get(self.iid)['comments']:
+   if not c.get('stale'): self.request('review',role='expert',comment_id=c['id'],state='approved')
+  self.request('confirm',reason='Xác nhận sau kiểm tra lại')
+  self.assertEqual(s.get(self.iid)['status'],'rechecked')
+  self.request('finalize',reason='Đã duyệt kiểm tra lại')
+  self.assertEqual(s.get(self.iid)['status'],'complete')
+  self.request('unlock',role='system',target='unit',reason='Cho đơn vị bổ sung nguồn')
   self.assertEqual(s.get(self.iid)['status'],'released')
  def test_partial_step_release_and_private_fields(self):
   self.request('edit',reason='Đối chiếu',resolve_issues=True)
@@ -79,6 +90,9 @@ class Workflow(unittest.TestCase):
   self.request('respond',role='unit',step='1',agreement='agree',revisions={'1':'Bản sửa 1'},submit=True)
   self.assertEqual(s.get(self.iid)['status'],'self_review')
   self.assertEqual(s.get(self.iid)['submitted_steps'],['1'])
+  self.request('release',role='project',step='1',status=400)
+  current=s.get(self.iid)
+  self.assertTrue(all(c['version']==current['versions'][-1]['number'] for c in current['comments'] if not c.get('stale')))
   self.assertEqual(len(s.visible_initiative(who('unit'),s.get(self.iid))['comments']),2)
   self.request('respond',role='unit',step='1',agreement='agree',revisions={'1':'Nộp lại'},submit=True,status=403)
   self.request('respond',role='unit',step='2',agreement='agree',revisions={'2':'Bản sửa 2'},submit=True)
@@ -150,6 +164,44 @@ class Workflow(unittest.TestCase):
   with patch.object(s,'actor',return_value=who('data')):
    workspace=self.client.get('/vc-api/workspace').get_json()
   self.assertEqual(len(workspace['initiatives']),4)
+ def test_new_upload_does_not_overwrite_submitted_record(self):
+  original=s.get(self.iid); original.update(status='submitted',released=True)
+  original['versions'][-1]['revisions']={'1':'Nội dung đơn vị đã nộp'}
+  s.put('initiative',original)
+  candidate=copy.deepcopy(self.parsed['candidates'][0]); candidate.update(id='new-upload-record',issues=[])
+  file={**s.get('source','file'),'id':'second-file'}; s.put('file',file)
+  result=s.add_candidate(candidate,file)
+  self.assertNotEqual(result,self.iid)
+  self.assertEqual(s.get(self.iid),original)
+  self.assertIn('code_conflict',s.get(result)['issues'])
+ def test_numeric_source_conflicts_preserve_evidence(self):
+  r=s.get(self.iid)
+  blocks=[{'id':'a','file_id':'one','label':'Baseline','text':'5.2%'}, {'id':'b','file_id':'two','label':'Baseline','text':'52%'}]
+  r['versions'][-1]['blocks']=blocks; r['versions'][-1]['fields']={'3':['a','b']}
+  before=copy.deepcopy(r)
+  conflicts=numeric_conflicts(r)
+  self.assertEqual(len(conflicts),1); self.assertEqual(r,before)
+  alerts=[c for c in rules(r) if c['rule']=='NUMERIC_SOURCE_DIFFERENCE_V1']
+  self.assertEqual(alerts[0]['evidence'],blocks); self.assertEqual(alerts[0]['state'],'pending')
+  blocks[1]['text']='5.2%'; self.assertEqual(numeric_conflicts(r),[])
+  blocks[1].update(text='52%',file_id='one'); self.assertEqual(numeric_conflicts(r),[])
+ def test_worker_progress_waits_for_other_received_files(self):
+  f=s.get('source','file'); f.update(status='reading',stored='worker-test.docx')
+  (s.DATA/'sources'/f['stored']).write_bytes(MASTER.read_bytes()); s.put('file',f)
+  waiting={**f,'id':'waiting','status':'queued'}; s.put('file',waiting)
+  s.process_file(f)
+  done=s.get('source','file')
+  self.assertEqual(done['status'],'parsed')
+  self.assertEqual(done['progress']['extract']['status'],'done')
+  self.assertEqual(done['progress']['merge']['status'],'waiting')
+  self.request('convert',files=['source'],status=409)
+  waiting['status']='error'; s.put('file',waiting)
+  self.request('convert',files=['source'])
+  self.assertEqual(s.get('source','file')['progress']['result']['status'],'done')
+  broken={**f,'id':'broken','stored':'missing.docx','status':'reading'}; s.put('file',broken)
+  s.process_file(broken)
+  self.assertEqual(s.get('broken','file')['status'],'error')
+  self.assertEqual(s.get('broken','file')['progress']['extract']['status'],'error')
  def test_scope_and_forged_mapping(self):
   item=s.get(self.iid)
   self.assertFalse(s.can(who('unit',unit='other'),item))

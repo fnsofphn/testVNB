@@ -186,7 +186,7 @@ def add_candidate(c, file):
             if value.startswith(prefix): value = value[len(prefix):]
         return value
     exact = [r for r in existing if title_key(r['name']) == title_key(c['name'])]
-    if len(exact) == 1 and not c['issues']:
+    if len(exact) == 1 and not c['issues'] and exact[0]['status']=='pending' and not exact[0].get('released') and not exact[0]['versions'][-1].get('revisions') and not any(cm.get('rule')=='EXPERT' and not cm.get('stale') for cm in exact[0]['comments']):
         r = exact[0]
         old = r['versions'][-1]
         fields = {s: old['fields'][s] + c['fields'][s] for s in STEPS}
@@ -210,9 +210,12 @@ def add_candidate(c, file):
 
 
 def reconcile_sources(project, unit):
+    if any(f['project']==project and f['unit']==unit and f['status'] in ('queued','reading') for f in rows('file')):
+        return False
     candidates = [r for r in rows('initiative') if r['project']==project and r['unit']==unit
                   and not r.get('merged_into') and not r.get('released') and r['status']=='pending'
-                  and not r['versions'][-1].get('revisions')]
+                  and not r['versions'][-1].get('revisions')
+                  and not any(c.get('rule')=='EXPERT' and not c.get('stale') for c in r['comments'])]
     for combined in mapped_outputs(candidates):
         members = combined.pop('contributing_ids')
         if len(members) < 2: continue
@@ -228,10 +231,27 @@ def reconcile_sources(project, unit):
             if rid == combined['id']: continue
             source = get(rid, 'initiative'); source['merged_into'] = combined['id']; put('initiative', source)
         put('initiative', combined)
+    for f in rows('file'):
+        if f['project']==project and f['unit']==unit and f.get('progress') and not f.get('attachment') and f['status'] not in ('uploading','queued','reading','error'):
+            for phase in ('merge','check'): f['progress'][phase]={'status':'done','at':now()}
+            f['progress']['result']={'status':'done' if f['status']=='parsed' else 'partial','at':now()}
+            put('file',f)
+    return True
 
 
 def process_file(file):
     try:
+        with LOCK:
+            DB.execute('BEGIN IMMEDIATE')
+            try:
+                current = get(file['id'], 'file')
+                if CLOUD and current.get('claim') != file.get('claim'):
+                    DB.execute('ROLLBACK'); return
+                file['progress'] = {'receive':{'status':'done','at':file.get('at',now())},
+                                    'extract':{'status':'running','at':now()}}
+                put('file',file); DB.execute('COMMIT')
+            except Exception:
+                DB.execute('ROLLBACK'); raise
         if CLOUD:
             source = DB.download(file['stored'])
             if len(source)>30*1024*1024 or hashlib.sha256(source).hexdigest()!=file['sha256']: raise ValueError('Nội dung tệp không khớp SHA-256 hoặc vượt giới hạn')
@@ -239,6 +259,9 @@ def process_file(file):
             path.write_bytes(source)
         else: path = DATA / 'sources' / file['stored']
         result = parse(path, file['name']) if not file.get('attachment') else None
+        file['progress']['extract'] = {'status':'partial' if result and result['ocr_pages'] else 'done','at':now()}
+        file['progress']['mapping'] = {'status':'partial' if result and (result['ocr_pages'] or not result['candidates']) else 'done','at':now()}
+        file['progress']['merge'] = {'status':'running','at':now()}
         with LOCK:
             DB.execute('BEGIN IMMEDIATE')
             try:
@@ -251,6 +274,7 @@ def process_file(file):
                     attachment.setdefault('attachments', []).append({'file': file['id'], 'at': now(), 'uploader': file['uploader']})
                     put('initiative', attachment)
                     file.update(status='evidence', category='evidence', initiatives=[attachment['id']])
+                    file['progress'] = {phase:{'status':'done','at':now()} for phase in ('receive','result')}
                     put('file', file); DB.execute('COMMIT'); return
                 file.update(status=result['status'], category=result['category'], pages=result['pages'],
                             ocr_pages=result['ocr_pages'], unassigned=result['unassigned'], forms=len(result['candidates']))
@@ -261,7 +285,11 @@ def process_file(file):
                         r['comments'] = [c for c in r['comments'] if c['rule'] not in ('EMPTY_LAYER_V1', 'BASELINE_REVIEW_V1', 'OWNER_V1')]
                         put('initiative', r)
                 put('file', file)
-                reconcile_sources(file['project'], file['unit'])
+                reconciled = reconcile_sources(file['project'], file['unit'])
+                file['progress']['merge'] = {'status':'done' if reconciled else 'waiting','at':now()}
+                file['progress']['check'] = {'status':'done','at':now()}
+                file['progress']['result'] = {'status':('done' if file['status']=='parsed' else 'partial') if reconciled else 'waiting','at':now()}
+                put('file',file)
                 DB.execute('COMMIT')
             except Exception:
                 DB.execute('ROLLBACK'); raise
@@ -275,6 +303,9 @@ def process_file(file):
                 current = get(file['id'], 'file')
                 if not CLOUD or current.get('claim') == file.get('claim'):
                     current.update(status='error', error='Không đọc được tệp; kiểm tra định dạng và tải lại.' if CLOUD else str(e)[:300])
+                    progress=current.setdefault('progress',{})
+                    phase=next((key for key,value in progress.items() if value['status']=='running'),'extract')
+                    progress[phase]={'status':'error','at':now()}
                     put('file', current)
                 DB.execute('COMMIT')
             except Exception:
@@ -546,7 +577,8 @@ def api(op=None):
         if not isinstance(ids,list) or not 1 <= len(ids) <= 100: raise Problem('Chọn từ 1 đến 100 tệp')
         files = [scoped(a, fid, 'file') for fid in ids]
         if any(f['status'] in ('uploading','queued','reading') for f in files): raise Problem('Tài liệu đang được xử lý',409)
-        for project, unit in {(f['project'],f['unit']) for f in files}: reconcile_sources(project,unit)
+        for project, unit in {(f['project'],f['unit']) for f in files}:
+            if not reconcile_sources(project,unit): raise Problem('Đang chờ các tệp còn lại của đơn vị được xử lý',409)
         records = [r for r in rows('initiative') if not r.get('merged_into') and can(a,r) and set(r['files']) & set(ids)]
         audit(a, 'convert_sources', after={'files':ids,'initiatives':[r['id'] for r in records]})
         return jsonify(initiatives=[r['id'] for r in records])
@@ -649,8 +681,10 @@ def api(op=None):
         if not reason or r['issues'] or not r['code'] or not r['unit_name']: raise Problem('Cần xử lý ngoại lệ, mã, tên đơn vị và ghi căn cứ xác nhận')
         if any(get(fid, 'file')['status'] in ('needs_ocr', 'error', 'reading', 'queued') for fid in r['files']): raise Problem('Nguồn chưa đọc đủ; chưa thể xác nhận')
         if op == 'finalize' and r['status'] != 'rechecked': raise Problem('Cần kiểm tra lại sau hiệu chỉnh')
+        if op == 'finalize' and any(c['state']=='pending' and not c.get('stale') for c in r['comments']): raise Problem('Cần xử lý các nhận xét kiểm tra lại trước khi hoàn tất')
+        if op == 'confirm' and r['status'] in ('released','self_review','submitted','complete'): raise Problem('Không xác nhận lại trong khi đơn vị đang phản hồi hoặc hồ sơ đã hoàn tất')
         version['confirmed'] = True; version['confirmed_by'] = a['id']; version['confirmed_at'] = now()
-        r['status'] = 'complete' if op == 'finalize' else 'review'
+        r['status'] = 'complete' if op == 'finalize' else ('rechecked' if r['status']=='rechecked' else 'review')
     elif op == 'assign':
         require(a, ('project',))
         ids = body.get('experts', [])
@@ -689,7 +723,7 @@ def api(op=None):
         if not r.get('released'): r['status'] = 'locked'
         r['locked_by'] = a['id']
     elif op == 'unlock':
-        require(a, ('expert', 'project'))
+        require(a, ('expert', 'project', 'system') if body.get('target')=='unit' else ('expert','project'))
         if not reason: raise Problem('Bắt buộc nhập lý do mở khóa')
         if body.get('target') == 'unit':
             require(a, ('project', 'system'))
@@ -697,6 +731,7 @@ def api(op=None):
             r['status'], r['released'] = 'released', True
             r['submitted_steps'] = []
         else:
+            if r['status'] in ('submitted','complete'): raise Problem('Cần quản trị mở lại bản nộp trước khi sửa nhận xét')
             targets = {body['step']} if body.get('step') else set(STEPS)
             if not targets <= set(STEPS): raise Problem('Bước không hợp lệ')
             r['locked_steps'] = sorted(step_set(r,'locked_steps') - targets)
@@ -707,10 +742,12 @@ def api(op=None):
         require(a, ('project', 'system'))
         targets = {body['step']} if body.get('step') else step_set(r,'locked_steps')
         if not targets or not targets <= step_set(r,'locked_steps'): raise Problem('Chỉ mở các bước đã khóa nhận xét')
+        if r['status'] in ('submitted','rechecked','complete'): raise Problem('Bản nộp đang khóa; dùng chức năng mở lại có lý do')
+        if targets & set(r.get('submitted_steps',[])): raise Problem('Không mở lại bước đã nộp bằng thao tác công bố góp ý')
         r['released_steps'] = sorted(step_set(r,'released_steps') | targets)
         for c in r['comments']:
             if c['step'] in targets and c['state']=='approved' and not c.get('internal') and not c.get('stale'): c['published_at'] = now()
-        r['released'], r['status'] = True, 'released'
+        r['released'], r['status'] = True, 'self_review' if r.get('submitted_steps') else 'released'
     elif op == 'compare-review':
         require(a, ('expert', 'project'))
         if body.get('step') not in STEPS or body.get('label') not in ('Rõ hơn','Không thay đổi','Còn yếu','Cần xác minh') or not reason: raise Problem('Chọn bước, kết quả và căn cứ đánh giá')
@@ -744,10 +781,12 @@ def api(op=None):
                 r['status'] = 'submitted' if step_set(r,'released_steps') <= set(r['submitted_steps']) else 'self_review'
             for c in r['comments']:
                 if not response_step or c['step'] == response_step: c['stale'] = True
+                elif not c.get('stale'): c['version'] = v['number']
     elif op == 'recheck':
         require(a, ('expert', 'data', 'project'))
         if r['status'] != 'submitted': raise Problem('Chỉ kiểm tra lại bản đã nộp')
         r['comments'].extend(rules(r)); r['status'] = 'rechecked'
+        r['locked_steps'] = []
     else: raise Problem('Chức năng không tồn tại', 404)
     put('initiative', r)
     # Audit tracks IDs/states, not private comments in broadly readable logs.
