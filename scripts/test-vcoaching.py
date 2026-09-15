@@ -254,6 +254,36 @@ class Workflow(unittest.TestCase):
   self.assertEqual(len(mapped_outputs([base,other])),2)
   numbered=copy.deepcopy(base); numbered.update(id='numbered',name=base['name']+' 2')
   self.assertEqual(len(mapped_outputs([base,numbered])),2)
+ def test_fanpage_short_title_real_sources(self):
+  directory=next(p for p in CORPUS.rglob('4. Ban Truyền thông') if p.is_dir())
+  records=[]
+  for filename in ('Mau_01_Master_CTHD_VNPT_Rising_2026_2028_Ban TT.docx','SK02_Mau_02_CTHD_VNPT_Rising_2026_2028_Ban TT.docx'):
+   parsed=parse(directory/filename)
+   file={**s.get('source','file'),'id':filename,'name':filename,'sha256':parsed['sha256']}
+   s.put('file',file)
+   for c in parsed['candidates']:
+    if business_code(c['code'])=='SK02': records.append(s.get(s.add_candidate(c,file)))
+  self.assertEqual(len(records),2)
+  original=copy.deepcopy(records)
+  result=mapped_outputs(records)
+  self.assertEqual(len(result),1)
+  self.assertEqual(result[0]['name'],records[0]['name'])
+  self.assertEqual(len(result[0]['files']),2)
+  self.assertEqual(len(result[0]['versions'][-1]['blocks']),sum(len(r['versions'][-1]['blocks']) for r in records))
+  self.assertEqual(records,original)
+  self.request('convert',files=[r['files'][0] for r in records])
+  self.assertEqual(len([r for r in s.rows('initiative') if not r.get('merged_into') and r['id'] in {v['id'] for v in records}]),1)
+  wrong=copy.deepcopy(original[1]); wrong['code']='SK03'
+  self.assertEqual(len(mapped_outputs([original[0],wrong])),2)
+  wrong=copy.deepcopy(original[1]); wrong['source_unit_name']='Ban Nhân lực'
+  self.assertEqual(len(mapped_outputs([original[0],wrong])),2)
+  wrong=copy.deepcopy(original[1]); wrong['versions'][-1]['blocks']=[]
+  self.assertEqual(len(mapped_outputs([original[0],wrong])),2)
+  second=copy.deepcopy(original[0]); second.update(id='another-master',name=original[0]['name']+', phạm vi khác')
+  result=mapped_outputs([original[0],second,original[1]])
+  # If both full titles themselves match, they are one source group; otherwise
+  # the short title must not choose arbitrarily between distinct groups.
+  self.assertTrue(all(len(r['contributing_ids'])!=2 or original[1]['id'] not in r['contributing_ids'] for r in result))
  def test_fresh_grant_and_switch_rejects_forgery(self):
   user={'id':'admin','email':'admin@test.invalid','app_metadata':{'vcoaching':{'active':True,'role':'system','super_admin':True,'projects':[],'units':[]}}}
   def auth(path,**kwargs):

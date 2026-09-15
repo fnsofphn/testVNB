@@ -83,3 +83,18 @@ Không khẳng định hoàn thiện 100% logic mockup hoặc mọi loại tài 
   vẫn có thể chưa ghép được. Nguồn gốc/khác biệt được giữ, không bịa nội dung.
 - 17 kiểm thử nghiệp vụ đạt, gồm phạm vi tệp chọn, chạy lại không nhân phiên bản,
   tên viết tắt/sai dấu, chi tiết không có master và bộ tài liệu thật.
+
+## Tên rút gọn SK02 Fanpage — kiểm thử theo tài liệu Ban Truyền thông
+
+Bổ sung ghép tên ngắn là phần đầu của tên đầy đủ khi cùng mã, cùng phạm vi đơn
+vị và có đoạn vấn đề/hiện trạng/mục tiêu/kết quả đủ dài, tương đồng cao. Không
+chỉ dùng độ giống tên hoặc mã SK02. Nếu nguồn ghi hai đơn vị khác nhau, nhánh
+nhận diện này không tự ghép. Giữ nguyên quy tắc không chọn tùy ý giữa nhiều nhóm.
+
+Kiểm thử đúng Mẫu 01 và SK02 Mẫu 02 của Ban Truyền thông: một hồ sơ với tên đầy
+đủ từ Mẫu 01, hai nguồn và toàn bộ các đoạn được giữ nguyên. Kiểm tra âm tính
+khác mã/đơn vị/thiếu bằng chứng đạt; 18 ca kiểm thử nghiệp vụ đạt.
+
+Để áp dụng cho dữ liệu đã tải, triển khai commit mới rồi chọn lại bộ tệp nguồn
+và bấm Phân tích & tổng hợp. Không cần xóa/tải lại. Hồ sơ đã được người dùng
+nhận xét hoặc nộp vẫn được bảo vệ; không tự sửa dữ liệu production trong đợt này.

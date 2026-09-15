@@ -334,6 +334,20 @@ def mapped_outputs(records):
         initials=lambda t: ''.join(w[0] for w in t.split())
         if len(x)>=4 and ' ' not in x and x==initials(y): return True
         if len(y)>=4 and ' ' not in y and y==initials(x): return True
+        # A detail may abbreviate the master title before a descriptive suffix.
+        # Require the same code and substantive source evidence, not prefix alone.
+        short,long=sorted((x,y),key=len)
+        same_code=bool(a.get('code')) and business_code(a['code'])==business_code(b.get('code',''))
+        source_unit_a=norm(a.get('source_unit_name',a.get('unit_name','')))
+        source_unit_b=norm(b.get('source_unit_name',b.get('unit_name','')))
+        units_agree=not source_unit_a or not source_unit_b or source_unit_a==source_unit_b
+        def evidence(r):
+            return [norm(block['text']) for block in r['versions'][-1]['blocks']
+                    if re.search(r'van de|diem nghen|hien trang|muc tieu|ket qua',norm(block['label']))
+                    and len(norm(block['text']))>=80 and not blank(block['text'])]
+        if same_code and units_agree and len(short.split())>=4 and long.startswith(short+' '):
+            if any(SequenceMatcher(None,u,v).ratio()>=0.9 for u in evidence(a) for v in evidence(b)):
+                return True
         if min(len(x.split()),len(y.split()))<4: return False
         ratio=SequenceMatcher(None,x,y).ratio()
         def content(r):
