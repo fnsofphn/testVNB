@@ -242,7 +242,7 @@ class Workflow(unittest.TestCase):
   version=active[0]['versions'][-1]['number']
   self.request('convert',files=['source','selected-file'])
   self.assertEqual(s.get(active[0]['id'])['versions'][-1]['number'],version)
-  self.request('convert',files=['source'],status=409)
+  self.request('convert',files=['source'])
  def test_abbreviations_typos_and_detail_only_grouping(self):
   base=s.get(self.iid); base.update(forms=['detail'],name='Nâng cao chất lượng chăm sóc khách hàng doanh nghiệp')
   alias=copy.deepcopy(base); alias.update(id='alias',files=['alias-file'],name='Nâng cao chất lượng CSKH DN')
@@ -305,6 +305,27 @@ class Workflow(unittest.TestCase):
   self.assertEqual(len([u for u in s.rows('unit') if u['id']==communication['id']]),1)
   self.assertEqual(s.get(communication['id'])['name'],'Tên quản trị đã sửa')
   s.DB.execute('DELETE FROM records WHERE id=?',(communication['id'],))
+ def test_partial_master_selection_and_stable_tracking_numbers(self):
+  base=s.get(self.iid)
+  s.DB.execute('DELETE FROM records WHERE id=?',(self.iid,))
+  first={**copy.deepcopy(base),'id':'first','files':['source','detail-one'],'forms':['master','detail'],'conversion_pending':False}
+  second={**copy.deepcopy(base),'id':'second','files':['source','detail-two'],'forms':['master','detail'],'conversion_pending':False,'unit_name':'Ban khác'}
+  child={**copy.deepcopy(base),'id':'child','files':['detail-one'],'forms':['detail'],'merged_into':'first'}
+  for r in (first,second,child):s.put('initiative',r)
+  for fid in ('detail-one','detail-two'):s.put('file',{**s.get('source','file'),'id':fid})
+  result=self.request('convert',files=['source','detail-one'])
+  self.assertEqual(result['initiatives'],['first'])
+  self.assertEqual(s.get('second')['versions'],second['versions'])
+  codes=[s.get(key)['tracking_code'] for key in ('first','second')]
+  self.assertEqual(len(set(codes)),2)
+  self.request('convert',files=['source','detail-one'])
+  self.assertEqual([s.get(key)['tracking_code'] for key in ('first','second')],codes)
+  self.assertEqual(s.get('first')['code'],base['code'])
+  third={**copy.deepcopy(base),'id':'third','files':['later-file'],'conversion_pending':True}
+  s.put('initiative',third);s.put('file',{**s.get('source','file'),'id':'later-file'})
+  self.request('convert',files=['later-file'])
+  self.assertNotIn(s.get('third')['tracking_code'],codes)
+  self.assertGreater(int(s.get('third')['tracking_code'][3:]),max(int(code[3:]) for code in codes))
  def test_fresh_grant_and_switch_rejects_forgery(self):
   user={'id':'admin','email':'admin@test.invalid','app_metadata':{'vcoaching':{'active':True,'role':'system','super_admin':True,'projects':[],'units':[]}}}
   def auth(path,**kwargs):

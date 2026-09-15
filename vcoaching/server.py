@@ -582,10 +582,31 @@ def api(op=None):
         if any(f['status'] in ('uploading','queued','reading') for f in files): raise Problem('Tài liệu đang được xử lý',409)
         for project, unit in {(f['project'],f['unit']) for f in files}:
             if not reconcile_sources(project,unit,ids): raise Problem('Đang chờ các tệp còn lại của đơn vị được xử lý',409)
-        records = [r for r in rows('initiative') if not r.get('merged_into') and can(a,r) and set(r['files']) & set(ids)]
+        all_records=rows('initiative')
+        detail_ids={fid for r in all_records if r['forms']==['detail'] for fid in r['files'] if fid in ids}
+        records = [r for r in all_records if not r.get('merged_into') and can(a,r)
+                   and set(r['files']) & (detail_ids or set(ids))]
         for record in records:
-            if not set(record['files']) <= set(ids): raise Problem('Hồ sơ đã tổng hợp chứa tệp khác; chọn đủ các tệp nguồn của hồ sơ để phân tích lại',409)
+            # Existing source history is retained; unrelated initiatives in the
+            # same master no longer block a selected detail's analysis.
             record['conversion_pending']=False; put('initiative',record)
+        # The enclosing write transaction serializes number allocation, including
+        # concurrent cloud invocations. Source codes remain unchanged.
+        try: sequence=get('initiative-number-sequence','sequence')
+        except Problem: sequence={'id':'initiative-number-sequence','value':0}
+        all_records=rows('initiative')
+        sequence['value']=max([sequence['value']]+[int(r['tracking_code'][3:]) for r in all_records if re.fullmatch(r'SK-\d+',r.get('tracking_code',''))])
+        for record in sorted(all_records,key=lambda r:r['id']):
+            if record.get('merged_into') or record.get('conversion_pending') or not can(a,record): continue
+            if not record.get('tracking_code'):
+                sequence['value']+=1;record['tracking_code']=f"SK-{sequence['value']:06d}"
+            peers=[other for other in all_records if other['id']!=record['id'] and not other.get('merged_into')
+                   and not other.get('conversion_pending') and other['project']==record['project']
+                   and norm(other['unit_name'])==norm(record['unit_name'])
+                   and business_code(other['code'])==business_code(record['code']) and record['code']]
+            if not peers: record['issues']=[issue for issue in record['issues'] if issue!='code_conflict']
+            put('initiative',record)
+        put('sequence',sequence)
         audit(a, 'convert_sources', after={'files':ids,'initiatives':[r['id'] for r in records]})
         return jsonify(initiatives=[r['id'] for r in records])
     if op == 'mapped-export':

@@ -119,3 +119,21 @@ nhận xét hoặc nộp vẫn được bảo vệ; không tự sửa dữ liệ
 - Kiểm thử: 19 ca Python; test-vcoaching-units.mjs kiểm tra bảng rỗng/hỗn hợp,
   mở góp ý một phần, bộ lọc kết hợp, tìm không dấu, nhóm hồ sơ cũ và menu admin.
   TypeScript và build được kiểm tra. Chưa kiểm thử trình duyệt trên production.
+
+## Phân tích theo từng sáng kiến và mã quản lý riêng
+
+- Bỏ lỗi buộc chọn đủ mọi tệp lịch sử của các sáng kiến chung Mẫu 01. Khi chọn
+  file chi tiết, kết quả giới hạn vào hồ sơ liên quan file chi tiết đó. Mẫu 01
+  dùng làm nguồn đối chiếu; các sáng kiến khác không bị công bố hoặc đổi nội dung.
+- Giao diện nhận đúng ID kết quả từ API; không liệt kê mọi sáng kiến chỉ vì cùng
+  dùng file Master. Lịch sử nguồn đã tổng hợp được giữ; không xóa nguồn cũ khi
+  phân tích lại một phần. Đây là cập nhật bổ sung, không phải thay thế lịch sử.
+- Thêm `tracking_code` dạng SK-000001 cấp theo bộ đếm trong giao dịch ghi chung,
+  không đặt lại ở mỗi đợt nhập. Mã `code` trong tài liệu vẫn nguyên bản. Các số
+  của hồ sơ đã ghép không được tái sử dụng; có thể có khoảng trống trong dãy số.
+- Khi phân tích, cấp mã cho hồ sơ đã công bố trong phạm vi được phép nhưng chưa
+  có mã quản lý. Chạy lại giữ mã cũ. Gỡ cảnh báo trùng mã nguồn khi không còn hồ
+  sơ cùng đơn vị/cùng mã đang công bố; SK02 ở hai ban không phải cùng danh tính.
+- Kiểm thử chọn riêng hai tệp sau đợt tổng hợp, giữ hồ sơ khác nguyên vẹn, số
+  riêng giữa các ban và số ổn định khi chạy lại. Bộ lọc/giao diện vẫn đạt.
+- Chưa cập nhật dữ liệu production; mã mới được cấp sau khi deploy và phân tích.
