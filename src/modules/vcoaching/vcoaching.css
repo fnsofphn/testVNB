@@ -64,11 +64,11 @@
 .vc-root td,.vc-root th{padding:11px 10px;border-bottom:1px solid var(--vc-line);vertical-align:top}
 .vc-root td button{padding:5px 9px}
 .vc-root .vc-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:15px 0}
-.vc-root .vc-steps{display:flex;gap:5px;flex-wrap:wrap;margin:16px 0}
-.vc-root .vc-steps button{min-width:54px;padding:8px 10px;color:var(--vc-blue)}
+.vc-root .vc-steps{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0}
+.vc-root .vc-steps button{width:112px;min-height:68px;padding:8px 10px;color:var(--vc-blue);justify-content:flex-start;text-align:left}
 .vc-root .vc-steps button.active{background:var(--vc-blue);color:#fff}
-.vc-root .vc-steps button.needs-review{border-color:var(--vc-warnink);color:var(--vc-warnink)}
-.vc-root .vc-steps button.needs-review.active{background:var(--vc-warn)}
+.vc-root .vc-steps button.needs-review{border-color:#c13b35;color:#b6312c}
+.vc-root .vc-steps button.needs-review.active{background:#fff0ef;color:#a72c27}
 .vc-root .vc-heat button.good{background:var(--vc-green);color:#206a50}
 .vc-root .vc-steps small{display:block;font-size:11px}
 .vc-root .vc-split{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;align-items:start}
@@ -148,8 +148,8 @@
 .vc-root .vc-source p{white-space:pre-wrap}
 .vc-root .vc-source strong,.vc-root .vc-source summary,.vc-root .vc-source small{font-size:12px;color:var(--vc-muted)}
 .vc-root .vc-scroll{max-height:650px;overflow:auto}
-.vc-root .vc-steps button{display:flex;flex-direction:column;gap:2px}
-.vc-root .vc-steps button small{font-size:11px}
+.vc-root .vc-steps button{display:flex;flex-direction:column;gap:3px}
+.vc-root .vc-steps button small{font-size:11px;line-height:1.25;white-space:normal}
 
 .vc-root .vc-formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px}
 .vc-root .vc-formgrid .wide{grid-column:1/-1}
@@ -163,7 +163,7 @@
 .vc-root.vc-login>section{width:min(440px,100%);background:var(--vc-panel);padding:30px;border:1px solid var(--vc-line);border-radius:11px}
 .vc-root .vc-login button{width:100%}
 .vc-root hr{border:0;border-top:1px solid var(--vc-line);margin:20px 0}
-@media(max-width:760px){.vc-root .vc-header{flex-wrap:wrap}.vc-root .vc-header .vc-row{width:100%}.vc-root .vc-formgrid{grid-template-columns:1fr}.vc-root .vc-main{padding:16px}.vc-root .vc-steps{overflow:auto}.vc-root .vc-steps button{min-width:65px}.vc-root .vc-sidebar-foot{display:none}}
+@media(max-width:760px){.vc-root .vc-header{flex-wrap:wrap}.vc-root .vc-header .vc-row{width:100%}.vc-root .vc-formgrid{grid-template-columns:1fr}.vc-root .vc-main{padding:16px}.vc-root .vc-steps{overflow:auto;flex-wrap:nowrap}.vc-root .vc-steps button{width:108px;min-width:108px}.vc-root .vc-sidebar-foot{display:none}}
 
 .vc-root .vc-account-dialog{background:var(--vc-panel);color:var(--vc-ink);border:1px solid var(--vc-line);border-radius:13px;width:min(700px,calc(100vw - 32px));max-height:85vh;overflow:auto;padding:24px;margin:auto;box-shadow:0 15px 50px #00182f33}
 .vc-root .vc-account-dialog::backdrop{background:#04182c88}
