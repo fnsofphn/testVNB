@@ -1,6 +1,6 @@
 /* VNPT Rising portal blue and white palette. Real application data only. */
 
-.vc-root{color-scheme:light;--vc-bg:#f6f9fd;--vc-panel:#fff;--vc-ink:#102b49;--vc-muted:#60758c;--vc-line:#d3e1ef;--vc-blue:#1d67a8;--vc-blue-dark:#143e63;--vc-navy:#0d2038;--vc-soft:#eaf4fc;--vc-warn:#fff1e6;--vc-warnink:#a94a13;--vc-green:#e7f4ee;font:14px/1.55 Arial,sans-serif;color:var(--vc-ink);background:var(--vc-bg);border:1px solid var(--vc-line);border-radius:16px;overflow:hidden;min-height:740px}
+.vc-root{color-scheme:light;--vc-bg:#f6f9fd;--vc-panel:#fff;--vc-ink:#102b49;--vc-muted:#60758c;--vc-line:#d3e1ef;--vc-blue:#1d67a8;--vc-blue-dark:#143e63;--vc-navy:#0d2038;--vc-soft:#eaf4fc;--vc-warn:#fff1e6;--vc-warnink:#a94a13;--vc-green:#e7f4ee;font:14px/1.55 Arial,sans-serif;color:var(--vc-ink);background:var(--vc-bg);display:flex;flex-direction:column;box-sizing:border-box;min-height:100vh;min-height:100dvh}
 .vc-root *{box-sizing:border-box}
 .vc-root button,.vc-root input,.vc-root select,.vc-root textarea{font:inherit}
 .vc-root button{cursor:pointer;border:1px solid var(--vc-line);background:var(--vc-panel);color:var(--vc-ink);padding:9px 13px;border-radius:8px}
@@ -26,7 +26,7 @@
 .vc-root .vc-header button:hover{background:#1d4d78;color:#fff}
 .vc-root .vc-header .vc-sub{color:#c3d9ee}
 .vc-root .vc-header .vc-badge{background:#173653;color:#e5f3ff}
-.vc-root .vc-layout{display:grid;grid-template-columns:230px minmax(0,1fr)}
+.vc-root .vc-layout{display:grid;grid-template-columns:230px minmax(0,1fr);flex:1}
 .vc-root aside{padding:22px 12px;background:var(--vc-navy);color:#d8e7f6;border-right:1px solid #294663}
 .vc-root aside button{width:100%;text-align:left;border:0;margin-bottom:4px;background:transparent;color:#d8e7f6;padding:11px 12px}
 .vc-root aside button:hover{background:#173b5e;color:#fff}
@@ -106,7 +106,7 @@
 .vc-root .vc-kicker{font-size:12px;letter-spacing:1px;color:var(--vc-blue);margin-bottom:7px}
 .vc-root .hline{height:1px;background:var(--vc-line);margin:15px 0}
 .vc-root .muted{color:var(--vc-muted)}
-@media(max-width:800px){.vc-root .vc-layout{grid-template-columns:1fr}
+@media(max-width:800px){.vc-root .vc-layout{grid-template-columns:1fr;grid-template-rows:auto 1fr}
 .vc-root aside{display:flex;gap:5px;flex-wrap:wrap;border-right:0;border-bottom:1px solid var(--vc-line);padding:10px}
 .vc-root aside button{width:auto;font-size:12px;margin:0}
 .vc-root .vc-navgroup,.vc-root aside .navfoot{display:none}
