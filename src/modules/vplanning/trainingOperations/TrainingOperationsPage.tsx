@@ -4,11 +4,14 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { ArrowDown, ArrowUp, BookOpen, ChevronDown, ChevronRight, CopyPlus, CornerDownRight, FolderKanban, Menu, MoreVertical, Pencil, Plus, Trash2, UsersRound, X } from 'lucide-react';
 import './TrainingOperationsPage.css';
+import TaskDetailLayer from './TaskDetailLayer';
+import { DetailedInputContext, useDetailedInputs, TaskDetailedInputs, DetailedInputWorkspace, InputDraftFields, ContextFields } from './DetailedInputUI';
+import { detailCourseManager, detailedReadiness } from './detailedInputs.js';
 import {
   TRAINING_DEFAULT_CLASSES,
   TRAINING_INPUT_DEFINITIONS,
   TRAINING_TASK_TEMPLATES,
-  createInitialTrainingOperationsState,
+  createEmptyTrainingOperationsState,
 } from './domain.js';
 import {
   createTrainingOperationsAccount,
@@ -99,7 +102,7 @@ const CHANGE_CONFIG = {
 const taskTemplates = TRAINING_TASK_TEMPLATES.map((item) => [item.group, item.code, item.title, item.inputKey, item.dueOffset, item.checklist]);
 
 const CLASS_META = TRAINING_DEFAULT_CLASSES;
-const INITIAL_WORKSPACE = createInitialTrainingOperationsState({ now: '2026-08-25T00:00:00.000Z' });
+const INITIAL_WORKSPACE = createEmptyTrainingOperationsState({ now: '2026-08-25T00:00:00.000Z' });
 const initialTasks = INITIAL_WORKSPACE.tasks;
 
 const STATUS_LABEL = { WAITING_INPUT: 'Chưa sẵn sàng', READY: 'Sẵn sàng', IN_PROGRESS: 'Đang thực hiện', IN_REVIEW: 'Chờ review', REWORK: 'Cần làm lại', NEEDS_REASSIGNMENT: 'Chờ phân công lại', UNASSIGNED: 'Chưa giao', DONE: 'Hoàn thành', CANCELLED: 'Đã hủy theo scope' };
@@ -115,7 +118,7 @@ const ACTIVE_ROLE_STORAGE_PREFIX = 'vwork-training-operations.active-role:';
 function roleCanAccessTab(role, tab) {
   if (['overview', 'tasks'].includes(tab)) return true;
   if (['structure'].includes(tab)) return ['operations', 'content', 'vtraining'].includes(role);
-  if (tab === 'inputs') return !['manager', 'member'].includes(role);
+  if (tab === 'inputs') return true;
   if (['due', 'review'].includes(tab)) return ['operations', 'manager'].includes(role);
   if (tab === 'change') return ['operations', 'intake'].includes(role);
   return role === 'operations' && ['team', 'accounts', 'audit'].includes(tab);
@@ -354,8 +357,38 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
     }
   }
 
+  const pollRef = useRef(null);
+  const currentRoleRef = useRef(role);
+  currentRoleRef.current = role;
+  pollRef.current = async () => {
+    if (savingRef.current || syncState !== 'synced' || document.visibilityState !== 'visible'
+      || document.querySelector('[data-detail-dirty="true"]') || document.activeElement?.matches('input,textarea,select')) return;
+    const observedVersion = versionRef.current;
+    try {
+      const response = await fetchTrainingOperationsState(role);
+      if (!savingRef.current && versionRef.current === observedVersion && response.role === currentRoleRef.current
+        && !document.querySelector('[data-detail-dirty="true"]') && !document.activeElement?.matches('input,textarea,select') && Number(response.version) > observedVersion) {
+        hydrate(response);
+        notify('Dữ liệu đã cập nhật. Kiểm tra thông báo phiên bản trong công việc.');
+      }
+    } catch { /* Keep the current screen usable; explicit saves still report errors. */ }
+  };
+  useEffect(() => {
+    const refresh = () => void pollRef.current?.();
+    const timer = window.setInterval(refresh, 30000);
+    window.addEventListener('focus', refresh);
+    return () => { window.clearInterval(timer); window.removeEventListener('focus', refresh); };
+  }, []);
   useEffect(() => { void loadWorkspace({ requestedRole: initialRole }); }, []);
   useEffect(() => {
+    if (selectedTaskId && routeContext.taskId !== selectedTaskId && document.querySelector('.detail-layer [data-detail-dirty="true"]')) {
+      const retainedTask = tasks.find(task => task.id === selectedTaskId);
+      if (retainedTask) {
+        writeRoute('tasks', { projectId: retainedTask.projectId, courseId: retainedTask.courseId, classId: retainedTask.classId, taskId: retainedTask.id }, { replace: true });
+        notify('Input chưa lưu được giữ lại. Lưu nháp hoặc dùng Quay lại danh sách để đóng.');
+        return;
+      }
+    }
     const requestedTab = VIEW_TO_TAB[routeContext.view] || routeContext.view || 'overview';
     const nextTab = roleCanAccessTab(role, requestedTab) ? requestedTab : 'overview';
     setTabState(nextTab);
@@ -387,7 +420,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
       if (response.audit?.warning) setSyncError(response.audit.warning);
       return response;
     } catch (error) {
-      if (error.code === 'TRAINING_OPERATIONS_VERSION_CONFLICT') {
+      if (['TRAINING_OPERATIONS_VERSION_CONFLICT', 'DETAIL_INPUT_CONFLICT'].includes(error.code)) {
         await loadWorkspace({ quiet: true });
         notify('Dữ liệu vừa được cập nhật ở phiên khác. Hệ thống đã tải bản mới; vui lòng thực hiện lại thao tác.');
       } else {
@@ -567,14 +600,14 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
     : tab === 'inputs' ? ['VWORK', activeProject?.code, activeCourse?.name, 'ĐẦU VÀO'].filter(Boolean).join(' / ')
     : tab === 'tasks' ? ['VWORK', activeProject?.code, routeContext.courseId && activeCourse?.name, routeContext.classId && classes.find((item) => [item.id, item.code].includes(routeContext.classId))?.code, routeContext.classId && 'CÔNG VIỆC'].filter(Boolean).join(' / ')
     : tab === 'structure' ? 'VWORK / DANH SÁCH DỰ ÁN' : `VWORK / DỰ ÁN / ${activeProject?.code || ''}`;
-  return <div className="vwork-training-operations app-shell">
+  return <DetailedInputContext.Provider value={{ state: { ...workspaceState, tasks }, actor, role, directory, command: runCommand, syncError, syncState }}><div className="vwork-training-operations app-shell">
     <aside className={`sidebar${sidebarOpen ? ' open' : ''}`}>
       <div className="brand"><span className="brand-mark">P1</span><div><strong>PeopleOne</strong><small>VWork Operations</small></div></div>
       <nav>
         <p>WORKSPACE</p>
         <button className={tab === 'overview' ? 'active' : ''} onClick={() => setTab('overview')}>Tổng quan</button>
         {['operations', 'content', 'vtraining'].includes(role) && <button className={tab === 'structure' ? 'active' : ''} onClick={() => setTab('structure')}>Khóa / lớp</button>}
-        {!['manager', 'member'].includes(role) && <button className={tab === 'inputs' ? 'active' : ''} onClick={() => setTab('inputs')}>Đầu vào {role === 'intake' ? <b>{saleUploadDone}/{saleUploadTotal}</b> : role === 'content' ? <b>{contentReadyCount}/{contentInputKeys.length}</b> : readyTotal - readyCount > 0 && <b>{readyTotal - readyCount}</b>}</button>}
+        {<button className={tab === 'inputs' ? 'active' : ''} onClick={() => setTab('inputs')}>Đầu vào {role === 'intake' ? <b>{saleUploadDone}/{saleUploadTotal}</b> : role === 'content' ? <b>{contentReadyCount}/{contentInputKeys.length}</b> : readyTotal - readyCount > 0 && <b>{readyTotal - readyCount}</b>}</button>}
         <p>CÔNG VIỆC</p>
         <button aria-label={role === 'operations' ? 'Công việc lớp' : role === 'manager' ? 'Công việc' : 'Việc của tôi'} className={tab === 'tasks' ? 'active' : ''} onClick={() => setTab('tasks')}>{role === 'operations' ? 'Công việc lớp' : role === 'manager' ? 'Công việc' : 'Việc của tôi'} <b>{contextTasks.filter((task) => !task.archivedAt).length}</b></button>
         {role === 'operations' && <button className={['due', 'review'].includes(tab) ? 'active' : ''} onClick={() => setTab('due')}>Việc cần xử lý <b>{contextTasks.filter((task) => !['DONE', 'CANCELLED'].includes(task.status)).length}</b></button>}
@@ -658,7 +691,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
           removeCourseRole={removeCourseRole}
           onSelectCourse={(courseId) => writeRoute('team', { projectId: activeProject?.id, courseId, classId: '', taskId: '' })}
         />}
-        {tab === 'inputs' && !['manager', 'member'].includes(role) && <Inputs role={role} activeCourse={activeCourse} courses={projectCourses} inputs={inputs} inputRecords={projectInputs} courseInputProgress={workspaceState.courseInputProgress || []} tasks={tasks} classes={projectClasses} uploadStep={uploadStep} setUploadStep={setUploadStep} submitInput={submitInput} onSelectCourse={(courseId) => writeRoute('inputs', { projectId: activeProject?.id, courseId, classId: '', taskId: '' })}/>}
+        {tab === 'inputs' && <Inputs role={role} activeCourse={activeCourse} courses={projectCourses} inputs={inputs} inputRecords={projectInputs} courseInputProgress={workspaceState.courseInputProgress || []} tasks={tasks} classes={projectClasses} uploadStep={uploadStep} setUploadStep={setUploadStep} submitInput={submitInput} onSelectCourse={(courseId) => writeRoute('inputs', { projectId: activeProject?.id, courseId, classId: '', taskId: '' })}/>}
         {tab === 'tasks' && <LayeredTasks role={role} tasks={contextTasks} classes={classes} inputRecords={projectInputs} directory={directory} teamAssignments={workspaceState.teamAssignments || []} directoryLoading={syncState === 'loading'} actor={actor} project={activeProject} course={activeCourse} routeContext={routeContext} onNavigate={navigateWork} selectedTask={contextSelectedTask} setSelectedTaskId={setSelectedTaskId} updateTask={updateTask} createClassTask={createClassTask} moveClassTask={moveClassTask} archiveTask={archiveTask} assignTasks={assignTasks} toggleChecklist={toggleChecklist}/>}
         {['due', 'review'].includes(tab) && <WorkActionInbox role={role} tasks={contextTasks} classes={classes} inputRecords={projectInputs} directory={directory} actor={actor} project={activeProject} course={activeCourse} scopeLabel={actionScopeLabel} selectedTask={contextSelectedTask} setSelectedTaskId={setSelectedTaskId} updateTask={updateTask} assignTasks={assignTasks} toggleChecklist={toggleChecklist} initialTab={tab === 'review' ? 'acceptance' : 'tracking'}/>}
         {tab === 'accounts' && <AccountsPanel directory={accountDirectory} provisionAccount={provisionAccount} restoreExistingLoginAccess={restoreExistingLoginAccess}/>}
@@ -676,7 +709,7 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
         }
       }}
     />}
-  </div>;
+  </div></DetailedInputContext.Provider>;
 }
 
 function buildMiniMonth(year, monthIndex) {
@@ -1369,6 +1402,8 @@ function Inputs({ role, activeCourse, courses = [], inputRecords = [], courseInp
   const visibleInputs = Object.entries(INPUT_META).filter(([key]) => relevantKeys.includes(key));
   const completed = relevantKeys.filter((key) => scopedInputs[key]).length;
 
+  if (['manager', 'member'].includes(role)) return <DetailedInputWorkspace courseId={selectedCourse?.id}/>;
+
   function patchDraft(key, patch) {
     setDrafts((current) => ({ ...current, [key]: { ...(current[key] || {}), ...patch } }));
   }
@@ -1420,9 +1455,10 @@ function Inputs({ role, activeCourse, courses = [], inputRecords = [], courseInp
     }
   }
 
-  if (role === 'intake') return <div className="input-workspace-stack"><SaleRosterInputs courses={courses} classes={classes} inputRecords={inputRecords} uploadStep={uploadStep} setUploadStep={setUploadStep} submit={(draft) => submitInput('roster', draft)}/></div>;
+  if (role === 'intake') return <div className="input-workspace-stack"><DetailedInputWorkspace courseId={selectedCourse?.id}/><SaleRosterInputs courses={courses} classes={classes} inputRecords={inputRecords} uploadStep={uploadStep} setUploadStep={setUploadStep} submit={(draft) => submitInput('roster', draft)}/></div>;
 
   return <div className="input-workspace-stack">
+    <DetailedInputWorkspace courseId={selectedCourse?.id}/>
     <section className="card full role-input-workspace">
     <div className="page-title">
       <div>
@@ -1481,10 +1517,10 @@ function inputFieldValue(value) {
   return String(value ?? '—');
 }
 
-function InputVersionSnapshot({ inputRecord, role, label = '' }) {
+function InputVersionSnapshot({ inputRecord, role, label = '', versionNumber = inputRecord?.activeVersion }) {
   const [opening, setOpening] = useState('');
   const [openError, setOpenError] = useState('');
-  const version = inputRecord?.versions?.find((item) => item.version === inputRecord.activeVersion);
+  const version = inputRecord?.versions?.find((item) => item.version === versionNumber);
   if (!version) return null;
   const fields = Object.entries(version.data || {}).filter(([, value]) => value !== '' && value !== null && value !== undefined);
   async function openFile(file) {
@@ -1646,7 +1682,7 @@ function LayeredTasks({ role, tasks, classes = CLASS_META, inputRecords = [], di
   useEffect(() => {
     setLayer(layerFromRoute());
     if (routeContext.classId) setClassCode(routeContext.classId);
-    if (routeContext.taskId && baseTasks.some((task) => task.id === routeContext.taskId)) setSelectedTaskId(routeContext.taskId);
+    if (!document.querySelector('.detail-layer [data-detail-dirty="true"]')) setSelectedTaskId(routeContext.taskId && baseTasks.some((task) => task.id === routeContext.taskId) ? routeContext.taskId : '');
   }, [routeContext.projectId, routeContext.courseId, routeContext.classId, routeContext.taskId]);
 
   function showClasses() { setLayer('classes'); setSelectedTaskId(''); onNavigate({ projectId: project?.id, courseId: course?.id }); }
@@ -1664,7 +1700,7 @@ function LayeredTasks({ role, tasks, classes = CLASS_META, inputRecords = [], di
   function closeTask() {
     const closingId = selectedTask?.id;
     setSelectedTaskId('');
-    onNavigate({ projectId: project?.id, courseId: course?.id, classId: activeClass.id || activeClass.code }, { replace: true });
+    onNavigate({ projectId: project?.id, courseId: course?.id, classId: activeClass.id || activeClass.code, taskId: '' }, { replace: true });
     window.setTimeout(() => document.querySelector(`[data-task-id="${closingId}"]`)?.focus(), 0);
   }
   function toggleSelected(id) { setSelectedIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]); }
@@ -1715,12 +1751,15 @@ function LayeredTasks({ role, tasks, classes = CLASS_META, inputRecords = [], di
 }
 
 function TaskCreateForm({ classItem, managerName, onCancel, onSubmit }) {
+  const detailApi = useDetailedInputs();
+  const canCreateInput = detailApi && detailCourseManager(detailApi.state, classItem.courseId, detailApi);
   const [draft, setDraft] = useState({ title: '', group: 'setup', inputKey: 'roster', plannedDeadline: classItem.startDate || '', checklistText: '' });
   const checklistItems = draft.checklistText.split('\n').map((item) => item.trim()).filter(Boolean);
   const valid = Boolean(draft.title.trim() && draft.plannedDeadline && checklistItems.length && managerName);
   return <form className="task-create-form" onSubmit={(event) => { event.preventDefault(); if (valid) void onSubmit({ ...draft, deadline: draft.plannedDeadline, title: draft.title.trim(), checklistItems }); }}>
     <div><span><b>Thêm công việc cho {classItem.code}</b><small>Người xác nhận: {managerName || 'Chưa gán Quản lý ekip'}</small></span><button type="button" onClick={onCancel}>Đóng</button></div>
     <div className="form-grid"><label>Tên công việc<input value={draft.title} onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}/></label><label>Nhóm<select value={draft.group} onChange={(event) => setDraft((current) => ({ ...current, group: event.target.value }))}>{Object.entries(GROUP_META).map(([value, [, label]]) => <option value={value} key={value}>{label}</option>)}</select></label><label>Input cần có<select value={draft.inputKey} onChange={(event) => setDraft((current) => ({ ...current, inputKey: event.target.value }))}>{Object.entries(INPUT_META).map(([value, [code, label]]) => <option value={value} key={value}>{code} · {label}</option>)}</select></label><label>Deadline<input type="date" value={draft.plannedDeadline} onChange={(event) => setDraft((current) => ({ ...current, plannedDeadline: event.target.value }))}/></label><label className="wide">Người xác nhận<input value={managerName || 'Chưa gán Quản lý ekip'} readOnly aria-invalid={!managerName}/>{!managerName && <small className="hint error">Hãy vào Gán vai trò và chọn Quản lý ekip cho khóa học trước khi tạo công việc.</small>}</label><label className="wide">Checklist chi tiết, mỗi dòng một tiêu chí<textarea rows="4" value={draft.checklistText} onChange={(event) => setDraft((current) => ({ ...current, checklistText: event.target.value }))} placeholder="Mô tả rõ kết quả cần đạt cho từng tiêu chí"/></label></div>
+    {canCreateInput && <InputDraftFields value={draft.detailedInput} onChange={detailedInput=>setDraft(current=>({...current,detailedInput}))} inputKey={draft.inputKey} directory={detailApi.directory} defaultOwner={detailApi.actor?.email} defaultDue={draft.plannedDeadline} title={draft.title}/>}
     <div className="task-create-actions"><button type="button" onClick={onCancel}>Hủy</button><button className="primary" disabled={!valid}>Lưu công việc</button></div>
   </form>;
 }
@@ -1801,7 +1840,7 @@ function Tasks({ role, tasks, inputRecords = [], directory = [], actor, project,
     <div className={canAssign ? 'table-head with-select' : 'table-head'}>{canAssign && <span>Chọn</span>}<span>Công việc</span><span>Input</span><span>Deadline</span><span>Trạng thái</span></div>
     {!visible.length && <div className="empty"><strong>Không có công việc trong phạm vi này</strong><p>Hãy kiểm tra lại dự án, khóa học hoặc lớp đang chọn.</p></div>}
     {!!visible.length && taskGroups.map(([label, items]) => <div className="task-group" key={label}><div className="task-group-title"><b>{label}</b><span>{items.length} việc</span></div>{items.map((task) => <div className={`${selectedTask?.id === task.id ? 'task-row selected' : 'task-row'} ${canAssign ? 'with-select' : ''}`} key={task.id}>{canAssign && <label className="row-check"><input type="checkbox" checked={selectedIds.includes(task.id)} onChange={() => toggleSelected(task.id)} aria-label={`Chọn ${task.title} · ${task.classCode}`}/></label>}<button className="task-open" onClick={() => setSelectedTaskId(task.id)}><b>{task.title}</b><small>{project?.name || task.projectId} / {course?.name || task.courseId} / {task.classCode} / {GROUP_META[task.group]?.[0]} · {task.id} · {task.assignee}</small></button><span>{taskReadinessLabel(task)}</span><span>{taskDeadlineLabel(task)}</span><TaskStatusBadges task={task}/></div>)}</div>)}
-  </section>{(view !== 'due' || selectedTask) && <TaskDrawer role={role} task={selectedTask} inputRecords={inputRecords} directory={directory} actor={actor} updateTask={updateTask} toggleChecklist={toggleChecklist} allowAssignment={view !== 'due'}/>}</div>;
+  </section>{(view !== 'due' || selectedTask) && <TaskDrawer role={role} task={selectedTask} inputRecords={inputRecords} directory={directory} actor={actor} updateTask={updateTask} toggleChecklist={toggleChecklist} allowAssignment={view !== 'due'} onClose={() => setSelectedTaskId('')}/>}</div>;
 }
 
 function LegacyTasks({ role, tasks, classes = CLASS_META, directory = [], actor, project, course, selectedTask, setSelectedTaskId, updateTask, assignTasks, toggleChecklist, view = 'hierarchy', onView }) {
@@ -1831,6 +1870,8 @@ function LegacyTasks({ role, tasks, classes = CLASS_META, directory = [], actor,
 }
 function TaskDrawer({ role, task, inputRecords = [], directory = [], directoryLoading = false, courseManager = null, actor, updateTask, archiveTask, toggleChecklist, onClose, allowAssignment = true }) {
   const drawerRef = useRef(null);
+  const [detailTab, setDetailTab] = useState('input');
+  const detailsApi = useDetailedInputs();
   const [actualOutput, setActualOutput] = useState(task?.actualOutput || '');
   const [evidence, setEvidence] = useState(task?.evidence || '');
   const [evidenceRecord, setEvidenceRecord] = useState(null);
@@ -1934,17 +1975,24 @@ function TaskDrawer({ role, task, inputRecords = [], directory = [], directoryLo
       setUploadingEvidence(false);
     }
   }
-  return <aside className="card task-drawer" ref={drawerRef} tabIndex={-1} aria-label={`Chi tiết công việc ${task.title}`}>
-    <div className="drawer-head"><div><span>{task.id}</span><h2>{task.title}</h2></div><div className="drawer-head-actions"><TaskStatusBadges task={task}/>{onClose && <button type="button" aria-label="Đóng chi tiết công việc" onClick={onClose}>×</button>}</div></div>
+  const content = <aside className="card task-drawer" ref={drawerRef} tabIndex={-1} aria-label={`Chi tiết công việc ${task.title}`}>
+    <div className="drawer-head"><div><span>{task.id}</span><h2>{task.title}</h2></div><div className="drawer-head-actions"><TaskStatusBadges task={task}/></div></div>
     {task.assignmentStatus === 'NEEDS_REASSIGNMENT' && <div className="reassignment-warning" role="alert"><b>Công việc đang tạm dừng</b><span>Thành viên phụ trách đã được gỡ khỏi khóa học. Hãy phân công người mới để tiếp tục từ trạng thái trước đó.</span></div>}
     <div className="meta-grid"><div><small>Quản lý ekip</small><b>{task.manager}</b></div><div><small>Người thực hiện</small><b>{task.assignee}</b></div><div><small>Deadline</small><b>{taskDeadlineLabel(task)}</b></div><div><small>Tiến độ</small><b>{task.progress}%</b></div></div>
-    <section><h3>Input dùng để thực hiện công việc</h3>{task.requiredInputCodes?.map((code) => { const inputEntry = Object.entries(INPUT_META).find(([, [itemCode]]) => itemCode === code); const inputKey = inputEntry?.[0]; const input = inputEntry?.[1]; const matchingRecord = inputRecords.find((record) => record.key === inputKey && record.courseId === task.courseId && (!record.classId || [task.classId, task.classCode].includes(record.classId)) && record.status === 'ACTIVE'); return <div className="task-input-detail" key={code}><div className="input-line"><span>{code} · {input?.[1] || 'Input bắt buộc'}</span><b>{task.requiredInputVersions?.[code] ? `Đã khóa v${task.requiredInputVersions[code]}` : 'Còn thiếu'}</b></div>{matchingRecord ? <InputVersionSnapshot inputRecord={matchingRecord} role={role}/> : <small className="input-empty-version">Chưa có dữ liệu hoặc file input đang hiệu lực.</small>}</div>; })}</section>
+    <nav className="detail-tabs" aria-label="Các phần chi tiết công việc">{[['input','Đầu vào'],['work','Thực hiện'],...(canAssign||canConfigure?[['manage','Quản lý']]:[])].map(([key,label])=><button type="button" key={key} aria-pressed={detailTab===key} onClick={()=>setDetailTab(key)}>{label}</button>)}</nav>
+    {detailsApi?.syncError && <p className="detail-error" role="alert">{detailsApi.syncError}</p>}
+    <div hidden={detailTab!=='input'}><TaskDetailedInputs key={task.id} task={task}/>
+    <section><h3>Nguồn input hiện có (giữ dữ liệu cũ)</h3>{task.requiredInputCodes?.filter(code => !detailsApi || !detailedReadiness(detailsApi.state, task).replacedCodes.has(code)).map((code) => { const inputEntry = Object.entries(INPUT_META).find(([, [itemCode]]) => itemCode === code); const inputKey = inputEntry?.[0]; const input = inputEntry?.[1]; const matchingRecord = inputRecords.find((record) => record.key === inputKey && record.courseId === task.courseId && (!record.classId || [task.classId, task.classCode].includes(record.classId)) && record.status === 'ACTIVE'); return <div className="task-input-detail" key={code}><div className="input-line"><span>{code} · {input?.[1] || 'Input bắt buộc'}</span><b>{task.requiredInputVersions?.[code] ? `Đã khóa v${task.requiredInputVersions[code]}` : 'Còn thiếu'}</b></div>{matchingRecord ? <InputVersionSnapshot inputRecord={matchingRecord} role={role} versionNumber={task.requiredInputVersions?.[code] || matchingRecord.activeVersion}/> : <small className="input-empty-version">Chưa có dữ liệu hoặc file input đang hiệu lực.</small>}</div>; })}</section>
+    </div><div hidden={detailTab!=='manage'}>
     {canAssign && <section><h3>Phân công người thực hiện</h3><div className="form-grid"><label>Người thực hiện<button type="button" className="assignee-trigger" onClick={() => setAssignmentOpen(true)}>{directory.find((item) => item.id === assigneeId)?.name || task.assignee || 'Bạn muốn giao việc cho ai?'}</button></label><label>Người xác nhận<input value={reviewerName} readOnly aria-invalid={!reviewer}/>{!reviewer && <small className="hint error">Chưa có Quản lý ekip của khóa học.</small>}</label><label>Priority<select value={priority} onChange={(event) => setPriority(event.target.value)}><option>Low</option><option>Normal</option><option>High</option><option>Critical</option></select></label><label>Deadline<input type="date" value={plannedDeadline} onChange={(event) => setPlannedDeadline(event.target.value)}/></label>{needsDeadlineReason && <label className="wide">Lý do deadline sau khai giảng<textarea value={deadlineOverrideReason} onChange={(event) => setDeadlineOverrideReason(event.target.value)} placeholder="Nêu rõ ngoại lệ vận hành..."/></label>}</div><button disabled={!assigneeId || !reviewer || (needsDeadlineReason && !deadlineOverrideReason.trim())} onClick={() => { const assignee = directory.find((item) => item.id === assigneeId); if (assignee && reviewer) void updateTask(task.id, { assigneeId: assignee.id, assignee: assignee.name, priority, reviewerId: reviewer.id, reviewer: reviewer.name, plannedDeadline, deadlineOverrideReason: deadlineOverrideReason.trim() }, `Đã giao ${task.id} cho ${assignee.name}.`); }}>Lưu phân công</button></section>}
     {canConfigure && <section className="task-config-section"><h3><Pencil size={14}/> Sửa công việc trong lớp</h3><div className="form-grid"><label>Tên công việc<input value={configDraft.title} onChange={(event) => setConfigDraft((current) => ({ ...current, title: event.target.value }))}/></label><label>Nhóm<select value={configDraft.group} onChange={(event) => setConfigDraft((current) => ({ ...current, group: event.target.value }))}>{Object.entries(GROUP_META).map(([value, [, label]]) => <option value={value} key={value}>{label}</option>)}</select></label><label>Deadline<input type="date" value={configDraft.plannedDeadline} onChange={(event) => setConfigDraft((current) => ({ ...current, plannedDeadline: event.target.value }))}/></label><label className="wide">Checklist chi tiết<textarea rows="5" value={configDraft.checklistText} onChange={(event) => setConfigDraft((current) => ({ ...current, checklistText: event.target.value }))} placeholder="Mỗi dòng mô tả rõ một kết quả cần đạt"/></label></div><div className="task-config-actions"><button disabled={!configDraft.title.trim() || !configDraft.plannedDeadline || !configChecklist.length} onClick={() => updateTask(task.id, { title: configDraft.title.trim(), group: configDraft.group, plannedDeadline: configDraft.plannedDeadline, checklistItems: configChecklist }, `Đã cập nhật cấu hình ${task.id}.`)}>Lưu thay đổi</button><button className="danger-action" disabled={['IN_PROGRESS', 'IN_REVIEW'].includes(task.status)} onClick={() => void archiveTask(task.id)}><Trash2 size={14}/>Xóa công việc</button></div></section>}
+    </div><div hidden={detailTab!=='work'}>
+    {!canExecute && <p>Người thực hiện: {task.assignee}. Chỉ thành viên được giao việc được cập nhật checklist và kết quả.</p>}
     {canExecute && <section className="task-checklist-section"><div className="task-section-heading"><div><h3>Checklist hoàn thành</h3><p>Đánh dấu và thêm minh chứng theo từng tiêu chí. Mọi thay đổi được lưu ngay.</p></div><strong>{task.checklist.filter(Boolean).length}/{task.checklist.length}</strong></div>{latestRework && task.status === 'REWORK' && <div className="rework-feedback"><b>Yêu cầu bổ sung từ người duyệt</b><p>{latestRework.comment}</p></div>}<div className="checklist-grid">{task.checklist.map((checked, index) => { const record = checklistEvidenceRecords[index]?.[0]; const editable = ['IN_PROGRESS', 'REWORK'].includes(task.status); return <article className={`check-evidence-row${checked ? ' completed' : ''}`} key={task.checklistItems[index]}><label className="check-row"><input type="checkbox" checked={checked} disabled={!editable} onChange={() => toggleChecklist(index)}/><span><b>Tiêu chí {index + 1}</b>{task.checklistItems[index]}</span></label><div className="criterion-evidence"><span>Minh chứng (không bắt buộc)</span>{record?.path ? <div className="criterion-file"><small title={record.name || record.id}>Đã tải: {record.name || record.id}</small><button type="button" onClick={() => void openTaskEvidenceRecord(record)}>Mở</button>{editable && <button type="button" onClick={() => void clearChecklistEvidence(index)}>Xóa</button>}</div> : <input value={checklistEvidenceDraft[index] || ''} disabled={!editable || uploadingChecklistIndex === index} onChange={(event) => { const value = event.target.value; setChecklistEvidenceDraft((current) => current.map((item, itemIndex) => itemIndex === index ? value : item)); setChecklistEvidenceRecords((current) => current.map((items, itemIndex) => itemIndex === index ? [] : items)); }} onBlur={() => void saveProgress()} placeholder="Dán URL hoặc ID"/>}<label className="criterion-upload"><input type="file" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" disabled={!editable || uploadingChecklistIndex >= 0} onChange={(event) => void selectChecklistEvidenceFile(index, event.target.files?.[0])}/>{uploadingChecklistIndex === index ? 'Đang tải…' : record?.path ? 'Thay file' : 'Tải file'}</label></div></article>; })}</div>{task.status === 'READY' && <button className="primary" onClick={() => updateTask(task.id, { status: 'IN_PROGRESS' }, `Bắt đầu ${task.id}.`)}>Bắt đầu công việc</button>}{['IN_PROGRESS', 'REWORK'].includes(task.status) && <><label className="field">Vướng mắc<textarea value={blocker} onChange={(event) => setBlocker(event.target.value)} onBlur={() => void saveProgress(checklistEvidenceDraft, checklistEvidenceRecords, blocker)} placeholder="Để trống nếu không có vướng mắc..."/></label><label className="field">Kết quả thực tế (không bắt buộc)<textarea value={actualOutput} onChange={(event) => setActualOutput(event.target.value)} placeholder="Mô tả kết quả thực tế nếu cần..."/></label><label className="field">Minh chứng tổng hợp (không bắt buộc)<input value={evidenceRecord ? '' : evidence} disabled={Boolean(evidenceRecord)} onChange={(event) => setEvidence(event.target.value)} placeholder="https://... hoặc ID VTraining"/></label><label className="field">Hoặc tải file minh chứng<input type="file" disabled={uploadingEvidence} onChange={(event) => void selectEvidenceFile(event.target.files?.[0])}/></label>{evidenceRecord && <small className="hint ready">Đã tải riêng tư: {evidenceRecord.name}</small>}{evidenceError && <small className="hint error">{evidenceError}</small>}<button className="primary" disabled={!canSubmitReview} onClick={() => updateTask(task.id, { status: 'IN_REVIEW', checklistEvidence: buildChecklistEvidence(), blocker, actualOutput: actualOutput.trim(), evidence: evidence.trim(), evidenceRecord }, `Đã gửi ${task.id} yêu cầu xác nhận hoàn thành.`)}>Gửi yêu cầu xác nhận</button><small className="hint ready">Có thể gửi ở mọi mức tiến độ, kể cả 0% và chưa có minh chứng. Người duyệt sẽ quyết định Đạt hoặc yêu cầu bổ sung.</small></>}</section>}
     {!canExecute && !canAssign && !canConfigure && <div className="read-only">Vai trò hiện tại chỉ được xem trạng thái công việc.</div>}
-    <AssigneePickerDialog open={assignmentOpen} directory={directory} loading={directoryLoading} taskCount={1} selectedId={assigneeId} onClose={() => setAssignmentOpen(false)} onSelect={(person) => { setAssigneeId(person.id); setAssignmentOpen(false); }}/>
+    </div><AssigneePickerDialog open={assignmentOpen} directory={directory} loading={directoryLoading} taskCount={1} selectedId={assigneeId} onClose={() => setAssignmentOpen(false)} onSelect={(person) => { setAssigneeId(person.id); setAssignmentOpen(false); }}/>
   </aside>;
+  return onClose ? <TaskDetailLayer title={task.title} onClose={onClose}>{content}</TaskDetailLayer> : content;
 }
 
 function WorkActionInbox({ initialTab = 'tracking', ...props }) {
@@ -2011,6 +2059,8 @@ function taskReadinessLabel(task) {
   if (task.assignmentStatus === 'NEEDS_REASSIGNMENT') return 'Chờ phân công lại';
   if (task.assignmentStatus === 'UNASSIGNED') return 'Chưa giao';
   if (task.status !== 'WAITING_INPUT') return 'Đủ điều kiện';
+  if (task.inputBindings?.some(binding => binding.pendingVersion)) return 'Có phiên bản input mới';
+  if (task.blockingDetailedInputIds?.length) return `Thiếu ${task.blockingDetailedInputIds.length} bộ input chi tiết`;
   if (task.blockingInputCodes?.length) return `Thiếu ${task.blockingInputCodes.join(', ')}`;
   if (task.waitingReason === 'ASSIGNMENT' || !task.assigneeId || !task.reviewerId) return 'Chưa phân công đủ';
   if (task.blockingTaskIds?.length) return `Chờ ${task.blockingTaskIds.length} việc trước`;
@@ -2096,20 +2146,21 @@ function getChangeSummary(objectKey, changeType, counts, nextQuantity) {
 function Audit({ entries }) { return <section className="card full"><div className="page-title"><div><small>AUDIT LOG</small><h2>Lịch sử không thể chỉnh sửa</h2><p>Ai làm gì, lúc nào và trên đối tượng nào.</p></div></div><div className="audit-list">{entries.map((entry, index) => { const legacy = typeof entry === 'string'; const actorLabel = legacy ? 'Không có dữ liệu người thực hiện' : `${entry.actor?.name || entry.actor?.email || 'Hệ thống'} · ${TRAINING_ROLE_OPTIONS.find(([value]) => value === entry.actor?.role)?.[1] || entry.actor?.role || 'system'}`; return <div key={legacy ? `${entry}-${index}` : entry.id || index}><span></span><div><b>{legacy ? entry : `${new Date(entry.happenedAt).toLocaleString('vi-VN')} · ${entry.summary}`}</b><small>{actorLabel}{legacy ? '' : ` · ${entry.entityType || 'workspace'}: ${entry.entityId || 'default'} · ${entry.type}`}</small></div></div>; })}</div></section>; }
 
 function CreateWizard({ step, setStep, close, confirm, directory = [] }) {
+  const [detailTemplates, setDetailTemplates] = useState({});
   const stages = ['Dự án', 'Khóa học', 'Lớp', 'Nhóm việc', 'Xác nhận'];
   const managers = directory.filter((item) => directoryHasRole(item, 'manager'));
   const [systems, setSystems] = useState(['VTraining', 'VLearning']);
-  const [projectDraft, setProjectDraft] = useState({ id: 'EVNSPC-2026-02', name: 'Đào tạo Trải nghiệm khách hàng EVNSPC 2026 · Đợt 2', customerName: 'EVNSPC', startDate: '2026-10-01', deadline: '2026-10-31', teamId: managers[0]?.id || '' });
-  const [courseDrafts, setCourseDrafts] = useState([{ id: 'CX-FOUNDATION-02', name: 'Trải nghiệm khách hàng · Đợt 2', contentVersion: '2026-v1' }]);
+  const [projectDraft, setProjectDraft] = useState({ id: '', name: '', customerName: '', startDate: '', deadline: '', teamId: managers[0]?.id || '' });
+  const [courseDrafts, setCourseDrafts] = useState([{ id: '', name: '', contentVersion: 'v1' }]);
   const [activeCourseIndex, setActiveCourseIndex] = useState(0);
   const courseDraft = courseDrafts[activeCourseIndex] || courseDrafts[0];
   const [editingChecklist, setEditingChecklist] = useState('');
   const [checklistDrafts, setChecklistDrafts] = useState(() => Object.fromEntries(taskTemplates.map(([, id, , , , items]) => [id, items.join('\n')])));
   const [enabledTaskIds, setEnabledTaskIds] = useState(() => taskTemplates.map(([, id]) => id));
   const [taskDueOffsets, setTaskDueOffsets] = useState(() => Object.fromEntries(taskTemplates.map(([, id, , , dueOffset]) => [id, dueOffset])));
-  const [draftClasses, setDraftClasses] = useState(() => CLASS_META.map((item, index) => ({ ...item, id: `TNKH2${String(index + 1).padStart(2, '0')}`, code: `TNKH2${String(index + 1).padStart(2, '0')}`, courseId: 'CX-FOUNDATION-02', name: `Lớp ${String(index + 1).padStart(2, '0')} · CSKH EVNSPC · Đợt 2`, startDate: `2026-10-${String(1 + index * 7).padStart(2, '0')}`, endDate: `2026-10-${String(5 + index * 7).padStart(2, '0')}` })));
+  const [draftClasses, setDraftClasses] = useState([]);
   const [addingClass, setAddingClass] = useState(false);
-  const [classDraft, setClassDraft] = useState({ code: 'TNKH204', name: 'Lớp 04 · CSKH EVNSPC · Đợt 2', courseId: 'CX-FOUNDATION-02', startDate: '2026-10-22', endDate: '2026-10-26', cloneFrom: 'LỚP MẪU' });
+  const [classDraft, setClassDraft] = useState({ code: '', name: '', courseId: '', startDate: '', endDate: '', cloneFrom: 'LỚP MẪU' });
   function toggleSystem(system) { setSystems((current) => current.includes(system) ? current.filter((item) => item !== system) : [...current, system]); }
   function patchCourseDraft(patch) {
     const previousId = courseDraft.id;
@@ -2142,7 +2193,7 @@ function CreateWizard({ step, setStep, close, confirm, directory = [] }) {
     setDraftClasses((current) => [...current, { ...classDraft, id: classDraft.code }]);
     setAddingClass(false);
     const nextNumber = draftClasses.length + 2;
-    setClassDraft({ code: `TNKH2${String(nextNumber).padStart(2, '0')}`, name: `Lớp ${String(nextNumber).padStart(2, '0')} · CSKH EVNSPC · Đợt 2`, courseId: courseDrafts[0]?.id || '', startDate: '2026-10-29', endDate: '2026-11-02', cloneFrom: 'LỚP MẪU' });
+    setClassDraft({ code: '', name: '', courseId: courseDrafts[0]?.id || '', startDate: '', endDate: '', cloneFrom: 'LỚP MẪU' });
   }
   function removeDraftClass(code) {
     setDraftClasses((current) => current.filter((item) => item.code !== code));
@@ -2155,6 +2206,7 @@ function CreateWizard({ step, setStep, close, confirm, directory = [] }) {
         selectedContents: systems.map((item) => item.toUpperCase()),
         instanceCount: { VLEARNING: 1, GAMIFICATION: 2, DISCUSSION: 2, ASSIGNMENT: 1, TEST: 1, MATERIAL: 4 },
       },
+      detailTemplates,
       taskTemplates: taskTemplates.map(([, code, title]) => ({ code, title, dueOffset: Number(taskDueOffsets[code] ?? 0), enabled: enabledTaskIds.includes(code), checklist: checklistDrafts[code].split('\n').map((item) => item.trim()).filter(Boolean) })),
     });
     const [firstCourse, ...additionalCourses] = courseDrafts;
@@ -2168,10 +2220,10 @@ function CreateWizard({ step, setStep, close, confirm, directory = [] }) {
   return <div className="modal-backdrop"><div className="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="create-project-title">
     <div className="modal-head"><div><small>KHỞI TẠO TRIỂN KHAI ĐÀO TẠO</small><h2 id="create-project-title">Dự án → khóa học → lớp → nhóm việc → công việc</h2></div><button onClick={close} aria-label="Đóng">×</button></div>
     <div className="wizard-steps">{stages.map((label, index) => <div className={step >= index + 1 ? 'active' : ''} key={label}><b>{index + 1}</b><span>{label}</span></div>)}</div>
-    {step === 1 && <div className="wizard-body"><div className="step-intro"><span>BƯỚC 1</span><h3>Thông tin dự án</h3><p>Dự án là cấp quản lý tổng, chứa các khóa học; chưa sinh công việc tại cấp này.</p></div><div className="form-grid"><label>Tên dự án<input value={projectDraft.name} onChange={(event) => setProjectDraft((current) => ({ ...current, name: event.target.value }))}/></label><label>Khách hàng<input value={projectDraft.customerName} onChange={(event) => setProjectDraft((current) => ({ ...current, customerName: event.target.value }))}/></label><label>Ngày bắt đầu<input type="date" value={projectDraft.startDate} onChange={(event) => setProjectDraft((current) => ({ ...current, startDate: event.target.value }))}/></label><label>Deadline tổng<input type="date" value={projectDraft.deadline} onChange={(event) => setProjectDraft((current) => ({ ...current, deadline: event.target.value }))}/></label><label>Ekip phụ trách<select value={projectDraft.teamId} onChange={(event) => setProjectDraft((current) => ({ ...current, teamId: event.target.value }))}><option value="">{managers.length ? 'Chọn Quản lý ekip' : 'Chưa có tài khoản Quản lý ekip'}</option>{managers.map((manager) => <option value={manager.id} key={manager.id}>{manager.name} · {manager.id}</option>)}</select>{!managers.length && <small className="field-hint error">Đóng cửa sổ và tạo tài khoản Quản lý ekip trước.</small>}</label><label>Mã dự án<input value={projectDraft.id} onChange={(event) => setProjectDraft((current) => ({ ...current, id: event.target.value }))}/></label></div></div>}
-    {step === 2 && <div className="wizard-body"><div className="step-intro"><span>BƯỚC 2</span><h3>Khởi tạo các khóa học trong dự án</h3><p>Một dự án có thể chứa nhiều khóa như QL01A, QL01B, QL02; mỗi khóa quản lý lớp và input độc lập.</p></div><div className="wizard-course-tabs">{courseDrafts.map((item, index) => <button type="button" className={index === activeCourseIndex ? 'active' : ''} key={`${item.id}-${index}`} onClick={() => { setActiveCourseIndex(index); setClassDraft((current) => ({ ...current, courseId: item.id })); }}><span>KHÓA {index + 1}</span><b>{item.id || 'Chưa có mã'}</b><small>{item.name || 'Chưa có tên'}</small></button>)}<button type="button" className="add-course" onClick={addCourseDraft}>+ Thêm khóa</button></div><div className="wizard-course-editor"><div className="form-grid"><label>Tên khóa học<input value={courseDraft.name} onChange={(event) => patchCourseDraft({ name: event.target.value })}/></label><fieldset className="system-multiselect"><legend>Hệ thống áp dụng chung</legend><div className="system-options">{COURSE_SYSTEMS.map((system) => <label key={system.id}><input type="checkbox" checked={systems.includes(system.id)} onChange={() => toggleSystem(system.id)}/><span>{system.id}</span>{!system.mature && <em>Mở rộng sau</em>}</label>)}</div><small>VSurvey và VEvent mới ghi nhận phạm vi; cấu hình chuyên sâu thực hiện ở đợt sau.</small></fieldset><label>Mã khóa học<input value={courseDraft.id} onChange={(event) => patchCourseDraft({ id: event.target.value })}/></label><label>Phiên bản nội dung<input value={courseDraft.contentVersion} onChange={(event) => patchCourseDraft({ contentVersion: event.target.value })}/></label></div>{courseDrafts.length > 1 && <button type="button" className="remove-course" onClick={() => removeCourseDraft(activeCourseIndex)}>Xóa khóa đang chọn</button>}</div></div>}
-    {step === 3 && <div className="wizard-body"><div className="step-intro"><span>BƯỚC 3</span><h3>Tạo lớp và gắn đúng khóa học</h3><p>Mỗi lớp thuộc đúng một khóa, có lịch, input và nhóm việc độc lập.</p></div><div className="class-list">{draftClasses.map((item) => <article key={item.code}><div><small>{item.courseId}</small><b>{item.name}</b></div><span>{formatDate(item.startDate)} — {formatDate(item.endDate)}</span><em>Clone từ Lớp mẫu</em><button type="button" className="remove-class" onClick={() => removeDraftClass(item.code)}>Xóa lớp</button></article>)}</div>{addingClass ? <div className="add-class-form"><div className="form-grid"><label>Thuộc khóa học<select value={classDraft.courseId} onChange={(event) => setClassDraft((current) => ({ ...current, courseId: event.target.value }))}>{courseDrafts.map((item) => <option value={item.id} key={item.id}>{item.id} · {item.name}</option>)}</select></label><label>Mã lớp<input value={classDraft.code} onChange={(event) => setClassDraft((current) => ({ ...current, code: event.target.value }))}/></label><label>Tên lớp<input value={classDraft.name} onChange={(event) => setClassDraft((current) => ({ ...current, name: event.target.value }))}/></label><label>Ngày bắt đầu<input type="date" value={classDraft.startDate} onChange={(event) => setClassDraft((current) => ({ ...current, startDate: event.target.value }))}/></label><label>Ngày kết thúc<input type="date" value={classDraft.endDate} onChange={(event) => setClassDraft((current) => ({ ...current, endDate: event.target.value }))}/></label><label>Clone cấu hình từ<select value={classDraft.cloneFrom} onChange={(event) => setClassDraft((current) => ({ ...current, cloneFrom: event.target.value }))}><option>LỚP MẪU</option>{draftClasses.map((item) => <option key={item.code}>{item.code}</option>)}</select></label></div><div className="add-class-actions"><button onClick={() => setAddingClass(false)}>Hủy</button><button className="primary" disabled={!classDraft.courseId || !classDraft.code.trim() || !classDraft.name.trim() || !classDraft.startDate || !classDraft.endDate || classDraft.endDate < classDraft.startDate} onClick={addDraftClass}>Lưu lớp</button></div></div> : <button onClick={() => { setClassDraft((current) => ({ ...current, courseId: courseDrafts[0]?.id || '' })); setAddingClass(true); }}>+ Thêm lớp vào khóa học</button>}<div className="course-class-summary">{courseDrafts.map((item) => { const count = draftClasses.filter((classItem) => classItem.courseId === item.id).length; return <span className={count ? '' : 'missing'} key={item.id}><b>{item.id}</b>{count} lớp</span>; })}</div></div>}
-    {step === 4 && <div className="wizard-body"><div className="step-intro"><span>BƯỚC 4</span><h3>Cấu hình công việc cho các lớp</h3><p>Mẫu dưới đây áp dụng cho tất cả lớp. Mỗi deadline được tính theo số ngày trước ngày khai giảng của từng lớp.</p></div><div className="task-template-list v4">{Object.keys(GROUP_META).map((group) => { const templates = taskTemplates.filter(([taskGroup]) => taskGroup === group); return templates.length ? <section className="wizard-task-group" key={group}><h3>{GROUP_META[group][0]} · {GROUP_META[group][1]}</h3>{templates.map(([, id, title, , , checklistItems]) => { const enabled = enabledTaskIds.includes(id); return <article key={id}><label><input type="checkbox" checked={enabled} onChange={() => setEnabledTaskIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])}/><span><b>{title}</b><small>{checklistDrafts[id].split('\n').filter(Boolean).length} checklist · chưa phân công</small></span><span className="task-deadline-offset">Trước khai giảng <input type="number" min="0" value={taskDueOffsets[id]} disabled={!enabled} aria-label={`Số ngày trước khai giảng cho ${title}`} onChange={(event) => setTaskDueOffsets((current) => ({ ...current, [id]: Math.max(0, Number(event.target.value || 0)) }))}/> ngày</span><button type="button" disabled={!enabled} onClick={() => setEditingChecklist(editingChecklist === id ? '' : id)}>Chỉnh checklist</button></label>{editingChecklist === id && enabled && <div className="checklist-editor"><label>Checklist, mỗi dòng là một tiêu chí<textarea value={checklistDrafts[id]} onChange={(event) => setChecklistDrafts((current) => ({ ...current, [id]: event.target.value }))}/></label><small>{checklistDrafts[id].split('\n').filter(Boolean).length} tiêu chí</small><button type="button" onClick={() => setEditingChecklist('')}>Lưu checklist</button></div>}</article>; })}</section> : null; })}</div></div>}
+    {step === 1 && <div className="wizard-body"><div className="step-intro"><span>BƯỚC 1</span><h3>Thông tin dự án</h3><p>Dự án là cấp quản lý tổng, chứa các khóa học; chưa sinh công việc tại cấp này.</p></div><div className="form-grid"><label>Tên dự án<input value={projectDraft.name} onChange={(event) => setProjectDraft((current) => ({ ...current, name: event.target.value }))}/></label><label>Khách hàng<input value={projectDraft.customerName} onChange={(event) => setProjectDraft((current) => ({ ...current, customerName: event.target.value }))}/></label><label>Ngày bắt đầu<input type="date" value={projectDraft.startDate} onChange={(event) => setProjectDraft((current) => ({ ...current, startDate: event.target.value }))}/></label><label>Deadline tổng<input type="date" value={projectDraft.deadline} onChange={(event) => setProjectDraft((current) => ({ ...current, deadline: event.target.value }))}/></label><label>Ekip phụ trách<select value={projectDraft.teamId} onChange={(event) => setProjectDraft((current) => ({ ...current, teamId: event.target.value }))}><option value="">{managers.length ? 'Chọn Quản lý ekip' : 'Chưa có tài khoản Quản lý ekip'}</option>{managers.map((manager) => <option value={manager.id} key={manager.id}>{manager.name} · {manager.id}</option>)}</select>{!managers.length && <small className="field-hint error">Đóng cửa sổ và tạo tài khoản Quản lý ekip trước.</small>}</label><label>Mã dự án<input value={projectDraft.id} onChange={(event) => setProjectDraft((current) => ({ ...current, id: event.target.value }))}/></label></div><ContextFields level="project" value={projectDraft} onChange={setProjectDraft}/></div>}
+    {step === 2 && <div className="wizard-body"><div className="step-intro"><span>BƯỚC 2</span><h3>Khởi tạo các khóa học trong dự án</h3><p>Một dự án có thể chứa nhiều khóa như QL01A, QL01B, QL02; mỗi khóa quản lý lớp và input độc lập.</p></div><div className="wizard-course-tabs">{courseDrafts.map((item, index) => <button type="button" className={index === activeCourseIndex ? 'active' : ''} key={`${item.id}-${index}`} onClick={() => { setActiveCourseIndex(index); setClassDraft((current) => ({ ...current, courseId: item.id })); }}><span>KHÓA {index + 1}</span><b>{item.id || 'Chưa có mã'}</b><small>{item.name || 'Chưa có tên'}</small></button>)}<button type="button" className="add-course" onClick={addCourseDraft}>+ Thêm khóa</button></div><div className="wizard-course-editor"><div className="form-grid"><label>Tên khóa học<input value={courseDraft.name} onChange={(event) => patchCourseDraft({ name: event.target.value })}/></label><fieldset className="system-multiselect"><legend>Hệ thống áp dụng chung</legend><div className="system-options">{COURSE_SYSTEMS.map((system) => <label key={system.id}><input type="checkbox" checked={systems.includes(system.id)} onChange={() => toggleSystem(system.id)}/><span>{system.id}</span>{!system.mature && <em>Mở rộng sau</em>}</label>)}</div><small>VSurvey và VEvent mới ghi nhận phạm vi; cấu hình chuyên sâu thực hiện ở đợt sau.</small></fieldset><label>Mã khóa học<input value={courseDraft.id} onChange={(event) => patchCourseDraft({ id: event.target.value })}/></label><label>Phiên bản nội dung<input value={courseDraft.contentVersion} onChange={(event) => patchCourseDraft({ contentVersion: event.target.value })}/></label></div><ContextFields level="course" value={courseDraft} onChange={patchCourseDraft}/>{courseDrafts.length > 1 && <button type="button" className="remove-course" onClick={() => removeCourseDraft(activeCourseIndex)}>Xóa khóa đang chọn</button>}</div></div>}
+    {step === 3 && <div className="wizard-body"><div className="step-intro"><span>BƯỚC 3</span><h3>Tạo lớp và gắn đúng khóa học</h3><p>Mỗi lớp thuộc đúng một khóa, có lịch, input và nhóm việc độc lập.</p></div><div className="class-list">{draftClasses.map((item) => <article key={item.code}><div><small>{item.courseId}</small><b>{item.name}</b></div><span>{formatDate(item.startDate)} — {formatDate(item.endDate)}</span><em>Clone từ Lớp mẫu</em><button type="button" className="remove-class" onClick={() => removeDraftClass(item.code)}>Xóa lớp</button></article>)}</div>{addingClass ? <div className="add-class-form"><div className="form-grid"><label>Thuộc khóa học<select value={classDraft.courseId} onChange={(event) => setClassDraft((current) => ({ ...current, courseId: event.target.value }))}>{courseDrafts.map((item) => <option value={item.id} key={item.id}>{item.id} · {item.name}</option>)}</select></label><label>Mã lớp<input value={classDraft.code} onChange={(event) => setClassDraft((current) => ({ ...current, code: event.target.value }))}/></label><label>Tên lớp<input value={classDraft.name} onChange={(event) => setClassDraft((current) => ({ ...current, name: event.target.value }))}/></label><label>Ngày bắt đầu<input type="date" value={classDraft.startDate} onChange={(event) => setClassDraft((current) => ({ ...current, startDate: event.target.value }))}/></label><label>Ngày kết thúc<input type="date" value={classDraft.endDate} onChange={(event) => setClassDraft((current) => ({ ...current, endDate: event.target.value }))}/></label><label>Clone cấu hình từ<select value={classDraft.cloneFrom} onChange={(event) => setClassDraft((current) => ({ ...current, cloneFrom: event.target.value }))}><option>LỚP MẪU</option>{draftClasses.map((item) => <option key={item.code}>{item.code}</option>)}</select></label></div><ContextFields level="class" value={classDraft} onChange={setClassDraft}/><div className="add-class-actions"><button onClick={() => setAddingClass(false)}>Hủy</button><button className="primary" disabled={!classDraft.courseId || !classDraft.code.trim() || !classDraft.name.trim() || !classDraft.startDate || !classDraft.endDate || classDraft.endDate < classDraft.startDate} onClick={addDraftClass}>Lưu lớp</button></div></div> : <button onClick={() => { setClassDraft((current) => ({ ...current, courseId: courseDrafts[0]?.id || '' })); setAddingClass(true); }}>+ Thêm lớp vào khóa học</button>}<div className="course-class-summary">{courseDrafts.map((item) => { const count = draftClasses.filter((classItem) => classItem.courseId === item.id).length; return <span className={count ? '' : 'missing'} key={item.id}><b>{item.id}</b>{count} lớp</span>; })}</div></div>}
+    {step === 4 && <div className="wizard-body"><div className="step-intro"><span>BƯỚC 4</span><h3>Cấu hình công việc cho các lớp</h3><p>Mẫu dưới đây áp dụng cho tất cả lớp. Mỗi deadline được tính theo số ngày trước ngày khai giảng của từng lớp.</p></div><div className="task-template-list v4">{Object.keys(GROUP_META).map((group) => { const templates = taskTemplates.filter(([taskGroup]) => taskGroup === group); return templates.length ? <section className="wizard-task-group" key={group}><h3>{GROUP_META[group][0]} · {GROUP_META[group][1]}</h3>{templates.map(([, id, title, inputKey, , checklistItems]) => { const enabled = enabledTaskIds.includes(id); return <article key={id}><label><input type="checkbox" checked={enabled} onChange={() => setEnabledTaskIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])}/><span><b>{title}</b><small>{checklistDrafts[id].split('\n').filter(Boolean).length} checklist · chưa phân công</small></span><span className="task-deadline-offset">Trước khai giảng <input type="number" min="0" value={taskDueOffsets[id]} disabled={!enabled} aria-label={`Số ngày trước khai giảng cho ${title}`} onChange={(event) => setTaskDueOffsets((current) => ({ ...current, [id]: Math.max(0, Number(event.target.value || 0)) }))}/> ngày</span><button type="button" disabled={!enabled} onClick={() => setEditingChecklist(editingChecklist === id ? '' : id)}>Chỉnh checklist</button></label>{editingChecklist === id && enabled && <div className="checklist-editor"><label>Checklist, mỗi dòng là một tiêu chí<textarea value={checklistDrafts[id]} onChange={(event) => setChecklistDrafts((current) => ({ ...current, [id]: event.target.value }))}/></label><small>{checklistDrafts[id].split('\n').filter(Boolean).length} tiêu chí</small><button type="button" onClick={() => setEditingChecklist('')}>Lưu checklist</button></div>}{enabled && <InputDraftFields value={detailTemplates[id]} onChange={value=>setDetailTemplates(current=>{const next={...current};if(value)next[id]=value;else delete next[id];return next;})} inputKey={inputKey} directory={directory} defaultOwner={directory.find(p=>p.roles?.includes('operations'))?.id||''} defaultDue={projectDraft.deadline} title={title}/>}</article>; })}</section> : null; })}</div></div>}
     {step === 5 && <div className="wizard-body"><div className="summary"><span>CẤU TRÚC SẼ KHỞI TẠO</span><h3>01 dự án · {String(courseDrafts.length).padStart(2, '0')} khóa học · {String(draftClasses.length).padStart(2, '0')} lớp</h3><p>{draftClasses.length * enabledTaskIds.length} công việc cấp lớp ({enabledTaskIds.length} việc × {draftClasses.length} lớp), được tách theo từng khóa học và từng lớp; không sinh công việc ngang hàng ở cấp dự án hoặc khóa học.</p></div><div className="creation-flow"><div><b>1</b><span>Dự án<small>{projectDraft.id}</small></span></div><i></i><div><b>2</b><span>{String(courseDrafts.length).padStart(2, '0')} khóa học<small>{courseDrafts.map((item) => item.id).join(', ')}</small></span></div><i></i><div><b>3</b><span>{String(draftClasses.length).padStart(2, '0')} lớp<small>Lịch riêng</small></span></div><i></i><div><b>4</b><span>{draftClasses.length * enabledTaskIds.length} công việc<small>Theo lớp</small></span></div></div><div className="warning">Mỗi khóa phải có ít nhất một lớp. Mức độ sẵn sàng đầu vào và hàng đợi upload của Sale sẽ được theo dõi riêng theo khóa.</div></div>}
     <div className="modal-actions"><button disabled={step === 1} onClick={() => setStep((value) => value - 1)}>Quay lại</button>{step < stages.length ? <button className="primary" disabled={(step === 1 && !projectDraft.teamId) || (step === 2 && courseDrafts.some((item) => !item.id.trim() || !item.name.trim())) || (step === 3 && courseDrafts.some((item) => !draftClasses.some((classItem) => classItem.courseId === item.id)))} onClick={() => setStep((value) => value + 1)}>Tiếp tục</button> : <button className="primary" onClick={() => confirm(createPayload())}>Xác nhận & sinh việc theo lớp</button>}</div>
   </div></div>;

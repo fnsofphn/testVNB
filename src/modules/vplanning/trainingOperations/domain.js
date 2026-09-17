@@ -1,3 +1,4 @@
+import { DETAIL_COMMANDS, applyDetailCommand, detailedReadiness, cleanInputContext } from './detailedInputs.js';
 export const TRAINING_OPERATIONS_STATE_ID = 'default';
 
 export const TRAINING_INPUT_DEFINITIONS = Object.freeze({
@@ -38,6 +39,7 @@ export const TRAINING_DEFAULT_CLASSES = Object.freeze([
 ]);
 
 const COMMAND_ROLES = Object.freeze({
+  ...Object.fromEntries(DETAIL_COMMANDS.map(type => [type, ['operations', 'admin', 'intake', 'content', 'vtraining', 'manager', 'member']])),
   CREATE_PROJECT: ['operations', 'admin'],
   CREATE_PROJECT_BUNDLE: ['operations', 'admin'],
   CREATE_COURSE: ['operations', 'admin'],
@@ -280,6 +282,12 @@ function appendNotification(state, input) {
   }];
 }
 
+export function createEmptyTrainingOperationsState(context = {}) {
+  const timestamp = nowIso(context);
+  return { schemaVersion: 3, detailSchemaVersion: 1, activeProjectId: '', projects: [], courses: [], classes: [], scopes: [], inputs: [], detailedInputs: [], teamAssignments: [], tasks: [], changeRequests: [], notifications: [], auditEvents: [], createdAt: timestamp, updatedAt: timestamp, updatedBy: 'system' };
+}
+
+// Explicit fixture factory only: never used by the live API or page.
 export function createInitialTrainingOperationsState(context = {}) {
   const timestamp = nowIso(context);
   const projectId = 'EVNSPC-2026';
@@ -339,7 +347,7 @@ function scopedClassCode(courseCode, rawCode) {
   }
   const state = clone(currentState);
   const timestamp = nowIso(context);
-  for (const key of ['projects', 'courses', 'classes', 'scopes', 'inputs', 'teamAssignments', 'tasks', 'changeRequests', 'notifications', 'auditEvents']) {
+  for (const key of ['projects', 'courses', 'classes', 'scopes', 'inputs', 'detailedInputs', 'teamAssignments', 'tasks', 'changeRequests', 'notifications', 'auditEvents']) {
     if (!Array.isArray(state[key])) state[key] = [];
   }
   state.courses = state.courses.map((course) => {
@@ -569,8 +577,10 @@ function refreshTaskReadiness(state, projectId, timestamp) {
     if (task.projectId !== projectId || ['DONE', 'CANCELLED', 'IN_REVIEW', 'IN_PROGRESS', 'REWORK', 'UNASSIGNED', 'NEEDS_REASSIGNMENT'].includes(task.status)) return;
     const inputs = state.inputs.filter((item) => item.projectId === projectId && item.status === 'ACTIVE'
       && (item.scopeLevel === 'course' ? item.courseId === task.courseId : item.classId === task.classId));
-    const versions = Object.fromEntries(inputs.map((item) => [item.dataCode, item.activeVersion]));
-    const blockingInputCodes = task.requiredInputCodes.filter((code) => Number(versions[code] || 0) <= 0);
+    const versions = Object.fromEntries(inputs.map((item) => [item.dataCode, task.requiredInputVersions?.[item.dataCode] || item.activeVersion]));
+    const detail = detailedReadiness(state, task);
+    const blockingInputCodes = task.requiredInputCodes.filter((code) => !detail.replacedCodes.has(code) && Number(versions[code] || 0) <= 0);
+    task.blockingDetailedInputIds = detail.blockingIds;
     const blockingTaskIds = (task.dependsOnTaskIds || []).filter((id) => {
       const dependency = state.tasks.find((item) => item.id === id);
       return dependency && !['DONE', 'CANCELLED'].includes(dependency.status);
@@ -579,8 +589,8 @@ function refreshTaskReadiness(state, projectId, timestamp) {
     task.requiredInputVersions = Object.fromEntries(task.requiredInputCodes.filter((code) => versions[code]).map((code) => [code, versions[code]]));
     task.blockingInputCodes = blockingInputCodes;
     task.blockingTaskIds = blockingTaskIds;
-    task.waitingReason = blockingInputCodes.length ? 'INPUT' : !assigned ? 'ASSIGNMENT' : blockingTaskIds.length ? 'DEPENDENCY' : null;
-    const ready = !blockingInputCodes.length && assigned && !blockingTaskIds.length;
+    task.waitingReason = blockingInputCodes.length || detail.blockingIds.length ? 'INPUT' : !assigned ? 'ASSIGNMENT' : blockingTaskIds.length ? 'DEPENDENCY' : null;
+    const ready = !blockingInputCodes.length && !detail.blockingIds.length && assigned && !blockingTaskIds.length;
     task.status = ready ? 'READY' : 'WAITING_INPUT';
     task.deadlineStatus = ready ? 'ACTIVE' : 'INACTIVE';
     task.slaStartedAt = ready ? (task.slaStartedAt || timestamp) : null;
@@ -674,11 +684,11 @@ function createProject(state, payload, context) {
     const classStart = dateText(item.startDate, `Ngày bắt đầu lớp ${index + 1}`);
     const classEnd = dateText(item.endDate, `Ngày kết thúc lớp ${index + 1}`);
     if (classEnd < classStart) throw domainError('VALIDATION_ERROR', `Ngày kết thúc lớp ${classId} không hợp lệ.`);
-    return { id: classId, code: classId, projectId, courseId, name: requiredText(item.name, `Tên lớp ${index + 1}`), startDate: classStart, endDate: classEnd, cloneFrom: item.cloneFrom || 'CLASS_TEMPLATE', status: 'PREPARING', createdAt: timestamp, updatedAt: timestamp };
+    return { ...cleanInputContext('class', item), id: classId, code: classId, projectId, courseId, name: requiredText(item.name, `Tên lớp ${index + 1}`), startDate: classStart, endDate: classEnd, cloneFrom: item.cloneFrom || 'CLASS_TEMPLATE', status: 'PREPARING', createdAt: timestamp, updatedAt: timestamp };
   });
   if (new Set(normalizedClasses.map((item) => item.id)).size !== normalizedClasses.length) throw domainError('DUPLICATE_CLASS', 'Mã lớp trong khóa học không được trùng nhau.');
-  state.projects.push({ id: projectId, code: projectId, name, customerId, customerName: project.customerName || customerId, startDate, deadline, classCount, teamId: project.teamId || '', status: 'PREPARING', scopeVersion: 1, createdAt: timestamp, updatedAt: timestamp });
-  state.courses.push({ id: courseId, projectId, code: courseId, name: requiredText(course.name, 'Tên khóa học'), systems, activities: selectedContents, contentVersion: course.contentVersion || 'v1', status: 'DECLARED', startDate: normalizedClasses.map((item) => item.startDate).sort()[0], endDate: normalizedClasses.map((item) => item.endDate).sort().at(-1), templateVersion: 1, templateRecommendations: [], createdAt: timestamp, updatedAt: timestamp });
+  state.projects.push({ ...cleanInputContext('project', project), id: projectId, code: projectId, name, customerId, customerName: project.customerName || customerId, startDate, deadline, classCount, teamId: project.teamId || '', status: 'PREPARING', scopeVersion: 1, createdAt: timestamp, updatedAt: timestamp });
+  state.courses.push({ ...cleanInputContext('course', course), id: courseId, projectId, code: courseId, name: requiredText(course.name, 'Tên khóa học'), systems, activities: selectedContents, contentVersion: course.contentVersion || 'v1', status: 'DECLARED', startDate: normalizedClasses.map((item) => item.startDate).sort()[0], endDate: normalizedClasses.map((item) => item.endDate).sort().at(-1), templateVersion: 1, templateRecommendations: [], createdAt: timestamp, updatedAt: timestamp });
   state.classes.push(...normalizedClasses);
   state.scopes.push(scope);
   state.inputs.push(...createInputRecords(projectId, courseId, scope, normalizedClasses, timestamp));
@@ -714,11 +724,11 @@ function createCourse(state, payload, context) {
     const startDate = dateText(item.startDate, `Ngày bắt đầu lớp ${index + 1}`);
     const endDate = dateText(item.endDate, `Ngày kết thúc lớp ${index + 1}`);
     if (endDate < startDate) throw domainError('VALIDATION_ERROR', `Ngày kết thúc lớp ${classId} không hợp lệ.`);
-    return { id: classId, code: classId, projectId: project.id, courseId, name: requiredText(item.name, `Tên lớp ${index + 1}`), startDate, endDate, cloneFrom: item.cloneFrom || 'CLASS_TEMPLATE', status: 'PREPARING', createdAt: timestamp, updatedAt: timestamp };
+    return { ...cleanInputContext('class', item), id: classId, code: classId, projectId: project.id, courseId, name: requiredText(item.name, `Tên lớp ${index + 1}`), startDate, endDate, cloneFrom: item.cloneFrom || 'CLASS_TEMPLATE', status: 'PREPARING', createdAt: timestamp, updatedAt: timestamp };
   });
   if (new Set(classes.map((item) => item.id)).size !== classes.length) throw domainError('DUPLICATE_CLASS', 'Mã lớp trong khóa học không được trùng nhau.');
   const scope = { projectId: project.id, courseId, version: 1, selectedContents, instanceCount: clone(sourceScope?.instanceCount || payload.scope?.instanceCount || {}), createdAt: timestamp };
-  state.courses.push({ id: courseId, code: courseId, projectId: project.id, name: requiredText(course.name, 'Tên khóa học'), systems, activities: selectedContents, contentVersion: sourceCourse?.contentVersion || course.contentVersion || 'v1', status: 'DECLARED', startDate: classes.map((item) => item.startDate).sort()[0], endDate: classes.map((item) => item.endDate).sort().at(-1), templateVersion: Number(sourceCourse?.templateVersion || 1), templateRecommendations: [], copiedFromCourseId: sourceCourse?.id || null, copiedAt: sourceCourse ? timestamp : null, createdAt: timestamp, updatedAt: timestamp });
+  state.courses.push({ ...cleanInputContext('course', sourceCourse || course), id: courseId, code: courseId, projectId: project.id, name: requiredText(course.name, 'Tên khóa học'), systems, activities: selectedContents, contentVersion: sourceCourse?.contentVersion || course.contentVersion || 'v1', status: 'DECLARED', startDate: classes.map((item) => item.startDate).sort()[0], endDate: classes.map((item) => item.endDate).sort().at(-1), templateVersion: Number(sourceCourse?.templateVersion || 1), templateRecommendations: [], copiedFromCourseId: sourceCourse?.id || null, copiedAt: sourceCourse ? timestamp : null, createdAt: timestamp, updatedAt: timestamp });
   state.classes.push(...classes);
   state.scopes.push(scope);
   state.inputs.push(...createInputRecords(project.id, courseId, scope, classes, timestamp));
@@ -1146,6 +1156,8 @@ function updateCourseTemplate(state, payload, context) {
 }
 
 function startTask(state, payload, context) {
+  const existing = findTask(state, payload.taskId);
+  refreshTaskReadiness(state, existing.projectId, nowIso(context));
   const task = findTask(state, payload.taskId);
   assertTaskAssignee(task, context);
   if (task.status !== 'READY') throw domainError('INVALID_TRANSITION', 'Chỉ công việc Sẵn sàng mới được bắt đầu.');
@@ -1239,6 +1251,10 @@ function resolveInputImpact(state, payload, context) {
   taskIds.forEach((id) => {
     const task = findTask(state, id);
     if (!task.inputImpact || task.inputImpact.decision !== 'PENDING') throw domainError('INVALID_TRANSITION', `${task.id} không có impact đang chờ xử lý.`);
+    if (decision !== 'CONTINUE') {
+      const input = state.inputs.find(item => item.id === task.inputImpact.inputId);
+      if (input) task.requiredInputVersions = { ...task.requiredInputVersions, [input.dataCode]: task.inputImpact.toVersion };
+    }
     task.inputImpact.decision = decision;
     task.inputImpact.decidedBy = actorFrom(context);
     task.inputImpact.decidedAt = nowIso(context);
@@ -1369,6 +1385,13 @@ export function applyTrainingOperationsCommand(currentState, command, context = 
   assertTrainingOperationsCommandRole(type, role);
   const state = normalizeTrainingOperationsState(currentState, context);
   const payload = command?.payload || {};
+  if (DETAIL_COMMANDS.includes(type)) {
+    applyDetailCommand(state, type, payload, { ...context, role });
+    state.projects.forEach(project => refreshTaskReadiness(state, project.id, nowIso(context)));
+    state.detailSchemaVersion = 1;
+    return state;
+  }
+  const previousTaskIds = new Set(state.tasks.map(task => task.id));
   switch (type) {
     case 'CREATE_PROJECT': createProject(state, payload, { ...context, role }); break;
     case 'CREATE_PROJECT_BUNDLE': createProjectBundle(state, payload, { ...context, role }); break;
@@ -1398,6 +1421,15 @@ export function applyTrainingOperationsCommand(currentState, command, context = 
     case 'APPROVE_SCOPE_CHANGE': approveScopeChange(state, payload, { ...context, role }); break;
     default: throw domainError('UNKNOWN_COMMAND', `Lệnh ${type} chưa được hỗ trợ.`);
   }
+  if (['CREATE_PROJECT', 'CREATE_PROJECT_BUNDLE', 'CREATE_COURSE', 'CREATE_CLASS_TASK'].includes(type)) {
+    const bundles = [payload, ...(payload.additionalCourses || [])];
+    for (const task of state.tasks.filter(task => !previousTaskIds.has(task.id))) {
+      const bundle = type === 'CREATE_CLASS_TASK' ? payload : bundles.find(b => (b.course?.id || b.course?.code) === task.courseId);
+      const draft = type === 'CREATE_CLASS_TASK' ? payload.detailedInput : bundle?.detailTemplates?.[task.templateId];
+      if (draft) applyDetailCommand(state, 'CREATE_DETAIL_INPUT', { ...draft, id: task.id.replace(/[^a-zA-Z0-9-]/g, '-') + '-initial', taskId: task.id }, { ...context, role });
+    }
+  }
+  if (['CREATE_PROJECT', 'CREATE_PROJECT_BUNDLE', 'CREATE_COURSE', 'CREATE_CLASS_TASK'].includes(type)) state.projects.forEach(project => refreshTaskReadiness(state, project.id, nowIso(context)));
   state.schemaVersion = 3;
   return state;
 }

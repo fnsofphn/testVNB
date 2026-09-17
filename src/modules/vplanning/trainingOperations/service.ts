@@ -85,7 +85,7 @@ async function uploadFileToSignedUrl(signedUrl: string, file: File) {
   const body = new FormData();
   body.append('cacheControl', '3600');
   body.append('', file);
-  const response = await fetch(signedUrl, { method: 'PUT', headers: { 'x-upsert': 'true' }, body });
+  const response = await fetch(signedUrl, { method: 'PUT', headers: { 'x-upsert': 'false' }, body });
   if (!response.ok) {
     const text = await response.text().catch(() => '');
     throw new Error(text || `Upload failed with HTTP ${response.status}.`);

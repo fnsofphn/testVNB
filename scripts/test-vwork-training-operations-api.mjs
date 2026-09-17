@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { createInitialTrainingOperationsState } from '../src/modules/vplanning/trainingOperations/domain.js';
+let fixtureState = createInitialTrainingOperationsState();
 
 process.env.SUPABASE_URL = 'https://supabase.test';
 process.env.SUPABASE_ANON_KEY = 'anon-test';
@@ -32,8 +34,8 @@ globalThis.fetch = async (url, options = {}) => {
     { email: 'content@peopleone.vn', full_name: 'Chỉ nội dung', roles: ['vplanning_content'] },
     { email: 'unlinked@peopleone.vn', full_name: 'Tài khoản VWork chưa liên kết', roles: ['vplanning_member'] },
   ]);
-  if (value.includes('/vwork_training_operations_state?') && (options.method || 'GET') === 'GET') return Response.json([]);
-  if (value.includes('/vwork_training_operations_tasks?') && (options.method || 'GET') === 'GET') return Response.json([]);
+  if (value.includes('/vwork_training_operations_state?') && (options.method || 'GET') === 'GET') return Response.json(fixtureState ? [{ payload: fixtureState, version: 0 }] : []);
+  if (value.includes('/vwork_training_operations_tasks?') && (options.method || 'GET') === 'GET') return Response.json((fixtureState?.tasks || []).map(snapshot => ({ snapshot })));
   if (value.includes('/vwork_training_operations_audit_events?') && (options.method || 'GET') === 'GET') return Response.json([]);
   if (value.includes('/vwork_training_operations_command_requests?') && (options.method || 'GET') === 'GET') return Response.json(persistedRequest ? [persistedRequest] : []);
   if (value.endsWith('/rpc/persist_vwork_training_operations_state')) {
@@ -107,7 +109,7 @@ assert.equal(getResponse.statusCode, 200);
 assert.equal(getResponse.payload.ok, true);
 assert.equal(getResponse.payload.role, 'operations');
 assert.deepEqual(getResponse.payload.availableRoles, ['operations', 'intake', 'content', 'vtraining', 'manager', 'member']);
-assert.equal(getResponse.payload.storage, 'seed');
+assert.equal(getResponse.payload.storage, 'database');
 assert.equal(getResponse.payload.state.tasks.length, 33);
 assert.deepEqual(getResponse.payload.directory.map((item) => [item.id, item.role]), [['ops@peopleone.vn', 'operations'], ['manager@peopleone.vn', 'manager'], ['member@peopleone.vn', 'member'], ['scoped@peopleone.vn', 'member'], ['chieuanh18082003@gmail.com', 'member'], ['content@peopleone.vn', 'content'], ['unlinked@peopleone.vn', 'member']]);
 assert.deepEqual(getResponse.payload.directory[0].roles, ['operations', 'intake', 'content', 'vtraining', 'manager', 'member']);
@@ -265,4 +267,22 @@ await handler(request('POST', {
 assert.equal(separatedAssignment.statusCode, 400);
 assert.match(separatedAssignment.payload.error, /phải khác nhau/);
 
-console.log('V-Work Training Operations API auth, persistence and concurrency checks passed.');
+// Detailed-input assignments must use active directory identities and course scope.
+persistedRequest = null;
+const detailPayload = { taskId: 'CX-FOUNDATION-TNKH01-T-101', id: 'api-detail', key: 'roster', title: 'Roster', ownerId: 'member@peopleone.vn', reviewerId: 'manager@peopleone.vn', collaboratorIds: [], dueAt: '2026-09-20', data: {} };
+const detailCreate = responseRecorder();
+await handler(request('POST', { expectedVersion: 0, requestId: '88888888-8888-4888-8888-888888888888', command: { type: 'CREATE_DETAIL_INPUT', payload: detailPayload } }), detailCreate);
+assert.equal(detailCreate.statusCode, 200);
+assert.equal(lastPersistedBody.p_payload.detailedInputs[0].ownerId, 'member@peopleone.vn');
+assert.equal(lastPersistedBody.p_tasks.find(t => t.id === detailPayload.taskId)?.inputBindings[0].version, 0);
+persistedRequest = null;
+const forbiddenDetail = responseRecorder();
+await handler(request('POST', { expectedVersion: 0, requestId: '99999999-9999-4999-8999-999999999999', command: { type: 'CREATE_DETAIL_INPUT', payload: { ...detailPayload, ownerId: 'scoped@peopleone.vn' } } }), forbiddenDetail);
+assert.equal(forbiddenDetail.statusCode, 403);
+fixtureState = null;
+const emptyResponse = responseRecorder();
+await handler(request('GET'), emptyResponse);
+assert.equal(emptyResponse.payload.storage, 'empty');
+assert.equal(emptyResponse.payload.state.projects.length, 0);
+assert.equal(emptyResponse.payload.state.tasks.length, 0);
+console.log('V-Work Training Operations API auth, persistence, concurrency, detailed assignments and empty-state checks passed.');

@@ -1,7 +1,9 @@
 import { createLimitedBufferReader, parseByteLimit } from './_body-limit.js';
+import { randomUUID } from 'node:crypto';
 import { enforceRateLimit, RATE_LIMITS } from './_rate-limit.js';
 import { TRAINING_OPERATIONS_STATE_ID } from '../src/modules/vplanning/trainingOperations/domain.js';
 import { resolveActiveTrainingRole, resolveTrainingRoles } from '../src/modules/vplanning/trainingOperations/roles.js';
+import { canEditDetail, canReadDetail, projectDetailsForActor } from '../src/modules/vplanning/trainingOperations/detailedInputs.js';
 
 const MAX_BODY_BYTES = parseByteLimit(process.env.VWORK_TRAINING_OPERATIONS_FILE_BODY_LIMIT, 64 * 1024);
 const MAX_UPLOAD_BYTES = parseByteLimit(process.env.VWORK_TRAINING_OPERATIONS_FILE_LIMIT, 25 * 1024 * 1024);
@@ -14,6 +16,7 @@ const BLOCKED_EXTENSIONS = new Set([
 const BLOCKED_CONTENT_TYPES = /(?:text\/html|javascript|x-msdownload|x-sh|x-shellscript|x-dosexec|x-executable)/i;
 const SCOPED_INPUT_READERS = Object.freeze(['intake', 'content', 'vtraining', 'manager', 'member']);
 const DOCUMENT_ACCESS = Object.freeze({
+  detail: { upload: SCOPED_INPUT_READERS, download: SCOPED_INPUT_READERS },
   roster: { upload: ['intake'], download: SCOPED_INPUT_READERS },
   vlearning: { upload: ['content'], download: SCOPED_INPUT_READERS },
   game: { upload: ['content'], download: SCOPED_INPUT_READERS },
@@ -102,6 +105,23 @@ export async function assertInputDocumentAccess(admin, profile, role, inputId, d
   if (!scoped) { const denied = new Error('Bạn không được phân công trong khóa học của file input này.'); denied.status = 403; throw denied; }
 }
 
+export async function assertDetailedDocumentAccess(admin, profile, role, inputId, action, objectPath = '') {
+  const { data: row, error } = await admin.from('vwork_training_operations_state').select('payload').eq('id', TRAINING_OPERATIONS_STATE_ID).maybeSingle();
+  if (error) throw error;
+  const { data: tasks, error: taskError } = await admin.from('vwork_training_operations_tasks').select('snapshot').eq('state_id', TRAINING_OPERATIONS_STATE_ID);
+  if (taskError) throw taskError;
+  const state = { ...(row?.payload || {}), tasks: (tasks || []).map(t => t.snapshot) };
+  const input = (state.detailedInputs || []).find(i => i.id === inputId);
+  const context = { role, actor: { id: profile.id, email: profile.email } };
+  const permitted = input && (action === 'upload' ? canEditDetail(input, context) && input.status !== 'REVIEW' : canReadDetail(state, input, context));
+  if (!permitted) { const denied = new Error('Bạn không được truy cập file của bộ input này.'); denied.status = 403; throw denied; }
+  if (action === 'download') {
+    const visible = projectDetailsForActor(state, context).find(i => i.id === input.id);
+    const files = [...(visible?.draft?.files || []), ...(visible?.versions || []).flatMap(v => v.files || [])];
+    if (!files.some(file => file.path === objectPath)) { const denied = new Error('File không thuộc phiên bản input bạn được phép đọc.'); denied.status = 403; throw denied; }
+  }
+}
+
 async function authorize(req, config) {
   const authHeader = String(req.headers.authorization || '');
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
@@ -144,7 +164,8 @@ export default async function handler(req, res) {
       const documentType = objectPath.split('/')[2] || '';
       if (!canAccessDocument(role, documentType, 'download')) { res.status(403).json({ ok: false, error: 'Vai trò hiện tại không được phép đọc file này.' }); return; }
       const entityId = decodeEntityId(objectPath.split('/')[1]);
-      if (documentType === 'evidence') await assertEvidenceTaskAccess(admin, profile, role, entityId, 'download');
+      if (documentType === 'detail') await assertDetailedDocumentAccess(admin, profile, role, entityId, 'download', objectPath);
+      else if (documentType === 'evidence') await assertEvidenceTaskAccess(admin, profile, role, entityId, 'download');
       else if (DOCUMENT_ACCESS[documentType]) await assertInputDocumentAccess(admin, profile, role, entityId, documentType);
       const signedDownload = await admin.storage.from(config.bucket).createSignedUrl(objectPath, 300, { download: String(body.fileName || '').trim() || true });
       if (signedDownload.error) throw signedDownload.error;
@@ -157,6 +178,7 @@ export default async function handler(req, res) {
     const validation = validateUploadMetadata({ fileName, contentType: body.contentType, size: body.size, entityId: body.entityId });
     if (!validation.valid) { res.status(validation.status).json({ ok: false, ...(validation.code ? { code: validation.code } : {}), error: validation.error }); return; }
     if (documentType === 'evidence') await assertEvidenceTaskAccess(admin, profile, role, String(body.entityId), 'upload');
+    if (documentType === 'detail') await assertDetailedDocumentAccess(admin, profile, role, String(body.entityId), 'upload');
     const existing = await admin.storage.getBucket(config.bucket);
     if (existing.error && String(existing.error.message || '').toLowerCase().includes('not found')) {
       const created = await admin.storage.createBucket(config.bucket, { public: false, fileSizeLimit: MAX_UPLOAD_BYTES });
@@ -166,7 +188,7 @@ export default async function handler(req, res) {
       const secured = await admin.storage.updateBucket(config.bucket, { public: false, fileSizeLimit: MAX_UPLOAD_BYTES });
       if (secured.error) throw secured.error;
     }
-    const objectPath = ['training-operations', encodeEntityId(body.entityId), slug(documentType), `${Date.now()}-${slug(fileName)}`].join('/');
+    const objectPath = ['training-operations', encodeEntityId(body.entityId), slug(documentType), `${Date.now()}-${randomUUID()}-${slug(fileName)}`].join('/');
     const signed = await admin.storage.from(config.bucket).createSignedUploadUrl(objectPath, { upsert: false });
     if (signed.error) throw signed.error;
     res.status(200).json({ ok: true, upload: { bucket: config.bucket, path: objectPath, signedUrl: signed.data.signedUrl, token: signed.data.token || '', fileName, private: true, requestedBy: profile.id } });

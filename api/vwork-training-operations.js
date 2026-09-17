@@ -1,10 +1,11 @@
 import { createLimitedBufferReader, parseByteLimit } from './_body-limit.js';
 import { enforceRateLimit, RATE_LIMITS } from './_rate-limit.js';
+import { isDetailParticipant, projectDetailsForActor } from '../src/modules/vplanning/trainingOperations/detailedInputs.js';
 import {
   TRAINING_OPERATIONS_STATE_ID,
   applyTrainingOperationsCommand,
   assertTrainingOperationsCommandRole,
-  createInitialTrainingOperationsState,
+  createEmptyTrainingOperationsState,
   normalizeTrainingOperationsState,
   summarizeTrainingOperationsState,
 } from '../src/modules/vplanning/trainingOperations/domain.js';
@@ -138,11 +139,11 @@ async function authenticate(req, config) {
   };
 }
 
-function projectActiveInput(input) {
+function projectActiveInput(input, pinnedVersions = []) {
   return {
     ...input,
     versions: input.versions.map((version) => ({
-      ...(version.version === input.activeVersion ? version : {
+      ...(version.version === input.activeVersion || pinnedVersions.includes(version.version) ? version : {
         id: version.id,
         version: version.version,
         status: version.status,
@@ -170,8 +171,10 @@ function courseInputProgress(state) {
   });
 }
 
-export function stateForRole(state, auth) {
+function scopedStateForRole(state, auth) {
   const output = normalizeTrainingOperationsState(state);
+  const actorDetails = projectDetailsForActor(output, auth);
+  output.detailedInputs = actorDetails;
   const role = auth.role;
   output.courseInputProgress = courseInputProgress(output);
   const actorTokens = new Set([auth.actor.id, auth.actor.email, auth.actor.name].map((item) => String(item || '').trim().toLowerCase()).filter(Boolean));
@@ -182,6 +185,12 @@ export function stateForRole(state, auth) {
     && item.role === role
     && [item.accountId, item.accountEmail, item.accountName].some((value) => actorTokens.has(String(value || '').trim().toLowerCase())))
     .map((item) => item.courseId));
+  const courseRoleIds = new Set(scopedCourseIds);
+  actorDetails.forEach(input => scopedCourseIds.add(input.courseId));
+  // A contributor may see the task which consumes their assigned input without
+  // acquiring the right to execute it or read every task in that course.
+  const providedInputIds = new Set(actorDetails.filter(i => isDetailParticipant(i, auth)).map(i => i.id));
+  const isInputTask = task => (task.inputBindings || []).some(b => providedInputIds.has(b.inputId));
   if (role === 'member') output.tasks.filter(isAssigned).forEach((item) => scopedCourseIds.add(item.courseId));
   if (role === 'manager') output.tasks.filter((item) => matchesActor(item.managerId, item.manager, item.reviewerId, item.reviewer)).forEach((item) => scopedCourseIds.add(item.courseId));
   output.courses = output.courses.filter((item) => scopedCourseIds.has(item.id));
@@ -190,7 +199,8 @@ export function stateForRole(state, auth) {
   output.classes = output.classes.filter((item) => scopedCourseIds.has(item.courseId));
   output.scopes = output.scopes.filter((item) => scopedCourseIds.has(item.courseId));
   output.inputs = output.inputs.filter((item) => scopedCourseIds.has(item.courseId));
-  output.tasks = output.tasks.filter((item) => scopedCourseIds.has(item.courseId));
+  output.tasks = output.tasks.filter((item) => scopedCourseIds.has(item.courseId)
+    && (role !== 'manager' || courseRoleIds.has(item.courseId) || matchesActor(item.managerId, item.reviewerId, item.assigneeId) || isInputTask(item)));
   output.teamAssignments = output.teamAssignments.filter((item) => scopedCourseIds.has(item.courseId));
   output.courseInputProgress = output.courseInputProgress.filter((item) => scopedCourseIds.has(item.courseId));
   output.changeRequests = output.changeRequests.filter((item) => (item.affectedCourseIds || [item.courseId]).some((id) => scopedCourseIds.has(id)));
@@ -200,14 +210,14 @@ export function stateForRole(state, auth) {
   output.activeProjectId = output.projects.some((item) => item.id === output.activeProjectId) ? output.activeProjectId : output.projects[0]?.id || null;
   if (role === 'intake') {
     output.inputs = output.inputs.map((item) => item.ownerRole === role ? item : projectActiveInput(item));
-    output.tasks = output.tasks.filter(isAssigned);
+    output.tasks = output.tasks.filter(task => isAssigned(task) || isInputTask(task));
     output.notifications = output.notifications.filter((item) => (item.recipients || []).some((value) => ['intake', auth.actor.id, auth.actor.email].includes(value)));
     output.auditEvents = output.auditEvents.filter((item) => item.actor?.id === auth.actor.id || ['PROJECT_CREATED', 'SCOPE_CHANGE_APPROVED'].includes(item.type));
     return output;
   }
   if (role === 'content') {
     output.inputs = output.inputs.map((item) => item.ownerRole === role ? item : projectActiveInput(item));
-    output.tasks = output.tasks.filter(isAssigned);
+    output.tasks = output.tasks.filter(task => isAssigned(task) || isInputTask(task));
     output.changeRequests = [];
     output.notifications = output.notifications.filter((item) => (item.recipients || []).some((value) => ['content', auth.actor.id, auth.actor.email].includes(value)));
     output.auditEvents = output.auditEvents.filter((item) => item.actor?.id === auth.actor.id || item.entityType === 'project');
@@ -215,15 +225,36 @@ export function stateForRole(state, auth) {
   }
   if (role === 'vtraining') {
     output.inputs = output.inputs.map((item) => item.ownerRole === role ? item : projectActiveInput(item));
-    output.tasks = output.tasks.filter(isAssigned);
+    output.tasks = output.tasks.filter(task => isAssigned(task) || isInputTask(task));
     output.changeRequests = [];
     return output;
   }
-  output.inputs = output.inputs.map(projectActiveInput);
+  output.inputs = output.inputs.map(input => projectActiveInput(input));
   if (role === 'member') {
-    output.tasks = output.tasks.filter(isAssigned);
+    output.tasks = output.tasks.filter(task => isAssigned(task) || isInputTask(task));
     output.changeRequests = [];
   }
+  return output;
+}
+
+export function stateForRole(state, auth) {
+  const output = scopedStateForRole(state, auth);
+  if (['operations', 'admin'].includes(auth.role)) return output;
+  // Discard legacy quarantine data and unrelated audit payloads from client responses.
+  delete output.legacyUnscopedInputs;
+  const detailIds = new Set(output.detailedInputs.map(i => i.id));
+  output.auditEvents = output.auditEvents.filter(e => e.entityType !== 'detailed_input' || detailIds.has(e.entityId));
+  const scopedTasks = output.tasks;
+  const taskOnly = ['member', 'vtraining'].includes(auth.role);
+  if (taskOnly) output.classes = output.classes.filter(c => scopedTasks.some(t => t.classId === c.id) || output.detailedInputs.some(i => i.classId === c.id));
+  const originalInputs = normalizeTrainingOperationsState(state).inputs;
+  output.inputs = output.inputs.filter(input => !taskOnly || scopedTasks.some(task =>
+    task.courseId === input.courseId && (input.scopeLevel === 'course' || task.classId === input.classId) && task.requiredInputCodes?.includes(input.dataCode)))
+    .map(input => {
+      const original = originalInputs.find(i => i.id === input.id) || input;
+      const pinned = scopedTasks.filter(t => t.courseId === input.courseId && (input.scopeLevel === 'course' || t.classId === input.classId)).map(t => t.requiredInputVersions?.[input.dataCode]).filter(Boolean);
+      return input.ownerRole === auth.role ? input : projectActiveInput(original, pinned);
+    });
   return output;
 }
 
@@ -234,7 +265,7 @@ async function loadState(auth) {
     requestJson(`${auth.restUrl}/vwork_training_operations_audit_events?state_id=eq.${encodeURIComponent(TRAINING_OPERATIONS_STATE_ID)}&select=id,actor_id,actor_email,actor_name,actor_role,entity_type,entity_id,summary,details,happened_at,command_type&order=happened_at.asc`, { headers: auth.serviceHeaders }),
   ]);
   const row = Array.isArray(rows) ? rows[0] || null : null;
-  if (!row) return { state: createInitialTrainingOperationsState(), version: 0, updatedAt: null, storage: 'seed' };
+  if (!row) return { state: createEmptyTrainingOperationsState(), version: 0, updatedAt: null, storage: 'empty' };
   const tasks = (Array.isArray(taskRows) ? taskRows : []).map((item) => item.snapshot).filter(Boolean);
   const auditEvents = (Array.isArray(auditRows) ? auditRows : []).map((item) => ({
     id: item.id,
@@ -343,6 +374,37 @@ async function normalizeAssignmentCommand(auth, state, command) {
   payload.reviewerId = reviewer.id;
   payload.reviewerName = reviewer.name;
   return { ...command, payload };
+}
+
+async function normalizeDetailedAssignments(auth, state, command) {
+  const type = String(command?.type || '').toUpperCase();
+  const copy = structuredClone(command);
+  const entries = [];
+  if (['CREATE_DETAIL_INPUT', 'ASSIGN_DETAIL_INPUT'].includes(type)) {
+    const source = type === 'CREATE_DETAIL_INPUT' ? state.tasks.find(t => t.id === copy.payload?.taskId) : (state.detailedInputs || []).find(i => i.id === copy.payload?.inputId);
+    entries.push({ value: copy.payload, scope: source });
+  }
+  if (copy.payload?.detailedInput) {
+    const classroom = state.classes.find(c => c.id === copy.payload.classId);
+    entries.push({ value: copy.payload.detailedInput, scope: classroom && { ...classroom, classId: classroom.id } });
+  }
+  for (const bundle of [copy.payload || {}, ...(copy.payload?.additionalCourses || [])]) {
+    for (const value of Object.values(bundle.detailTemplates || {})) entries.push({ value, scope: { projectId: copy.payload?.project?.id || copy.payload?.projectId, courseId: bundle.course?.id } });
+  }
+  if (!entries.length) return copy;
+  const directory = await loadTeamDirectory(auth);
+  for (const { value, scope } of entries) {
+    if (!value || typeof value !== 'object' || !scope) { const error = new Error('Phạm vi phân công input không hợp lệ.'); error.status = 400; throw error; }
+    for (const id of [value.ownerId, value.reviewerId, ...(Array.isArray(value.collaboratorIds) ? value.collaboratorIds : [])]) {
+      const person = directory.find(p => p.id === normalizeEmail(id));
+      if (!person?.assignable || !assignmentScopeAllows(person, scope)) { const error = new Error('Người nhập/người chốt phải là tài khoản VWork đang hoạt động trong phạm vi phù hợp.'); error.status = 403; throw error; }
+    }
+    value.ownerId = normalizeEmail(value.ownerId);
+    value.reviewerId = normalizeEmail(value.reviewerId);
+    if (value.collaboratorIds != null && !Array.isArray(value.collaboratorIds)) { const error = new Error('Danh sách người cùng nhập không hợp lệ.'); error.status = 400; throw error; }
+    value.collaboratorIds = (value.collaboratorIds || []).map(normalizeEmail);
+  }
+  return copy;
 }
 
 async function loadCommandRequest(auth, requestId) {
@@ -469,7 +531,7 @@ export default async function handler(req, res) {
       return;
     }
     assertTrainingOperationsCommandRole(String(body.command?.type || '').toUpperCase(), auth.role);
-    const command = await normalizeAssignmentCommand(auth, current.state, body.command);
+    const command = await normalizeDetailedAssignments(auth, current.state, await normalizeAssignmentCommand(auth, current.state, body.command));
     const previousAuditLength = current.state.auditEvents?.length || 0;
     const nextState = applyTrainingOperationsCommand(current.state, command, { role: auth.role, actor: auth.actor });
     const newAuditEvents = (nextState.auditEvents || []).slice(previousAuditLength);

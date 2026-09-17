@@ -7,6 +7,7 @@
 - Git remote chuẩn: `https://github.com/fnsofphn/testVNB.git`.
 - Vercel project: `test-vinabrian`; production domain: `https://test-vinabrain.vercel.app`.
 - Supabase của Test-Vinabrain là project riêng. Chỉ dùng project được liên kết hoặc cấu hình trong chính repo/Vercel này.
+- Supabase ref được người dùng xác nhận ngày 17/09/2026: `npazlysytrqhnwezugcs` (tên hiển thị `vcontent-p0-cleanroom-20260725`). Ref này khớp cấu hình local và bundle công khai của production Test-Vinabrain; tên kế thừa không thay đổi phạm vi project.
 - Tên package, module hoặc code kế thừa có thể chứa `VContent`; điều đó không cho phép dùng hạ tầng hay tài liệu của repo Vinabrain khác.
 - Không truy cập, sửa, deploy hoặc chạy lệnh tại `D:\02. Github\01. Vinabrain\vcontent-3.0` trong khi thực hiện task của Test-Vinabrain.
 
