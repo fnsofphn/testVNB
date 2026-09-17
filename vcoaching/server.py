@@ -24,6 +24,7 @@ from urllib.error import HTTPError
 from flask import Flask, request, jsonify, send_file, g
 from cloud import CloudDB, CloudError
 from self_reflection import apply as reflect_apply, review as reflect_review, ReflectionError
+from forms import build as build_form, validate_cells
 from documents import STEPS, parse, norm, business_code, rules, export_docx, assessment_schema, mapped_outputs
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -448,7 +449,7 @@ def api(op=None):
     a = getattr(g, 'vc_actor', None) or actor()
     body = request.get_json(silent=True) or {}
     write_ops = {'catalog', 'upload', 'edit', 'merge', 'confirm', 'assign', 'comment', 'review',
-                 'reflection', 'reflection-review', 'lock', 'unlock', 'release', 'respond', 'finalize', 'account', 'switch-audit', 'recheck', 'classify', 'config', 'compare-review', 'convert', 'upload-init', 'upload-complete'}
+                 'master-form', 'reflection', 'reflection-review', 'lock', 'unlock', 'release', 'respond', 'finalize', 'account', 'switch-audit', 'recheck', 'classify', 'config', 'compare-review', 'convert', 'upload-init', 'upload-complete'}
     if op in write_ops and request.method != 'POST': raise Problem('Chỉ chấp nhận POST', 405)
     if op == 'me':
         return jsonify(actor=a, roles=ROLES, steps=STEPS, storage='supabase' if CLOUD else 'local',
@@ -468,6 +469,7 @@ def api(op=None):
         item = {'id': key, 'type': 'config', 'project': project, 'stage': body['stage'], 'text': body['text'].strip(), 'at': now(), 'by': a['id']}
         put('config', item); audit(a, 'config', item, before=previous, after=item)
         return jsonify(ok=True)
+    if op in ('form-summary','master-form'): return form_api(op,a,body)
     if op == 'workspace':
         catalog_units=rows('unit')
         initiatives = [visible_initiative(a, r, catalog_units) for r in rows('initiative') if not r.get('merged_into') and not r.get('conversion_pending') and can(a, r)]
@@ -841,6 +843,50 @@ def api(op=None):
     audit(a, op, r, before={'version': old['versions'][-1]['number'], 'status': old['status']},
           after={'version': r['versions'][-1]['number'], 'status': r['status']}, reason=reason)
     return jsonify(initiative=visible_initiative(a, r))
+
+
+def form_api(op,a,body):
+    require(a,('unit','project','system'))
+    unit=scoped(a,body.get('unit') or request.args.get('unit'),'unit')
+    key=unit['id']+':master-form'
+    doc=next((x for x in rows('master_form') if x['id']==key),None)
+    records=[r for r in rows('initiative') if r['unit']==unit['id'] and r['project']==unit['project'] and not r.get('merged_into') and not r.get('conversion_pending') and can(a,r)]
+    files=[f for f in rows('file') if f['unit']==unit['id'] and f['project']==unit['project'] and can(a,f)]
+    if op=='form-summary':
+        form=request.args.get('form','01');mode=request.args.get('mode','draft')
+        if form not in ('01','02') or mode not in ('draft','approved'):raise Problem('Biểu mẫu không hợp lệ')
+        record=None
+        if form=='02':
+            record=scoped(a,request.args.get('initiative'),'initiative')
+            if record['unit']!=unit['id'] or record.get('merged_into') or record.get('conversion_pending'):raise Problem('Hồ sơ không thuộc danh mục đơn vị',403)
+        result=build_form(form,unit,records,files,mode,record,doc)
+        result.update(unit=unit['id'],form=form,mode=mode,master=doc,record=visible_initiative(a,record) if record else None)
+        return jsonify(result)
+    action=body.get('action');old=copy.deepcopy(doc)
+    if not doc:doc={'id':key,'type':'master_form','project':unit['project'],'unit':unit['id'],'revision':0,'status':'draft','cells':{},'approved_cells':{},'history':[]}
+    if body.get('revision')!=doc['revision']:raise Problem('Biểu mẫu vừa được cập nhật. Tải lại trước khi lưu.',409)
+    if action in ('save','submit'):
+        require(a,('unit',))
+        if doc['status']=='submitted':raise Problem('Biểu mẫu đang chờ duyệt',409)
+        if action=='save':
+            try:doc['cells']={**doc['cells'],**validate_cells('01',body.get('cells'))}
+            except ValueError as error:raise Problem(str(error))
+            doc['status']='draft'
+        else:
+            if not doc['cells']:raise Problem('Chưa có phần bổ sung để gửi')
+            if doc['cells']==doc['approved_cells']:raise Problem('Chưa có thay đổi so với phần bổ sung đã duyệt')
+            doc.update(status='submitted',submitted_by=a['id'],submitted_at=now())
+    elif action in ('accept','return'):
+        require(a,('project',))
+        if doc['status']!='submitted':raise Problem('Không có bản đang chờ duyệt',409)
+        if not isinstance(body.get('reason'),str) or not body['reason'].strip():raise Problem('Cần ghi căn cứ quyết định')
+        if action=='accept':doc['approved_cells']=copy.deepcopy(doc['cells'])
+        doc['status']='accepted' if action=='accept' else 'returned'
+    else:raise Problem('Thao tác không hợp lệ')
+    doc['revision']+=1;doc['at']=now();doc['by']=a['id']
+    doc['history'].append({'action':action,'at':doc['at'],'by':a['email'],'reason':body.get('reason',''),'cells':copy.deepcopy(doc['cells'])})
+    put('master_form',doc);audit(a,'master_form_'+action,doc,before=old,after=doc)
+    return jsonify(ok=True)
 
 
 def account_users():

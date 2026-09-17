@@ -44,7 +44,28 @@ Góp ý PeopleOne vẫn theo quyền công bố hiện có. Đơn vị có thể
 khi công bố góp ý. Đính kèm tệp bằng chứng giữ điều kiện mở phản hồi hiện có;
 các bước khác có trường ghi bằng chứng/nguồn dự kiến.
 
-## Kiểm thử
+## Tổng hợp hiệu chỉnh theo biểu mẫu
+
+Tab Tổng hợp hiệu chỉnh sử dụng cấu trúc hai DOCX gốc trong
+`vcoaching/form_schema.json`: Biểu mẫu 01 ở cấp đơn vị (I–VI), Biểu mẫu 02
+ở cấp sáng kiến (I–VII). Các mục, nhãn và cột theo mẫu; ô chưa có dữ liệu
+để trống. Hàng hướng dẫn gộp ô được trình bày thành đoạn trước bảng.
+
+Bản đang chỉnh hiển thị phần tự soi đã lưu; chế độ nguồn và hiệu chỉnh đã
+duyệt chỉ áp dụng các hiệu chỉnh được duyệt. Dữ liệu nguồn không được tự
+coi là đã duyệt. Khi phiên bản nguồn thay đổi, nháp cũ không tự ghép vào
+bản tổng hợp. Các ô được ánh xạ từ tự soi chỉnh tại 8 bước; phần khác được
+bổ sung trực tiếp tại biểu mẫu. Nội dung khác nhau giữa các nguồn có mục
+đối chiếu riêng.
+
+Phần bổ sung Biểu mẫu 02 lưu trong `self_reflection.form_cells`, đi cùng
+snapshot khi gửi và chuyển vào phiên bản sáng kiến khi duyệt. Phần bổ sung
+Biểu mẫu 01 lưu bằng loại bản ghi `master_form` trong kho hiện có, có luồng
+lưu/gửi/duyệt/trả lại riêng. Danh mục sáng kiến trong Biểu mẫu 01 lấy từ các
+hồ sơ cùng đơn vị, không nhập lại. API kiểm tra phạm vi đơn vị, vai trò và
+revision để tránh ghi đè cập nhật đồng thời. Tài liệu gốc được giữ nguyên.
+
+## Kiểm thử biểu mẫu
 
 `scripts/test-vcoaching.py Workflow` dùng dữ liệu cục bộ cô lập, kiểm tra đủ
 8 bước, lưu nháp không sửa nguồn, gửi lặp, trả lại/gửi lại/duyệt, snapshot cũ,

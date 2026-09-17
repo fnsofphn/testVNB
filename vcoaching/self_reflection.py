@@ -2,6 +2,7 @@
 import copy
 import json
 from pathlib import Path
+from forms import validate_cells
 
 SCHEMA = json.loads(Path(__file__).with_name('self_reflection_schema.json').read_text('utf-8'))
 FIELDS = {str(i): [str(i)] for i in range(1, 9)}
@@ -66,6 +67,9 @@ def apply(r, body, actor_id, at, new_id):
     if action == 'save':
         step = body.get('step')
         draft['steps'][step] = validate_step(step, body.get('data'), body.get('complete') is True)
+    elif action == 'form-cells':
+        try: draft['form_cells'] = {**draft.get('form_cells', {}), **validate_cells('02', body.get('cells'))}
+        except ValueError as error: raise ReflectionError(str(error))
     elif action == 'commitment':
         check(isinstance(body.get('data'), dict), 'Cam kết không hợp lệ')
         draft['commitment'] = {k: text(body['data'].get(k, '')) for k in ('action', 'owner', 'due')}
@@ -99,6 +103,7 @@ def review(r, body, actor_id, at):
         r['status'] = 'self_review'
         return
     version = copy.deepcopy(r['versions'][-1])
+    version['form_cells'] = {**version.get('form_cells', {}), **draft.get('form_cells', {})}
     for step, data in draft['steps'].items():
         if data['decision'] in ('clarify', 'revise'): version['revisions'].update(data['revisions'])
     version.update(number=version['number']+1, at=at, confirmed=False, self_submission_id=draft['submission_id'])

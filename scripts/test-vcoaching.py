@@ -15,6 +15,50 @@ def who(role='data', super_admin=False, unit='vcoaching-test-unit'):
  return {'id':role,'email':role+'@test.invalid','role':role,'super':super_admin,'switched':False,'projects':['vcoaching-test'],'units':[unit],'initiatives':[],'assignment_actor':role}
 
 class Workflow(unittest.TestCase):
+ def summary(self,form='01',mode='draft',actor=None,status=200):
+  with patch.object(s,'actor',return_value=actor or who('unit')):
+   response=self.client.get('/vc-api/form-summary',query_string={'unit':'vcoaching-test-unit','form':form,'mode':mode,'initiative':self.iid})
+  self.assertEqual(response.status_code,status,response.get_json())
+  return response.get_json()
+ def test_template_summary_draft_approval_and_scope(self):
+  r=s.get(self.iid);r['conversion_pending']=False;s.put('initiative',r)
+  initial=copy.deepcopy(r['versions'])
+  self.reflection_request('save',step='2',data={'decision':'revise','revisions':{'2':'Trạng thái đích đã sửa'},'note':'Bổ sung'})
+  self.reflection_request('form-cells',cells={'4:1:2':'Sản phẩm bổ sung','6:1:2':'Kết quả kỳ này'})
+  draft=self.summary('02');approved=self.summary('02','approved')
+  self.assertEqual(draft['values']['2:9:1'],'Trạng thái đích đã sửa')
+  self.assertNotEqual(approved['values'].get('2:9:1'),'Trạng thái đích đã sửa')
+  self.assertEqual(draft['values']['4:1:2'],'Sản phẩm bổ sung')
+  self.assertNotIn('4:1:2',approved['values'])
+  self.assertEqual(s.get(self.iid)['versions'],initial)
+  self.assertEqual(self.summary()['values']['4:1:3'],'Trạng thái đích đã sửa')
+  template=self.summary()['schema']
+  self.assertEqual(template['tables'][4]['rows'][0][0],'Mã')
+  self.assertEqual(len(template['tables'][4]['rows'][0]),10)
+  self.assertFalse(any(x.get('table')=='0' for x in template['order']))
+  self.summary(actor=who('unit',unit='other'),status=403)
+  self.reflection_request('form-cells',cells={'2:0:1':'Đổi mã trái phép'},status=400)
+  self.reflection_request('form-cells',cells={'4:200:1':'Quá nhiều dòng'},status=400)
+  self.complete_reflection();self.reflection_request('submit',request_id='forms-submit')
+  snap=s.get(self.iid)['self_submissions'][-1]
+  self.assertEqual(snap['form_cells']['4:1:2'],'Sản phẩm bổ sung')
+  self.reflection_request('form-cells',cells={'4:1:2':'Không được sửa'},status=409)
+  self.request('reflection-review',role='project',decision='accept',submission_id=snap['submission_id'],reason='Đã đối chiếu')
+  self.assertEqual(self.summary('02','approved')['values']['4:1:2'],'Sản phẩm bổ sung')
+ def test_master_form_supplement_review_and_revision(self):
+  self.request('master-form',role='unit',unit='vcoaching-test-unit',action='save',revision=0,cells={'2:2:1':'Lãnh đạo A','5:4:1':'Kết quả sớm'})
+  self.assertEqual(self.summary()['values']['2:2:1'],'Lãnh đạo A')
+  self.assertNotEqual(self.summary(mode='approved')['values'].get('2:2:1'),'Lãnh đạo A')
+  self.request('master-form',role='unit',unit='vcoaching-test-unit',action='save',revision=0,cells={},status=409)
+  self.request('master-form',role='unit',unit='vcoaching-test-unit',action='save',revision=1,cells={'4:1:2':'Không sửa danh mục'},status=400)
+  self.request('master-form',role='unit',unit='vcoaching-test-unit',action='submit',revision=1)
+  self.request('master-form',role='unit',unit='vcoaching-test-unit',action='accept',revision=2,reason='Sai quyền',status=403)
+  self.request('master-form',role='project',unit='vcoaching-test-unit',action='accept',revision=2,reason='Đã đối chiếu')
+  self.assertEqual(self.summary(mode='approved')['values']['2:2:1'],'Lãnh đạo A')
+  self.request('master-form',role='unit',unit='vcoaching-test-unit',action='save',revision=3,cells={'2:2:1':''})
+  self.assertEqual(self.summary()['values']['2:2:1'],'')
+  self.assertEqual(self.summary(mode='approved')['values']['2:2:1'],'Lãnh đạo A')
+  self.assertEqual(len(self.summary()['master']['history']),4)
  def reflection_request(self, action, role='unit', status=200, **body):
   record=s.get(self.iid)
   return self.request('reflection',role=role,status=status,base_version=record['versions'][-1]['number'],revision=record.get('self_reflection',{}).get('revision',0),action=action,**body)

@@ -173,3 +173,13 @@
 .vc-root .vc-reflection fieldset{border:0;padding:0;margin:0;min-width:0}
 .vc-root .vc-reflection-criterion{display:grid;grid-template-columns:minmax(0,1fr) 160px;align-items:center;gap:16px;border-bottom:1px solid var(--vc-line);padding:10px 0;color:var(--vc-ink)}
 @media(max-width:620px){.vc-root .vc-reflection-criterion{grid-template-columns:1fr;gap:4px}.vc-root .vc-reflection .vc-columns{grid-template-columns:1fr}}
+
+.vc-root .vc-form-summary .vc-form-table-section{margin:16px 0;background:var(--vc-panel);border:1px solid var(--vc-line);border-radius:8px;overflow:hidden}
+.vc-root .vc-form-summary table{width:100%;border-collapse:collapse}
+.vc-root .vc-form-summary td,.vc-root .vc-form-summary th{border:1px solid var(--vc-line);vertical-align:top;padding:10px;min-width:160px}
+.vc-root .vc-form-summary .vc-form-fields td:first-child{width:32%;min-width:220px;font-weight:600}
+.vc-root .vc-form-value{white-space:pre-wrap;overflow-wrap:anywhere}
+.vc-root .vc-form-cell textarea{min-width:180px;min-height:100px;resize:vertical}
+.vc-root .vc-form-cell small{display:block;color:var(--vc-muted);font-size:11px;margin-top:8px}
+.vc-root .vc-form-heading{margin-top:28px;color:var(--vc-blue)}
+.vc-root .vc-form-save{position:sticky;bottom:0;background:var(--vc-panel);border:1px solid var(--vc-line);padding:12px;z-index:2}

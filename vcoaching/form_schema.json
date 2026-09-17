@@ -1,0 +1,834 @@
+{
+  "01": {
+    "file": "Mau_01_Master_CTHD_VNPT_Rising_2026_2028.docx",
+    "order": [
+      {
+        "text": "MẪU 01 (mẫu Master)",
+        "heading": false
+      },
+      {
+        "text": "CHƯƠNG TRÌNH HÀNH ĐỘNG VNPT RISING CỦA BAN/ĐƠN VỊ",
+        "heading": false
+      },
+      {
+        "text": "Giai đoạn 2026–2028",
+        "heading": false
+      },
+      {
+        "table": "1"
+      },
+      {
+        "text": "I. THÔNG TIN CHUNG",
+        "heading": true
+      },
+      {
+        "table": "2"
+      },
+      {
+        "text": "II. ĐỊNH VỊ VAI TRÒ VÀ TRỌNG TÂM CHUYỂN ĐỔI CỦA BAN/ĐƠN VỊ",
+        "heading": true
+      },
+      {
+        "table": "3"
+      },
+      {
+        "text": "III. DANH MỤC MỤC TIÊU, SÁNG KIẾN VÀ NHIỆM VỤ TRỌNG TÂM",
+        "heading": true
+      },
+      {
+        "text": "Quy ước nguồn hình thành: TĐG = Tập đoàn giao; ĐHT = Đồng hành/tham gia sáng kiến hoặc mặt trận của Tập đoàn; ĐVCĐ = Ban/đơn vị chủ động đề xuất. Với mỗi sáng kiến, lựa chọn một cấu phần VNPT Rising liên kết chính và có thể bổ sung các cấu phần phối hợp.",
+        "heading": false
+      },
+      {
+        "table": "4"
+      },
+      {
+        "text": "Yêu cầu tối thiểu khi lựa chọn sáng kiến/nhiệm vụ:",
+        "heading": false
+      },
+      {
+        "text": "• Ưu tiên trước nhiệm vụ Tập đoàn giao và nội dung đồng hành với Chương trình hành động của Ban Tổng Giám đốc.",
+        "heading": false
+      },
+      {
+        "text": "• Sáng kiến do đơn vị chủ động đề xuất phải giải quyết vấn đề thực tế, gắn mục tiêu VNPT Rising và không tạo hệ thống/dữ liệu cục bộ trái định hướng dùng chung.",
+        "heading": false
+      },
+      {
+        "text": "• Mỗi sáng kiến phải có một Owner chịu trách nhiệm đến cùng, baseline hoặc kế hoạch thiết lập baseline trong 30 ngày đầu.",
+        "heading": false
+      },
+      {
+        "text": "• Không sử dụng số lượng hội nghị, truyền thông, đào tạo hoặc văn bản ban hành làm bằng chứng duy nhất của chuyển đổi.",
+        "heading": false
+      },
+      {
+        "text": "IV. TỔNG HỢP CÁC KẾT QUẢ DỰ KIẾN SẼ ĐẠT TRONG 12 THÁNG ĐẦU",
+        "heading": true
+      },
+      {
+        "table": "5"
+      },
+      {
+        "text": "V. CÁC VẤN ĐỀ CẦN TẬP ĐOÀN HỖ TRỢ HOẶC THÁO GỠ",
+        "heading": true
+      },
+      {
+        "table": "6"
+      },
+      {
+        "text": "VI. CAM KẾT CỦA NGƯỜI ĐỨNG ĐẦU",
+        "heading": true
+      },
+      {
+        "text": "Tôi cam kết trực tiếp dẫn dắt việc triển khai Chương trình hành động VNPT Rising tại Ban/đơn vị; bảo đảm các nhiệm vụ được tích hợp vào kế hoạch sản xuất kinh doanh, chương trình công tác, BSC/KPI, ngân sách và cơ chế giao ban hiện có. Ban/đơn vị chịu trách nhiệm về tính trung thực của dữ liệu, bằng chứng và kết quả báo cáo; chủ động rà soát, điều chỉnh, nhân rộng hoặc đề xuất dừng những nội dung không còn tạo giá trị.",
+        "heading": false
+      },
+      {
+        "table": "7"
+      }
+    ],
+    "tables": [
+      {
+        "id": "0",
+        "rows": [
+          [
+            ""
+          ]
+        ],
+        "kind": "static",
+        "header": 0
+      },
+      {
+        "id": "1",
+        "rows": [
+          [
+            "Mục đích sử dụng: Phê duyệt và tổng hợp các mục tiêu, sáng kiến/nhiệm vụ trọng tâm của Ban/đơn vị; phục vụ điều hành, báo cáo và rà soát cấp Tập đoàn. Mỗi Ban/đơn vị chỉ nên lựa chọn tối đa 03 mục tiêu chuyển đổi và 05 sáng kiến/nhiệm vụ trọng tâm."
+          ]
+        ],
+        "kind": "static",
+        "header": 0
+      },
+      {
+        "id": "2",
+        "rows": [
+          [
+            "Tên Ban/đơn vị",
+            ""
+          ],
+          [
+            "Loại hình đơn vị",
+            "[ ] Ban chức năng Tập đoàn    [ ] Tổng công ty/Công ty    [ ] VNPT tỉnh, thành phố    [ ] Đơn vị khác"
+          ],
+          [
+            "Người đứng đầu chịu trách nhiệm",
+            ""
+          ],
+          [
+            "Lãnh đạo phụ trách VNPT Rising",
+            ""
+          ],
+          [
+            "Đầu mối tổng hợp, điều phối",
+            ""
+          ],
+          [
+            "Thời kỳ Chương trình hành động",
+            "Từ tháng ……/2026 đến hết tháng 12/2028"
+          ],
+          [
+            "Ngày phê duyệt",
+            ""
+          ],
+          [
+            "Lần cập nhật gần nhất",
+            ""
+          ]
+        ],
+        "kind": "fields",
+        "header": 0
+      },
+      {
+        "id": "3",
+        "rows": [
+          [
+            "Nội dung cần xác định",
+            "Ban/đơn vị trình bày ngắn gọn"
+          ],
+          [
+            "1. Vai trò, chức năng cốt lõi của Ban/đơn vị trong chuỗi giá trị VNPT",
+            ""
+          ],
+          [
+            "2. Mục tiêu, sáng kiến, mặt trận hoặc chương trình của Ban Tổng Giám đốc mà Ban/đơn vị phải ưu tiên đóng góp",
+            ""
+          ],
+          [
+            "3. Các nhiệm vụ cụ thể được Tập đoàn giao hoặc đề nghị phối hợp thực hiện",
+            ""
+          ],
+          [
+            "4. Giá trị Ban/đơn vị cần tạo ra cho khách hàng, đơn vị thụ hưởng hoặc OneVNPT",
+            ""
+          ],
+          [
+            "5. Từ 03 đến 05 vấn đề, điểm nghẽn hoặc cơ hội quan trọng cần giải quyết",
+            ""
+          ],
+          [
+            "6. Từ 03 đến 05 thay đổi quan trọng cần đạt được đến cuối năm 2028",
+            ""
+          ],
+          [
+            "7. Các giá trị VNPT HEART cần ưu tiên chuyển hóa thành hành vi thực tế",
+            "[ ] Hợp tác cùng vươn cao   [ ] Thấu hiểu và Chia sẻ   [ ] Sáng tạo không giới hạn\n[ ] Phụng sự để Kiến tạo   [ ] Khách hàng là Trái tim"
+          ],
+          [
+            "8. Các hành vi, cách làm hoặc cơ chế hiện tại cần thay đổi",
+            ""
+          ]
+        ],
+        "kind": "fields",
+        "header": 1
+      },
+      {
+        "id": "4",
+        "rows": [
+          [
+            "Mã",
+            "Nguồn và liên kết VNPT Rising",
+            "Vấn đề/cơ hội và hiện trạng ban đầu",
+            "Mục tiêu hoặc trạng thái cần đạt",
+            "Sáng kiến/nhiệm vụ trọng tâm",
+            "Lộ trình 2026–2028",
+            "KPI, tiêu chí và bằng chứng chính",
+            "Owner và đơn vị phối hợp",
+            "Nguồn lực chính",
+            "Trạng thái/kiến nghị"
+          ],
+          [
+            "SK01",
+            "Nguồn: TĐG/ĐHT/ĐVCĐ\nLiên kết chính:.…..\nLiên kết phụ:…….\nHEART: …………",
+            "Vấn đề thực tế: …………….\nĐối tượng bị ảnh hưởng:….\nNguồn dữ liệu: ……………",
+            "Trạng thái mới cần tạo ra đến cuối 2028:………………",
+            "Tên sáng kiến/nhiệm vụ: ………………….\nPhạm vi thực hiện:…. ………………………..",
+            "2026: ……\n2027: ……\n2028: ……",
+            "Baseline: …………\nMục tiêu: …………\nBằng chứng: ……..",
+            "Owner: ………\nPhối hợp:……",
+            "Nhân sự: ………\nNgân sách: ……\nCông nghệ/dữ liệu: ……………",
+            "[ ] Thực hiện\n[ ] Chuẩn bị điều kiện\n[ ] Điều chỉnh\n[ ] Nhân rộng\n[ ] Dừng/Gộp\nKiến nghị: ………"
+          ],
+          [
+            "SK02",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "SK03",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "SK04",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "SK05",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        ],
+        "kind": "grid",
+        "header": 1
+      },
+      {
+        "id": "5",
+        "rows": [
+          [
+            "STT",
+            "Kết quả sớm cần tạo ra",
+            "Sáng kiến liên quan",
+            "Baseline → mục tiêu",
+            "Thời hạn",
+            "Owner",
+            "Đối tượng nhận thấy thay đổi",
+            "Dữ liệu/bằng chứng"
+          ],
+          [
+            "1",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "2",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "3",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        ],
+        "kind": "grid",
+        "header": 1
+      },
+      {
+        "id": "6",
+        "rows": [
+          [
+            "STT",
+            "Vấn đề vượt thẩm quyền Ban/đơn vị",
+            "Ảnh hưởng đến mục tiêu/sáng kiến",
+            "Cơ quan hoặc cấp cần xử lý",
+            "Đề xuất phương án",
+            "Thời điểm cần quyết định"
+          ],
+          [
+            "1",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "2",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "3",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        ],
+        "kind": "grid",
+        "header": 1
+      },
+      {
+        "id": "7",
+        "rows": [
+          [
+            "Người lập",
+            "Đầu mối VNPT Rising",
+            "Lãnh đạo phụ trách",
+            "Người đứng đầu Ban/đơn vị"
+          ],
+          [
+            "\n\n\nKý, ghi rõ họ tên",
+            "\n\n\nKý, ghi rõ họ tên",
+            "\n\n\nKý, ghi rõ họ tên",
+            "\n\n\nKý, ghi rõ họ tên"
+          ]
+        ],
+        "kind": "grid",
+        "header": 1
+      }
+    ]
+  },
+  "02": {
+    "file": "Mau_02_CTHD_VNPT_Rising_2026_2028.docx",
+    "order": [
+      {
+        "text": "MẪU 02",
+        "heading": false
+      },
+      {
+        "text": "KẾ HOẠCH TRIỂN KHAI CHI TIẾT VÀ RÀ SOÁT SÁNG KIẾN/NHIỆM VỤ",
+        "heading": false
+      },
+      {
+        "text": "Thuộc Chương trình hành động VNPT Rising 2026–2028",
+        "heading": false
+      },
+      {
+        "table": "1"
+      },
+      {
+        "text": "I. THÔNG TIN SÁNG KIẾN/NHIỆM VỤ",
+        "heading": true
+      },
+      {
+        "table": "2"
+      },
+      {
+        "text": "II. KẾT QUẢ CHUYỂN ĐỔI CẦN ĐÁNH GIÁ, KIỂM CHỨNG",
+        "heading": true
+      },
+      {
+        "table": "3"
+      },
+      {
+        "text": "III. KẾ HOẠCH HÀNH ĐỘNG CHI TIẾT",
+        "heading": true
+      },
+      {
+        "table": "4"
+      },
+      {
+        "text": "IV. PHỐI HỢP LIÊN BỘ PHẬN /ĐƠN VỊ THEO TINH THẦN ONEVNPT",
+        "heading": true
+      },
+      {
+        "text": "Chỉ điền khi sáng kiến có sự tham gia của từ hai Ban/đơn vị trở lên.",
+        "heading": false
+      },
+      {
+        "table": "5"
+      },
+      {
+        "text": "V. BẢNG CẬP NHẬT ĐIỀU HÀNH ĐỊNH KỲ",
+        "heading": true
+      },
+      {
+        "table": "6"
+      },
+      {
+        "text": "VI. PHIẾU RÀ SOÁT KẾT QUẢ SAU 3 THÁNG/6 THÁNG/12 THÁNG",
+        "heading": true
+      },
+      {
+        "table": "7"
+      },
+      {
+        "text": "VII. XÁC NHẬN KẾT QUẢ RÀ SOÁT",
+        "heading": true
+      },
+      {
+        "table": "8"
+      }
+    ],
+    "tables": [
+      {
+        "id": "0",
+        "rows": [
+          [
+            ""
+          ]
+        ],
+        "kind": "static",
+        "header": 0
+      },
+      {
+        "id": "1",
+        "rows": [
+          [
+            "Nguyên tắc sử dụng: Mỗi sáng kiến/nhiệm vụ trọng tâm ở Biểu mẫu 01 lập thành 01 Biểu mẫu 02. Các nhiệm vụ nhỏ thuộc cùng một sáng kiến được trình bày thành các dòng hành động trong cùng biểu mẫu. Mẫu được cập nhật trong nhịp giao ban hiện có, không lập thêm báo cáo riêng."
+          ]
+        ],
+        "kind": "static",
+        "header": 0
+      },
+      {
+        "id": "2",
+        "rows": [
+          [
+            "Mã sáng kiến/nhiệm vụ",
+            ""
+          ],
+          [
+            "Tên sáng kiến/nhiệm vụ",
+            ""
+          ],
+          [
+            "Nguồn hình thành",
+            "[ ] Tập đoàn giao    [ ] Đồng hành với sáng kiến/mặt trận Tập đoàn    [ ] Ban/đơn vị chủ động đề xuất"
+          ],
+          [
+            "Mục tiêu Master liên quan",
+            ""
+          ],
+          [
+            "Cấu phần VNPT Rising liên kết chính",
+            ""
+          ],
+          [
+            "Các cấu phần phối hợp",
+            ""
+          ],
+          [
+            "Giá trị VNPT HEART cần thực hành",
+            ""
+          ],
+          [
+            "Vấn đề/điểm nghẽn cần giải quyết",
+            ""
+          ],
+          [
+            "Baseline và nguồn dữ liệu",
+            ""
+          ],
+          [
+            "Kết quả cuối cùng cần tạo ra",
+            ""
+          ],
+          [
+            "Owner chịu trách nhiệm đến cùng",
+            ""
+          ],
+          [
+            "Lãnh đạo phụ trách/bảo trợ",
+            ""
+          ],
+          [
+            "Các đơn vị phối hợp chính",
+            ""
+          ],
+          [
+            "Thời gian thực hiện",
+            "Từ ngày ……/……/…… đến ngày ……/……/……"
+          ],
+          [
+            "Các mốc rà soát",
+            "[ ] 01 tháng    [ ] 03 tháng    [ ] 06 tháng    [ ] 12 tháng    [ ] Mốc khác: …………"
+          ]
+        ],
+        "kind": "fields",
+        "header": 0
+      },
+      {
+        "id": "3",
+        "rows": [
+          [
+            "Tầng\nchuyển đổi",
+            "Hiện trạng cần thay đổi",
+            "Trạng thái/thay đổi cần đạt",
+            "KPI, tiêu chí và bằng chứng"
+          ],
+          [
+            "1. HÀNH VI",
+            "Lãnh đạo, quản lý và người lao động đang nghĩ, làm, phối hợp hoặc chịu trách nhiệm như thế nào?",
+            "Cần hình thành hành vi hoặc cách làm mới nào?",
+            "Quan sát hành vi; cam kết; phản hồi; tỷ lệ thực hiện; hồ sơ công việc."
+          ],
+          [
+            "2. CƠ CHẾ",
+            "Quy trình, chỉ tiêu, phân cấp, dữ liệu, công cụ hoặc chính sách nào đang gây cản trở?",
+            "Cơ chế nào cần sửa đổi, bổ sung hoặc thiết lập mới?",
+            "Quy trình; KPI; RACI; SLA; dashboard; quyết định phân cấp."
+          ],
+          [
+            "3. KẾT QUẢ",
+            "Khách hàng, kinh doanh, vận hành, chất lượng hoặc năng suất đang bị ảnh hưởng ra sao?",
+            "Kết quả thực tế cần cải thiện như thế nào?",
+            "Doanh thu; chi phí; thời gian; chất lượng; trải nghiệm; mức sử dụng; năng suất."
+          ]
+        ],
+        "kind": "grid",
+        "header": 1
+      },
+      {
+        "id": "4",
+        "rows": [
+          [
+            "STT",
+            "Hành động cụ thể",
+            "Sản phẩm/đầu ra",
+            "Kết quả cần đạt về hành vi, cơ chế hoặc SXKD",
+            "KPI/tiêu chí; baseline → mục tiêu",
+            "Chủ trì và phối hợp",
+            "Thời gian thực hiện",
+            "Nguồn lực",
+            "Tiến độ và kết quả thực tế",
+            "Vướng mắc, hỗ trợ và quyết định cần quan tâm nếu có"
+          ],
+          [
+            "1",
+            "Mô tả bằng động từ cụ thể: rà soát, thiết kế, thử nghiệm, chuẩn hóa, tích hợp, nhân rộng…",
+            "Quy trình, dashboard, sản phẩm, mô hình, dữ liệu, báo cáo phân tích…",
+            "Hành vi: ………\nCơ chế: …….…\nKết quả: ………",
+            "Baseline: …………\nMục tiêu: …………\nNguồn dữ liệu:…...",
+            "Chủ trì: ………\nPhối hợp: ……",
+            "Bắt đầu: …………\nKết thúc: …………\nMốc rà soát: ……",
+            "Nhân sự: ……….\nNgân sách:…….\nCông nghệ: ……",
+            "[ ] Đúng tiến độ\n[ ] Có nguy cơ\n[ ] Chậm\nKết quả thực tế:…..",
+            "Vướng mắc: ………\nCấp hỗ trợ: ………\nQuyết định: ………"
+          ],
+          [
+            "2",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "3",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "4",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "5",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "6",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        ],
+        "kind": "grid",
+        "header": 1
+      },
+      {
+        "id": "5",
+        "rows": [
+          [
+            "Ban/đơn vị liên quan",
+            "Trách nhiệm và đầu ra phải bàn giao",
+            "Chỉ tiêu hoặc tiêu chí dùng chung",
+            "Thời hạn/SLA phản hồi",
+            "Nguồn dữ liệu thống nhất",
+            "Cơ chế chuyển cấp khi vướng mắc"
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        ],
+        "kind": "grid",
+        "header": 1
+      },
+      {
+        "id": "6",
+        "rows": [
+          [
+            "Kỳ báo cáo",
+            "KPI mục tiêu",
+            "Kết quả thực tế",
+            "Xu hướng",
+            "Tiến độ",
+            "Điểm nghẽn/nguyên nhân",
+            "Quyết định cần chốt",
+            "Owner xử lý",
+            "Hạn xử lý",
+            "Bằng chứng/link dữ liệu"
+          ],
+          [
+            "Tháng/Quý ……",
+            "",
+            "",
+            "[ ] Tốt hơn\n[ ] Không đổi\n[ ] Xấu đi",
+            "[ ] Đúng\n[ ] Nguy cơ\n[ ] Chậm",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "Tháng/Quý ……",
+            "",
+            "",
+            "[ ] Tốt hơn\n[ ] Không đổi\n[ ] Xấu đi",
+            "[ ] Đúng\n[ ] Nguy cơ\n[ ] Chậm",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "Tháng/Quý ……",
+            "",
+            "",
+            "[ ] Tốt hơn\n[ ] Không đổi\n[ ] Xấu đi",
+            "[ ] Đúng\n[ ] Nguy cơ\n[ ] Chậm",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        ],
+        "kind": "grid",
+        "header": 1
+      },
+      {
+        "id": "7",
+        "rows": [
+          [
+            "Câu hỏi rà soát",
+            "Kết luận và bằng chứng",
+            "Quyết định, người chịu trách nhiệm và thời hạn"
+          ],
+          [
+            "1. Sáng kiến có đang giải quyết đúng vấn đề, điểm nghẽn hoặc cơ hội đã xác định không?",
+            "",
+            ""
+          ],
+          [
+            "2. Kết quả thực tế so với baseline và mục tiêu như thế nào?",
+            "",
+            ""
+          ],
+          [
+            "3. Khách hàng hoặc đơn vị thụ hưởng đã nhận thấy thay đổi gì?",
+            "",
+            ""
+          ],
+          [
+            "4. Hành vi lãnh đạo, trách nhiệm đến cùng và phối hợp OneVNPT đã thay đổi ra sao?",
+            "",
+            ""
+          ],
+          [
+            "5. Quy trình, chỉ tiêu, phân cấp, dữ liệu hoặc công cụ nào đã được điều chỉnh?",
+            "",
+            ""
+          ],
+          [
+            "6. Nội dung nào đang chậm hoặc không còn tạo giá trị?",
+            "",
+            ""
+          ],
+          [
+            "7. Vấn đề nào vượt thẩm quyền và cần Tập đoàn tháo gỡ?",
+            "",
+            ""
+          ],
+          [
+            "8. Mô hình, công cụ hoặc bài học nào có thể chuẩn hóa và nhân rộng?",
+            "",
+            ""
+          ],
+          [
+            "9. Quyết định sau rà soát: [ ] Tiếp tục   [ ] Điều chỉnh   [ ] Nhân rộng   [ ] Dừng   [ ] Gộp với sáng kiến khác",
+            "",
+            ""
+          ]
+        ],
+        "kind": "grid",
+        "header": 1
+      },
+      {
+        "id": "8",
+        "rows": [
+          [
+            "Người lập/cập nhật",
+            "Owner sáng kiến",
+            "Lãnh đạo phụ trách",
+            "Người đứng đầu Ban/đơn vị"
+          ],
+          [
+            "\n\n\nKý, ghi rõ họ tên",
+            "\n\n\nKý, ghi rõ họ tên",
+            "\n\n\nKý, ghi rõ họ tên",
+            "\n\n\nKý, ghi rõ họ tên"
+          ]
+        ],
+        "kind": "grid",
+        "header": 1
+      }
+    ]
+  }
+}
