@@ -23,6 +23,7 @@ from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 from flask import Flask, request, jsonify, send_file, g
 from cloud import CloudDB, CloudError
+from self_reflection import apply as reflect_apply, review as reflect_review, ReflectionError
 from documents import STEPS, parse, norm, business_code, rules, export_docx, assessment_schema, mapped_outputs
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -219,6 +220,7 @@ def reconcile_sources(project, unit, selected_ids=None):
     candidates = [r for r in rows('initiative') if r['project']==project and r['unit']==unit
                   and (selected_ids is None or set(r['files']) <= selected_ids)
                   and not r.get('merged_into') and not r.get('released') and r['status']=='pending'
+                  and not r.get('self_reflection')
                   and not r['versions'][-1].get('revisions')
                   and not any(c.get('rule')=='EXPERT' and not c.get('stale') for c in r['comments'])]
     for combined in mapped_outputs(candidates):
@@ -446,7 +448,7 @@ def api(op=None):
     a = getattr(g, 'vc_actor', None) or actor()
     body = request.get_json(silent=True) or {}
     write_ops = {'catalog', 'upload', 'edit', 'merge', 'confirm', 'assign', 'comment', 'review',
-                 'lock', 'unlock', 'release', 'respond', 'finalize', 'account', 'switch-audit', 'recheck', 'classify', 'config', 'compare-review', 'convert', 'upload-init', 'upload-complete'}
+                 'reflection', 'reflection-review', 'lock', 'unlock', 'release', 'respond', 'finalize', 'account', 'switch-audit', 'recheck', 'classify', 'config', 'compare-review', 'convert', 'upload-init', 'upload-complete'}
     if op in write_ops and request.method != 'POST': raise Problem('Chỉ chấp nhận POST', 405)
     if op == 'me':
         return jsonify(actor=a, roles=ROLES, steps=STEPS, storage='supabase' if CLOUD else 'local',
@@ -670,9 +672,21 @@ def api(op=None):
     old = copy.deepcopy(r)
     version = r['versions'][-1]
     reason = body.get('reason', '').strip()
-    if op == 'merge':
+    if r.get('self_reflection', {}).get('status') == 'submitted' and op not in ('reflection', 'reflection-review'):
+        raise Problem('Bản tự soi đang chờ duyệt. Duyệt hoặc trả lại trước khi thay đổi hồ sơ.', 409)
+    if op == 'reflection':
+        require(a, ('unit',))
+        try: reflect_apply(r, body, a['id'], now(), ident())
+        except ReflectionError as error: raise Problem(error.message, error.status)
+    elif op == 'reflection-review':
+        require(a, ('expert', 'project'))
+        try: reflect_review(r, body, a['id'], now())
+        except ReflectionError as error: raise Problem(error.message, error.status)
+        if body.get('decision') == 'accept': r['comments'].extend(rules(r))
+    elif op == 'merge':
         require(a, ('data', 'project'))
         other = scoped(a, body.get('other'), 'initiative')
+        if r.get('self_reflection') or other.get('self_reflection'): raise Problem('Hồ sơ đã có lịch sử tự soi; cần đối chiếu riêng trước khi ghép nguồn.', 409)
         if other['id'] == r['id'] or other.get('merged_into') or r.get('merged_into'): raise Problem('Hồ sơ ghép không hợp lệ')
         if (other['project'], other['unit']) != (r['project'], r['unit']) or not reason: raise Problem('Chỉ ghép cùng đơn vị/dự án, cần lý do')
         ov = other['versions'][-1]
@@ -783,6 +797,7 @@ def api(op=None):
         r.setdefault('comparison', {})[body['step']] = {'label': body['label'], 'reason': reason, 'by': a['id'], 'at': now(), 'version': version['number']}
     elif op == 'respond':
         require(a, ('unit',))
+        if r.get('self_reflection'): raise Problem('Hồ sơ đã dùng form 8 bước; gửi từ Kết quả tự soi.', 409)
         if not r['released'] or r['status'] not in ('released', 'self_review'): raise Problem('Chưa mở góp ý hoặc đã nộp và khóa')
         if body.get('agreement') not in ('agree', 'partial', 'disagree'): raise Problem('Chọn mức đồng ý')
         if body['agreement'] != 'agree' and not reason: raise Problem('Cần giải thích khi không hoàn toàn đồng ý')

@@ -169,3 +169,7 @@
 .vc-root .vc-account-dialog::backdrop{background:#04182c88}
 
 .vc-root .vc-row>select{width:auto;max-width:100%}.vc-root .vc-drop{align-items:center}.vc-root .vc-toolbar{margin-bottom:16px}.vc-root .vc-heat td button{width:100%}.vc-root .vc-card textarea{min-height:110px}
+
+.vc-root .vc-reflection fieldset{border:0;padding:0;margin:0;min-width:0}
+.vc-root .vc-reflection-criterion{display:grid;grid-template-columns:minmax(0,1fr) 160px;align-items:center;gap:16px;border-bottom:1px solid var(--vc-line);padding:10px 0;color:var(--vc-ink)}
+@media(max-width:620px){.vc-root .vc-reflection-criterion{grid-template-columns:1fr;gap:4px}.vc-root .vc-reflection .vc-columns{grid-template-columns:1fr}}

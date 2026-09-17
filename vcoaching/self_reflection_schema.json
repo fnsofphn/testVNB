@@ -1,0 +1,116 @@
+[
+  {
+    "id": "1",
+    "name": "Mục tiêu VNPT Rising",
+    "question": "Tại sao sáng kiến này cần tồn tại trong VNPT Rising?",
+    "checks": [
+      "Đã liên kết với một mục tiêu, mặt trận hoặc chương trình cụ thể của VNPT Rising.",
+      "Đã làm rõ vai trò riêng của đơn vị trong mục tiêu chung.",
+      "Mục tiêu mô tả giá trị hoặc thay đổi cần tạo ra.",
+      "Đã xác định đối tượng chính nhận được giá trị.",
+      "Giá trị VNPT HEART được liên hệ với cách triển khai sáng kiến.",
+      "Có thể giải thích sáng kiến đóng góp gì cho VNPT Rising."
+    ]
+  },
+  {
+    "id": "2",
+    "name": "Trạng thái đích",
+    "question": "Nếu sáng kiến thành công, thực tế sẽ khác hiện nay ở điểm nào?",
+    "checks": [
+      "Đã mô tả một trạng thái vận hành mới.",
+      "Đã chỉ rõ khách hàng hoặc đơn vị phối hợp sẽ nhận thấy điều gì khác.",
+      "Trạng thái đích thể hiện thay đổi về tốc độ, chất lượng hoặc trải nghiệm.",
+      "Có thể quan sát hoặc xác nhận trạng thái đích trong thực tế.",
+      "Đã xác định mốc cần đạt hoặc mốc thí điểm.",
+      "Trạng thái đích phù hợp với mục tiêu ở bước 01."
+    ]
+  },
+  {
+    "id": "3",
+    "name": "Hiện trạng",
+    "question": "Điều gì đang thực sự xảy ra trước khi triển khai sáng kiến?",
+    "checks": [
+      "Hiện trạng mô tả sự việc đang thực sự xảy ra.",
+      "Đã xác định phạm vi, đối tượng và thời kỳ quan sát.",
+      "Đã phân biệt dữ kiện với nhận định.",
+      "Có số liệu nền hoặc kế hoạch thiết lập trong 30 ngày đầu.",
+      "Đã xác định nguồn dữ liệu hoặc người xác nhận.",
+      "Đã chỉ ra khoảng cách so với trạng thái đích.",
+      "Hiện trạng chưa bị viết lẫn với nguyên nhân hoặc giải pháp."
+    ]
+  },
+  {
+    "id": "4",
+    "name": "Điểm nghẽn",
+    "question": "Điểm nào đang cản trở đáng kể dòng giá trị và cần tháo gỡ trước?",
+    "checks": [
+      "Điểm nghẽn này đã thực sự hạn chế việc tạo giá trị cho khách hàng.",
+      "Có nhiều sự việc lặp đi lặp lại, đã nỗ lực giải quyết nhưng chưa được.",
+      "Đơn vị và cá nhân đã có nhiều nỗ lực nhưng chưa giải quyết được.",
+      "Có tính chất đòn bẩy để tạo nên sự thay đổi về cơ chế, hành vi, kết quả.",
+      "Nếu tháo gỡ sẽ thúc đẩy chuỗi giá trị nhanh hơn."
+    ]
+  },
+  {
+    "id": "5",
+    "name": "Đối tượng ảnh hưởng",
+    "question": "Ai đang chịu ảnh hưởng và họ đang mất giá trị gì?",
+    "checks": [
+      "Đã xác định đối tượng chịu ảnh hưởng trực tiếp.",
+      "Đã xem xét đối tượng chịu ảnh hưởng gián tiếp.",
+      "Đã mô tả tình huống đối tượng chịu ảnh hưởng.",
+      "Đã chỉ rõ loại giá trị đang bị mất.",
+      "Không chỉ liệt kê tên đối tượng.",
+      "Đã xác định đối tượng cần tạo thay đổi trước.",
+      "Có dữ liệu, phản hồi hoặc người có thể xác nhận tác động."
+    ]
+  },
+  {
+    "id": "6",
+    "name": "Kiểm định sáng kiến",
+    "question": "Can thiệp được đề xuất có thực sự tháo điểm nghẽn đã chọn không?",
+    "checks": [
+      "Sáng kiến xử lý trực tiếp điểm nghẽn ở bước 04.",
+      "Bản chất can thiệp đã được mô tả rõ.",
+      "Sáng kiến thay đổi cách lãnh đạo, quản lý, phối hợp hoặc tạo giá trị.",
+      "Có thể giải thích vì sao can thiệp có khả năng tháo điểm nghẽn.",
+      "Phạm vi đủ tập trung để triển khai và kiểm chứng.",
+      "Đã xem xét khả năng thí điểm trong phạm vi nhỏ.",
+      "Sáng kiến không gộp nhiều vấn đề khác bản chất.",
+      "Đã kiểm tra giao nhau hoặc phụ thuộc với sáng kiến khác."
+    ]
+  },
+  {
+    "id": "7",
+    "name": "Ba tầng thay đổi",
+    "question": "Cơ chế nào phải thay, ai làm khác và giá trị cuối cùng nào được tạo ra?",
+    "checks": [
+      "Đã xác định quy trình, trách nhiệm, phân cấp hoặc chỉ tiêu cần thay.",
+      "Cơ chế mới làm rõ quyền quyết định và trách nhiệm đến cùng.",
+      "Công nghệ và dữ liệu được đặt trong một cách vận hành cụ thể.",
+      "Đã xác định ai phải làm khác và trong tình huống nào.",
+      "Hành vi mới được mô tả bằng hành động có thể quan sát.",
+      "Kết quả thể hiện giá trị thực tế cho đối tượng thụ hưởng.",
+      "Kết quả không dừng ở đầu ra như quy trình, phần mềm hoặc đào tạo.",
+      "Cơ chế mới có khả năng tạo hành vi mới.",
+      "Hành vi mới có khả năng tạo kết quả mong muốn."
+    ]
+  },
+  {
+    "id": "8",
+    "name": "Thực thi & bằng chứng",
+    "question": "Sáng kiến có đủ điều kiện để thực hiện, theo dõi và chứng minh kết quả không?",
+    "checks": [
+      "Có một người hoặc chức danh chịu trách nhiệm đến cùng.",
+      "Mỗi hành động chính có chủ trì, phối hợp và thời hạn.",
+      "Đã xác định nguồn lực thiết yếu.",
+      "Đã xác định điều kiện tiên quyết và phụ thuộc.",
+      "Có đầu ra bàn giao, thời hạn phản hồi và cơ chế chuyển cấp khi liên đơn vị.",
+      "Mỗi kết quả chính có chỉ số hoặc tiêu chí kiểm chứng.",
+      "Đã xác định nguồn dữ liệu chính thức và người chịu trách nhiệm dữ liệu.",
+      "Có thể tạo bằng chứng ban đầu trong 90–180 ngày.",
+      "Đã xác định mốc rà soát và câu hỏi cần quyết định.",
+      "Vấn đề vượt thẩm quyền có cấp xử lý và thời hạn quyết định."
+    ]
+  }
+]

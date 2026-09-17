@@ -15,6 +15,64 @@ def who(role='data', super_admin=False, unit='vcoaching-test-unit'):
  return {'id':role,'email':role+'@test.invalid','role':role,'super':super_admin,'switched':False,'projects':['vcoaching-test'],'units':[unit],'initiatives':[],'assignment_actor':role}
 
 class Workflow(unittest.TestCase):
+ def reflection_request(self, action, role='unit', status=200, **body):
+  record=s.get(self.iid)
+  return self.request('reflection',role=role,status=status,base_version=record['versions'][-1]['number'],revision=record.get('self_reflection',{}).get('revision',0),action=action,**body)
+ def complete_reflection(self):
+  from self_reflection import SCHEMA, FIELDS
+  for step in SCHEMA:
+   data={'answers':{str(i):'clear' for i in range(len(step['checks']))},'decision':'keep'}
+   if step['id']=='7': data.update(decision='revise',note='Làm rõ ba tầng',revisions={key:'Nội dung mới '+key for key in FIELDS['7']})
+   self.reflection_request('save',step=step['id'],data=data,complete=True)
+  self.reflection_request('commitment',data={'action':'Thí điểm','owner':'Đầu mối đơn vị','due':'2026-10-01'})
+ def test_full_reflection_review_preserves_source_and_versions(self):
+  original=copy.deepcopy(s.get(self.iid)['versions'])
+  self.complete_reflection()
+  self.assertEqual(s.get(self.iid)['versions'],original)
+  self.reflection_request('submit',request_id='submission-one')
+  submitted=copy.deepcopy(s.get(self.iid)['self_submissions'][0])
+  self.reflection_request('submit',request_id='submission-one')
+  self.assertEqual(len(s.get(self.iid)['self_submissions']),1)
+  self.assertEqual(s.get(self.iid)['versions'],original)
+  self.request('edit',reason='Không ghi đè bản chờ duyệt',status=409)
+  self.reflection_request('save',step='1',data={},status=409)
+  self.request('reflection-review',role='unit',decision='accept',submission_id=submitted['submission_id'],reason='Sai quyền',status=403)
+  self.request('reflection-review',role='project',decision='return',submission_id=submitted['submission_id'],reason='Bổ sung bằng chứng')
+  self.assertEqual(s.get(self.iid)['self_submissions'][0],submitted)
+  self.assertEqual(s.get(self.iid)['versions'],original)
+  self.reflection_request('submit',request_id='submission-two')
+  latest=s.get(self.iid)['self_reflection']['submission_id']
+  self.request('reflection-review',role='project',decision='accept',submission_id=submitted['submission_id'],reason='Bản cũ',status=409)
+  self.request('reflection-review',role='project',decision='accept',submission_id=latest,reason='Đã đối chiếu đủ')
+  record=s.get(self.iid)
+  self.assertEqual(len(record['versions']),len(original)+1)
+  self.assertEqual(record['versions'][:-1],original)
+  self.assertEqual(record['versions'][-1]['revisions'],{key:'Nội dung mới '+key for key in ('7A','7B','7C')})
+  self.assertEqual(record['status'],'rechecked')
+  self.assertEqual(record['self_submissions'][0],submitted)
+  self.request('reflection-review',role='project',decision='accept',submission_id=latest,reason='Gửi lại',status=409)
+ def test_reflection_validation_scope_and_conflicts(self):
+  self.reflection_request('submit',request_id='incomplete',status=400)
+  self.reflection_request('save',role='data',step='1',data={},status=403)
+  from self_reflection import SCHEMA
+  data={'answers':{'0':'clear'},'decision':'keep'}
+  self.reflection_request('save',step='1',data=data)
+  self.request('reflection',role='unit',action='save',base_version=1,revision=0,step='1',data=data,status=409)
+  self.reflection_request('save',step='1',data=data,complete=True,status=400)
+  self.reflection_request('save',step='1',data={'answers':{'0':'forged'}},status=400)
+  self.reflection_request('save',step='1',data={'revisions':{'7A':'Không thuộc bước này'}},status=400)
+  full={'answers':{str(i):'missing' for i in range(len(SCHEMA[0]['checks']))},'decision':'verify','note':'Cần số liệu','owner':'A','due':'2026-10-01'}
+  self.reflection_request('save',step='1',data=full,complete=True)
+  self.assertTrue(s.get(self.iid)['self_reflection']['steps']['1']['complete'])
+  with patch.object(s,'actor',return_value=who('unit',unit='another-unit')):
+   result=self.client.post('/vc-api/reflection',json={'id':self.iid,'action':'restart'})
+  self.assertIn(result.status_code,(403,404))
+  self.request('edit',reason='Cập nhật nguồn')
+  self.reflection_request('save',step='1',data=data,status=409)
+  self.reflection_request('restart')
+  self.assertEqual(s.get(self.iid)['self_reflection']['steps'],{})
+  self.assertEqual(len(s.get(self.iid)['self_archives']),1)
+  self.reflection_request('save',step='1',data=data)
  @classmethod
  def setUpClass(cls):
   s.ensure_seed(); cls.parsed=parse(MASTER); cls.client=s.app.test_client()
