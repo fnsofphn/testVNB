@@ -25,6 +25,7 @@ from flask import Flask, request, jsonify, send_file, g
 from cloud import CloudDB, CloudError
 from self_reflection import apply as reflect_apply, review as reflect_review, ReflectionError
 from forms import build as build_form, validate_cells
+from initiative_codes import assign_codes
 from documents import STEPS, parse, norm, business_code, rules, export_docx, assessment_schema, mapped_outputs
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -64,6 +65,7 @@ def rows(kind):
     if kind == 'unit':
         existing={r['id'] for r in records}
         records.extend(copy.deepcopy(r) for r in UNIT_CATALOG if r['id'] not in existing)
+    if kind == 'initiative': assign_codes(records, rows('unit'))
     return records
 def get(key, kind=None):
     with LOCK: row = DB.execute('SELECT kind,data FROM records WHERE id=?', (key,)).fetchone()
@@ -71,6 +73,7 @@ def get(key, kind=None):
         catalog=next((r for r in UNIT_CATALOG if r['id']==key),None)
         if catalog: return copy.deepcopy(catalog)
     if row is None or kind and row[0] != kind: raise Problem('Không tìm thấy dữ liệu', 404)
+    if row[0]=='initiative': return next(r for r in rows('initiative') if r['id']==key)
     return json.loads(row[1])
 def put(kind, data):
     with LOCK: DB.execute('INSERT INTO records VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data',
@@ -154,8 +157,6 @@ def step_set(r, key):
 
 def visible_initiative(a, r, units=None):
     result = copy.deepcopy(r)
-    if re.fullmatch(r'SK-\d+',result.get('tracking_code','')):
-        result['tracking_code']=f"SK-{int(result['tracking_code'][3:]):03d}"
     # Reporting identity does not change the authorization scope on stored records.
     units=rows('unit') if units is None else units
     unit_key=lambda name: ' '.join(re.findall(r'[a-z0-9]+',re.sub(r'\([^)]*\)','',norm(name))))
@@ -598,21 +599,15 @@ def api(op=None):
             record['conversion_pending']=False; put('initiative',record)
         # The enclosing write transaction serializes number allocation, including
         # concurrent cloud invocations. Source codes remain unchanged.
-        try: sequence=get('initiative-number-sequence','sequence')
-        except Problem: sequence={'id':'initiative-number-sequence','value':0}
         all_records=rows('initiative')
-        sequence['value']=max([sequence['value']]+[int(r['tracking_code'][3:]) for r in all_records if re.fullmatch(r'SK-\d+',r.get('tracking_code',''))])
         for record in sorted(all_records,key=lambda r:r['id']):
             if record.get('merged_into') or record.get('conversion_pending') or not can(a,record): continue
-            if not record.get('tracking_code'):
-                sequence['value']+=1;record['tracking_code']=f"SK-{sequence['value']:03d}"
             peers=[other for other in all_records if other['id']!=record['id'] and not other.get('merged_into')
                    and not other.get('conversion_pending') and other['project']==record['project']
                    and norm(other['unit_name'])==norm(record['unit_name'])
                    and business_code(other['code'])==business_code(record['code']) and record['code']]
             if not peers: record['issues']=[issue for issue in record['issues'] if issue!='code_conflict']
             put('initiative',record)
-        put('sequence',sequence)
         audit(a, 'convert_sources', after={'files':ids,'initiatives':[r['id'] for r in records]})
         return jsonify(initiatives=[r['id'] for r in records])
     if op == 'mapped-export':

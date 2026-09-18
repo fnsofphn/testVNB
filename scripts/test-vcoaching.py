@@ -441,10 +441,28 @@ class Workflow(unittest.TestCase):
   self.assertEqual([s.get(key)['tracking_code'] for key in ('first','second')],codes)
   self.assertEqual(s.get('first')['code'],base['code'])
   third={**copy.deepcopy(base),'id':'third','files':['later-file'],'conversion_pending':True}
+  for key in ('tracking_code','unit_sequence','unit_code_suffix'):third.pop(key,None)
   s.put('initiative',third);s.put('file',{**s.get('source','file'),'id':'later-file'})
   self.request('convert',files=['later-file'])
   self.assertNotIn(s.get('third')['tracking_code'],codes)
-  self.assertGreater(int(s.get('third')['tracking_code'][3:]),max(int(code[3:]) for code in codes))
+  self.assertGreater(s.get('third')['unit_sequence'],max(s.get(key)['unit_sequence'] for key in ('first','second')))
+ def test_unit_scoped_codes_migrate_without_changing_source(self):
+  from initiative_codes import assign_codes
+  units=[{'id':'nl','name':'Ban Nhân lực'},{'id':'tt','name':'Ban Truyền thông'}]
+  records=[{'id':str(i),'project':'p','unit':unit,'code':'SK02','tracking_code':f'SK-{i:03d}'} for i,unit in [(2,'nl'),(7,'nl'),(9,'tt')]]
+  assign_codes(records,units)
+  self.assertEqual([r['tracking_code'] for r in records],['SK1-ban-nhan-luc','SK2-ban-nhan-luc','SK1-ban-truyen-thong'])
+  self.assertTrue(all(r['code']=='SK02' for r in records))
+  records.append({'id':'0','project':'p','unit':'nl','code':'SK02'})
+  assign_codes(records,units)
+  self.assertEqual(records[-1]['tracking_code'],'SK3-ban-nhan-luc')
+  records[0]['merged_into']='7'
+  assign_codes(records,units)
+  self.assertEqual(records[1]['tracking_code'],'SK2-ban-nhan-luc')
+  partial=[{'id':'a','project':'p','unit':'nl','tracking_code':'SK-002'},
+           {'id':'b','project':'p','unit':'nl','tracking_code':'SK2-ban-nhan-luc','unit_sequence':2}]
+  assign_codes(partial,units)
+  self.assertEqual(partial[0]['tracking_code'],'SK1-ban-nhan-luc')
  def test_fresh_grant_and_switch_rejects_forgery(self):
   user={'id':'admin','email':'admin@test.invalid','app_metadata':{'vcoaching':{'active':True,'role':'system','super_admin':True,'projects':[],'units':[]}}}
   def auth(path,**kwargs):
