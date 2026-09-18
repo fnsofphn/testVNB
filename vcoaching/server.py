@@ -24,6 +24,7 @@ from urllib.error import HTTPError
 from flask import Flask, request, jsonify, send_file, g
 from cloud import CloudDB, CloudError
 from self_reflection import apply as reflect_apply, review as reflect_review, ReflectionError
+from expert_worksheet import apply as worksheet_apply
 from forms import build as build_form, validate_cells
 from initiative_codes import assign_codes
 from documents import STEPS, parse, norm, business_code, rules, export_docx, assessment_schema, mapped_outputs
@@ -157,6 +158,10 @@ def step_set(r, key):
 
 def visible_initiative(a, r, units=None):
     result = copy.deepcopy(r)
+    # Private working answers never leak through workspace/detail/export to units.
+    worksheets = result.pop('expert_worksheets', {})
+    if a['super'] or a['role'] in ('expert', 'project'):
+        result['expert_worksheet'] = worksheets.get(a['id'])
     # Reporting identity does not change the authorization scope on stored records.
     units=rows('unit') if units is None else units
     unit_key=lambda name: ' '.join(re.findall(r'[a-z0-9]+',re.sub(r'\([^)]*\)','',norm(name))))
@@ -449,7 +454,7 @@ def api(op=None):
     if op in ('tick','process') and CLOUD: return cloud_process(op)
     a = getattr(g, 'vc_actor', None) or actor()
     body = request.get_json(silent=True) or {}
-    write_ops = {'catalog', 'upload', 'edit', 'merge', 'confirm', 'assign', 'comment', 'review',
+    write_ops = {'expert-worksheet', 'catalog', 'upload', 'edit', 'merge', 'confirm', 'assign', 'comment', 'review',
                  'master-form', 'reflection', 'reflection-review', 'lock', 'unlock', 'release', 'respond', 'finalize', 'account', 'switch-audit', 'recheck', 'classify', 'config', 'compare-review', 'convert', 'upload-init', 'upload-complete'}
     if op in write_ops and request.method != 'POST': raise Problem('Chỉ chấp nhận POST', 405)
     if op == 'me':
@@ -669,9 +674,13 @@ def api(op=None):
     old = copy.deepcopy(r)
     version = r['versions'][-1]
     reason = body.get('reason', '').strip()
-    if r.get('self_reflection', {}).get('status') == 'submitted' and op not in ('reflection', 'reflection-review'):
+    if r.get('self_reflection', {}).get('status') == 'submitted' and op not in ('expert-worksheet', 'reflection', 'reflection-review'):
         raise Problem('Bản tự soi đang chờ duyệt. Duyệt hoặc trả lại trước khi thay đổi hồ sơ.', 409)
-    if op == 'reflection':
+    if op == 'expert-worksheet':
+        require(a, ('expert', 'project'))
+        try: worksheet_apply(r, body, a['id'], now())
+        except ReflectionError as error: raise Problem(error.message, error.status)
+    elif op == 'reflection':
         require(a, ('unit',))
         try: reflect_apply(r, body, a['id'], now(), ident())
         except ReflectionError as error: raise Problem(error.message, error.status)

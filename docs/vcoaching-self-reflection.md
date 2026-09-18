@@ -2,6 +2,18 @@
 
 ## Luồng sử dụng
 
+### Phiếu giảng viên
+
+Trong màn 8 bước, giảng viên/quản trị dự án chọn **Giảng viên nhận xét** để
+nhập cả câu hỏi, câu trả lời và đánh giá của mình; không phải chờ đơn vị trả lời.
+Mỗi người có phiếu riêng. **Đơn vị tự soi** vẫn giữ luồng và dữ liệu hiện có.
+Thêm/sửa/xóa câu hỏi áp dụng cho phiếu giảng viên của hồ sơ đang mở, không sửa
+bộ câu hỏi gốc hoặc bản tự soi đơn vị. Lưu phiếu/chuyển bước ghi qua API
+`expert-worksheet`, kiểm tra phân quyền, phạm vi, revision và phiên bản nguồn.
+Các câu hỏi đã xóa cùng câu trả lời được giữ trong lịch sử mỗi lần lưu.
+Phiếu là bản làm việc riêng, chưa tự công bố cho đơn vị. Nhận xét công bố vẫn
+đi qua luồng khóa/mở góp ý hiện có. Không cần migration hoặc đổi cấu hình cloud.
+
 Trong hồ sơ sáng kiến, mở **Tự soi & hiệu chỉnh 8 bước**. Đơn vị đọc nguồn,
 trả lời tiêu chí, chọn kết luận và nhập nội dung sửa nếu cần. Lưu nháp hoặc
 chuyển bước trong form sẽ lưu bước đang sửa. Bước 7 giữ riêng 7A/7B/7C.

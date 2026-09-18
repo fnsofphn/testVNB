@@ -1,4 +1,4 @@
-/* VNPT Rising portal blue and white palette. Real application data only. */
+/* Approved medium slate-blue palette. Scoped to V-Coaching only. */
 
 .vc-root{color-scheme:light;--vc-bg:#f6f9fd;--vc-panel:#fff;--vc-ink:#102b49;--vc-muted:#60758c;--vc-line:#d3e1ef;--vc-blue:#1d67a8;--vc-blue-dark:#143e63;--vc-navy:#0d2038;--vc-soft:#eaf4fc;--vc-warn:#fff1e6;--vc-warnink:#a94a13;--vc-green:#e7f4ee;font:14px/1.55 Arial,sans-serif;color:var(--vc-ink);background:var(--vc-bg);display:flex;flex-direction:column;box-sizing:border-box;min-height:100vh;min-height:100dvh}
 .vc-root *{box-sizing:border-box}
@@ -183,3 +183,23 @@
 .vc-root .vc-form-cell small{display:block;color:var(--vc-muted);font-size:11px;margin-top:8px}
 .vc-root .vc-form-heading{margin-top:28px;color:var(--vc-blue)}
 .vc-root .vc-form-save{position:sticky;bottom:0;background:var(--vc-panel);border:1px solid var(--vc-line);padding:12px;z-index:2}
+
+/* Keep reading surfaces lighter than the canvas, without stark white panels. */
+.vc-root{--vc-bg:#7894ad;--vc-panel:#d9e4ed;--vc-ink:#203b53;--vc-muted:#405b72;--vc-line:#a8bfd1;--vc-blue:#286da8;--vc-blue-dark:#365d7b;--vc-navy:#233d54;--vc-soft:#c8dceC;font-family:Arial,sans-serif}
+.vc-root input,.vc-root select,.vc-root textarea{background:#edf2f7}
+.vc-root h1,.vc-root h2,.vc-root h3{font-weight:600}
+.vc-root .vc-header{background:#b3c5d5;color:var(--vc-ink);border-color:var(--vc-line)}
+.vc-root .vc-header .vc-sub{color:var(--vc-ink)}
+.vc-root aside button.active{background:var(--vc-blue)}
+.vc-root .vc-card{border-color:#bfd0dd;box-shadow:none}
+.vc-root th,.vc-root .vc-answer,.vc-root .vc-source,.vc-root .quote,.vc-root pre,.vc-root .milestone{background:#e3ebf2;color:var(--vc-ink)}
+.vc-root .vc-steps{flex-wrap:nowrap;overflow-x:auto;gap:1px;padding:2px 2px 8px;scroll-padding:8px}
+.vc-root .vc-steps button{flex:1 0 105px;min-width:105px;background:#c1d2e0;color:var(--vc-ink);min-height:92px;border-radius:5px;align-items:center;text-align:center;justify-content:center}
+.vc-root .vc-steps button.active{background:#e0edfa;color:#1b5790;border-bottom:3px solid var(--vc-blue)}
+.vc-root .vc-steps button small{font-size:12px;line-height:1.4}
+.vc-root button:focus-visible,.vc-root input:focus-visible,.vc-root select:focus-visible,.vc-root textarea:focus-visible{outline:3px solid #185889;outline-offset:2px}
+.vc-root .vc-question{padding:20px 0;border-bottom:1px solid var(--vc-line);margin-bottom:16px}
+.vc-root .vc-question h3{flex:1;min-width:180px;overflow-wrap:anywhere;margin:0}
+.vc-root .vc-question select{width:auto;min-width:180px;display:block}
+.vc-root .vc-expert-sheet button{display:inline-flex;align-items:center;gap:7px}
+.vc-root .vc-expert-sheet .vc-steps button{display:flex}

@@ -15,6 +15,34 @@ def who(role='data', super_admin=False, unit='vcoaching-test-unit'):
  return {'id':role,'email':role+'@test.invalid','role':role,'super':super_admin,'switched':False,'projects':['vcoaching-test'],'units':[unit],'initiatives':[],'assignment_actor':role}
 
 class Workflow(unittest.TestCase):
+ def test_expert_worksheet_is_private_independent_and_versioned(self):
+  from expert_worksheet import initial
+  record=s.get(self.iid); record['experts']=['expert']; s.put('initiative',record)
+  source=copy.deepcopy(record['versions'])
+  self.reflection_request('save',step='1',data={'answers':{'0':'clear'},'decision':'keep'})
+  unit=copy.deepcopy(s.get(self.iid)['self_reflection'])
+  questions=initial(1)['steps']['1']
+  questions[0]['answer']='Câu trả lời do giảng viên nhập'
+  questions[0]['rating']='clear'
+  payload=dict(base_version=1,revision=0,step='1',questions=questions)
+  self.request('expert-worksheet',role='unit',status=403,**payload)
+  result=self.request('expert-worksheet',role='expert',**payload)['initiative']
+  self.assertEqual(result['expert_worksheet']['steps']['1'][0]['answer'],questions[0]['answer'])
+  self.assertNotIn('expert_worksheets',result)
+  self.request('expert-worksheet',role='expert',status=409,**payload)
+  self.assertEqual(s.get(self.iid)['self_reflection'],unit)
+  self.assertEqual(s.get(self.iid)['versions'],source)
+  for role in ('unit','data','project'):
+   visible=s.visible_initiative(who(role),s.get(self.iid))
+   self.assertNotIn('expert_worksheets',visible)
+   self.assertFalse(visible.get('expert_worksheet'))
+  self.request('expert-worksheet',role='expert',base_version=1,revision=1,step='1',questions=questions[1:])
+  saved=s.get(self.iid)['expert_worksheets']['expert']
+  self.assertEqual(saved['history'][-1]['questions'][0]['answer'],questions[0]['answer'])
+  self.request('expert-worksheet',role='expert',base_version=1,revision=2,step='1',questions=[],status=400)
+  self.request('expert-worksheet',role='expert',base_version=2,revision=2,step='1',questions=questions,status=409)
+  item=s.get(self.iid);item['experts']=[];s.put('initiative',item)
+  self.request('expert-worksheet',role='expert',status=403,base_version=1,revision=2,step='1',questions=questions)
  def summary(self,form='01',mode='draft',actor=None,status=200):
   with patch.object(s,'actor',return_value=actor or who('unit')):
    response=self.client.get('/vc-api/form-summary',query_string={'unit':'vcoaching-test-unit','form':form,'mode':mode,'initiative':self.iid})
