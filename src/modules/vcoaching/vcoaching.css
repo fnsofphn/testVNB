@@ -204,15 +204,15 @@
 .vc-root .vc-expert-sheet button{display:inline-flex;align-items:center;gap:7px}
 .vc-root .vc-expert-sheet .vc-steps button{display:flex}
 
-/* VNPT Rising portal reference; neutral gray workspace requested on 2026-09-18. */
-.vc-root{color-scheme:light;--vc-bg:#eceef1;--vc-panel:#ffffff;--vc-ink:#173f60;--vc-muted:#52677b;--vc-line:#cfdae5;--vc-blue:#0875bd;--vc-blue-dark:#104569;--vc-navy:#06172c;--vc-soft:#eaf2f8;--vc-accent:#00cbe6;--vc-header-bg:#0b203d}
-.vc-root .vc-header{background:var(--vc-header-bg);color:#fff;border-color:#21374e}
-.vc-root .vc-header .vc-sub{color:#aec4dc}
+/* Approved option 1: low-glare slate-blue surfaces with VNPT blue accents. */
+.vc-root{color-scheme:light;--vc-bg:#bccbd6;--vc-panel:#d3dee5;--vc-ink:#17364b;--vc-muted:#40576a;--vc-line:#9fb5c5;--vc-blue:#0875bd;--vc-blue-dark:#164d70;--vc-navy:#102b43;--vc-soft:#c6d5e0;--vc-accent:#00cbe6;--vc-header-bg:#b8cad7}
+.vc-root .vc-header{background:var(--vc-header-bg);color:var(--vc-ink);border-color:var(--vc-line)}
+.vc-root .vc-header .vc-sub{color:var(--vc-muted)}
 .vc-root aside button.active{background:#10355c;color:#fff;box-shadow:inset 3px 0 var(--vc-accent)}
 .vc-root .vc-hero .vc-kicker{color:#ffbc66}
-.vc-root input,.vc-root select,.vc-root textarea{background:var(--vc-panel);color:var(--vc-ink)}
+.vc-root input,.vc-root select,.vc-root textarea{background:#e4ebf0;color:var(--vc-ink)}
 .vc-root .vc-card{border-color:var(--vc-line)}
-.vc-root th,.vc-root .vc-answer,.vc-root .vc-source,.vc-root .quote,.vc-root pre,.vc-root .milestone{background:#f4f6f8;color:var(--vc-ink)}
+.vc-root th,.vc-root .vc-answer,.vc-root .vc-source,.vc-root .quote,.vc-root pre,.vc-root .milestone{background:var(--vc-soft);color:var(--vc-ink)}
 .vc-root .vc-steps button{background:var(--vc-panel);color:var(--vc-ink);border-color:var(--vc-line)}
 .vc-root .vc-steps button.active{background:var(--vc-blue-dark);color:#fff;border-bottom-color:var(--vc-accent)}
 .vc-root .vc-steps button.needs-review{color:#803c12;border-color:#af744c}
@@ -231,7 +231,7 @@
 .vc-root .vc-rating-options{display:flex;flex-wrap:wrap;gap:8px}
 .vc-root .vc-rating-option{position:relative;display:inline-flex;margin:0;cursor:pointer}
 .vc-root .vc-rating-option input{position:absolute;width:1px;height:1px;margin:0;opacity:0;padding:0}
-.vc-root .vc-rating-option span{display:inline-flex;align-items:center;min-height:40px;padding:8px 13px;border:1px solid #8da8bd;border-radius:8px;background:var(--vc-panel);color:var(--vc-ink)}
+.vc-root .vc-rating-option span{display:inline-flex;align-items:center;min-height:40px;padding:8px 13px;border:1px solid #7896ad;border-radius:8px;background:var(--vc-panel);color:var(--vc-ink)}
 .vc-root .vc-rating-option input:checked+span{background:var(--vc-blue);border-color:var(--vc-blue);color:#fff;box-shadow:inset 0 -3px var(--vc-accent)}
 .vc-root .vc-rating-option input:focus-visible+span{outline:3px solid #064c87;outline-offset:3px}
 .vc-root .vc-rating-option:hover input:not(:disabled):not(:checked)+span{background:var(--vc-soft);border-color:var(--vc-blue)}

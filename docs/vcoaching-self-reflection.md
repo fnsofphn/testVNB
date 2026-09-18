@@ -6,7 +6,7 @@
 
 Màu mới nhất theo portal người dùng gửi lại: thanh bên navy `#06172c`,
 thanh đầu `#0b203d`, tiêu đề lớn `#104569`, điểm nhấn xanh dương/cyan,
-thẻ nội dung trắng. Nền làm việc xám trung tính `#eceef1` theo yêu cầu;
+thẻ nội dung xám xanh dịu `#d3dee5`. Nền làm việc xám xanh `#bccbd6` theo mẫu 1 đã duyệt;
 thay thế phương án nền xanh dương và thẻ xanh nhạt trước đó. Chỉ đổi màu,
 không thay bố cục, chức năng, dữ liệu hoặc phân quyền.
 
