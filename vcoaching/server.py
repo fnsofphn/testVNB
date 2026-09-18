@@ -17,6 +17,7 @@ import threading
 import time
 import uuid
 import zipfile
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.request import Request, urlopen
@@ -25,6 +26,8 @@ from flask import Flask, request, jsonify, send_file, g
 from cloud import CloudDB, CloudError
 from self_reflection import apply as reflect_apply, review as reflect_review, ReflectionError
 from expert_worksheet import apply as worksheet_apply
+from approved_source import SOURCE as APPROVED_SOURCE, replace as replace_approved_source
+from coaching_sessions import handle as handle_sessions
 from forms import build as build_form, validate_cells
 from initiative_codes import assign_codes
 from documents import STEPS, parse, norm, business_code, rules, export_docx, assessment_schema, mapped_outputs
@@ -122,17 +125,25 @@ def actor():
     if requested:
         if not a['super'] or requested not in ROLES: raise Problem('Không được switch role', 403)
         project, unit = request.headers.get('X-VCoaching-Project', ''), request.headers.get('X-VCoaching-Unit', '')
-        if not project or not unit or get(unit, 'unit')['project'] != project:
+        read_all = request.method == 'GET'
+        if not read_all and (not project or not unit or get(unit, 'unit')['project'] != project):
             raise Problem('Chọn dự án và đơn vị hợp lệ khi switch')
         a.update(role=requested, super=False, switched=True, projects=[project], units=[unit],
-                 assignment_actor=request.headers.get('X-VCoaching-Assignee', a['id']), initiatives=[])
+                 assignment_actor=request.headers.get('X-VCoaching-Assignee', a['id']), initiatives=[], read_all=read_all)
     if a['role'] not in ROLES: raise Problem('Chưa cấp vai trò V-Coaching', 403)
     return a
 
 
 def can(a, r):
     if a['super']: return True
+    # Issued only by actor() after checking the fresh server-owned admin grant.
+    # Never elevate POST mutations or trust a client-provided read-all header.
+    if a.get('read_all') and a.get('switched') and a.get('grant', {}).get('super_admin') and request.method == 'GET':
+        return True
     if r.get('project', r.get('id') if r.get('type') == 'project' else None) not in a['projects']: return False
+    if r.get('type') == 'coaching_session':
+        if a['role'] in ('unit','data','system'):return bool(set(r.get('units',[])) & set(a['units']))
+        if a['role']=='expert':return any(m.get('assignee')==a['assignment_actor'] for m in r.get('meetings',[]))
     if a['role'] in ('unit', 'data', 'system') and r.get('unit') and r['unit'] not in a['units']: return False
     if a['role'] == 'expert':
         iid = r.get('initiative', r['id'] if r.get('type') == 'initiative' else None)
@@ -158,6 +169,10 @@ def step_set(r, key):
 
 def visible_initiative(a, r, units=None):
     result = copy.deepcopy(r)
+    result.pop('approved_source_backups', None)
+    unit_sheets = result.pop('unit_worksheets', {})
+    if a['super'] or a['role'] == 'unit':
+        result['unit_worksheet'] = unit_sheets.get(r['unit'])
     # Private working answers never leak through workspace/detail/export to units.
     worksheets = result.pop('expert_worksheets', {})
     if a['super'] or a['role'] in ('expert', 'project'):
@@ -454,9 +469,12 @@ def api(op=None):
     if op in ('tick','process') and CLOUD: return cloud_process(op)
     a = getattr(g, 'vc_actor', None) or actor()
     body = request.get_json(silent=True) or {}
-    write_ops = {'expert-worksheet', 'catalog', 'upload', 'edit', 'merge', 'confirm', 'assign', 'comment', 'review',
+    write_ops = {'approved-source-replace', 'unit-worksheet', 'expert-worksheet', 'catalog', 'upload', 'edit', 'merge', 'confirm', 'assign', 'comment', 'review',
                  'master-form', 'reflection', 'reflection-review', 'lock', 'unlock', 'release', 'respond', 'finalize', 'account', 'switch-audit', 'recheck', 'classify', 'config', 'compare-review', 'convert', 'upload-init', 'upload-complete'}
     if op in write_ops and request.method != 'POST': raise Problem('Chỉ chấp nhận POST', 405)
+    if op in ('coaching-sessions','coach-profile','coaching-session-save','coaching-meeting-save','coaching-meeting-confirm','coaching-meeting-notes'):
+        if op!='coaching-sessions' and request.method!='POST':raise Problem('Chỉ chấp nhận POST',405)
+        return handle_sessions(sys.modules[__name__],op,a,body)
     if op == 'me':
         return jsonify(actor=a, roles=ROLES, steps=STEPS, storage='supabase' if CLOUD else 'local',
                        ai={'enabled': False, 'message': 'Chưa cấu hình đánh giá ngữ nghĩa. Chỉ kiểm tra quy tắc; chuyên gia đánh giá nội dung.'})
@@ -476,6 +494,9 @@ def api(op=None):
         put('config', item); audit(a, 'config', item, before=previous, after=item)
         return jsonify(ok=True)
     if op in ('form-summary','master-form'): return form_api(op,a,body)
+    if op == 'approved-source':
+        require(a, ('project', 'system'))
+        return jsonify(source=APPROVED_SOURCE)
     if op == 'workspace':
         catalog_units=rows('unit')
         initiatives = [visible_initiative(a, r, catalog_units) for r in rows('initiative') if not r.get('merged_into') and not r.get('conversion_pending') and can(a, r)]
@@ -676,7 +697,15 @@ def api(op=None):
     reason = body.get('reason', '').strip()
     if r.get('self_reflection', {}).get('status') == 'submitted' and op not in ('expert-worksheet', 'reflection', 'reflection-review'):
         raise Problem('Bản tự soi đang chờ duyệt. Duyệt hoặc trả lại trước khi thay đổi hồ sơ.', 409)
-    if op == 'expert-worksheet':
+    if op == 'approved-source-replace':
+        require(a, ('project', 'system'))
+        try: replace_approved_source(r, body.get('index'), body.get('base_version'), now())
+        except ReflectionError as error: raise Problem(error.message, error.status)
+    elif op == 'unit-worksheet':
+        require(a, ('unit',))
+        try: worksheet_apply(r, body, a['id'], now(), lane='unit')
+        except ReflectionError as error: raise Problem(error.message, error.status)
+    elif op == 'expert-worksheet':
         require(a, ('expert', 'project'))
         try: worksheet_apply(r, body, a['id'], now())
         except ReflectionError as error: raise Problem(error.message, error.status)

@@ -3,15 +3,18 @@ import copy
 from self_reflection import SCHEMA, check, text
 
 
-def initial(version):
+def initial(version, steps=None):
+    source = [dict(id=str(i+1), checks=s['questions']) for i,s in enumerate(steps)] if steps else SCHEMA
     return dict(revision=0, base_version=version, steps={s['id']: [
         dict(id=f"{s['id']}:{i}", question=q, answer='', rating='')
-        for i, q in enumerate(s['checks'])] for s in SCHEMA})
+        for i, q in enumerate(s['checks'])] for s in source})
 
 
-def apply(record, body, actor_id, at):
+def apply(record, body, actor_id, at, lane='expert'):
     version = record['versions'][-1]['number']
-    previous = record.get('expert_worksheets', {}).get(actor_id) or initial(version)
+    storage = 'unit_worksheets' if lane == 'unit' else 'expert_worksheets'
+    owner = record['unit'] if lane == 'unit' else actor_id
+    previous = record.get(storage, {}).get(owner) or initial(version, record.get('approved_steps'))
     check(type(body.get('revision')) is int and body['revision'] == previous['revision'],
           'Phiếu vừa thay đổi. Tải lại trước khi lưu.', 409)
     check(body.get('base_version') == version, 'Nguồn đã đổi. Tải lại để đối chiếu.', 409)
@@ -35,7 +38,12 @@ def apply(record, body, actor_id, at):
     updated = copy.deepcopy(previous)
     # Each save retains the previous step, including deleted questions and answers.
     updated.setdefault('history', []).append(dict(step=step, questions=copy.deepcopy(previous['steps'][step]),
+        detail=copy.deepcopy(previous.get('details', {}).get(step, {})),
         revision=previous['revision'], base_version=previous['base_version'], at=at))
     updated['steps'][step] = clean
+    detail = body.get('detail', {})
+    check(isinstance(detail, dict), 'Nội dung nhận xét không hợp lệ')
+    updated.setdefault('details', {})[step] = {key:text(detail.get(key, '')) for key in ('note','edit','master','owner','due')}
     updated.update(revision=previous['revision']+1, base_version=version, updated_at=at)
-    record.setdefault('expert_worksheets', {})[actor_id] = updated
+    updated['updated_by'] = actor_id
+    record.setdefault(storage, {})[owner] = updated

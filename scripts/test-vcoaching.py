@@ -6,6 +6,8 @@ from zipfile import ZipFile
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'vcoaching'))
 TEMP = tempfile.TemporaryDirectory(prefix='vcoaching-test-')
 os.environ['VCOACHING_DATA_DIR'] = TEMP.name
+os.environ['VCOACHING_CLOUD'] = '0'
+os.environ['VERCEL'] = '0'
 import server as s
 from documents import parse, STEPS, norm, business_code, export_docx, mapped_outputs, numeric_conflicts, rules
 CORPUS = Path(r'D:\03. Data\2026\V-Coaching\Tài liệu\2. WS1A_CHI TIẾT THEO PHIÊN')
@@ -15,6 +17,99 @@ def who(role='data', super_admin=False, unit='vcoaching-test-unit'):
  return {'id':role,'email':role+'@test.invalid','role':role,'super':super_admin,'switched':False,'projects':['vcoaching-test'],'units':[unit],'initiatives':[],'assignment_actor':role}
 
 class Workflow(unittest.TestCase):
+ def test_coaching_sessions_scope_conflicts_and_revision(self):
+  profile=self.request('coach-profile',role='project',id=None,project='vcoaching-test',name='Chuyên gia kiểm thử',auth_id='expert')['item']
+  self.request('coach-profile',role='unit',id=None,project='vcoaching-test',name='Không được phép',status=403)
+  session=self.request('coaching-session-save',role='project',id=None,project='vcoaching-test',units=['vcoaching-test-unit'],name='Phiên kiểm thử')['item']
+  payload=dict(id=session['id'],revision=1,expert=profile['id'],name='Buổi 1',start='2026-10-01T09:00:00+07:00',duration=60)
+  self.request('coaching-meeting-save',role='unit',status=403,**payload)
+  session=self.request('coaching-meeting-save',role='project',**payload)['item']
+  meeting=session['meetings'][0]
+  self.request('coaching-meeting-save',role='project',status=409,**payload)
+  payload['revision']=2
+  self.request('coaching-meeting-save',role='project',status=409,**payload)
+  self.assertEqual(s.get(session['id'])['revision'],2)
+  session=self.request('coaching-meeting-confirm',role='expert',id=session['id'],revision=2,meeting_id=meeting['id'])['item']
+  self.assertEqual(session['meetings'][0]['confirmation'],'confirmed')
+  self.request('coaching-meeting-notes',role='expert',id=session['id'],revision=3,meeting_id=meeting['id'],agenda=[{'name':'Trao đổi','minutes':0}],status=400)
+  session=self.request('coaching-meeting-notes',role='expert',id=session['id'],revision=3,meeting_id=meeting['id'],agenda=[{'name':'Trao đổi','minutes':15,'notes':'Nội dung','done':True}],conclusion='Kết luận',actions='Việc tiếp theo',closed=True)['item']
+  self.assertEqual(session['meetings'][0]['conclusion'],'Kết luận')
+  self.assertEqual(session['revision'],4)
+  with patch.object(s,'actor',return_value=who('unit')):
+   visible=self.client.get('/vc-api/coaching-sessions').get_json()
+   self.assertEqual([r['id'] for r in visible['sessions']],[session['id']])
+  with patch.object(s,'actor',return_value=who('unit',unit='outside-unit')):
+   self.assertEqual(self.client.get('/vc-api/coaching-sessions').get_json()['sessions'],[])
+  outsider=who('expert');outsider['assignment_actor']='unassigned'
+  with patch.object(s,'actor',return_value=outsider):
+   self.assertEqual(self.client.get('/vc-api/coaching-sessions').get_json()['sessions'],[])
+   self.assertEqual(self.client.post('/vc-api/coaching-meeting-confirm',json={'id':session['id'],'revision':4,'meeting_id':meeting['id']}).status_code,403)
+  payload.update(revision=4,meeting_id=meeting['id'],start='2026-10-01T10:00:00+07:00')
+  session=self.request('coaching-meeting-save',role='project',**payload)['item']
+  self.assertEqual(session['meetings'][0]['confirmation'],'pending')
+ def test_approved_source_and_independent_unit_questions(self):
+  from approved_source import SOURCE
+  from expert_worksheet import initial
+  original=copy.deepcopy(s.get(self.iid))
+  self.request('approved-source-replace',role='unit',status=403,index=0,base_version=1)
+  self.request('approved-source-replace',role='project',index=0,base_version=1)
+  r=s.get(self.iid)
+  self.assertEqual(r['approved_source_backups'][0]['record'],original)
+  self.assertEqual(r['approved_steps'],SOURCE['steps'][0])
+  self.assertEqual(r['versions'][0],original['versions'][0])
+  self.assertTrue(all(r['versions'][-1]['fields'][key] for key in ('7A','7B','7C')))
+  self.request('approved-source-replace',role='project',index=1,base_version=1,status=409)
+  questions=initial(2,r['approved_steps'])['steps']['1']
+  self.assertEqual([q['question'] for q in questions],SOURCE['steps'][0][0]['questions'])
+  questions.append({'id':'unit-extra','question':'Câu hỏi riêng đơn vị','answer':'Trả lời riêng','rating':'clear'})
+  self.request('unit-worksheet',role='unit',base_version=2,revision=0,step='1',questions=questions)
+  unit=copy.deepcopy(s.get(self.iid)['unit_worksheets'])
+  self.request('expert-worksheet',role='project',base_version=2,revision=0,step='1',questions=questions[:3])
+  self.assertEqual(s.get(self.iid)['unit_worksheets'],unit)
+  self.request('unit-worksheet',role='project',base_version=2,revision=1,step='1',questions=questions,status=403)
+  visible=s.visible_initiative(who('unit'),s.get(self.iid))
+  self.assertNotIn('approved_source_backups',visible)
+  self.assertNotIn('expert_worksheet',visible)
+  self.assertEqual(visible['unit_worksheet']['steps']['1'][-1]['answer'],'Trả lời riêng')
+  self.request('approved-source-replace',role='project',index=1,base_version=2)
+  r=s.get(self.iid)
+  self.assertEqual(r['approved_source_backups'][-1]['record']['unit_worksheets'],unit)
+  self.assertNotIn('unit_worksheets',r)
+  self.assertEqual(r['approved_steps'],SOURCE['steps'][1])
+  # The system accepts arbitrary further initiatives; no SK01–SK03 constraint.
+  extra=copy.deepcopy(original);extra['id']='future-initiative';extra['name']='Sáng kiến mới';s.put('initiative',extra)
+  self.request('unit-worksheet',role='unit',id=extra['id'],base_version=1,revision=0,step='1',questions=questions)
+  self.assertEqual(s.get(extra['id'])['unit_worksheets'][extra['unit']]['steps']['1'],questions)
+ def test_admin_role_preview_reads_all_without_expanding_writes(self):
+  record=s.get(self.iid);record['conversion_pending']=False;s.put('initiative',record)
+  other=copy.deepcopy(record);other.update(id='other-initiative',project='other-project',unit='other-unit',experts=[])
+  s.put('project',{'id':'other-project','type':'project','project':'other-project','name':'Other'})
+  s.put('unit',{'id':'other-unit','type':'unit','project':'other-project','unit':'other-unit','name':'Other'})
+  s.put('initiative',other)
+  user={'id':'admin','email':'admin@test.invalid','app_metadata':{'vcoaching':{'active':True,'role':'system','super_admin':True,'projects':[],'units':[]}}}
+  def auth(path,**kwargs):return [{'id':'p','active':True}] if path.startswith('/rest/') else copy.deepcopy(user)
+  headers={'Authorization':'Bearer test','X-VCoaching-Project':'vcoaching-test','X-VCoaching-Unit':'vcoaching-test-unit'}
+  with patch.object(s,'sb',side_effect=auth):
+   for role in ('unit','expert','data','project','system'):
+    headers['X-VCoaching-Role']=role
+    response=self.client.get('/vc-api/workspace',headers=headers)
+    self.assertEqual(response.status_code,200,response.get_json())
+    self.assertEqual({r['id'] for r in response.get_json()['initiatives']},{self.iid,'other-initiative'})
+    self.assertEqual(self.client.get('/vc-api/detail?id=other-initiative',headers=headers).status_code,200)
+   headers['X-VCoaching-Role']='unit'
+   response=self.client.post('/vc-api/reflection',headers=headers,json={'id':'other-initiative','action':'save'})
+   self.assertEqual(response.status_code,403)
+   headers['X-VCoaching-Role']='expert'
+   response=self.client.post('/vc-api/expert-worksheet',headers=headers,json={'id':self.iid})
+   self.assertEqual(response.status_code,403)
+   user['app_metadata']['vcoaching'].update(super_admin=False,role='unit',projects=['vcoaching-test'],units=['vcoaching-test-unit'])
+   self.assertEqual(self.client.get('/vc-api/workspace',headers=headers).status_code,403)
+   plain={'Authorization':'Bearer test','X-VCoaching-Read-All':'true'}
+   response=self.client.get('/vc-api/workspace',headers=plain)
+   self.assertEqual({r['id'] for r in response.get_json()['initiatives']},{self.iid})
+   self.assertEqual(self.client.get('/vc-api/detail?id=other-initiative',headers=plain).status_code,403)
+   user['app_metadata']['vcoaching']['active']=False
+   self.assertEqual(self.client.get('/vc-api/workspace',headers=plain).status_code,403)
  def test_expert_worksheet_is_private_independent_and_versioned(self):
   from expert_worksheet import initial
   record=s.get(self.iid); record['experts']=['expert']; s.put('initiative',record)

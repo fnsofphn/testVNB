@@ -2,6 +2,15 @@
 
 ## Luồng sử dụng
 
+### Admin chuyển vai trò
+
+Admin tổng đã xác thực được xem mọi dự án/đơn vị/sáng kiến khi chuyển vai.
+Quyền đọc này được máy chủ cấp theo grant hiện hành và chỉ áp dụng GET;
+không chấp nhận header tự khai quyền xem toàn bộ. Các trường riêng tư vẫn
+hiển thị theo vai trò đang xem. Tài khoản thường giữ nguyên phạm vi được cấp.
+POST vẫn kiểm tra vai trò, dự án/đơn vị đã chọn và phân công chuyên gia;
+chuyển vai không mở rộng quyền sửa/xóa. Nhật ký chuyển vai được giữ nguyên.
+
 ### Phiếu giảng viên
 
 Trong màn 8 bước, giảng viên/quản trị dự án chọn **Giảng viên nhận xét** để
@@ -24,6 +33,44 @@ và lưu cam kết mới được gửi. Hoàn thành tự soi không đồng ng
 và thời hạn. Chuyên gia/quản trị dự án duyệt hoặc trả lại kèm lý do.
 
 ## Contract và lưu trữ
+
+### Nội dung đã duyệt và phiếu riêng
+
+`approved_mockup.json` giữ nguyên nguồn nhúng trong HTML đã duyệt: 24 bước,
+72 câu hỏi, 126 thẻ nguồn và 7 tài liệu. Kiểm tra không ghi file bằng
+`node scripts/extract-vcoaching-mockup.mjs <đường-dẫn-HTML> --check`.
+Trong Danh mục/Cấu hình, quản trị chọn hồ sơ đích và xác nhận cập nhật;
+API lưu bản sao đầy đủ trước thay đổi, kiểm tra phiên bản và không cập nhật
+hồ sơ đã nộp/hoàn tất. Không tự ghi vào production khi khởi động ứng dụng.
+Ba nguồn chi tiết là dữ liệu tham chiếu, không giới hạn số sáng kiến hệ thống.
+
+Phiếu đơn vị dùng `unit-worksheet`, độc lập với `expert-worksheet` theo người
+giảng viên. Hai bên đều tự thêm/sửa/xóa câu hỏi và nhập câu trả lời, đánh giá,
+ghi chú, đề xuất cho Biểu 01/02, người thực hiện và hạn. Lịch sử lưu cả câu
+hỏi, câu trả lời và phần nhận xét trước mỗi lần lưu. Phiếu câu hỏi đơn vị
+hiện tách với luồng **Hiệu chỉnh & nộp hồ sơ**; chưa tự đưa các đề xuất này
+vào bản nộp hoặc đánh dấu chúng đã được duyệt.
+
+### Lịch và phiên khai vấn
+
+`coaching_sessions.py` dùng cùng kho records và transaction hiện có, với
+hai loại `coach_profile` và `coaching_session`. Một phiên có nhiều đơn vị,
+nhiều buổi; chuyên gia có xác nhận lịch, chương trình buổi, ghi chú, kết luận
+và hành động. Lưu lịch kiểm tra phạm vi, phiên bản và trùng giờ chuyên gia.
+Đổi lịch yêu cầu xác nhận lại. Chốt buổi cần có kết luận và hành động.
+Tài khoản đơn vị chỉ đọc phiên có đơn vị mình; chuyên gia chỉ đọc phiên
+được phân công và chỉ ghi buổi được phân công. Giao diện giữ lịch cũ.
+Không tạo sẵn chuyên gia, lịch hoặc xác nhận mô phỏng.
+
+### Kiểm thử cục bộ ngày 18/09/2026
+
+Người dùng chọn chỉ kiểm thử tự động cục bộ. Bộ kiểm thử chủ động tắt chế độ
+cloud, dùng thư mục tạm và giả lập xác thực, không ghi Supabase production.
+Đã đạt 30 kiểm thử (29 workflow + 1 corpus), kiểm tra TypeScript, mã hóa
+và build. Chưa xác minh giao diện sau đăng nhập, chưa commit/push/deploy.
+Chưa nghiệm thu 100% mockup: cần nối phiếu riêng vào nộp hồ sơ/xuất biểu,
+hai xác nhận tiếp nhận VNPT/PeopleOne, hoàn tất đối chiếu các cấu hình và
+toàn bộ bố cục, kiểm thử tương tác giao diện.
 
 - `self_reflection_schema.json` là nguồn câu hỏi chung cho React và Python,
   lấy từ form Kiểu 2; bước 4 dùng 5 tiêu chí đã được người dùng cung cấp.
