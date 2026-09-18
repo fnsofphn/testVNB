@@ -43,9 +43,12 @@ try {
   const tokens=Object.fromEntries([...css.matchAll(/(--vc-[\w-]+):\s*(#[a-f\d]{6})/gi)].map(m=>[m[1],m[2]]));
   const luminance=hex=>hex.slice(1).match(/../g).map(x=>parseInt(x,16)/255).map(x=>x<=.04045?x/12.92:((x+.055)/1.055)**2.4).reduce((n,x,i)=>n+x*[.2126,.7152,.0722][i],0);
   const contrast=(a,b)=>{const x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);};
-  for(const [a,b] of [['--vc-ink','--vc-panel'],['--vc-muted','--vc-panel']]) assert.ok(contrast(tokens[a],tokens[b])>=4.5,`${a}/${b} contrast`);
+  for(const [a,b] of [['--vc-ink','--vc-panel'],['--vc-muted','--vc-panel'],['--vc-ink','--vc-bg'],['--vc-muted','--vc-bg']]) assert.ok(contrast(tokens[a],tokens[b])>=4.5,`${a}/${b} contrast`);
   assert.ok(contrast('#ffffff',tokens['--vc-blue'])>=4.5,'Selected rating contrast');
-  assert.ok(luminance(tokens['--vc-bg'])>luminance('#061b43')*4,'Canvas must be brighter than rejected navy');
+  assert.equal(tokens['--vc-bg'],'#eceef1','Workspace must remain neutral gray');
+  assert.equal(tokens['--vc-panel'],'#ffffff','Portal reading cards must remain white');
+  assert.equal(tokens['--vc-navy'],'#06172c','Portal sidebar navy');
+  for(const key of ['--vc-navy','--vc-header-bg','--vc-blue-dark']) assert.ok(contrast('#ffffff',tokens[key])>=4.5,`${key} on white contrast`);
   console.log(`${cases} worksheet render cases passed; palette contrast checks passed.`);
 } finally {
   await unlink(output).catch(e=>{if(e.code!=='ENOENT')throw e;});

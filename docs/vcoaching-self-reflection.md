@@ -4,6 +4,12 @@
 
 ### Điều chỉnh theo phản hồi ngày 18/09/2026
 
+Màu mới nhất theo portal người dùng gửi lại: thanh bên navy `#06172c`,
+thanh đầu `#0b203d`, tiêu đề lớn `#104569`, điểm nhấn xanh dương/cyan,
+thẻ nội dung trắng. Nền làm việc xám trung tính `#eceef1` theo yêu cầu;
+thay thế phương án nền xanh dương và thẻ xanh nhạt trước đó. Chỉ đổi màu,
+không thay bố cục, chức năng, dữ liệu hoặc phân quyền.
+
 Giảng viên mở hồ sơ từ danh sách/nhận xét nhanh sẽ vào phiếu câu hỏi độc lập,
 có thêm/sửa/xóa, nhập câu trả lời và chọn trực tiếp bốn mức đánh giá. Lịch sử
 vẫn mở riêng; màn nhận xét cũ còn trong chi tiết để không mất khả năng xem
