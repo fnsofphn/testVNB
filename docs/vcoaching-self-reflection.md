@@ -2,6 +2,44 @@
 
 ## Luồng sử dụng
 
+### Điều chỉnh theo phản hồi ngày 18/09/2026
+
+Giảng viên mở hồ sơ từ danh sách/nhận xét nhanh sẽ vào phiếu câu hỏi độc lập,
+có thêm/sửa/xóa, nhập câu trả lời và chọn trực tiếp bốn mức đánh giá. Lịch sử
+vẫn mở riêng; màn nhận xét cũ còn trong chi tiết để không mất khả năng xem
+dữ liệu cũ. Mã đánh giá lưu trữ không thay đổi; nhãn `missing` là “Chưa rõ”
+theo mockup. Giao diện dùng canvas xanh dương sáng hơn, khung xanh nhạt và
+điểm nhấn cyan theo ảnh thành phố người dùng gửi lại.
+
+Người dùng xác nhận thay dữ liệu **production**. Đã kiểm tra đúng Supabase
+`npazlysytrqhnwezugcs`, namespace `production`, worker trỏ tới
+`https://test-vinabrain.vercel.app/api/vcoaching?op=tick`.
+Một transaction có khóa chống ghi đồng thời đã sao lưu toàn namespace sang
+`vcoaching-backup-production-20260918-quangtri`, đối chiếu fingerprint và
+số lượng, bỏ 25 initiative + 15 file + 15 batch khỏi namespace hoạt động,
+rồi nạp 3 initiative Quảng Trị và bản ghi đơn vị đúng danh mục.
+Không xóa đối tượng Storage; không sửa Auth, grant, project, sequence hoặc
+nhật ký cũ. Source của từng hồ sơ đã được đọc lại từ DB và so sánh bằng JSON:
+đều trùng nguồn, 8 bước/24 câu mỗi hồ sơ; số thẻ lần lượt 53/39/34.
+
+Khôi phục: quản trị phải sao lưu các phát sinh sau lần thay này, lấy khóa
+`production`, đối chiếu trạng thái mới rồi phục hồi 55 bản ghi initiative/file/batch
+từ namespace sao lưu; chỉ bỏ đúng 3 ID `vcoaching-approved-quang-tri-sk01`,
+`vcoaching-approved-quang-tri-sk02`, `vcoaching-approved-quang-tri-sk03` sau khi
+đã giữ lại mọi chỉnh sửa mới. Các tệp nhị phân cũ vẫn còn để đọc lại.
+Không chạy lại thay dữ liệu tự động khi khởi động hoặc deploy.
+
+Phân công chuyên gia/đơn vị không tự chuyển từ sáng kiến cũ sang ba sáng kiến
+mới. Admin thấy đủ dữ liệu khi chuyển vai; tài khoản thường cần đúng phạm vi
+Quảng Trị/phân công sáng kiến mới. Không nới quyền để lấp dữ liệu rỗng.
+`scripts/prepare-vcoaching-approved.py` chỉ chuẩn bị JSON, không kết nối DB.
+Ba hồ sơ này không phải giới hạn số sáng kiến của hệ thống.
+
+Kiểm tra bổ sung: `node scripts/test-vcoaching-ui.mjs` kiểm 20 trường hợp render
+hai vai trò/các lựa chọn/khóa sửa, không có dropdown đánh giá, giữ câu trả lời,
+điểm mở mặc định giảng viên và tương phản chữ/nền. Đây không phải kiểm thử
+tương tác trình duyệt hoặc nghiệm thu toàn bộ mockup.
+
 ### Admin chuyển vai trò
 
 Admin tổng đã xác thực được xem mọi dự án/đơn vị/sáng kiến khi chuyển vai.
