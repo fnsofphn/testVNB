@@ -44,6 +44,16 @@ export function normalizeTrainingRole(value) {
     .replace(/^_|_$/g, '');
 }
 
+export function hasTrainingAdminGrant(profile, vplanningUser) {
+  const tokens = [
+    profile?.role,
+    profile?.title,
+    ...(Array.isArray(profile?.vplanning_roles) ? profile.vplanning_roles : []),
+    ...(Array.isArray(vplanningUser?.roles) ? vplanningUser.roles : []),
+  ].map(normalizeTrainingRole);
+  return ['admin', 'training_ops_admin', 'vplanning_admin'].some((value) => tokens.includes(value));
+}
+
 export function resolveTrainingRoles(profile, vplanningUser) {
   const tokens = [
     profile?.role,
@@ -53,7 +63,7 @@ export function resolveTrainingRoles(profile, vplanningUser) {
   ].map(normalizeTrainingRole).filter(Boolean);
   const has = (...values) => values.some((value) => tokens.includes(value));
 
-  if (has('admin', 'training_ops_admin', 'vplanning_admin')) return [...TRAINING_ROLE_VALUES];
+  if (hasTrainingAdminGrant(profile, vplanningUser)) return [...TRAINING_ROLE_VALUES];
 
   const roles = [];
   if (has('operations', 'vplanning_operations', 'training_manager', 'training_admin', 'production_manager', 'pm', 'vplanning_director', 'quan_ly_van_hanh')) roles.push('operations');

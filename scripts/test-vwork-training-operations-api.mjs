@@ -53,7 +53,10 @@ globalThis.fetch = async (url, options = {}) => {
 };
 
 const { default: handler, stateForRole } = await import('../api/vwork-training-operations.js');
-const { resolveActiveTrainingRole, resolveTrainingRoles } = await import('../src/modules/vplanning/trainingOperations/roles.js');
+const { hasTrainingAdminGrant, resolveActiveTrainingRole, resolveTrainingRoles } = await import('../src/modules/vplanning/trainingOperations/roles.js');
+
+assert.equal(hasTrainingAdminGrant({ role: 'training_ops_admin' }, null), true);
+assert.equal(hasTrainingAdminGrant({ role: 'user', vplanning_roles: ['vplanning_manager'] }, null), false);
 
 assert.deepEqual(resolveTrainingRoles({ role: 'client' }, { roles: ['account_manager', 'vplanning_member'] }), ['intake', 'member'], 'account_manager must not be misread as the manager role.');
 assert.deepEqual(resolveTrainingRoles({ role: 'specialist' }, { roles: ['vtraining', 'vplanning_member'] }), ['vtraining', 'member'], 'A VTraining specialist must not receive the content interface unless that role is explicitly granted.');
@@ -128,14 +131,27 @@ await handler(request('GET', undefined, 'manager'), managerView);
 assert.equal(managerView.statusCode, 200);
 assert.equal(managerView.payload.directory.length, 7);
 assert.equal(managerView.payload.accountDirectory.length, 0);
-assert.equal(managerView.payload.state.projects.length, 0);
-assert.equal(managerView.payload.state.tasks.length, 0);
+assert.equal(managerView.payload.state.projects.length, fixtureState.projects.length, 'Admin must see every project while using the manager interface.');
+assert.equal(managerView.payload.state.courses.length, fixtureState.courses.length);
+assert.equal(managerView.payload.state.tasks.length, fixtureState.tasks.length);
+
+const ordinaryManagerView = stateForRole(fixtureState, { role: 'manager', isAdmin: false, actor: { id: 'profile-manager', email: 'manager@peopleone.vn', name: 'Ngọc Trần' } });
+assert.equal(ordinaryManagerView.projects.length, 0, 'A regular manager must not gain access to unassigned projects.');
+assert.equal(ordinaryManagerView.tasks.length, 0);
+
+const crossProjectState = structuredClone(fixtureState);
+crossProjectState.projects.push({ ...fixtureState.projects[0], id: 'PPO_TEST', code: 'PPO_TEST', name: 'Đào tạo Test' });
+crossProjectState.courses.push({ ...fixtureState.courses[0], id: 'PPO_TEST', code: 'PPO_TEST', name: 'Đào tạo Test', projectId: 'PPO_TEST' });
+const adminManagerState = stateForRole(crossProjectState, { role: 'manager', isAdmin: true, actor: { id: 'profile-operations', email: 'ops@peopleone.vn' } });
+assert.ok(adminManagerState.projects.some((item) => item.id === 'PPO_TEST'));
+assert.ok(adminManagerState.courses.some((item) => item.id === 'PPO_TEST'), 'Admin must see a course from another project while using the manager interface.');
+assert.ok(!stateForRole(crossProjectState, { role: 'manager', isAdmin: false, actor: { id: 'profile-manager', email: 'manager@peopleone.vn' } }).courses.some((item) => item.id === 'PPO_TEST'));
 
 const memberView = responseRecorder();
 await handler(request('GET', undefined, 'member'), memberView);
 assert.equal(memberView.statusCode, 200);
 assert.equal(memberView.payload.role, 'member');
-assert.equal(memberView.payload.state.tasks.length, 0);
+assert.equal(memberView.payload.state.tasks.length, fixtureState.tasks.length, 'Admin read visibility must persist across role switches.');
 
 const legacyAssignedState = structuredClone(getResponse.payload.state);
 const legacyAssignedTask = legacyAssignedState.tasks.find((item) => item.id === 'CX-FOUNDATION-TNKH01-T-101');

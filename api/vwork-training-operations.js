@@ -10,6 +10,7 @@ import {
   summarizeTrainingOperationsState,
 } from '../src/modules/vplanning/trainingOperations/domain.js';
 import {
+  hasTrainingAdminGrant,
   normalizeTrainingRole,
   resolveActiveTrainingRole,
   resolvePrimaryTrainingRole,
@@ -127,6 +128,7 @@ async function authenticate(req, config) {
   }
   return {
     role,
+    isAdmin: hasTrainingAdminGrant(profile, vplanningUser),
     availableRoles,
     actor: {
       id: profile.id || sessionUser.id,
@@ -238,8 +240,11 @@ function scopedStateForRole(state, auth) {
 }
 
 export function stateForRole(state, auth) {
-  const output = scopedStateForRole(state, auth);
-  if (['operations', 'admin'].includes(auth.role)) return output;
+  // An admin keeps full read visibility while working in a narrower role.
+  // Command authorization still uses the selected role in the request handler.
+  const readAuth = auth.isAdmin ? { ...auth, role: 'admin' } : auth;
+  const output = scopedStateForRole(state, readAuth);
+  if (['operations', 'admin'].includes(readAuth.role)) return output;
   // Discard legacy quarantine data and unrelated audit payloads from client responses.
   delete output.legacyUnscopedInputs;
   const detailIds = new Set(output.detailedInputs.map(i => i.id));
