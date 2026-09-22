@@ -684,12 +684,16 @@ export default function TrainingOperationsPage({ initialRole = 'operations', all
         />}
         {tab === 'team' && role === 'operations' && <CourseTeamWorkspace
           course={activeCourse}
-          courses={projectCourses}
+          courses={(workspaceState.courses || []).filter((item) => item.status !== 'ARCHIVED')}
+          projects={workspaceState.projects || []}
           directory={accountDirectory.length ? accountDirectory : directory}
           assignments={workspaceState.teamAssignments || []}
           assignCourseRole={assignCourseRole}
           removeCourseRole={removeCourseRole}
-          onSelectCourse={(courseId) => writeRoute('team', { projectId: activeProject?.id, courseId, classId: '', taskId: '' })}
+          onSelectCourse={(courseId) => {
+            const selectedCourse = workspaceState.courses?.find((item) => item.id === courseId);
+            if (selectedCourse) writeRoute('team', { projectId: selectedCourse.projectId, courseId, classId: '', taskId: '' });
+          }}
         />}
         {tab === 'inputs' && <Inputs role={role} activeCourse={activeCourse} courses={projectCourses} inputs={inputs} inputRecords={projectInputs} courseInputProgress={workspaceState.courseInputProgress || []} tasks={tasks} classes={projectClasses} uploadStep={uploadStep} setUploadStep={setUploadStep} submitInput={submitInput} onSelectCourse={(courseId) => writeRoute('inputs', { projectId: activeProject?.id, courseId, classId: '', taskId: '' })}/>}
         {tab === 'tasks' && <LayeredTasks role={role} tasks={contextTasks} classes={classes} inputRecords={projectInputs} directory={directory} teamAssignments={workspaceState.teamAssignments || []} directoryLoading={syncState === 'loading'} actor={actor} project={activeProject} course={activeCourse} routeContext={routeContext} onNavigate={navigateWork} selectedTask={contextSelectedTask} setSelectedTaskId={setSelectedTaskId} updateTask={updateTask} createClassTask={createClassTask} moveClassTask={moveClassTask} archiveTask={archiveTask} assignTasks={assignTasks} toggleChecklist={toggleChecklist}/>}
@@ -1122,7 +1126,7 @@ function normalizeSearchText(value) {
 
 function RoleSummary({ role }) { const copy = { operations: ['Giao nhóm việc cho Quản lý ekip', 'Duyệt yêu cầu trước khi tạo task'], intake: ['Chỉ nộp danh sách theo từng lớp', 'Tạo yêu cầu thay đổi, không tự tạo task'], content: ['Nộp 5 nhóm input nội dung', 'Theo dõi phiên bản độc lập'], vtraining: ['Theo dõi 03 nhóm VTraining', 'Tùy chỉnh checklist và deadline'], manager: ['Nhận nhóm việc và giao CTV', 'Xác nhận PASS / REWORK'], member: ['Thực hiện checklist chi tiết', 'Gửi yêu cầu xác nhận hoàn thành'] }[role]; return <ul className="role-summary">{copy.map((item) => <li key={item}>{item}</li>)}</ul>; }
 
-function CourseTeamWorkspace({ course, courses = [], directory, assignments, assignCourseRole, removeCourseRole, onSelectCourse }) {
+function CourseTeamWorkspace({ course, courses = [], projects = [], directory, assignments, assignCourseRole, removeCourseRole, onSelectCourse }) {
   const [accountId, setAccountId] = useState('');
   const [courseRole, setCourseRole] = useState('member');
   const [assignmentOpen, setAssignmentOpen] = useState(false);
@@ -1153,7 +1157,7 @@ function CourseTeamWorkspace({ course, courses = [], directory, assignments, ass
   return <section className="course-access-workspace">
     <header className="course-access-hero">
       <div><small>COURSE ACCESS</small><h1>Gán vai trò theo khóa học</h1><p>Quản lý tập trung người tham gia và quyền của từng khóa. Người xác nhận công việc được lấy trực tiếp từ vai trò Quản lý ekip.</p></div>
-      <label><span>Khóa học</span><select aria-label="Chọn khóa học để gán vai trò" value={course.id} onChange={(event) => onSelectCourse?.(event.target.value)}>{courses.map((item, index) => <option value={item.id} key={item.id}>{index + 1}.1 · {item.code} · {item.name}</option>)}</select></label>
+      <label><span>Khóa học ({courses.length})</span><select aria-label="Chọn khóa học để gán vai trò" value={course.id} onChange={(event) => onSelectCourse?.(event.target.value)}>{courses.map((item) => <option value={item.id} key={item.id}>{projects.find((project) => project.id === item.projectId)?.code || item.projectId} · {item.code} · {item.name}</option>)}</select></label>
     </header>
     <div className="card course-access-surface">
       <div className="course-access-surface-head"><div><small>COURSE ACCESS</small><h2>{course.code} · {course.name}</h2><p>Thêm hoặc gỡ tài khoản ngay trên từng vai trò. Thay đổi được đồng bộ vào dữ liệu vận hành.</p></div><button type="button" className="primary" onClick={() => openAssignment()}>+ Gán vai trò</button></div>
