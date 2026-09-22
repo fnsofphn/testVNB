@@ -27,6 +27,9 @@ assert.throws(() => edit('SUBMIT_DETAIL_INPUT', { data: {} }), /bắt buộc/);
 assert.throws(() => edit('SAVE_DETAIL_INPUT', { data: { ...game, attempts: '-1' } }), /nguyên dương/);
 assert.throws(() => cleanDetailData('vlearning', { vimeo: 'javascript:alert(1)' }), /http/);
 assert.throws(() => cleanDetailData('vlearning', { vimeo: 'https://vimeo.com.evil.test/1' }), /Vimeo/);
+assert.throws(() => cleanDetailData('vtrainingCourse', { classCount: '0' }), /nguyên dương/);
+assert.throws(() => cleanDetailData('vlearningCourse', { thumbnail: 'javascript:alert(1)' }), /http/);
+assert.equal(cleanDetailData('vlearningCourse', { name: 'Khóa Test', thumbnail: 'https://example.com/thumbnail.png' }, true).name, 'Khóa Test');
 const staleRevision = current().revision;
 edit('SAVE_DETAIL_INPUT', { data: game }, collaborator);
 assert.throws(() => edit('SAVE_DETAIL_INPUT', { data: game, expectedRevision: staleRevision }), e => e.status === 409);
@@ -86,4 +89,3 @@ await assert.rejects(() => assertDetailedDocumentAccess(admin, worker.actor, 'me
 await assert.rejects(() => assertDetailedDocumentAccess(admin, outsider.actor, 'member', 'DIN-one', 'download', 'anything'), e => e.status === 403);
 await assert.rejects(() => assertDetailedDocumentAccess(admin, worker.actor, 'member', 'DIN-one', 'download', 'unreferenced-file'), e => e.status === 403);
 console.log('Detailed inputs: authority, draft/review/return, readiness, immutable versions, decisions, concurrency, context, projection and file scope passed.');
-

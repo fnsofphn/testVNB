@@ -20,7 +20,9 @@ const FIRST_INPUT_SOURCE_STEPS = Object.freeze({
 
 export const TRAINING_TASK_TEMPLATES = Object.freeze([
   { group: 'prepare', code: 'T-101', title: 'Chuẩn bị thông tin lớp', inputKey: 'roster', dueOffset: 3, checklist: ['Xác nhận chương trình, đối tượng đào tạo và khách hàng', 'Xác nhận tên khóa, hình thức, thời gian, số lớp và địa điểm', 'Xác nhận tên lớp, giảng viên và lịch đào tạo', 'Có danh sách học viên sơ bộ theo lớp'] },
-  { group: 'setup', code: 'T-102', title: 'Khởi tạo lớp học VTraining', inputKey: 'roster', system: 'VTRAINING', dueOffset: 2, checklist: ['Đúng tên lớp và khóa học VTraining', 'Đúng giảng viên, thời gian, hình thức và địa điểm đào tạo'] },
+  { group: 'setup', code: 'T-116', title: 'Khởi tạo khóa VTraining', inputKey: 'roster', system: 'VTRAINING', noSourceInput: true, detailInputKey: 'vtrainingCourse', dueOffset: 3, checklist: ['Có tên khóa, chương trình và khách hàng/đơn vị', 'Đúng hình thức, thời gian, số lớp, địa điểm và đối tượng đào tạo'] },
+  { group: 'setup', code: 'T-117', title: 'Khởi tạo khóa VLearning', inputKey: 'roster', system: 'VLEARNING', noSourceInput: true, detailInputKey: 'vlearningCourse', dueOffset: 3, checklist: ['Có tên khóa học VLearning', 'Có thumbnail đúng cho khóa học'] },
+  { group: 'setup', code: 'T-102', title: 'Khởi tạo lớp học VTraining', inputKey: 'roster', system: 'VTRAINING', dueOffset: 2, dependsOnTemplates: ['T-116'], checklist: ['Đúng tên lớp và khóa học VTraining', 'Đúng giảng viên, thời gian, hình thức và địa điểm đào tạo'] },
   { group: 'setup', code: 'T-103', title: 'Khởi tạo danh sách học viên VTraining', inputKey: 'roster', system: 'VTRAINING', detailInputKey: 'roster', dueOffset: 1, checklist: ['Có danh sách học viên theo lớp và thông tin chia nhóm', 'Đúng số lượng học viên và quyền truy cập lớp'] },
   { group: 'setup', code: 'T-104', title: 'Khởi tạo hoạt động thảo luận', inputKey: 'discussion', system: 'VTRAINING', detailInputKey: 'discussion', dueOffset: 2, checklist: ['Có tên và mô tả từng chủ đề thảo luận', 'Có danh sách học viên theo nhóm từ lớp', 'Đúng thời lượng mỗi phiên', 'Tài khoản test thực hiện được và học viên thấy hoạt động'] },
   { group: 'setup', code: 'T-105', title: 'Khởi tạo bài kiểm tra VTraining', inputKey: 'test', system: 'VTRAINING', requiresContent: 'TEST', detailInputKey: 'test', dueOffset: 2, checklist: ['Có bộ câu hỏi kiểm tra', 'Đúng số câu mỗi bài, thời gian hoàn thành và số lượt làm', 'Tài khoản test thực hiện được và thấy kết quả'] },
@@ -28,7 +30,7 @@ export const TRAINING_TASK_TEMPLATES = Object.freeze([
   { group: 'setup', code: 'T-107', title: 'Khởi tạo game VTraining', inputKey: 'game', system: 'VTRAINING', detailInputKey: 'game', dueOffset: 2, checklist: ['Có tên game đầy đủ và tên game trên hệ thống', 'Đúng số lượt và thời gian chơi', 'Tài khoản test chơi được và học viên thấy game'] },
   { group: 'setup', code: 'T-108', title: 'Khởi tạo bài giảng VLearning', inputKey: 'vlearning', system: 'VLEARNING', detailInputKey: 'vlearning', dueOffset: 2, dependsOnTemplates: ['T-112'], checklist: ['Có file Excel cho từng bài giảng, tên bài và các phần', 'Có link Vimeo và bộ câu hỏi cuối bài nếu áp dụng', 'Học viên thấy bài giảng trong lớp VLearning'] },
   { group: 'setup', code: 'T-109', title: 'Khởi tạo tài liệu VTraining', inputKey: 'material', system: 'VTRAINING', detailInputKey: 'material', dueOffset: 2, checklist: ['Có agenda và tài liệu học tập', 'Tài liệu gắn đúng lớp và thời gian hiển thị', 'Học viên xem hoặc tải được tài liệu'] },
-  { group: 'setup', code: 'T-112', title: 'Khởi tạo lớp học VLearning', inputKey: 'roster', system: 'VLEARNING', dueOffset: 2, checklist: ['Đúng tên lớp và khóa học VLearning', 'Đúng thời gian đào tạo của lớp'] },
+  { group: 'setup', code: 'T-112', title: 'Khởi tạo lớp học VLearning', inputKey: 'roster', system: 'VLEARNING', dueOffset: 2, dependsOnTemplates: ['T-117'], checklist: ['Đúng tên lớp và khóa học VLearning', 'Đúng thời gian đào tạo của lớp'] },
   { group: 'setup', code: 'T-113', title: 'Khởi tạo danh sách học viên VLearning', inputKey: 'roster', system: 'VLEARNING', detailInputKey: 'roster', dueOffset: 1, dependsOnTemplates: ['T-112'], checklist: ['Có danh sách học viên theo lớp, có hoặc chưa chia nhóm', 'Học viên truy cập được lớp VLearning'] },
   { group: 'setup', code: 'T-114', title: 'Khởi tạo bài kiểm tra VLearning', inputKey: 'test', system: 'VLEARNING', detailInputKey: 'test', dueOffset: 2, dependsOnTemplates: ['T-112'], checklist: ['Có bộ câu hỏi kiểm tra', 'Đúng số câu mỗi bài, thời gian hoàn thành và số lượt làm', 'Tài khoản test thực hiện được trong lớp VLearning'] },
   { group: 'setup', code: 'T-115', title: 'Chuẩn bị và gửi mail lịch học', inputKey: 'roster', system: 'VLEARNING', detailInputKey: 'email', dueOffset: 1, dependsOnTemplates: ['T-112', 'T-113'], checklist: ['Có thời gian triển khai, tên khóa và tên lớp', 'Có email học viên và địa điểm đào tạo', 'Lớp ELN có hướng dẫn truy cập; lớp trực tiếp có tài liệu, danh sách chia nhóm và dụng cụ', 'Xác nhận mail đã gửi đúng danh sách học viên'] },
@@ -178,6 +180,7 @@ function createInputRecords(projectId, courseId, scope, classes, timestamp) {
 }
 
 function taskRequiredInputs(template) {
+  if (template.noSourceInput) return [];
   const code = TRAINING_INPUT_DEFINITIONS[template.inputKey]?.code || 'D03';
   return code === 'D03' ? ['D03'] : ['D03', code];
 }

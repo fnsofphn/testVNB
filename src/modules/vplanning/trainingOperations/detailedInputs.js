@@ -2,6 +2,8 @@
 // caller-supplied names, role labels, versions and approval timestamps are never trusted.
 const field = (key, label, type = 'text', required = true) => ({ key, label, type, required });
 export const DETAIL_SCHEMAS = Object.freeze({
+  vtrainingCourse: { label: 'Khóa VTraining', code: 'D09', fields: [field('name', 'Tên khóa học'), field('program', 'Chương trình đào tạo'), field('customer', 'Khách hàng / đơn vị'), field('deliveryMode', 'Hình thức đào tạo'), field('period', 'Thời gian khóa đào tạo'), field('classCount', 'Số lớp đào tạo', 'number'), field('venue', 'Địa điểm đào tạo'), field('audience', 'Đối tượng đào tạo')] },
+  vlearningCourse: { label: 'Khóa VLearning', code: 'D04', fields: [field('name', 'Tên khóa học'), field('thumbnail', 'Thumbnail khóa học', 'url')] },
   roster: { label: 'Lớp & học viên', code: 'D03', fields: [field('roster', 'Danh sách học viên / tham chiếu file'), field('groups', 'Thông tin chia nhóm', 'textarea', false)] },
   vlearning: { label: 'Bài giảng VLearning', code: 'D04', fields: [field('name', 'Tên bài giảng'), field('parts', 'Tên các phần', 'textarea'), field('vimeo', 'Link Vimeo', 'url'), field('excel', 'File Excel bài giảng / tham chiếu file'), field('quiz', 'Câu hỏi cuối bài (nếu có)', 'textarea', false)] },
   game: { label: 'Game', code: 'D05', fields: [field('name', 'Tên game đầy đủ'), field('systemName', 'Tên game trên hệ thống'), field('attempts', 'Số lượt chơi', 'number'), field('minutes', 'Thời gian chơi (phút)', 'number')] },
