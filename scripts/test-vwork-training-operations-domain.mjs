@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
 import {
   applyTrainingOperationsCommand,
+  createEmptyTrainingOperationsState,
   createInitialTrainingOperationsState,
   normalizeTrainingOperationsState,
+  selectTrainingTaskTemplates,
   summarizeTrainingOperationsState,
 } from '../src/modules/vplanning/trainingOperations/domain.js';
 
@@ -13,7 +15,7 @@ const commandAs = (state, type, payload, role, id, name) => applyTrainingOperati
 
 let state = createInitialTrainingOperationsState({ now: '2026-08-25T00:00:00.000Z' });
 const initialSummary = summarizeTrainingOperationsState(state);
-assert.deepEqual(initialSummary, { projects: 1, courses: 1, classes: 3, inputs: 9, tasks: 33, changeRequests: 0, auditEvents: 1 });
+assert.deepEqual(initialSummary, { projects: 1, courses: 1, classes: 3, inputs: 9, tasks: 45, changeRequests: 0, auditEvents: 1 });
 
 // Legacy project-level D03 is preserved for audit but is never guessed onto a class.
 const legacyState = structuredClone(state);
@@ -23,6 +25,18 @@ const normalizedLegacy = normalizeTrainingOperationsState(legacyState, { now: '2
 assert.equal(normalizedLegacy.schemaVersion, 3);
 assert.ok(normalizedLegacy.inputs.filter((item) => item.dataCode === 'D03').every((item) => item.status === 'MISSING'));
 assert.equal(normalizedLegacy.legacyUnscopedInputs[0].id, 'EVNSPC-2026:D03');
+const legacyLectureTask = structuredClone(state);
+const lecture = legacyLectureTask.tasks.find((item) => item.templateId === 'T-108');
+delete lecture.defaultDetailInputKey;
+assert.equal(normalizeTrainingOperationsState(legacyLectureTask).tasks.find((item) => item.id === lecture.id).defaultDetailInputKey, 'vlearning', 'Existing generated tasks must expose the input template without rewriting stored work.');
+assert.equal(selectTrainingTaskTemplates(['VLEARNING']).length, 8);
+assert.ok(!selectTrainingTaskTemplates(['VTRAINING', 'VLEARNING']).some((item) => item.code === 'T-105'));
+const earlierClassState = structuredClone(state);
+earlierClassState.tasks = earlierClassState.tasks.filter((item) => !(item.classId === 'TNKH01' && ['T-112', 'T-113', 'T-114', 'T-115'].includes(item.templateId)));
+const syncedClassState = command(earlierClassState, 'SYNC_CLASS_DEFAULT_TASKS', { classId: 'TNKH01' }, 'operations');
+assert.equal(syncedClassState.tasks.filter((item) => item.classId === 'TNKH01').length, 15);
+assert.ok(syncedClassState.tasks.find((item) => item.id === 'CX-FOUNDATION-TNKH01-T-110').dependsOnTaskIds.includes('CX-FOUNDATION-TNKH01-T-114'));
+assert.equal(command(syncedClassState, 'SYNC_CLASS_DEFAULT_TASKS', { classId: 'TNKH01' }, 'operations').tasks.length, syncedClassState.tasks.length, 'Synchronizing default tasks twice must not duplicate work.');
 
 // UC01 — create project, scope, course, class and class-owned tasks.
 state = command(state, 'CREATE_PROJECT', {
@@ -32,8 +46,24 @@ state = command(state, 'CREATE_PROJECT', {
   scope: { selectedContents: ['VTRAINING', 'VLEARNING', 'GAMIFICATION', 'DISCUSSION', 'ASSIGNMENT', 'TEST'], instanceCount: { VLEARNING: 1, GAMIFICATION: 2, DISCUSSION: 1, ASSIGNMENT: 1, TEST: 1, MATERIAL: 2 } },
 }, 'operations', 'Quản lý vận hành');
 assert.equal(state.activeProjectId, 'ALPHA-2026');
-assert.equal(state.tasks.filter((item) => item.projectId === 'ALPHA-2026').length, 11);
+assert.equal(state.tasks.filter((item) => item.projectId === 'ALPHA-2026').length, 15);
 assert.ok(state.tasks.filter((item) => item.projectId === 'ALPHA-2026').every((item) => item.scopeLevel === 'class' && item.status === 'WAITING_INPUT'));
+const alphaTasks = state.tasks.filter((item) => item.courseId === 'ALPHA-CX');
+for (const code of ['T-108', 'T-112', 'T-113', 'T-114', 'T-115']) assert.ok(alphaTasks.some((item) => item.templateId === code), `${code} must be generated for VLearning.`);
+assert.equal(alphaTasks.find((item) => item.templateId === 'T-108').defaultDetailInputKey, 'vlearning');
+assert.equal(alphaTasks.find((item) => item.templateId === 'T-114').defaultDetailInputKey, 'test');
+assert.deepEqual(alphaTasks.find((item) => item.templateId === 'T-114').requiredInputCodes, ['D03', 'D08']);
+assert.equal(alphaTasks.find((item) => item.templateId === 'T-115').defaultDetailInputKey, 'email');
+
+const onlyLearning = command(createEmptyTrainingOperationsState(), 'CREATE_PROJECT', {
+  project: { id: 'ELN-ONLY', name: 'Đào tạo trực tuyến', customerId: 'ELN', startDate: '2026-10-01', deadline: '2026-10-31', classCount: 1 },
+  course: { id: 'ELN-COURSE', name: 'Khóa trực tuyến', systems: ['VLearning'] },
+  classes: [{ id: 'L01', name: 'Lớp trực tuyến', startDate: '2026-10-10', endDate: '2026-10-12' }],
+  scope: { selectedContents: ['VLEARNING'] },
+}, 'operations');
+assert.ok(onlyLearning.tasks.some((item) => item.templateId === 'T-114'));
+assert.ok(!onlyLearning.tasks.some((item) => item.templateId === 'T-102' || item.templateId === 'T-105'), 'A VLearning-only course must not get VTraining tasks.');
+assert.equal(onlyLearning.inputs.find((item) => item.courseId === 'ELN-COURSE' && item.dataCode === 'D08').required, true);
 
 // UC02 — D03 accepts the user's source file without validating its business format.
 state = command(state, 'SUBMIT_INPUT', { projectId: 'ALPHA-2026', courseId: 'ALPHA-CX', classId: 'ALPHA-CX-ALPHA01', inputKey: 'roster', sourceStepCode: 'UC02-B04', data: {}, validation: { valid: false, errors: ['Client could not parse this format.'] }, files: [{ name: 'alpha-roster-notes.txt', fileUrl: 'https://files.example/alpha-roster-notes.txt' }] }, 'intake', 'Đầu mối Alpha');

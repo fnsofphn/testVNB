@@ -43,11 +43,11 @@ globalThis.fetch = async (url, options = {}) => {
     lastPersistedBody = body;
     assert.equal(body.p_state_id, 'default');
     assert.equal(body.p_expected_version, 0);
-    assert.ok(Array.isArray(body.p_tasks) && body.p_tasks.length === 33);
+    assert.ok(Array.isArray(body.p_tasks) && body.p_tasks.length === fixtureState.tasks.length);
     assert.equal(body.p_payload.tasks, undefined);
     assert.equal(body.p_payload.auditEvents, undefined);
     persistedRequest = { request_id: body.p_request_id, state_id: 'default', actor_id: 'profile-operations', result: { version: 1, updatedAt: '2026-08-25T02:00:00.000Z', auditCount: 1 } };
-    return Response.json({ version: 1, updatedAt: '2026-08-25T02:00:00.000Z', taskCount: 33, auditCount: 1, idempotentReplay: false });
+    return Response.json({ version: 1, updatedAt: '2026-08-25T02:00:00.000Z', taskCount: fixtureState.tasks.length, auditCount: 1, idempotentReplay: false });
   }
   throw new Error(`Unexpected fetch: ${options.method || 'GET'} ${value}`);
 };
@@ -113,7 +113,7 @@ assert.equal(getResponse.payload.ok, true);
 assert.equal(getResponse.payload.role, 'operations');
 assert.deepEqual(getResponse.payload.availableRoles, ['operations', 'intake', 'content', 'vtraining', 'manager', 'member']);
 assert.equal(getResponse.payload.storage, 'database');
-assert.equal(getResponse.payload.state.tasks.length, 33);
+assert.equal(getResponse.payload.state.tasks.length, fixtureState.tasks.length);
 assert.deepEqual(getResponse.payload.directory.map((item) => [item.id, item.role]), [['ops@peopleone.vn', 'operations'], ['manager@peopleone.vn', 'manager'], ['member@peopleone.vn', 'member'], ['scoped@peopleone.vn', 'member'], ['chieuanh18082003@gmail.com', 'member'], ['content@peopleone.vn', 'content'], ['unlinked@peopleone.vn', 'member']]);
 assert.deepEqual(getResponse.payload.directory[0].roles, ['operations', 'intake', 'content', 'vtraining', 'manager', 'member']);
 assert.equal(getResponse.payload.directory.find((item) => item.id === 'chieuanh18082003@gmail.com').assignable, true);

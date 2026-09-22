@@ -23,7 +23,7 @@ function PeopleFields({ value, onChange, directory }) {
     <p className="field-hint">Có thể kiêm người nhập và người chốt. Phân công input độc lập với người thực hiện công việc.</p></>;
 }
 export function InputDraftFields({ inputKey = 'roster', value, onChange, directory, defaultOwner = '', defaultDue = '', title = '' }) {
-  return <details className="detail-draft-creation"><summary>Input chi tiết cho công việc</summary>
+  return <details className="detail-draft-creation" defaultOpen={Boolean(value)}><summary>Input chi tiết cho công việc</summary>
     <label className="detail-enable"><input type="checkbox" checked={Boolean(value)} onChange={e => onChange(e.target.checked ? { key: DETAIL_SCHEMAS[inputKey] ? inputKey : 'roster', title: title || DETAIL_SCHEMAS[inputKey]?.label, ownerId: defaultOwner, reviewerId: defaultOwner, collaboratorIds: [], dueAt: defaultDue, data: {} } : null)}/>Khởi tạo bộ input riêng cùng công việc</label>
     {value && <><label>Tên bộ input<input value={value.title || ''} onChange={e => onChange({ ...value, title: e.target.value })}/></label><label>Loại input<select value={value.key} onChange={e => onChange({ ...value, key: e.target.value, data: {} })}>{Object.entries(DETAIL_SCHEMAS).map(([key, schema]) => <option key={key} value={key}>{schema.label}</option>)}</select></label>
       <PeopleFields value={value} onChange={onChange} directory={directory || []}/>
@@ -115,7 +115,16 @@ function InputCard({ input, task, binding }) {
 }
 export function TaskDetailedInputs({ task }) {
   const api = useDetailedInputs();
-  const [draft, setDraft] = useState(null), [linkId, setLinkId] = useState(''), [busy, setBusy] = useState(false), [error, setError] = useState('');
+  const [draft, setDraft] = useState(() => task.defaultDetailInputKey && !task.inputBindings?.length ? {
+    key: task.defaultDetailInputKey,
+    title: task.title,
+    ownerId: '',
+    reviewerId: '',
+    collaboratorIds: [],
+    dueAt: task.plannedDeadline || task.startDate || '',
+    data: {},
+  } : null);
+  const [draftTouched, setDraftTouched] = useState(false), [linkId, setLinkId] = useState(''), [busy, setBusy] = useState(false), [error, setError] = useState('');
   if (!api) return null;
   const { state, actor, role, directory, command } = api;
   const managing = detailCourseManager(state, task.courseId, { actor, role });
@@ -124,13 +133,13 @@ export function TaskDetailedInputs({ task }) {
   const available = all.filter(i => i.courseId === task.courseId && i.classId === task.classId && !bindings.some(b => b.inputId === i.id));
   async function create() {
     setBusy(true); setError('');
-    try { const result = await command('CREATE_DETAIL_INPUT', { ...draft, taskId: task.id, id: crypto.randomUUID() }, 'Đã tạo bộ input chi tiết.'); if (result) setDraft(null); else setError('Chưa tạo được bộ input. Kiểm tra người phụ trách, người chốt và hạn cung cấp.'); } finally { setBusy(false); }
+    try { const result = await command('CREATE_DETAIL_INPUT', { ...draft, taskId: task.id, id: crypto.randomUUID() }, 'Đã tạo bộ input chi tiết.'); if (result) { setDraft(null); setDraftTouched(false); } else setError('Chưa tạo được bộ input. Kiểm tra người phụ trách, người chốt và hạn cung cấp.'); } finally { setBusy(false); }
   }
   return <section className="task-detailed-inputs"><h3>Đầu vào chi tiết của công việc</h3><ContextSummary value={detailContext(state, task)} title="Thông tin hiện tại từ dự án / khóa / lớp"/>
-    {!bindings.length && <p>Chưa có bộ input riêng. Dữ liệu nguồn hiện có được giữ ở phần bên dưới; không tự chuyển hoặc chốt thay.</p>}
+    {!bindings.length && <p>{task.defaultDetailInputKey ? `Mẫu ${DETAIL_SCHEMAS[task.defaultDetailInputKey]?.label || 'input'} đã được chuẩn bị cho công việc. Chọn người phụ trách và người chốt để tạo bộ input.` : 'Chưa có bộ input riêng. Dữ liệu nguồn hiện có được giữ ở phần bên dưới; không tự chuyển hoặc chốt thay.'}</p>}
     {bindings.map(binding => { const input = all.find(i => i.id === binding.inputId); return input ? <InputCard key={input.id} input={input} task={task} binding={binding}/> : <p key={binding.inputId}>Bộ input chưa tải được hoặc ngoài quyền xem. Vui lòng tải lại dữ liệu.</p>; })}
-    {managing && !['DONE', 'IN_REVIEW'].includes(task.status) && <fieldset disabled={busy} data-detail-dirty={draft ? 'true' : undefined}><legend>Bổ sung bộ input cho công việc</legend><InputDraftFields inputKey={task.input || 'roster'} value={draft} onChange={setDraft} directory={directory} defaultOwner={actor?.email} defaultDue={task.plannedDeadline || task.startDate} title={task.title}/>
-      {draft && <button type="button" className="primary" onClick={create}>Tạo bộ input nháp</button>}
+    {managing && !['DONE', 'IN_REVIEW'].includes(task.status) && <fieldset disabled={busy} data-detail-dirty={draftTouched ? 'true' : undefined}><legend>Bổ sung bộ input cho công việc</legend><InputDraftFields inputKey={task.defaultDetailInputKey || task.input || 'roster'} value={draft} onChange={(value) => { setDraft(value); setDraftTouched(true); }} directory={directory} defaultOwner={actor?.email} defaultDue={task.plannedDeadline || task.startDate} title={task.title}/>
+      {draft && <button type="button" className="primary" disabled={!draft.ownerId || !draft.reviewerId || !draft.dueAt} onClick={create}>Tạo bộ input nháp</button>}
       {available.length > 0 && <><label>Dùng chung bộ input đã có trong lớp<select value={linkId} onChange={e => setLinkId(e.target.value)}><option value="">Chọn bộ input</option>{available.map(i => <option key={i.id} value={i.id}>{i.title} · {DETAIL_SCHEMAS[i.key]?.label}</option>)}</select></label><button type="button" disabled={!linkId} onClick={async () => { const input = available.find(i => i.id === linkId); setBusy(true); try { await command('LINK_DETAIL_INPUT', { inputId: input.id, taskId: task.id, expectedRevision: input.revision }, 'Đã gắn cùng nguồn input.'); setLinkId(''); } finally { setBusy(false); } }}>Gắn vào công việc</button></>}
     </fieldset>}{error && <p role="alert" className="detail-error">{error}</p>}<p className="field-hint">Mỗi bài giảng, game, chủ đề hoặc bài kiểm tra có thể thêm một bộ input riêng. Input gửi mail chỉ cung cấp thông tin, không tự gửi email.</p></section>;
 }

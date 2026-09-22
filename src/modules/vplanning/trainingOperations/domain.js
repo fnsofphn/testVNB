@@ -1,4 +1,4 @@
-import { DETAIL_COMMANDS, applyDetailCommand, detailedReadiness, cleanInputContext } from './detailedInputs.js';
+import { DETAIL_COMMANDS, DETAIL_SCHEMAS, applyDetailCommand, detailedReadiness, cleanInputContext } from './detailedInputs.js';
 export const TRAINING_OPERATIONS_STATE_ID = 'default';
 
 export const TRAINING_INPUT_DEFINITIONS = Object.freeze({
@@ -19,17 +19,21 @@ const FIRST_INPUT_SOURCE_STEPS = Object.freeze({
 });
 
 export const TRAINING_TASK_TEMPLATES = Object.freeze([
-  { group: 'prepare', code: 'T-101', title: 'Chuẩn bị thông tin lớp', inputKey: 'roster', dueOffset: 3, checklist: ['Có danh sách sơ bộ bằng file Excel', 'Đủ tên khóa học, tên lớp, thời gian và địa điểm', 'Đã chốt số lượng từng loại hoạt động'] },
-  { group: 'setup', code: 'T-102', title: 'Khởi tạo lớp học', inputKey: 'roster', dueOffset: 2, checklist: ['Đúng tên lớp', 'Đúng thời gian chạy lớp'] },
-  { group: 'setup', code: 'T-103', title: 'Khởi tạo danh sách học viên', inputKey: 'roster', dueOffset: 1, checklist: ['Đúng số lượng học viên', 'Tài khoản học viên thấy lớp', 'Đủ 02 tài khoản test thuộc 02 nhóm', 'Có 01 tài khoản test trước lớp và 01 tài khoản demo tại lớp'] },
-  { group: 'setup', code: 'T-104', title: 'Khởi tạo hoạt động thảo luận', inputKey: 'discussion', dueOffset: 2, checklist: ['Chọn đúng thảo luận từ thư viện', 'Tài khoản test làm được và admin thấy kết quả', 'Tài khoản học viên thấy thảo luận', 'Đóng phát hành sau khi test'] },
-  { group: 'setup', code: 'T-105', title: 'Khởi tạo bài kiểm tra', inputKey: 'test', dueOffset: 2, checklist: ['Chọn đúng bài kiểm tra từ thư viện', 'Đúng số câu và thời gian làm bài', 'Tài khoản test làm được và thấy kết quả', 'Đóng phát hành sau khi test'] },
-  { group: 'setup', code: 'T-106', title: 'Khởi tạo bài thu hoạch', inputKey: 'assignment', dueOffset: 2, checklist: ['Chọn đúng bài thu hoạch từ thư viện', 'Đúng yêu cầu đầu ra và rubric', 'Tài khoản test nộp được bài', 'Đóng phát hành sau khi test'] },
-  { group: 'setup', code: 'T-107', title: 'Khởi tạo Ứng dụng học tập số / Gamification', inputKey: 'game', dueOffset: 2, checklist: ['Khởi tạo đúng ứng dụng học tập số', 'Tài khoản test làm thử thành công', 'Màn ranking có kết quả và reset được', 'Tài khoản học viên thấy bài', 'Đóng phát hành sau khi test'] },
-  { group: 'setup', code: 'T-108', title: 'Khởi tạo bài tập VLearning', inputKey: 'vlearning', dueOffset: 2, checklist: ['Khởi tạo đúng bài tập', 'Tài khoản test làm được và thấy kết quả', 'Tài khoản học viên thấy bài trong lớp'] },
-  { group: 'setup', code: 'T-109', title: 'Khởi tạo tài liệu', inputKey: 'material', dueOffset: 2, checklist: ['Khởi tạo đúng tài liệu', 'Tài khoản học viên thấy tài liệu', 'Tải thử tài liệu thành công'] },
-  { group: 'live', code: 'T-110', title: 'Mở phát hành các hoạt động', inputKey: 'roster', dueOffset: 0, dependsOnGroups: ['setup'], checklist: ['Phát hành Thảo luận', 'Phát hành Ứng dụng học tập số', 'Phát hành Kiểm tra và Thu hoạch', 'Tài khoản học viên thấy các bài'] },
-  { group: 'live', code: 'T-111', title: 'Xem kết quả các hoạt động', inputKey: 'roster', dueOffset: 0, dependsOnTemplates: ['T-110'], checklist: ['Xem kết quả Thảo luận', 'Xem kết quả Ứng dụng học tập số', 'Xem kết quả Kiểm tra', 'Xem kết quả Thu hoạch'] },
+  { group: 'prepare', code: 'T-101', title: 'Chuẩn bị thông tin lớp', inputKey: 'roster', dueOffset: 3, checklist: ['Xác nhận chương trình, đối tượng đào tạo và khách hàng', 'Xác nhận tên khóa, hình thức, thời gian, số lớp và địa điểm', 'Xác nhận tên lớp, giảng viên và lịch đào tạo', 'Có danh sách học viên sơ bộ theo lớp'] },
+  { group: 'setup', code: 'T-102', title: 'Khởi tạo lớp học VTraining', inputKey: 'roster', system: 'VTRAINING', dueOffset: 2, checklist: ['Đúng tên lớp và khóa học VTraining', 'Đúng giảng viên, thời gian, hình thức và địa điểm đào tạo'] },
+  { group: 'setup', code: 'T-103', title: 'Khởi tạo danh sách học viên VTraining', inputKey: 'roster', system: 'VTRAINING', detailInputKey: 'roster', dueOffset: 1, checklist: ['Có danh sách học viên theo lớp và thông tin chia nhóm', 'Đúng số lượng học viên và quyền truy cập lớp'] },
+  { group: 'setup', code: 'T-104', title: 'Khởi tạo hoạt động thảo luận', inputKey: 'discussion', system: 'VTRAINING', detailInputKey: 'discussion', dueOffset: 2, checklist: ['Có tên và mô tả từng chủ đề thảo luận', 'Có danh sách học viên theo nhóm từ lớp', 'Đúng thời lượng mỗi phiên', 'Tài khoản test thực hiện được và học viên thấy hoạt động'] },
+  { group: 'setup', code: 'T-105', title: 'Khởi tạo bài kiểm tra VTraining', inputKey: 'test', system: 'VTRAINING', requiresContent: 'TEST', detailInputKey: 'test', dueOffset: 2, checklist: ['Có bộ câu hỏi kiểm tra', 'Đúng số câu mỗi bài, thời gian hoàn thành và số lượt làm', 'Tài khoản test thực hiện được và thấy kết quả'] },
+  { group: 'setup', code: 'T-106', title: 'Khởi tạo bài thu hoạch', inputKey: 'assignment', system: 'VTRAINING', detailInputKey: 'assignment', dueOffset: 2, checklist: ['Có câu hỏi thu hoạch', 'Đúng thời gian và số lượt làm bài', 'Tài khoản test nộp được bài'] },
+  { group: 'setup', code: 'T-107', title: 'Khởi tạo game VTraining', inputKey: 'game', system: 'VTRAINING', detailInputKey: 'game', dueOffset: 2, checklist: ['Có tên game đầy đủ và tên game trên hệ thống', 'Đúng số lượt và thời gian chơi', 'Tài khoản test chơi được và học viên thấy game'] },
+  { group: 'setup', code: 'T-108', title: 'Khởi tạo bài giảng VLearning', inputKey: 'vlearning', system: 'VLEARNING', detailInputKey: 'vlearning', dueOffset: 2, dependsOnTemplates: ['T-112'], checklist: ['Có file Excel cho từng bài giảng, tên bài và các phần', 'Có link Vimeo và bộ câu hỏi cuối bài nếu áp dụng', 'Học viên thấy bài giảng trong lớp VLearning'] },
+  { group: 'setup', code: 'T-109', title: 'Khởi tạo tài liệu VTraining', inputKey: 'material', system: 'VTRAINING', detailInputKey: 'material', dueOffset: 2, checklist: ['Có agenda và tài liệu học tập', 'Tài liệu gắn đúng lớp và thời gian hiển thị', 'Học viên xem hoặc tải được tài liệu'] },
+  { group: 'setup', code: 'T-112', title: 'Khởi tạo lớp học VLearning', inputKey: 'roster', system: 'VLEARNING', dueOffset: 2, checklist: ['Đúng tên lớp và khóa học VLearning', 'Đúng thời gian đào tạo của lớp'] },
+  { group: 'setup', code: 'T-113', title: 'Khởi tạo danh sách học viên VLearning', inputKey: 'roster', system: 'VLEARNING', detailInputKey: 'roster', dueOffset: 1, dependsOnTemplates: ['T-112'], checklist: ['Có danh sách học viên theo lớp, có hoặc chưa chia nhóm', 'Học viên truy cập được lớp VLearning'] },
+  { group: 'setup', code: 'T-114', title: 'Khởi tạo bài kiểm tra VLearning', inputKey: 'test', system: 'VLEARNING', detailInputKey: 'test', dueOffset: 2, dependsOnTemplates: ['T-112'], checklist: ['Có bộ câu hỏi kiểm tra', 'Đúng số câu mỗi bài, thời gian hoàn thành và số lượt làm', 'Tài khoản test thực hiện được trong lớp VLearning'] },
+  { group: 'setup', code: 'T-115', title: 'Chuẩn bị và gửi mail lịch học', inputKey: 'roster', system: 'VLEARNING', detailInputKey: 'email', dueOffset: 1, dependsOnTemplates: ['T-112', 'T-113'], checklist: ['Có thời gian triển khai, tên khóa và tên lớp', 'Có email học viên và địa điểm đào tạo', 'Lớp ELN có hướng dẫn truy cập; lớp trực tiếp có tài liệu, danh sách chia nhóm và dụng cụ', 'Xác nhận mail đã gửi đúng danh sách học viên'] },
+  { group: 'live', code: 'T-110', title: 'Mở phát hành các hoạt động', inputKey: 'roster', dueOffset: 0, dependsOnGroups: ['setup'], checklist: ['Phát hành các bài giảng và hoạt động áp dụng cho lớp', 'Học viên thấy đúng bài học, bài kiểm tra và tài liệu', 'Đóng nội dung thử nghiệm trước khi chạy lớp'] },
+  { group: 'live', code: 'T-111', title: 'Xem kết quả các hoạt động', inputKey: 'roster', dueOffset: 0, dependsOnTemplates: ['T-110'], checklist: ['Xem kết quả học tập và các hoạt động đã phát hành', 'Đối chiếu kết quả với danh sách học viên của lớp'] },
 ]);
 
 export const TRAINING_DEFAULT_CLASSES = Object.freeze([
@@ -51,6 +55,7 @@ const COMMAND_ROLES = Object.freeze({
   UPDATE_CLASS_STATUS: ['operations', 'manager', 'admin'],
   CLONE_CLASS: ['operations', 'admin'],
   CREATE_CLASS_TASK: ['operations', 'vtraining', 'manager', 'admin'],
+  SYNC_CLASS_DEFAULT_TASKS: ['operations', 'vtraining', 'manager', 'admin'],
   UPDATE_TASK_CONFIG: ['operations', 'vtraining', 'manager', 'admin'],
   MOVE_CLASS_TASK: ['operations', 'vtraining', 'manager', 'admin'],
   ARCHIVE_TASK: ['operations', 'vtraining', 'manager', 'admin'],
@@ -128,7 +133,7 @@ function selectedInputCodes(scope) {
   if (selected.has('GAMIFICATION')) codes.push('D05');
   if (selected.has('DISCUSSION')) codes.push('D06');
   if (selected.has('ASSIGNMENT')) codes.push('D07');
-  if (selected.has('TEST')) codes.push('D08');
+  if (selected.has('TEST') || selected.has('VLEARNING')) codes.push('D08');
   if (selected.has('VTRAINING')) codes.push('D09');
   return codes;
 }
@@ -197,9 +202,17 @@ function normalizeTaskTemplates(overrides) {
   });
 }
 
-function createTasksForClass(projectId, courseId, classItem, classIndex, timestamp, selectedContents = [], templateOverrides) {
+export function selectTrainingTaskTemplates(selectedContents = [], templateOverrides) {
+  const selected = new Set(selectedContents.map((item) => String(item).toUpperCase()));
   const requiredCodes = new Set(selectedInputCodes({ selectedContents }));
-  const templates = normalizeTaskTemplates(templateOverrides).filter((template) => template.inputKey === 'roster' || requiredCodes.has(TRAINING_INPUT_DEFINITIONS[template.inputKey]?.code));
+  return normalizeTaskTemplates(templateOverrides).filter((template) =>
+    (!template.system || selected.has(template.system))
+    && (!template.requiresContent || selected.has(template.requiresContent))
+    && (template.inputKey === 'roster' || requiredCodes.has(TRAINING_INPUT_DEFINITIONS[template.inputKey]?.code)));
+}
+
+function createTasksForClass(projectId, courseId, classItem, classIndex, timestamp, selectedContents = [], templateOverrides) {
+  const templates = selectTrainingTaskTemplates(selectedContents, templateOverrides);
   const taskScopePrefix = String(classItem.code).startsWith(`${courseId}-`) ? classItem.code : `${courseId}-${classItem.code}`;
   const taskIdByTemplate = new Map(templates.map((template) => [template.code, `${taskScopePrefix}-${template.code}`]));
   return templates.map((template, templateIndex) => ({
@@ -216,6 +229,7 @@ function createTasksForClass(projectId, courseId, classItem, classIndex, timesta
     templateId: template.code,
     title: template.title,
     input: template.inputKey,
+    defaultDetailInputKey: template.detailInputKey || null,
     requiredInputCodes: taskRequiredInputs(template),
     requiredInputVersions: {},
     dependsOnTaskIds: templates.filter((candidate) => template.dependsOnGroups?.includes(candidate.group)).map((candidate) => taskIdByTemplate.get(candidate.code))
@@ -401,6 +415,9 @@ function scopedClassCode(courseCode, rawCode) {
   state.tasks = state.tasks.map((task, taskIndex) => ({
     ...task,
     scopeLevel: task.scopeLevel || 'class',
+    defaultDetailInputKey: task.defaultDetailInputKey !== undefined
+      ? task.defaultDetailInputKey
+      : TRAINING_TASK_TEMPLATES.find((template) => template.code === task.templateId)?.detailInputKey || null,
     dependsOnTaskIds: Array.isArray(task.dependsOnTaskIds) ? task.dependsOnTaskIds : task.templateId === 'T-110'
       ? state.tasks.filter((item) => item.classId === task.classId && item.group === 'setup' && item.status !== 'CANCELLED').map((item) => item.id)
       : task.templateId === 'T-111'
@@ -818,6 +835,33 @@ function cloneClass(state, payload, context) {
   appendAudit(state, auditEvent('CLASS_CLONED', `Tạo lớp ${classId} từ ${classItem.cloneFrom}; sinh ${tasks.length} công việc có ID riêng.`, context, 'class', classId, { taskIds: tasks.map((item) => item.id) }));
 }
 
+function syncClassDefaultTasks(state, payload, context) {
+  const classId = requiredText(payload.classId, 'Lớp');
+  const classItem = state.classes.find((item) => item.id === classId || item.code === classId);
+  if (!classItem) throw domainError('NOT_FOUND', 'Không tìm thấy lớp cần bổ sung công việc.');
+  assertTaskConfigurationAccess(state, classItem.courseId, context);
+  const course = state.courses.find((item) => item.id === classItem.courseId && item.projectId === classItem.projectId);
+  if (!course) throw domainError('NOT_FOUND', 'Không tìm thấy khóa học của lớp.');
+  const timestamp = nowIso(context);
+  const existingIds = new Set(state.tasks.map((item) => item.id));
+  const generated = createTasksForClass(classItem.projectId, classItem.courseId, classItem, state.classes.indexOf(classItem), timestamp, course.activities || []);
+  const added = generated.filter((item) => !existingIds.has(item.id));
+  if (!added.length) return;
+  state.tasks.push(...added);
+  const activeIds = new Set(state.tasks.filter((item) => item.status !== 'CANCELLED' && !item.archivedAt).map((item) => item.id));
+  for (const expected of generated) {
+    const task = state.tasks.find((item) => item.id === expected.id);
+    if (!task || task.status === 'CANCELLED' || task.archivedAt) continue;
+    task.dependsOnTaskIds = [...new Set([...(task.dependsOnTaskIds || []), ...expected.dependsOnTaskIds.filter((id) => activeIds.has(id))])];
+  }
+  if (course.activities?.some((item) => String(item).toUpperCase() === 'VLEARNING')) {
+    const testInput = state.inputs.find((item) => item.courseId === course.id && item.dataCode === 'D08');
+    if (testInput) testInput.required = true;
+  }
+  refreshTaskReadiness(state, classItem.projectId, timestamp);
+  appendAudit(state, auditEvent('CLASS_DEFAULT_TASKS_SYNCED', `Bổ sung ${added.length} công việc mẫu cho lớp ${classItem.code}.`, context, 'class', classItem.id, { taskIds: added.map((item) => item.id) }));
+}
+
 function updateTaskConfig(state, payload, context) {
   const task = findTask(state, payload.taskId);
   assertTaskConfigurationAccess(state, task.courseId, context);
@@ -871,6 +915,7 @@ function createClassTask(state, payload, context) {
     title: requiredText(payload.title, 'Tên công việc'),
     group,
     input: inputKey,
+    defaultDetailInputKey: DETAIL_SCHEMAS[payload.detailedInput?.key] ? payload.detailedInput.key : DETAIL_SCHEMAS[inputKey] ? inputKey : null,
     requiredInputCodes: taskRequiredInputs({ inputKey }),
     dueOffset: Math.max(0, Number(payload.dueOffset) || 0),
     plannedDeadline: payload.deadline ? dateText(payload.deadline, 'Deadline công việc') : null,
@@ -1403,6 +1448,7 @@ export function applyTrainingOperationsCommand(currentState, command, context = 
     case 'UPDATE_COURSE_TEMPLATE': updateCourseTemplate(state, payload, { ...context, role }); break;
     case 'UPDATE_CLASS_STATUS': updateClassStatus(state, payload, { ...context, role }); break;
     case 'CLONE_CLASS': cloneClass(state, payload, { ...context, role }); break;
+    case 'SYNC_CLASS_DEFAULT_TASKS': syncClassDefaultTasks(state, payload, { ...context, role }); break;
     case 'CREATE_CLASS_TASK': createClassTask(state, payload, { ...context, role }); break;
     case 'UPDATE_TASK_CONFIG': updateTaskConfig(state, payload, { ...context, role }); break;
     case 'MOVE_CLASS_TASK': moveClassTask(state, payload, { ...context, role }); break;
