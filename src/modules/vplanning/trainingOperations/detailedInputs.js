@@ -3,15 +3,17 @@
 const field = (key, label, type = 'text', required = true) => ({ key, label, type, required });
 export const DETAIL_SCHEMAS = Object.freeze({
   vtrainingCourse: { label: 'Khóa VTraining', code: 'D09', fields: [field('name', 'Tên khóa học'), field('program', 'Chương trình đào tạo'), field('customer', 'Khách hàng / đơn vị'), field('deliveryMode', 'Hình thức đào tạo'), field('period', 'Thời gian khóa đào tạo'), field('classCount', 'Số lớp đào tạo', 'number'), field('venue', 'Địa điểm đào tạo'), field('audience', 'Đối tượng đào tạo')] },
+  vtrainingClass: { label: 'Lớp VTraining', code: 'D03', fields: [field('className', 'Tên lớp học'), field('courseName', 'Lớp thuộc khóa nào'), field('instructor', 'Giảng viên'), field('startDate', 'Ngày bắt đầu'), field('endDate', 'Ngày kết thúc'), field('deliveryMode', 'Hình thức đào tạo'), field('venue', 'Địa điểm đào tạo')] },
   vlearningCourse: { label: 'Khóa VLearning', code: 'D04', fields: [field('name', 'Tên khóa học'), field('thumbnail', 'Thumbnail khóa học', 'url')] },
+  vlearningClass: { label: 'Lớp VLearning', code: 'D03', fields: [field('className', 'Tên lớp học'), field('courseName', 'Lớp thuộc khóa nào'), field('startDate', 'Ngày bắt đầu'), field('endDate', 'Ngày kết thúc')] },
   roster: { label: 'Lớp & học viên', code: 'D03', fields: [field('roster', 'Danh sách học viên / tham chiếu file'), field('groups', 'Thông tin chia nhóm', 'textarea', false)] },
   vlearning: { label: 'Bài giảng VLearning', code: 'D04', fields: [field('name', 'Tên bài giảng'), field('parts', 'Tên các phần', 'textarea'), field('vimeo', 'Link Vimeo', 'url'), field('excel', 'File Excel bài giảng / tham chiếu file'), field('quiz', 'Câu hỏi cuối bài (nếu có)', 'textarea', false)] },
   game: { label: 'Game', code: 'D05', fields: [field('name', 'Tên game đầy đủ'), field('systemName', 'Tên game trên hệ thống'), field('attempts', 'Số lượt chơi', 'number'), field('minutes', 'Thời gian chơi (phút)', 'number')] },
   discussion: { label: 'Chủ đề thảo luận', code: 'D06', fields: [field('name', 'Tên chủ đề'), field('description', 'Mô tả chủ đề', 'textarea'), field('groups', 'Danh sách học viên đã chia nhóm / tham chiếu file'), field('minutes', 'Thời lượng mỗi phiên (phút)', 'number')] },
-  assignment: { label: 'Bài thu hoạch', code: 'D07', fields: [field('name', 'Tên bài thu hoạch'), field('questions', 'Câu hỏi thu hoạch', 'textarea'), field('duration', 'Thời gian làm bài'), field('attempts', 'Số lượt làm bài', 'number')] },
-  test: { label: 'Bài kiểm tra', code: 'D08', fields: [field('name', 'Tên bài kiểm tra'), field('questions', 'Bộ câu hỏi / tham chiếu file', 'textarea'), field('count', 'Số câu hỏi mỗi bài', 'number'), field('minutes', 'Thời gian hoàn thành (phút)', 'number'), field('attempts', 'Số lượt làm bài', 'number')] },
+  assignment: { label: 'Bài thu hoạch', code: 'D07', fields: [field('name', 'Tên bài thu hoạch', 'text', false), field('questions', 'Câu hỏi thu hoạch', 'textarea'), field('duration', 'Thời gian làm bài'), field('attempts', 'Số lượt làm bài', 'number')] },
+  test: { label: 'Bài kiểm tra', code: 'D08', fields: [field('name', 'Tên bài kiểm tra', 'text', false), field('questions', 'Bộ câu hỏi / tham chiếu file', 'textarea'), field('count', 'Số câu hỏi mỗi bài', 'number'), field('minutes', 'Thời gian hoàn thành (phút)', 'number'), field('attempts', 'Số lượt làm bài', 'number')] },
   material: { label: 'Tài liệu', code: 'D09', fields: [field('agenda', 'Agenda / tham chiếu file'), field('materials', 'Tài liệu học tập / tham chiếu file', 'textarea')] },
-  email: { label: 'Input gửi mail lịch học', code: 'EMAIL', fields: [field('recipients', 'Email học viên / tham chiếu danh sách', 'textarea'), field('access', 'Hướng dẫn truy cập ELN (học trực tuyến)', 'textarea', false), field('preparation', 'Tài liệu, chia nhóm, dụng cụ (học trực tiếp)', 'textarea', false)] },
+  email: { label: 'Input gửi mail lịch học', code: 'EMAIL', fields: [field('classTime', 'Thời gian triển khai lớp học'), field('courseName', 'Tên khóa học'), field('className', 'Tên lớp học'), field('recipients', 'Email học viên / tham chiếu danh sách', 'textarea'), field('venue', 'Địa điểm đào tạo'), field('access', 'Hướng dẫn truy cập ELN (học trực tuyến)', 'textarea', false), field('preparation', 'Tài liệu, chia nhóm, dụng cụ (học trực tiếp)', 'textarea', false)] },
 });
 export const DETAIL_COMMANDS = ['CREATE_DETAIL_INPUT', 'SAVE_DETAIL_INPUT', 'SUBMIT_DETAIL_INPUT', 'RETURN_DETAIL_INPUT', 'APPROVE_DETAIL_INPUT', 'ASSIGN_DETAIL_INPUT', 'LINK_DETAIL_INPUT', 'APPLY_DETAIL_INPUT', 'REQUEST_DETAIL_INPUT', 'UPDATE_INPUT_CONTEXT'];
 export const DETAIL_STATUS = { DRAFT: 'Bản nháp', REVIEW: 'Chờ kiểm tra', RETURNED: 'Yêu cầu bổ sung', READY: 'Sẵn sàng' };
@@ -75,6 +77,30 @@ export function detailContext(state, task) {
     startDate: classroom.startDate || course.startDate || '', endDate: classroom.endDate || course.endDate || '',
     deliveryMode: classroom.deliveryMode || course.deliveryMode || '', venue: classroom.venue || course.venue || '',
   };
+}
+export function defaultDetailDataForTask(state, task) {
+  const context = detailContext(state, task);
+  const key = task.defaultDetailInputKey;
+  if (key === 'vtrainingCourse') return {
+    name: context.courseName, program: context.program, customer: context.customer,
+    deliveryMode: context.deliveryMode, period: [context.startDate, context.endDate].filter(Boolean).join(' — '),
+    classCount: String(state.classes.filter((item) => item.courseId === task.courseId).length || ''),
+    venue: context.venue, audience: context.audience,
+  };
+  if (key === 'vlearningCourse') return { name: context.courseName, thumbnail: context.thumbnail };
+  if (key === 'vtrainingClass') return {
+    className: context.className, courseName: context.courseName, instructor: context.instructor,
+    startDate: context.startDate, endDate: context.endDate, deliveryMode: context.deliveryMode, venue: context.venue,
+  };
+  if (key === 'vlearningClass') return {
+    className: context.className, courseName: context.courseName,
+    startDate: context.startDate, endDate: context.endDate,
+  };
+  if (key === 'email') return {
+    classTime: [context.startDate, context.endDate].filter(Boolean).join(' — '),
+    courseName: context.courseName, className: context.className, venue: context.venue,
+  };
+  return {};
 }
 function cleanFiles(files, inputId) {
   if (!Array.isArray(files) || files.length > 20) fail('Tối đa 20 file trong một bộ input.');

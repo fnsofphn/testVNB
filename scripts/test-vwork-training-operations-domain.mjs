@@ -15,7 +15,7 @@ const commandAs = (state, type, payload, role, id, name) => applyTrainingOperati
 
 let state = createInitialTrainingOperationsState({ now: '2026-08-25T00:00:00.000Z' });
 const initialSummary = summarizeTrainingOperationsState(state);
-assert.deepEqual(initialSummary, { projects: 1, courses: 1, classes: 3, inputs: 9, tasks: 51, changeRequests: 0, auditEvents: 1 });
+assert.deepEqual(initialSummary, { projects: 1, courses: 1, classes: 3, inputs: 9, tasks: 45, changeRequests: 0, auditEvents: 1 });
 
 // Legacy project-level D03 is preserved for audit but is never guessed onto a class.
 const legacyState = structuredClone(state);
@@ -29,12 +29,12 @@ const legacyLectureTask = structuredClone(state);
 const lecture = legacyLectureTask.tasks.find((item) => item.templateId === 'T-108');
 delete lecture.defaultDetailInputKey;
 assert.equal(normalizeTrainingOperationsState(legacyLectureTask).tasks.find((item) => item.id === lecture.id).defaultDetailInputKey, 'vlearning', 'Existing generated tasks must expose the input template without rewriting stored work.');
-assert.equal(selectTrainingTaskTemplates(['VLEARNING']).length, 9);
-assert.ok(!selectTrainingTaskTemplates(['VTRAINING', 'VLEARNING']).some((item) => item.code === 'T-105'));
+assert.equal(selectTrainingTaskTemplates(['VLEARNING']).length, 8);
+assert.ok(selectTrainingTaskTemplates(['VTRAINING', 'VLEARNING']).some((item) => item.code === 'T-105'));
 const earlierClassState = structuredClone(state);
 earlierClassState.tasks = earlierClassState.tasks.filter((item) => !(item.classId === 'TNKH01' && ['T-112', 'T-113', 'T-114', 'T-115', 'T-116', 'T-117'].includes(item.templateId)));
 const syncedClassState = command(earlierClassState, 'SYNC_CLASS_DEFAULT_TASKS', { classId: 'TNKH01' }, 'operations');
-assert.equal(syncedClassState.tasks.filter((item) => item.classId === 'TNKH01').length, 17);
+assert.equal(syncedClassState.tasks.filter((item) => item.classId === 'TNKH01').length, 15);
 assert.ok(syncedClassState.tasks.find((item) => item.id === 'CX-FOUNDATION-TNKH01-T-110').dependsOnTaskIds.includes('CX-FOUNDATION-TNKH01-T-114'));
 assert.ok(syncedClassState.tasks.find((item) => item.id === 'CX-FOUNDATION-TNKH01-T-112').dependsOnTaskIds.includes('CX-FOUNDATION-TNKH01-T-117'));
 assert.equal(command(syncedClassState, 'SYNC_CLASS_DEFAULT_TASKS', { classId: 'TNKH01' }, 'operations').tasks.length, syncedClassState.tasks.length, 'Synchronizing default tasks twice must not duplicate work.');
@@ -47,7 +47,7 @@ state = command(state, 'CREATE_PROJECT', {
   scope: { selectedContents: ['VTRAINING', 'VLEARNING', 'GAMIFICATION', 'DISCUSSION', 'ASSIGNMENT', 'TEST'], instanceCount: { VLEARNING: 1, GAMIFICATION: 2, DISCUSSION: 1, ASSIGNMENT: 1, TEST: 1, MATERIAL: 2 } },
 }, 'operations', 'Quản lý vận hành');
 assert.equal(state.activeProjectId, 'ALPHA-2026');
-assert.equal(state.tasks.filter((item) => item.projectId === 'ALPHA-2026').length, 17);
+assert.equal(state.tasks.filter((item) => item.projectId === 'ALPHA-2026').length, 15);
 assert.ok(state.tasks.filter((item) => item.projectId === 'ALPHA-2026').every((item) => item.scopeLevel === 'class' && item.status === 'WAITING_INPUT'));
 const alphaTasks = state.tasks.filter((item) => item.courseId === 'ALPHA-CX');
 for (const code of ['T-108', 'T-112', 'T-113', 'T-114', 'T-115', 'T-116', 'T-117']) assert.ok(alphaTasks.some((item) => item.templateId === code), `${code} must be generated for the selected systems.`);
@@ -55,7 +55,7 @@ assert.deepEqual(alphaTasks.find((item) => item.templateId === 'T-116').required
 assert.equal(alphaTasks.find((item) => item.templateId === 'T-117').defaultDetailInputKey, 'vlearningCourse');
 assert.equal(alphaTasks.find((item) => item.templateId === 'T-108').defaultDetailInputKey, 'vlearning');
 assert.equal(alphaTasks.find((item) => item.templateId === 'T-114').defaultDetailInputKey, 'test');
-assert.deepEqual(alphaTasks.find((item) => item.templateId === 'T-114').requiredInputCodes, ['D03', 'D08']);
+assert.deepEqual(alphaTasks.find((item) => item.templateId === 'T-114').requiredInputCodes, ['D08']);
 assert.equal(alphaTasks.find((item) => item.templateId === 'T-115').defaultDetailInputKey, 'email');
 
 const onlyLearning = command(createEmptyTrainingOperationsState(), 'CREATE_PROJECT', {
@@ -73,13 +73,25 @@ let existingPpoClass = command(createEmptyTrainingOperationsState(), 'CREATE_PRO
   classes: [{ id: 'TNKH201', name: 'Lớp Test', startDate: '2026-10-01', endDate: '2026-10-05' }],
   scope: { selectedContents: ['VTRAINING', 'VLEARNING'] },
 }, 'operations');
+assert.equal(existingPpoClass.tasks.length, 15);
+existingPpoClass.tasks = existingPpoClass.tasks.filter((item) => !['T-104', 'T-105', 'T-106', 'T-107'].includes(item.templateId));
+for (const [code, title, group] of [['T-101', 'Chuẩn bị thông tin lớp', 'prepare'], ['T-103', 'Khởi tạo danh sách học viên', 'setup']]) {
+  existingPpoClass.tasks.push({ ...structuredClone(existingPpoClass.tasks[0]), id: `PPO_TEST-TNKH201-${code}`, templateId: code, title, group });
+}
+Object.assign(existingPpoClass.tasks.find((item) => item.templateId === 'T-102'), { status: 'CANCELLED', archivedAt: '2026-09-11T18:48:29.000Z', archiveReason: 'Đã hủy theo phạm vi cũ', history: [{ type: 'ARCHIVED' }] });
 assert.equal(existingPpoClass.tasks.length, 13);
-existingPpoClass.tasks = existingPpoClass.tasks.filter((item) => !['T-112', 'T-113', 'T-114', 'T-115', 'T-116', 'T-117'].includes(item.templateId));
-existingPpoClass.tasks.find((item) => item.templateId === 'T-102').status = 'CANCELLED';
-assert.equal(existingPpoClass.tasks.length, 7);
-existingPpoClass = command(existingPpoClass, 'SYNC_CLASS_DEFAULT_TASKS', { classId: 'PPO_TEST-TNKH201' }, 'operations');
-assert.equal(existingPpoClass.tasks.length, 13);
-assert.equal(existingPpoClass.tasks.find((item) => item.templateId === 'T-102').status, 'CANCELLED');
+existingPpoClass = command(existingPpoClass, 'SYNC_CLASS_DEFAULT_TASKS', { classId: 'PPO_TEST-TNKH201', archiveLegacy: true }, 'operations');
+assert.equal(existingPpoClass.tasks.length, 17);
+assert.equal(existingPpoClass.tasks.filter((item) => item.classId === 'PPO_TEST-TNKH201' && !item.archivedAt).length, 15);
+assert.deepEqual(existingPpoClass.tasks.filter((item) => !item.archivedAt && item.system).sort((a, b) => a.sortOrder - b.sortOrder).map((item) => item.templateId), ['T-116', 'T-102', 'T-104', 'T-105', 'T-106', 'T-107', 'T-109', 'T-117', 'T-112', 'T-108', 'T-113', 'T-114', 'T-115']);
+assert.deepEqual(existingPpoClass.tasks.filter((item) => !item.archivedAt && item.system).sort((a, b) => a.sortOrder - b.sortOrder).map((item) => item.title), [
+  'Khởi tạo khóa', 'Khởi tạo lớp học', 'Khởi tạo hoạt động thảo luận', 'Khởi tạo bài kiểm tra', 'Khởi tạo bài thu hoạch', 'Khởi tạo game', 'Khởi tạo tài liệu',
+  'Khởi tạo khóa', 'Khởi tạo lớp học', 'Khởi tạo bài giảng', 'Khởi tạo danh sách học viên', 'Khởi tạo bài kiểm tra', 'Gửi mail lịch học',
+]);
+assert.ok(existingPpoClass.tasks.filter((item) => ['T-101', 'T-103'].includes(item.templateId)).every((item) => item.archivedAt));
+assert.equal(existingPpoClass.tasks.find((item) => item.templateId === 'T-102').archivedAt, null);
+assert.deepEqual(existingPpoClass.tasks.find((item) => item.templateId === 'T-102').history, [{ type: 'ARCHIVED' }]);
+assert.ok(existingPpoClass.auditEvents.some((item) => item.type === 'TASK_RESTORED' && item.entityId === 'PPO_TEST-TNKH201-T-102'));
 assert.deepEqual(existingPpoClass.tasks.filter((item) => ['T-116', 'T-117'].includes(item.templateId)).map((item) => item.defaultDetailInputKey).sort(), ['vlearningCourse', 'vtrainingCourse']);
 
 // UC02 — D03 accepts the user's source file without validating its business format.
@@ -136,6 +148,9 @@ assert.ok(assignedLivePublish.blockingTaskIds.length > 0);
 // UC09 + UC10 — generated task dependencies and assignment.
 const discussionTaskId = 'ALPHA-CX-ALPHA01-T-104';
 assert.deepEqual(state.tasks.find((item) => item.id === discussionTaskId).requiredInputCodes, ['D03', 'D06']);
+// The course and class setup precede discussion in the source workflow.
+state.tasks.find((item) => item.id === 'ALPHA-CX-ALPHA01-T-116').status = 'DONE';
+state.tasks.find((item) => item.id === 'ALPHA-CX-ALPHA01-T-102').status = 'DONE';
 state = command(state, 'ASSIGN_GROUP_MANAGER', { classCode: 'ALPHA-CX-ALPHA01', group: 'setup', managerId: 'manager-01', managerName: 'Ngọc Trần' }, 'operations', 'Quản lý vận hành');
 assert.ok(state.tasks.filter((item) => item.classCode === 'ALPHA-CX-ALPHA01' && item.group === 'setup').every((item) => item.manager === 'Ngọc Trần' && item.assignee === 'Chưa giao'));
 state = command(state, 'ASSIGN_TASKS', { taskIds: [discussionTaskId], assigneeId: 'member-01', assigneeName: 'Nam Nguyễn', reviewerId: 'manager-01', reviewerName: 'Ngọc Trần', deadline: '2026-10-08', priority: 'High', requireSeparation: true }, 'manager', 'Ngọc Trần');
@@ -344,7 +359,7 @@ assert.equal(atomicBase.projects.some((item) => item.id === 'ATOMIC-2026'), fals
 
 // Course duplication creates a new course while copying configuration only.
 let duplicateState = createInitialTrainingOperationsState({ now: '2026-08-25T00:00:00.000Z' });
-duplicateState = command(duplicateState, 'UPDATE_TASK_CONFIG', { taskId: 'CX-FOUNDATION-TNKH01-T-101', dueOffset: 5, checklistItems: ['Tiêu chí cấu hình riêng'] }, 'vtraining', 'Chuyên viên VTraining');
+duplicateState = command(duplicateState, 'UPDATE_TASK_CONFIG', { taskId: 'CX-FOUNDATION-TNKH01-T-116', dueOffset: 5, checklistItems: ['Tiêu chí cấu hình riêng'] }, 'vtraining', 'Chuyên viên VTraining');
 duplicateState = command(duplicateState, 'CREATE_COURSE', {
   projectId: 'EVNSPC-2026',
   copyFromCourseId: 'CX-FOUNDATION',
@@ -352,7 +367,7 @@ duplicateState = command(duplicateState, 'CREATE_COURSE', {
   classes: [{ id: 'L01', name: 'Lớp 01 · Bản sao', startDate: '2026-11-01', endDate: '2026-11-03' }],
 }, 'operations', 'Quản lý vận hành');
 const duplicatedCourse = duplicateState.courses.find((item) => item.id === 'CX-FOUNDATION-COPY');
-const duplicatedTask = duplicateState.tasks.find((item) => item.id === 'CX-FOUNDATION-COPY-L01-T-101');
+const duplicatedTask = duplicateState.tasks.find((item) => item.id === 'CX-FOUNDATION-COPY-L01-T-116');
 assert.equal(duplicatedCourse.copiedFromCourseId, 'CX-FOUNDATION');
 assert.equal(duplicatedTask.dueOffset, 5);
 assert.deepEqual(duplicatedTask.checklistItems, ['Tiêu chí cấu hình riêng']);

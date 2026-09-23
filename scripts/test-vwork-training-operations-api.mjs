@@ -154,7 +154,7 @@ assert.equal(memberView.payload.role, 'member');
 assert.equal(memberView.payload.state.tasks.length, fixtureState.tasks.length, 'Admin read visibility must persist across role switches.');
 
 const legacyAssignedState = structuredClone(getResponse.payload.state);
-const legacyAssignedTask = legacyAssignedState.tasks.find((item) => item.id === 'CX-FOUNDATION-TNKH01-T-101');
+const legacyAssignedTask = legacyAssignedState.tasks.find((item) => item.id === 'CX-FOUNDATION-TNKH01-T-116');
 legacyAssignedTask.assigneeId = 'member@peopleone.vn';
 legacyAssignedTask.assignee = 'Nam Nguyễn';
 const legacyMemberView = stateForRole(legacyAssignedState, { role: 'member', actor: { id: 'profile-member', email: 'member@peopleone.vn', name: 'Nam Nguyễn' } });
@@ -188,7 +188,7 @@ const forbiddenCommand = responseRecorder();
 await handler(request('POST', {
   expectedVersion: 0,
   requestId: '33333333-3333-4333-8333-333333333333',
-  command: { type: 'ASSIGN_TASKS', payload: { taskIds: ['CX-FOUNDATION-TNKH01-T-101'] } },
+  command: { type: 'ASSIGN_TASKS', payload: { taskIds: ['CX-FOUNDATION-TNKH01-T-116'] } },
 }, 'intake'), forbiddenCommand);
 assert.equal(forbiddenCommand.statusCode, 403);
 assert.equal(forbiddenCommand.payload.code, 'TRAINING_OPERATIONS_PERMISSION_DENIED');
@@ -238,7 +238,7 @@ await handler(request('POST', {
   command: {
     type: 'ASSIGN_TASKS',
     payload: {
-      taskIds: ['CX-FOUNDATION-TNKH01-T-101', 'CX-FOUNDATION-TNKH01-T-102'],
+      taskIds: ['CX-FOUNDATION-TNKH01-T-116', 'CX-FOUNDATION-TNKH01-T-102'],
       assigneeId: ' MEMBER@PEOPLEONE.VN ',
       reviewerId: 'MANAGER@PEOPLEONE.VN',
       requireSeparation: true,
@@ -246,7 +246,7 @@ await handler(request('POST', {
   },
 }), multiAssignment);
 assert.equal(multiAssignment.statusCode, 200);
-const assignedTasks = lastPersistedBody.p_tasks.filter((item) => ['CX-FOUNDATION-TNKH01-T-101', 'CX-FOUNDATION-TNKH01-T-102'].includes(item.id));
+const assignedTasks = lastPersistedBody.p_tasks.filter((item) => ['CX-FOUNDATION-TNKH01-T-116', 'CX-FOUNDATION-TNKH01-T-102'].includes(item.id));
 assert.equal(assignedTasks.length, 2);
 assert.ok(assignedTasks.every((item) => item.assigneeId === 'member@peopleone.vn' && item.assignee === 'Nam Nguyễn'));
 assert.ok(assignedTasks.every((item) => item.reviewerId === 'manager@peopleone.vn' && item.reviewer === 'Ngọc Trần'));
@@ -258,7 +258,7 @@ const vworkRoleOnlyAssignment = responseRecorder();
 await handler(request('POST', {
   expectedVersion: 0,
   requestId: '77777777-7777-4777-8777-777777777777',
-  command: { type: 'ASSIGN_TASKS', payload: { taskIds: ['CX-FOUNDATION-TNKH01-T-101'], assigneeId: 'inactive@peopleone.vn', reviewerId: 'manager@peopleone.vn', requireSeparation: true } },
+  command: { type: 'ASSIGN_TASKS', payload: { taskIds: ['CX-FOUNDATION-TNKH01-T-116'], assigneeId: 'inactive@peopleone.vn', reviewerId: 'manager@peopleone.vn', requireSeparation: true } },
 }), vworkRoleOnlyAssignment);
 assert.equal(vworkRoleOnlyAssignment.statusCode, 400);
 assert.equal(vworkRoleOnlyAssignment.payload.code, 'TRAINING_OPERATIONS_ASSIGNEE_INVALID');
@@ -269,7 +269,7 @@ const scopedAssignment = responseRecorder();
 await handler(request('POST', {
   expectedVersion: 0,
   requestId: '55555555-5555-4555-8555-555555555555',
-  command: { type: 'ASSIGN_TASKS', payload: { taskIds: ['CX-FOUNDATION-TNKH01-T-101'], assigneeId: 'scoped@peopleone.vn', reviewerId: 'manager@peopleone.vn', requireSeparation: true } },
+  command: { type: 'ASSIGN_TASKS', payload: { taskIds: ['CX-FOUNDATION-TNKH01-T-116'], assigneeId: 'scoped@peopleone.vn', reviewerId: 'manager@peopleone.vn', requireSeparation: true } },
 }), scopedAssignment);
 assert.equal(scopedAssignment.statusCode, 403);
 assert.equal(scopedAssignment.payload.code, 'TRAINING_OPERATIONS_ASSIGNMENT_SCOPE_DENIED');
@@ -278,14 +278,14 @@ const separatedAssignment = responseRecorder();
 await handler(request('POST', {
   expectedVersion: 0,
   requestId: '66666666-6666-4666-8666-666666666666',
-  command: { type: 'ASSIGN_TASKS', payload: { taskIds: ['CX-FOUNDATION-TNKH01-T-101'], assigneeId: 'manager@peopleone.vn', reviewerId: 'manager@peopleone.vn', requireSeparation: true } },
+  command: { type: 'ASSIGN_TASKS', payload: { taskIds: ['CX-FOUNDATION-TNKH01-T-116'], assigneeId: 'manager@peopleone.vn', reviewerId: 'manager@peopleone.vn', requireSeparation: true } },
 }), separatedAssignment);
 assert.equal(separatedAssignment.statusCode, 400);
 assert.match(separatedAssignment.payload.error, /phải khác nhau/);
 
 // Detailed-input assignments must use active directory identities and course scope.
 persistedRequest = null;
-const detailPayload = { taskId: 'CX-FOUNDATION-TNKH01-T-101', id: 'api-detail', key: 'roster', title: 'Roster', ownerId: 'member@peopleone.vn', reviewerId: 'manager@peopleone.vn', collaboratorIds: [], dueAt: '2026-09-20', data: {} };
+const detailPayload = { taskId: 'CX-FOUNDATION-TNKH01-T-116', id: 'api-detail', key: 'roster', title: 'Roster', ownerId: 'member@peopleone.vn', reviewerId: 'manager@peopleone.vn', collaboratorIds: [], dueAt: '2026-09-20', data: {} };
 const detailCreate = responseRecorder();
 await handler(request('POST', { expectedVersion: 0, requestId: '88888888-8888-4888-8888-888888888888', command: { type: 'CREATE_DETAIL_INPUT', payload: detailPayload } }), detailCreate);
 assert.equal(detailCreate.statusCode, 200);

@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { createContext, useContext, useId, useState } from 'react';
-import { DETAIL_SCHEMAS, DETAIL_STATUS, canEditDetail, canReviewDetail, detailCourseManager, detailContext, detailOperations, safeDetailUrl } from './detailedInputs.js';
+import { DETAIL_SCHEMAS, DETAIL_STATUS, canEditDetail, canReviewDetail, defaultDetailDataForTask, detailCourseManager, detailContext, detailOperations, safeDetailUrl } from './detailedInputs.js';
 import { getTrainingOperationsFileUrl, uploadTrainingOperationsFile } from './service';
 import './DetailedInputUI.css';
 
@@ -122,7 +122,7 @@ export function TaskDetailedInputs({ task }) {
     reviewerId: '',
     collaboratorIds: [],
     dueAt: task.plannedDeadline || task.startDate || '',
-    data: {},
+    data: api ? defaultDetailDataForTask(api.state, task) : {},
   } : null);
   const [draftTouched, setDraftTouched] = useState(false), [linkId, setLinkId] = useState(''), [busy, setBusy] = useState(false), [error, setError] = useState('');
   if (!api) return null;
