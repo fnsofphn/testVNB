@@ -285,7 +285,7 @@ assert.match(separatedAssignment.payload.error, /phải khác nhau/);
 
 // Detailed-input assignments must use active directory identities and course scope.
 persistedRequest = null;
-const detailPayload = { taskId: 'CX-FOUNDATION-TNKH01-T-116', id: 'api-detail', key: 'roster', title: 'Roster', ownerId: 'member@peopleone.vn', reviewerId: 'manager@peopleone.vn', collaboratorIds: [], dueAt: '2026-09-20', data: {} };
+const detailPayload = { taskId: 'CX-FOUNDATION-TNKH01-T-116', id: 'api-detail', key: 'vtrainingCourse', title: 'Khóa VTraining', ownerId: 'member@peopleone.vn', reviewerId: 'manager@peopleone.vn', collaboratorIds: [], dueAt: '2026-09-20', data: {} };
 const detailCreate = responseRecorder();
 await handler(request('POST', { expectedVersion: 0, requestId: '88888888-8888-4888-8888-888888888888', command: { type: 'CREATE_DETAIL_INPUT', payload: detailPayload } }), detailCreate);
 assert.equal(detailCreate.statusCode, 200);

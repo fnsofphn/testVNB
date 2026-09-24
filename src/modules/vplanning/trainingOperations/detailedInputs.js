@@ -2,10 +2,19 @@
 // caller-supplied names, role labels, versions and approval timestamps are never trusted.
 const field = (key, label, type = 'text', required = true) => ({ key, label, type, required });
 export const DETAIL_SCHEMAS = Object.freeze({
+  vtrainingDiscussion: { label: 'Hoạt động thảo luận VTraining', code: 'D06', fields: [field('name', 'Tên chủ đề'), field('description', 'Mô tả chủ đề', 'textarea'), field('groups', 'Danh sách học viên theo lớp đã chia nhóm / tham chiếu file'), field('minutes', 'Thời lượng mỗi phiên (phút)', 'number')] },
+  vtrainingTest: { label: 'Bài kiểm tra VTraining', code: 'D08', fields: [field('questions', 'Bộ câu hỏi kiểm tra / tham chiếu file', 'textarea'), field('count', 'Số câu hỏi mỗi bài', 'number'), field('minutes', 'Thời gian hoàn thành (phút)', 'number'), field('attempts', 'Số lượt làm bài kiểm tra', 'number')] },
+  vtrainingAssignment: { label: 'Bài thu hoạch VTraining', code: 'D07', fields: [field('questions', 'Các câu hỏi thu hoạch', 'textarea'), field('duration', 'Thời gian làm bài'), field('attempts', 'Số lượt làm bài thu hoạch', 'number')] },
+  vtrainingGame: { label: 'Game VTraining', code: 'D05', fields: [field('name', 'Tên game đầy đủ'), field('systemName', 'Tên game trên hệ thống để chọn đưa vào lớp'), field('attempts', 'Lượt chơi', 'number'), field('minutes', 'Thời gian chơi (phút)', 'number')] },
+  vtrainingMaterial: { label: 'Tài liệu VTraining', code: 'D09', fields: [field('agenda', 'Agenda / tham chiếu file'), field('materials', 'Tài liệu học tập / tham chiếu file', 'textarea')] },
   vtrainingCourse: { label: 'Khóa VTraining', code: 'D09', fields: [field('name', 'Tên khóa học'), field('program', 'Chương trình đào tạo'), field('customer', 'Khách hàng / đơn vị'), field('deliveryMode', 'Hình thức đào tạo'), field('period', 'Thời gian khóa đào tạo'), field('classCount', 'Số lớp đào tạo', 'number'), field('venue', 'Địa điểm đào tạo'), field('audience', 'Đối tượng đào tạo')] },
   vtrainingClass: { label: 'Lớp VTraining', code: 'D03', fields: [field('className', 'Tên lớp học'), field('courseName', 'Lớp thuộc khóa nào'), field('instructor', 'Giảng viên'), field('startDate', 'Ngày bắt đầu'), field('endDate', 'Ngày kết thúc'), field('deliveryMode', 'Hình thức đào tạo'), field('venue', 'Địa điểm đào tạo')] },
   vlearningCourse: { label: 'Khóa VLearning', code: 'D04', fields: [field('name', 'Tên khóa học'), field('thumbnail', 'Thumbnail khóa học', 'url')] },
   vlearningClass: { label: 'Lớp VLearning', code: 'D03', fields: [field('className', 'Tên lớp học'), field('courseName', 'Lớp thuộc khóa nào'), field('startDate', 'Ngày bắt đầu'), field('endDate', 'Ngày kết thúc')] },
+  vlearningLesson: { label: 'Bài giảng VLearning', code: 'D04', fields: [field('excel', 'File Excel từng bài giảng / tham chiếu file'), field('name', 'Tên bài giảng'), field('parts', 'Tên các phần', 'textarea'), field('vimeo', 'Link Vimeo', 'url'), field('quiz', 'Bộ câu hỏi kiểm tra cuối bài (nếu có)', 'textarea', false)] },
+  vlearningRoster: { label: 'Danh sách học viên VLearning', code: 'D03', fields: [field('roster', 'Danh sách học viên theo lớp / tham chiếu file'), field('groups', 'Thông tin chia nhóm (nếu có)', 'textarea', false)] },
+  vlearningTest: { label: 'Bài kiểm tra VLearning', code: 'D08', fields: [field('questions', 'Bộ câu hỏi kiểm tra / tham chiếu file', 'textarea'), field('count', 'Số câu hỏi mỗi bài', 'number'), field('minutes', 'Thời gian hoàn thành (phút)', 'number'), field('attempts', 'Số lượt làm bài kiểm tra', 'number')] },
+  vlearningEmail: { label: 'Gửi mail lịch học VLearning', code: 'EMAIL', fields: [field('classTime', 'Thời gian triển khai lớp học'), field('courseName', 'Tên khóa học'), field('className', 'Tên lớp học'), field('recipients', 'Mail của học viên / tham chiếu danh sách', 'textarea'), field('venue', 'Địa điểm đào tạo'), field('access', 'Hướng dẫn truy cập hệ thống học tập trực tuyến (ELN)', 'textarea', false), field('preparation', 'Tài liệu đào tạo, danh sách chia nhóm và dụng cụ học tập (học trực tiếp)', 'textarea', false)] },
   roster: { label: 'Lớp & học viên', code: 'D03', fields: [field('roster', 'Danh sách học viên / tham chiếu file'), field('groups', 'Thông tin chia nhóm', 'textarea', false)] },
   vlearning: { label: 'Bài giảng VLearning', code: 'D04', fields: [field('name', 'Tên bài giảng'), field('parts', 'Tên các phần', 'textarea'), field('vimeo', 'Link Vimeo', 'url'), field('excel', 'File Excel bài giảng / tham chiếu file'), field('quiz', 'Câu hỏi cuối bài (nếu có)', 'textarea', false)] },
   game: { label: 'Game', code: 'D05', fields: [field('name', 'Tên game đầy đủ'), field('systemName', 'Tên game trên hệ thống'), field('attempts', 'Số lượt chơi', 'number'), field('minutes', 'Thời gian chơi (phút)', 'number')] },
@@ -55,7 +64,7 @@ export function cleanDetailData(key, source = {}, complete = false) {
     const value = text(source[f.key], f.label, complete && f.required);
     if (value && f.type === 'number' && (!Number.isSafeInteger(Number(value)) || Number(value) <= 0)) fail(f.label + ' phải là số nguyên dương.');
     if (value && f.type === 'url' && !safeDetailUrl(value)) fail(f.label + ' phải là đường dẫn http/https hợp lệ.');
-    if (key === 'vlearning' && f.key === 'vimeo' && value && !/(^|\.)vimeo\.com$/i.test(new URL(value).hostname)) fail('Link bài giảng phải thuộc Vimeo.');
+    if (['vlearning', 'vlearningLesson'].includes(key) && f.key === 'vimeo' && value && !/(^|\.)vimeo\.com$/i.test(new URL(value).hostname)) fail('Link bài giảng phải thuộc Vimeo.');
     return [f.key, value];
   }));
 }
@@ -96,7 +105,7 @@ export function defaultDetailDataForTask(state, task) {
     className: context.className, courseName: context.courseName,
     startDate: context.startDate, endDate: context.endDate,
   };
-  if (key === 'email') return {
+  if (['email', 'vlearningEmail'].includes(key)) return {
     classTime: [context.startDate, context.endDate].filter(Boolean).join(' — '),
     courseName: context.courseName, className: context.className, venue: context.venue,
   };
@@ -173,6 +182,7 @@ export function applyDetailCommand(state, type, payload, context) {
     requireAccess(detailCourseManager(state, task.courseId, context));
     if (['DONE', 'IN_REVIEW'].includes(task.status)) fail('Không thêm input bắt buộc khi công việc đã hoàn thành hoặc chờ nghiệm thu.');
     if (!DETAIL_SCHEMAS[payload.key]) fail('Loại input không hợp lệ.');
+    if (task.defaultDetailInputKey && payload.key !== task.defaultDetailInputKey) fail('Công việc này phải dùng đúng form input đã cấu hình.');
     const id = 'DIN-' + text(payload.id, 'ID input', true, 80);
     if (!/^DIN-[a-zA-Z0-9-]+$/.test(id) || state.detailedInputs.some(i => i.id === id)) fail('ID input không hợp lệ hoặc đã tồn tại.');
     const input = { id, title: text(payload.title, 'Tên bộ input', true, 200), key: payload.key,
@@ -205,7 +215,7 @@ export function applyDetailCommand(state, type, payload, context) {
     input.draft = { data: cleanDetailData(input.key, payload.data, submitting), files: cleanFiles(payload.files || [], input.id),
       reason: text(payload.reason, 'Lý do cập nhật', submitting && input.latestVersion > 0), editedAt: at, editedBy: actor };
     if (submitting) {
-      if (input.key === 'email') {
+      if (['email', 'vlearningEmail'].includes(input.key)) {
         const inherited = detailContext(state, input);
         const remote = /trực tuyến|online/i.test(inherited.deliveryMode);
         if (!input.draft.data[remote ? 'access' : 'preparation']) fail(remote ? 'Cần hướng dẫn truy cập ELN.' : 'Cần thông tin chuẩn bị cho lớp.');
@@ -223,7 +233,7 @@ export function applyDetailCommand(state, type, payload, context) {
     requireAccess(canReviewDetail(input, context));
     if (input.status !== 'REVIEW' || !input.draft) fail('Input chưa gửi kiểm tra.');
     cleanDetailData(input.key, input.draft.data, true);
-    if (input.key === 'email') {
+    if (['email', 'vlearningEmail'].includes(input.key)) {
       const inherited = detailContext(state, input);
       const remote = /trực tuyến|online/i.test(inherited.deliveryMode);
       if (!input.draft.data[remote ? 'access' : 'preparation']) fail('Thông tin lớp đã thay đổi. Yêu cầu bổ sung hướng dẫn phù hợp trước khi chốt.');
@@ -243,6 +253,7 @@ export function applyDetailCommand(state, type, payload, context) {
     const task = taskById(state, payload.taskId);
     requireAccess(detailCourseManager(state, task.courseId, context));
     if (task.courseId !== input.courseId || task.classId !== input.classId || task.projectId !== input.projectId) fail('Bộ input chỉ được gắn với công việc cùng dự án, khóa và lớp.');
+    if (task.defaultDetailInputKey && input.key !== task.defaultDetailInputKey) fail('Bộ input không đúng form của công việc này.');
     if (['DONE', 'IN_REVIEW'].includes(task.status)) fail('Không thay bộ input của công việc đã hoàn thành hoặc chờ nghiệm thu.');
     if (!(task.inputBindings || []).some(b => b.inputId === input.id)) {
       const inProgress = ['IN_PROGRESS', 'REWORK'].includes(task.status);

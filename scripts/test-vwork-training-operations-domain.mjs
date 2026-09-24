@@ -28,9 +28,10 @@ assert.equal(normalizedLegacy.legacyUnscopedInputs[0].id, 'EVNSPC-2026:D03');
 const legacyLectureTask = structuredClone(state);
 const lecture = legacyLectureTask.tasks.find((item) => item.templateId === 'T-108');
 delete lecture.defaultDetailInputKey;
-assert.equal(normalizeTrainingOperationsState(legacyLectureTask).tasks.find((item) => item.id === lecture.id).defaultDetailInputKey, 'vlearning', 'Existing generated tasks must expose the input template without rewriting stored work.');
+assert.equal(normalizeTrainingOperationsState(legacyLectureTask).tasks.find((item) => item.id === lecture.id).defaultDetailInputKey, 'vlearningLesson', 'Existing generated tasks must expose the input template without rewriting stored work.');
 assert.equal(selectTrainingTaskTemplates(['VLEARNING']).length, 8);
 assert.ok(selectTrainingTaskTemplates(['VTRAINING', 'VLEARNING']).some((item) => item.code === 'T-105'));
+assert.equal(new Set(selectTrainingTaskTemplates(['VTRAINING', 'VLEARNING']).filter((item) => item.system).map((item) => item.detailInputKey)).size, 13, 'Each of the 13 source tasks must own a distinct detailed-input form.');
 const earlierClassState = structuredClone(state);
 earlierClassState.tasks = earlierClassState.tasks.filter((item) => !(item.classId === 'TNKH01' && ['T-112', 'T-113', 'T-114', 'T-115', 'T-116', 'T-117'].includes(item.templateId)));
 const syncedClassState = command(earlierClassState, 'SYNC_CLASS_DEFAULT_TASKS', { classId: 'TNKH01' }, 'operations');
@@ -53,10 +54,10 @@ const alphaTasks = state.tasks.filter((item) => item.courseId === 'ALPHA-CX');
 for (const code of ['T-108', 'T-112', 'T-113', 'T-114', 'T-115', 'T-116', 'T-117']) assert.ok(alphaTasks.some((item) => item.templateId === code), `${code} must be generated for the selected systems.`);
 assert.deepEqual(alphaTasks.find((item) => item.templateId === 'T-116').requiredInputCodes, []);
 assert.equal(alphaTasks.find((item) => item.templateId === 'T-117').defaultDetailInputKey, 'vlearningCourse');
-assert.equal(alphaTasks.find((item) => item.templateId === 'T-108').defaultDetailInputKey, 'vlearning');
-assert.equal(alphaTasks.find((item) => item.templateId === 'T-114').defaultDetailInputKey, 'test');
+assert.equal(alphaTasks.find((item) => item.templateId === 'T-108').defaultDetailInputKey, 'vlearningLesson');
+assert.equal(alphaTasks.find((item) => item.templateId === 'T-114').defaultDetailInputKey, 'vlearningTest');
 assert.deepEqual(alphaTasks.find((item) => item.templateId === 'T-114').requiredInputCodes, ['D08']);
-assert.equal(alphaTasks.find((item) => item.templateId === 'T-115').defaultDetailInputKey, 'email');
+assert.equal(alphaTasks.find((item) => item.templateId === 'T-115').defaultDetailInputKey, 'vlearningEmail');
 
 const onlyLearning = command(createEmptyTrainingOperationsState(), 'CREATE_PROJECT', {
   project: { id: 'ELN-ONLY', name: 'Đào tạo trực tuyến', customerId: 'ELN', startDate: '2026-10-01', deadline: '2026-10-31', classCount: 1 },

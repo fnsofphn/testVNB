@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { applyTrainingOperationsCommand as apply, createEmptyTrainingOperationsState } from '../src/modules/vplanning/trainingOperations/domain.js';
-import { projectDetailsForActor, cleanDetailData, detailedReadiness } from '../src/modules/vplanning/trainingOperations/detailedInputs.js';
+import { DETAIL_SCHEMAS, projectDetailsForActor, cleanDetailData, detailedReadiness } from '../src/modules/vplanning/trainingOperations/detailedInputs.js';
 import { stateForRole } from '../api/vwork-training-operations.js';
 import { assertDetailedDocumentAccess } from '../api/vwork-training-operations-file.js';
 
@@ -16,6 +16,9 @@ const send = (type, payload, context = ops) => { state = apply(state, { type, pa
 const current = () => state.detailedInputs[0];
 const edit = (type, payload = {}, context = owner) => send(type, { inputId: current().id, expectedRevision: current().revision, ...payload }, context);
 const game = { name: 'Game one', systemName: 'G1', attempts: '2', minutes: '15' };
+assert.equal(new Set(['vtrainingCourse', 'vtrainingClass', 'vtrainingDiscussion', 'vtrainingTest', 'vtrainingAssignment', 'vtrainingGame', 'vtrainingMaterial', 'vlearningCourse', 'vlearningClass', 'vlearningLesson', 'vlearningRoster', 'vlearningTest', 'vlearningEmail'].map(key => DETAIL_SCHEMAS[key]?.label)).size, 13);
+assert.deepEqual(DETAIL_SCHEMAS.material.fields.map(item => item.label), ['Agenda / tham chiếu file', 'Tài liệu học tập / tham chiếu file']);
+assert.deepEqual(DETAIL_SCHEMAS.email.fields.map(item => item.label), ['Thời gian triển khai lớp học', 'Tên khóa học', 'Tên lớp học', 'Email học viên / tham chiếu danh sách', 'Địa điểm đào tạo', 'Hướng dẫn truy cập ELN (học trực tuyến)', 'Tài liệu, chia nhóm, dụng cụ (học trực tiếp)']);
 const create = { id: 'one', taskId: 'T', key: 'game', title: 'Game one', ownerId: owner.actor.id, reviewerId: reviewer.actor.id, collaboratorIds: [collaborator.actor.id], dueAt: '2026-09-20', data: {} };
 assert.throws(() => send('CREATE_DETAIL_INPUT', create, worker), e => e.status === 403);
 send('CREATE_DETAIL_INPUT', create);
