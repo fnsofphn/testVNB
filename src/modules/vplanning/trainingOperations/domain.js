@@ -973,7 +973,7 @@ function createClassTask(state, payload, context) {
     title: requiredText(payload.title, 'Tên công việc'),
     group,
     input: inputKey,
-    defaultDetailInputKey: DETAIL_SCHEMAS[payload.detailedInput?.key] ? payload.detailedInput.key : DETAIL_SCHEMAS[inputKey] ? inputKey : null,
+    defaultDetailInputKey: DETAIL_SCHEMAS[payload.detailedInput?.key] ? payload.detailedInput.key : null,
     requiredInputCodes: taskRequiredInputs({ inputKey }),
     dueOffset: Math.max(0, Number(payload.dueOffset) || 0),
     plannedDeadline: payload.deadline ? dateText(payload.deadline, 'Deadline công việc') : null,

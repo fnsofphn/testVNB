@@ -6,7 +6,7 @@ import { ArrowDown, ArrowUp, BookOpen, Check, ChevronDown, ChevronRight, CopyPlu
 import './TrainingOperationsPage.css';
 import TaskDetailLayer from './TaskDetailLayer';
 import { DetailedInputContext, useDetailedInputs, TaskDetailedInputs, DetailedInputWorkspace, InputDraftFields, ContextFields } from './DetailedInputUI';
-import { detailCourseManager } from './detailedInputs.js';
+import { DETAIL_SCHEMAS, detailCourseManager } from './detailedInputs.js';
 import {
   TRAINING_DEFAULT_CLASSES,
   TRAINING_INPUT_DEFINITIONS,
@@ -29,6 +29,12 @@ const COURSE_SYSTEMS = [
   { id: 'VLearning', mature: true },
   { id: 'VSurvey', mature: false },
   { id: 'VEvent', mature: false },
+];
+
+const CUSTOM_DETAIL_FORM_OPTIONS = [
+  'vtrainingCourse', 'vtrainingClass', 'vtrainingDiscussion', 'vtrainingTest',
+  'vtrainingAssignment', 'vtrainingGame', 'vtrainingMaterial', 'vlearningCourse',
+  'vlearningClass', 'vlearningLesson', 'vlearningRoster', 'vlearningTest', 'vlearningEmail',
 ];
 
 const INPUT_OWNER_LABEL = { intake: 'Đầu mối / Sale', content: 'Chuyên viên nội dung', vtraining: 'Chuyên viên vận hành VTraining' };
@@ -1798,10 +1804,10 @@ function TaskCreateForm({ classItem, managerName, onCancel, onSubmit }) {
   const [draft, setDraft] = useState({ title: '', group: 'setup', inputKey: 'roster', plannedDeadline: classItem.startDate || '', checklistText: '' });
   const checklistItems = draft.checklistText.split('\n').map((item) => item.trim()).filter(Boolean);
   const valid = Boolean(draft.title.trim() && draft.plannedDeadline && checklistItems.length && managerName);
-  return <form className="task-create-form" onSubmit={(event) => { event.preventDefault(); if (valid) void onSubmit({ ...draft, deadline: draft.plannedDeadline, title: draft.title.trim(), checklistItems }); }}>
+  return <form className="task-create-form" onSubmit={(event) => { event.preventDefault(); if (valid) void onSubmit({ ...draft, deadline: draft.plannedDeadline, title: draft.title.trim(), checklistItems, detailedInput: draft.detailedInput ? { ...draft.detailedInput, title: draft.title.trim(), dueAt: draft.plannedDeadline } : null }); }}>
     <div><span><b>Thêm công việc cho {classItem.code}</b><small>Người xác nhận: {managerName || 'Chưa gán Quản lý ekip'}</small></span><button type="button" onClick={onCancel}>Đóng</button></div>
-    <div className="form-grid"><label>Tên công việc<input value={draft.title} onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}/></label><label>Nhóm<select value={draft.group} onChange={(event) => setDraft((current) => ({ ...current, group: event.target.value }))}>{Object.entries(GROUP_META).map(([value, [, label]]) => <option value={value} key={value}>{label}</option>)}</select></label><label>Input cần có<select value={draft.inputKey} onChange={(event) => setDraft((current) => ({ ...current, inputKey: event.target.value }))}>{Object.entries(INPUT_META).map(([value, [code, label]]) => <option value={value} key={value}>{code} · {label}</option>)}</select></label><label>Deadline<input type="date" value={draft.plannedDeadline} onChange={(event) => setDraft((current) => ({ ...current, plannedDeadline: event.target.value }))}/></label><label className="wide">Người xác nhận<input value={managerName || 'Chưa gán Quản lý ekip'} readOnly aria-invalid={!managerName}/>{!managerName && <small className="hint error">Hãy vào Gán vai trò và chọn Quản lý ekip cho khóa học trước khi tạo công việc.</small>}</label><label className="wide">Checklist chi tiết, mỗi dòng một tiêu chí<textarea rows="4" value={draft.checklistText} onChange={(event) => setDraft((current) => ({ ...current, checklistText: event.target.value }))} placeholder="Mô tả rõ kết quả cần đạt cho từng tiêu chí"/></label></div>
-    {canCreateInput && <InputDraftFields value={draft.detailedInput} onChange={detailedInput=>setDraft(current=>({...current,detailedInput}))} inputKey={draft.inputKey} directory={detailApi.directory} defaultOwner={detailApi.actor?.email} defaultDue={draft.plannedDeadline} title={draft.title}/>}
+    <div className="form-grid"><label>Tên công việc<input value={draft.title} onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}/></label><label>Nhóm<select value={draft.group} onChange={(event) => setDraft((current) => ({ ...current, group: event.target.value }))}>{Object.entries(GROUP_META).map(([value, [, label]]) => <option value={value} key={value}>{label}</option>)}</select></label><label>Input dùng chung cần có<select value={draft.inputKey} onChange={(event) => setDraft((current) => ({ ...current, inputKey: event.target.value }))}>{Object.entries(INPUT_META).map(([value, [code, label]]) => <option value={value} key={value}>{code} · {label}</option>)}</select><small className="hint">D03–D09 lấy từ tab Đầu vào.</small></label><label>Deadline<input type="date" value={draft.plannedDeadline} onChange={(event) => setDraft((current) => ({ ...current, plannedDeadline: event.target.value }))}/></label>{canCreateInput && <label className="wide">Form đầu vào riêng của công việc<select value={draft.detailedInput?.key || ''} onChange={(event) => { const key = event.target.value; setDraft((current) => ({ ...current, detailedInput: key ? { key, title: current.title || DETAIL_SCHEMAS[key]?.label, ownerId: detailApi.actor?.id || detailApi.actor?.email || '', reviewerId: detailApi.actor?.id || detailApi.actor?.email || '', collaboratorIds: [], dueAt: current.plannedDeadline, data: {} } : null })); }}><option value="">Không dùng form đầu vào riêng</option>{CUSTOM_DETAIL_FORM_OPTIONS.map((key) => <option key={key} value={key}>{DETAIL_SCHEMAS[key].label}</option>)}</select><small className="hint">Chọn form chứa dữ liệu riêng cần cung cấp để thực hiện công việc.</small></label>}<label className="wide">Người xác nhận<input value={managerName || 'Chưa gán Quản lý ekip'} readOnly aria-invalid={!managerName}/>{!managerName && <small className="hint error">Hãy vào Gán vai trò và chọn Quản lý ekip cho khóa học trước khi tạo công việc.</small>}</label><label className="wide">Checklist chi tiết, mỗi dòng một tiêu chí<textarea rows="4" value={draft.checklistText} onChange={(event) => setDraft((current) => ({ ...current, checklistText: event.target.value }))} placeholder="Mô tả rõ kết quả cần đạt cho từng tiêu chí"/></label></div>
+    {canCreateInput && draft.detailedInput && <InputDraftFields value={draft.detailedInput} onChange={detailedInput=>setDraft(current=>({...current,detailedInput}))} inputKey={draft.detailedInput.key} lockInputKey={true} alwaysEnabled={true} directory={detailApi.directory} defaultOwner={detailApi.actor?.email} defaultDue={draft.plannedDeadline} title={draft.title}/>}
     <div className="task-create-actions"><button type="button" onClick={onCancel}>Hủy</button><button className="primary" disabled={!valid}>Lưu công việc</button></div>
   </form>;
 }
@@ -2156,7 +2162,11 @@ function taskReadinessLabel(task) {
   if (task.blockingTaskIds?.length) return `Chờ ${task.blockingTaskIds.length} việc trước`;
   return 'Chưa sẵn sàng';
 }
-function taskStatusLabel(task) { return task.assignmentStatus ? STATUS_LABEL[task.assignmentStatus] || STATUS_LABEL[task.status] : STATUS_LABEL[task.status]; }
+function taskStatusLabel(task) {
+  if (task.assignmentStatus) return STATUS_LABEL[task.assignmentStatus] || STATUS_LABEL[task.status];
+  if (task.status === 'WAITING_INPUT') return taskReadinessLabel(task);
+  return STATUS_LABEL[task.status];
+}
 function taskStatusClass(task) { return task.assignmentStatus || task.status; }
 function taskOverdueDays(task, todayIso = new Date().toISOString().slice(0, 10)) {
   if (!task || ['DONE', 'CANCELLED'].includes(task.status)) return 0;

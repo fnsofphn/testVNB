@@ -405,12 +405,15 @@ assert.throws(
 taskMaintenanceState = command(taskMaintenanceState, 'ASSIGN_COURSE_ROLE', { courseId: 'CX-FOUNDATION', role: 'manager', accountId: 'manager-01', accountName: 'Ngọc Trần', accountEmail: 'manager@peopleone.vn' }, 'operations', 'Quản lý vận hành');
 const setupOrderBefore = Math.max(...taskMaintenanceState.tasks.filter((item) => item.classId === 'TNKH01' && item.group === 'setup').map((item) => item.sortOrder));
 taskMaintenanceState = commandAs(taskMaintenanceState, 'CREATE_CLASS_TASK', { classId: 'TNKH01', title: 'Việc mới A', group: 'setup', inputKey: 'roster', dueOffset: 1, checklistItems: ['Tiêu chí A'] }, 'manager', 'manager-01', 'Ngọc Trần');
-taskMaintenanceState = commandAs(taskMaintenanceState, 'CREATE_CLASS_TASK', { classId: 'TNKH01', title: 'Việc mới B', group: 'setup', inputKey: 'roster', dueOffset: 1, checklistItems: ['Tiêu chí B'] }, 'manager', 'manager-01', 'Ngọc Trần');
+taskMaintenanceState = commandAs(taskMaintenanceState, 'CREATE_CLASS_TASK', { classId: 'TNKH01', title: 'Việc mới B', group: 'setup', inputKey: 'roster', dueOffset: 1, checklistItems: ['Tiêu chí B'], detailedInput: { key: 'vtrainingClass', title: 'Việc mới B', ownerId: 'manager-01', reviewerId: 'manager-01', dueAt: '2026-09-01', data: {} } }, 'manager', 'manager-01', 'Ngọc Trần');
 const customA = taskMaintenanceState.tasks.find((item) => item.title === 'Việc mới A');
 const customB = taskMaintenanceState.tasks.find((item) => item.title === 'Việc mới B');
 assert.ok(customA.sortOrder > setupOrderBefore && customB.sortOrder > customA.sortOrder, 'New tasks must append to the selected group instead of jumping to the top.');
 assert.equal(customA.managerId, 'manager-01');
 assert.equal(customA.reviewerId, 'manager-01');
+assert.equal(customA.defaultDetailInputKey, null, 'D03–D09 dùng chung không được tự chọn form đầu vào riêng.');
+assert.equal(customB.defaultDetailInputKey, 'vtrainingClass');
+assert.ok(taskMaintenanceState.detailedInputs.some((item) => item.activityId === customB.id && item.key === 'vtrainingClass'));
 taskMaintenanceState = commandAs(taskMaintenanceState, 'MOVE_CLASS_TASK', { taskId: customB.id, direction: 'UP' }, 'manager', 'manager-01', 'Ngọc Trần');
 assert.ok(taskMaintenanceState.tasks.find((item) => item.id === customB.id).sortOrder < taskMaintenanceState.tasks.find((item) => item.id === customA.id).sortOrder);
 taskMaintenanceState = commandAs(taskMaintenanceState, 'UPDATE_TASK_CONFIG', { taskId: customA.id, title: 'Việc mới A đã sửa', checklistItems: ['Tiêu chí đã sửa'] }, 'manager', 'manager-01', 'Ngọc Trần');
