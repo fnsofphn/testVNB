@@ -6,12 +6,12 @@ import './DetailedInputUI.css';
 
 export const DetailedInputContext = createContext(null);
 export const useDetailedInputs = () => useContext(DetailedInputContext);
-function DetailValue({ value }) { return value && safeDetailUrl(value) ? <a href={value} target="_blank" rel="noopener noreferrer">{value}</a> : <>{value || 'Chưa cung cấp'}</>; }
+function DetailValue({ value }) { return value && safeDetailUrl(value) ? <a href={value} target="_blank" rel="noopener noreferrer">{value}</a> : <>{value || 'Chưa khai báo'}</>; }
 export function DetailFields({ inputKey, data = {}, onChange, disabled = false }) {
   const prefix = useId();
   return <div className="form-grid detail-fields">{DETAIL_SCHEMAS[inputKey]?.fields.map(field => <label key={field.key} htmlFor={prefix + field.key}>{field.label}{field.required && <small> · bắt buộc khi gửi kiểm tra</small>}
-    {field.type === 'textarea' ? <textarea id={prefix + field.key} disabled={disabled} value={data[field.key] || ''} onChange={e => onChange({ ...data, [field.key]: e.target.value })}/>
-      : <input id={prefix + field.key} disabled={disabled} type={field.type} min={field.type === 'number' ? 1 : undefined} step={field.type === 'number' ? 1 : undefined} value={data[field.key] || ''} onChange={e => onChange({ ...data, [field.key]: e.target.value })}/>}
+    {field.type === 'textarea' ? <textarea id={prefix + field.key} disabled={disabled} required={field.required} aria-required={field.required} value={data[field.key] || ''} onChange={e => onChange({ ...data, [field.key]: e.target.value })}/>
+      : <input id={prefix + field.key} disabled={disabled} required={field.required} aria-required={field.required} type={field.type} min={field.type === 'number' ? 1 : undefined} step={field.type === 'number' ? 1 : undefined} value={data[field.key] || ''} onChange={e => onChange({ ...data, [field.key]: e.target.value })}/>}
   </label>)}</div>;
 }
 function PeopleFields({ value, onChange, directory }) {
@@ -106,11 +106,19 @@ function InputCard({ input, task, binding }) {
     </fieldset> : <><dl className="detail-values">{DETAIL_SCHEMAS[input.key]?.fields.map(f => <div key={f.key}><dt>{f.label}</dt><dd><DetailValue value={(shown?.data || input.draft?.data || {})[f.key]}/></dd></div>)}</dl>
       <div className="detail-files">{(shown?.files || []).map(file => <button type="button" key={file.path} onClick={() => openFile(file)}>Mở tệp · {file.name}</button>)}</div>
       {input.draft && <details className="detail-review-draft" open={input.status === 'REVIEW'}><summary>Bản nháp {input.status === 'REVIEW' ? 'đang chờ kiểm tra' : 'đã lưu'}</summary><dl className="detail-values">{DETAIL_SCHEMAS[input.key]?.fields.map(f => <div key={f.key}><dt>{f.label}</dt><dd><DetailValue value={input.draft.data[f.key]}/></dd></div>)}</dl><p>Lý do: {input.draft.reason || 'Nộp lần đầu'}</p>{input.draft.files.map(file => <button type="button" key={file.path} onClick={() => openFile(file)}>Mở tệp nháp · {file.name}</button>)}</details>}
-      <div className="detail-actions">{editAllowed && input.status !== 'REVIEW' && <button type="button" onClick={beginEdit}>Bổ sung input</button>}{reviewAllowed && input.status === 'REVIEW' && <button type="button" className="primary" disabled={busy} onClick={() => run('APPROVE_DETAIL_INPUT')}>Chốt sẵn sàng sử dụng</button>}{managing && <button type="button" onClick={() => { setPeople(input); setBaseRevision(input.revision); setAssigning(!assigning); }}>Phân công nhập input</button>}</div>
+      <div className="detail-actions">{editAllowed && input.status !== 'REVIEW' && <button type="button" onClick={beginEdit}>Bổ sung input</button>}{reviewAllowed && input.status === 'REVIEW' && <button type="button" className="primary" disabled={busy} onClick={() => run('APPROVE_DETAIL_INPUT')}>Duyệt input</button>}{managing && <button type="button" onClick={() => { setPeople(input); setBaseRevision(input.revision); setAssigning(!assigning); }}>Phân công nhập input</button>}</div>
       <label>Nội dung cần bổ sung<textarea value={reason} onChange={e => setReason(e.target.value)}/></label><button type="button" disabled={busy || !reason.trim()} onClick={() => run(reviewAllowed && input.status === 'REVIEW' ? 'RETURN_DETAIL_INPUT' : 'REQUEST_DETAIL_INPUT', { reason })}>{reviewAllowed && input.status === 'REVIEW' ? 'Trả lại để bổ sung' : 'Yêu cầu bổ sung'}</button></>}
     {assigning && <fieldset disabled={busy}><legend>Phân công cung cấp input</legend><PeopleFields value={people} onChange={setPeople} directory={directory}/><button type="button" onClick={() => run('ASSIGN_DETAIL_INPUT', { ownerId: people.ownerId, reviewerId: people.reviewerId, collaboratorIds: people.collaboratorIds, dueAt: people.dueAt }, baseRevision)}>Lưu phân công input</button><button type="button" onClick={() => setAssigning(false)}>Hủy phân công</button></fieldset>}
     {error && <p className="detail-error" role="alert">{error}</p>}
     <details><summary>Lịch sử input · {input.history?.length || 0} hoạt động</summary>{[...(input.history || [])].reverse().map(item => <p key={item.id}><b>{item.actor.name || item.actor.email}</b> · {item.happenedAt} · {item.type}{item.details?.reason ? ' · ' + item.details.reason : ''}</p>)}</details>
+  </article>;
+}
+function EmptyInputCard({ task, inputKey, data }) {
+  const schema = DETAIL_SCHEMAS[inputKey];
+  if (!schema) return null;
+  return <article className="detail-input-card detail-input-placeholder">
+    <header><div><small>{schema.label}</small><h3>{task.title}</h3></div><span className="detail-status DRAFT">Chưa khai báo</span></header>
+    <dl className="detail-values">{schema.fields.map(field => <div key={field.key}><dt>{field.label}</dt><dd><DetailValue value={data?.[field.key]}/></dd></div>)}</dl>
   </article>;
 }
 export function TaskDetailedInputs({ task }) {
@@ -118,29 +126,31 @@ export function TaskDetailedInputs({ task }) {
   const [draft, setDraft] = useState(() => task.defaultDetailInputKey && !task.inputBindings?.length ? {
     key: task.defaultDetailInputKey,
     title: task.title,
-    ownerId: '',
-    reviewerId: '',
+    ownerId: api?.actor?.id || api?.actor?.email || '',
+    reviewerId: api?.actor?.id || api?.actor?.email || '',
     collaboratorIds: [],
     dueAt: task.plannedDeadline || task.startDate || '',
     data: api ? defaultDetailDataForTask(api.state, task) : {},
   } : null);
-  const [draftTouched, setDraftTouched] = useState(false), [linkId, setLinkId] = useState(''), [busy, setBusy] = useState(false), [error, setError] = useState('');
+  const [draftTouched, setDraftTouched] = useState(false), [linkId, setLinkId] = useState(''), [backfillReason, setBackfillReason] = useState(''), [busy, setBusy] = useState(false), [error, setError] = useState('');
   if (!api) return null;
   const { state, actor, role, directory, command } = api;
   const managing = detailCourseManager(state, task.courseId, { actor, role });
   const schemaKey = task.defaultDetailInputKey || task.input || 'roster';
   const bindings = task.inputBindings || [];
   const all = state.detailedInputs || [];
+  const emptyData = defaultDetailDataForTask(state, { ...task, defaultDetailInputKey: schemaKey });
   const available = all.filter(i => i.courseId === task.courseId && i.classId === task.classId && (!task.defaultDetailInputKey || i.key === task.defaultDetailInputKey) && !bindings.some(b => b.inputId === i.id));
   async function create() {
     setBusy(true); setError('');
-    try { const result = await command('CREATE_DETAIL_INPUT', { ...draft, taskId: task.id, id: crypto.randomUUID() }, 'Đã tạo bộ input chi tiết.'); if (result) { setDraft(null); setDraftTouched(false); } else setError('Chưa tạo được bộ input. Kiểm tra người phụ trách, người chốt và hạn cung cấp.'); } finally { setBusy(false); }
+    try { const result = await command('CREATE_DETAIL_INPUT', { ...draft, taskId: task.id, id: crypto.randomUUID(), backfillReason: backfillReason.trim() }, 'Đã tạo bộ input chi tiết.'); if (result) { setDraft(null); setDraftTouched(false); setBackfillReason(''); } else setError('Chưa tạo được bộ input. Kiểm tra người phụ trách, người chốt và hạn cung cấp.'); } finally { setBusy(false); }
   }
   return <section className="task-detailed-inputs"><h3>Đầu vào công việc</h3>
     {bindings.map(binding => { const input = all.find(i => i.id === binding.inputId); return input ? <InputCard key={input.id} input={input} task={task} binding={binding}/> : <p key={binding.inputId}>Bộ input chưa tải được hoặc ngoài quyền xem. Vui lòng tải lại dữ liệu.</p>; })}
-    {!managing && !bindings.length && <div className="detail-permission-note" role="note"><b>Chưa có thông tin</b><p>Quản lý vận hành hoặc Quản lý ekip của khóa học sẽ phân công người phụ trách.</p></div>}
-    {managing && !['DONE', 'IN_REVIEW'].includes(task.status) && <fieldset className="detail-create-input" disabled={busy} data-detail-dirty={draftTouched ? 'true' : undefined}><legend>Bổ sung thông tin</legend><InputDraftFields inputKey={schemaKey} lockInputKey={Boolean(task.defaultDetailInputKey)} value={draft} onChange={(value) => { setDraft(value); setDraftTouched(true); }} directory={directory} defaultOwner={actor?.email} defaultDue={task.plannedDeadline || task.startDate} title={task.title}/>
-      {draft && <button type="button" className="primary" disabled={!draft.ownerId || !draft.reviewerId || !draft.dueAt} onClick={create}>Tạo input</button>}
+    {!bindings.length && (!managing || task.status === 'IN_REVIEW') && <EmptyInputCard task={task} inputKey={schemaKey} data={emptyData}/>}
+    {managing && task.status !== 'IN_REVIEW' && <fieldset className="detail-create-input" disabled={busy} data-detail-dirty={draftTouched || Boolean(backfillReason.trim()) ? 'true' : undefined}><legend>{task.status === 'DONE' ? 'Bổ sung hồ sơ sau hoàn thành' : 'Khai báo đầu vào công việc'}</legend><InputDraftFields inputKey={schemaKey} lockInputKey={Boolean(task.defaultDetailInputKey)} value={draft} onChange={(value) => { setDraft(value); setDraftTouched(true); }} directory={directory} defaultOwner={actor?.id || actor?.email} defaultDue={task.plannedDeadline || task.startDate} title={task.title}/>
+      {task.status === 'DONE' && draft && <label>Lý do bổ sung sau hoàn thành<textarea required value={backfillReason} onChange={e => setBackfillReason(e.target.value)} placeholder="Nêu lý do và phạm vi hồ sơ cần bổ sung"/></label>}
+      {draft && <button type="button" className="primary" disabled={!draft.ownerId || !draft.reviewerId || !draft.dueAt || (task.status === 'DONE' && !backfillReason.trim())} onClick={create}>{task.status === 'DONE' ? 'Tạo hồ sơ bổ sung' : 'Tạo input'}</button>}
       {available.length > 0 && <><label>Dùng chung bộ input đã có trong lớp<select value={linkId} onChange={e => setLinkId(e.target.value)}><option value="">Chọn bộ input</option>{available.map(i => <option key={i.id} value={i.id}>{i.title} · {DETAIL_SCHEMAS[i.key]?.label}</option>)}</select></label><button type="button" disabled={!linkId} onClick={async () => { const input = available.find(i => i.id === linkId); setBusy(true); try { await command('LINK_DETAIL_INPUT', { inputId: input.id, taskId: task.id, expectedRevision: input.revision }, 'Đã gắn cùng nguồn input.'); setLinkId(''); } finally { setBusy(false); } }}>Gắn vào công việc</button></>}
     </fieldset>}{error && <p role="alert" className="detail-error">{error}</p>}</section>;
 }

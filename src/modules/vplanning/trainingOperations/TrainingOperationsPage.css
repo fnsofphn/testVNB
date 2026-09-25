@@ -397,6 +397,7 @@
 .vwork-training-operations .input-impact{display:flex;justify-content:space-between;gap:8px;padding:8px;border-radius:7px;background:#fff4f5;color:#8b2638;font-size:9px}
 .vwork-training-operations .project-multilane-timeline{margin:16px 0}.vwork-training-operations .timeline-lanes{display:grid;gap:9px}.vwork-training-operations .timeline-lanes article{padding:12px;border:1px solid var(--border);border-radius:9px}.vwork-training-operations .timeline-lanes article>header{display:flex;justify-content:space-between;gap:8px}.vwork-training-operations .timeline-lanes article>div{display:flex;gap:8px;overflow-x:auto;margin-top:9px}.vwork-training-operations .timeline-lanes article>div>span{display:grid;min-width:180px;gap:3px;padding:9px;border-left:4px solid var(--primary);border-radius:6px;background:var(--primary-soft)}.vwork-training-operations .timeline-lanes small{color:var(--muted)}
 .vwork-training-operations .work-action-tabs{display:flex;gap:5px;margin-bottom:12px;padding:5px;border:1px solid var(--border);border-radius:9px;background:#fff}.vwork-training-operations .work-action-tabs button{flex:1}.vwork-training-operations .work-action-tabs button.active{border-color:var(--primary);background:var(--primary-soft);color:var(--primary)}
+.vwork-training-operations .action-notifications{margin-bottom:12px;padding:14px 16px}.vwork-training-operations .action-notifications summary{cursor:pointer;font-weight:800;color:#263a57}.vwork-training-operations .action-notifications button{display:grid;width:100%;gap:3px;padding:11px 0;border:0;border-top:1px solid #e5eaf1;background:transparent;text-align:left;color:#263a57}.vwork-training-operations .action-notifications button:first-of-type{margin-top:10px}.vwork-training-operations .action-notifications button span,.vwork-training-operations .action-notifications button small{color:#6b7b91}
 .vwork-training-operations .check-evidence-row{display:grid;gap:7px;margin-bottom:8px;padding:8px;border:1px solid var(--border);border-radius:8px}.vwork-training-operations .check-evidence-row>label:last-child{display:grid;gap:4px;color:var(--muted);font-size:8px;font-weight:800}.vwork-training-operations .check-evidence-row input[type="text"]{width:100%}
 @media(max-width:900px){.vwork-training-operations .training-context-bar{position:static;align-items:stretch;flex-direction:column;padding:10px 14px}.vwork-training-operations .training-context-bar>span{display:none}.vwork-training-operations .training-context-bar label{min-width:0}.vwork-training-operations .training-context-bar select{max-width:none}.vwork-training-operations .course-control-grid,.vwork-training-operations .course-create-form{grid-template-columns:1fr}}
 
@@ -522,7 +523,7 @@
 .vwork-training-operations .task-section-heading h3{margin-bottom:4px}
 .vwork-training-operations .task-section-heading p{margin:0;color:var(--muted);font-size:9px;line-height:1.45}
 .vwork-training-operations .task-section-heading>strong{padding:5px 8px;border-radius:12px;background:#eef2f6;color:#43536a;font-size:10px}
-.vwork-training-operations .checklist-grid{display:grid;grid-template-columns:1fr;gap:9px}
+.vwork-training-operations .checklist-grid{display:grid;grid-template-columns:1fr;gap:9px;margin:0;padding:0;list-style:none}
 .vwork-training-operations .check-evidence-row{min-width:0;margin:0;padding:10px;background:#fff}
 .vwork-training-operations .check-evidence-row.completed{border-color:#b8dfce;background:#fbfffd}
 .vwork-training-operations .check-evidence-row .check-row{display:grid;grid-template-columns:18px minmax(0,1fr);align-items:start;gap:9px;margin:0;padding:0;border:0}
@@ -538,7 +539,6 @@
 .vwork-training-operations .criterion-upload input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 .vwork-training-operations .rework-feedback{margin:0 0 10px;padding:10px 12px;border-left:3px solid #d47b35;border-radius:7px;background:#fff7ef}
 .vwork-training-operations .rework-feedback b{font-size:10px;color:#8f4b18}.vwork-training-operations .rework-feedback p{margin:4px 0 0;font-size:10px;line-height:1.45;color:#67452c}
-@container (min-width:720px){.vwork-training-operations .checklist-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 .vwork-training-operations .review-card{display:grid;gap:14px}
 .vwork-training-operations .review-card.expanded{border-color:#bccbdd;box-shadow:0 5px 18px #172b4510}

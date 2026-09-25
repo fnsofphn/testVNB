@@ -1,4 +1,4 @@
-import { DETAIL_COMMANDS, DETAIL_SCHEMAS, applyDetailCommand, detailedReadiness, cleanInputContext } from './detailedInputs.js';
+import { DETAIL_COMMANDS, DETAIL_SCHEMAS, applyDetailCommand, cleanInputContext, defaultDetailDataForTask, safeDetailUrl } from './detailedInputs.js';
 export const TRAINING_OPERATIONS_STATE_ID = 'default';
 
 export const TRAINING_INPUT_DEFINITIONS = Object.freeze({
@@ -32,7 +32,7 @@ export const TRAINING_TASK_TEMPLATES = Object.freeze([
   { group: 'setup', code: 'T-113', title: 'Khởi tạo danh sách học viên', inputKey: 'roster', system: 'VLEARNING', detailInputKey: 'vlearningRoster', requiredInputCodes: ['D03'], dueOffset: 1, dependsOnTemplates: ['T-112'], checklist: ['Danh sách học viên theo lớp', 'Thông tin chia nhóm nếu có'] },
   { group: 'setup', code: 'T-114', title: 'Khởi tạo bài kiểm tra', inputKey: 'test', system: 'VLEARNING', detailInputKey: 'vlearningTest', requiredInputCodes: ['D08'], dueOffset: 2, dependsOnTemplates: ['T-112'], checklist: ['Bộ câu hỏi kiểm tra', 'Số câu hỏi mỗi bài, thời gian hoàn thành, số lượt làm'] },
   { group: 'setup', code: 'T-115', title: 'Gửi mail lịch học', inputKey: 'roster', system: 'VLEARNING', detailInputKey: 'vlearningEmail', requiredInputCodes: ['D03'], dueOffset: 1, dependsOnTemplates: ['T-113'], checklist: ['Thời gian, tên khóa, tên lớp, email học viên, địa điểm', 'Hướng dẫn ELN khi học trực tuyến', 'Tài liệu, nhóm và dụng cụ khi học trực tiếp'] },
-  { group: 'prepare', code: 'T-101', legacy: true, title: 'Chuẩn bị thông tin lớp', inputKey: 'roster', dueOffset: 3, checklist: ['Thông tin lớp'] },
+  { group: 'prepare', code: 'T-101', legacy: true, title: 'Chuẩn bị thông tin lớp', inputKey: 'roster', detailInputKey: 'vtrainingClass', dueOffset: 3, checklist: ['Thông tin lớp'] },
   { group: 'setup', code: 'T-103', legacy: true, title: 'Khởi tạo danh sách học viên VTraining', inputKey: 'roster', dueOffset: 1, checklist: ['Danh sách học viên'] },
   { group: 'live', code: 'T-110', title: 'Mở phát hành các hoạt động', inputKey: 'roster', requiredInputCodes: ['D03'], dueOffset: 0, dependsOnGroups: ['setup'], checklist: ['Phát hành các bài giảng và hoạt động áp dụng cho lớp', 'Học viên thấy đúng bài học, bài kiểm tra và tài liệu'] },
   { group: 'live', code: 'T-111', title: 'Xem kết quả các hoạt động', inputKey: 'roster', requiredInputCodes: ['D03'], dueOffset: 0, dependsOnTemplates: ['T-110'], checklist: ['Xem kết quả học tập và các hoạt động đã phát hành'] },
@@ -301,6 +301,21 @@ function appendNotification(state, input) {
   }];
 }
 
+function cleanEvidenceRecords(items, label = 'Minh chứng') {
+  if (!Array.isArray(items)) return [];
+  return items.filter(Boolean).map((item) => {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) throw domainError('VALIDATION_ERROR', `${label} không hợp lệ.`);
+    const path = String(item.path || '').trim();
+    const url = String(item.url || item.fileUrl || '').trim();
+    if (path) {
+      if (path.includes('..') || !/^[\w/.-]+$/.test(path)) throw domainError('VALIDATION_ERROR', `${label} có đường dẫn tệp không hợp lệ.`);
+      return clone(item);
+    }
+    if (!url || !safeDetailUrl(url)) throw domainError('VALIDATION_ERROR', `${label} phải là đường dẫn http/https hoặc tệp đã tải lên.`);
+    return clone(item);
+  });
+}
+
 export function createEmptyTrainingOperationsState(context = {}) {
   const timestamp = nowIso(context);
   return { schemaVersion: 3, detailSchemaVersion: 1, activeProjectId: '', projects: [], courses: [], classes: [], scopes: [], inputs: [], detailedInputs: [], teamAssignments: [], tasks: [], changeRequests: [], notifications: [], auditEvents: [], createdAt: timestamp, updatedAt: timestamp, updatedBy: 'system' };
@@ -421,7 +436,7 @@ function scopedClassCode(courseCode, rawCode) {
     ...task,
     scopeLevel: task.scopeLevel || 'class',
     system: task.system || TRAINING_TASK_TEMPLATES.find((template) => template.code === task.templateId)?.system || null,
-    defaultDetailInputKey: task.defaultDetailInputKey !== undefined
+    defaultDetailInputKey: DETAIL_SCHEMAS[task.defaultDetailInputKey]
       ? task.defaultDetailInputKey
       : TRAINING_TASK_TEMPLATES.find((template) => template.code === task.templateId)?.detailInputKey || null,
     dependsOnTaskIds: Array.isArray(task.dependsOnTaskIds) ? task.dependsOnTaskIds : task.templateId === 'T-110'
@@ -601,9 +616,8 @@ function refreshTaskReadiness(state, projectId, timestamp) {
     const inputs = state.inputs.filter((item) => item.projectId === projectId && item.status === 'ACTIVE'
       && (item.scopeLevel === 'course' ? item.courseId === task.courseId : item.classId === task.classId));
     const versions = Object.fromEntries(inputs.map((item) => [item.dataCode, task.requiredInputVersions?.[item.dataCode] || item.activeVersion]));
-    const detail = detailedReadiness(state, task);
-    const blockingInputCodes = task.requiredInputCodes.filter((code) => !detail.replacedCodes.has(code) && Number(versions[code] || 0) <= 0);
-    task.blockingDetailedInputIds = detail.blockingIds;
+    const blockingInputCodes = task.requiredInputCodes.filter((code) => Number(versions[code] || 0) <= 0);
+    task.blockingDetailedInputIds = [];
     const blockingTaskIds = (task.dependsOnTaskIds || []).filter((id) => {
       const dependency = state.tasks.find((item) => item.id === id);
       return dependency && !['DONE', 'CANCELLED'].includes(dependency.status);
@@ -612,8 +626,8 @@ function refreshTaskReadiness(state, projectId, timestamp) {
     task.requiredInputVersions = Object.fromEntries(task.requiredInputCodes.filter((code) => versions[code]).map((code) => [code, versions[code]]));
     task.blockingInputCodes = blockingInputCodes;
     task.blockingTaskIds = blockingTaskIds;
-    task.waitingReason = blockingInputCodes.length || detail.blockingIds.length ? 'INPUT' : !assigned ? 'ASSIGNMENT' : blockingTaskIds.length ? 'DEPENDENCY' : null;
-    const ready = !blockingInputCodes.length && !detail.blockingIds.length && assigned && !blockingTaskIds.length;
+    task.waitingReason = blockingInputCodes.length ? 'INPUT' : !assigned ? 'ASSIGNMENT' : blockingTaskIds.length ? 'DEPENDENCY' : null;
+    const ready = !blockingInputCodes.length && assigned && !blockingTaskIds.length;
     task.status = ready ? 'READY' : 'WAITING_INPUT';
     task.deadlineStatus = ready ? 'ACTIVE' : 'INACTIVE';
     task.slaStartedAt = ready ? (task.slaStartedAt || timestamp) : null;
@@ -897,6 +911,7 @@ function syncClassDefaultTasks(state, payload, context) {
 function updateTaskConfig(state, payload, context) {
   const task = findTask(state, payload.taskId);
   assertTaskConfigurationAccess(state, task.courseId, context);
+  if (['DONE', 'CANCELLED'].includes(task.status)) throw domainError('INVALID_TRANSITION', 'Công việc đã kết thúc; hãy mở lại công việc trước khi sửa cấu hình.');
   const allowedGroups = new Set(TRAINING_TASK_TEMPLATES.map((item) => item.group));
   if (payload.enabled !== undefined) task.status = payload.enabled ? 'WAITING_INPUT' : 'CANCELLED';
   if (payload.dueOffset !== undefined) task.dueOffset = Math.max(0, Number(payload.dueOffset) || 0);
@@ -1015,7 +1030,8 @@ function assignTasks(state, payload, context) {
   const assigneeName = requiredText(payload.assigneeName, 'Người thực hiện');
   const assigneeId = payload.assigneeId || assigneeName;
   const reviewerName = requiredText(payload.reviewerName, 'Người duyệt');
-  if (payload.requireSeparation && payload.assigneeId && payload.assigneeId === payload.reviewerId) throw domainError('VALIDATION_ERROR', 'Người thực hiện và người duyệt phải khác nhau.');
+  const reviewerId = payload.reviewerId || reviewerName;
+  if (String(assigneeId).trim().toLowerCase() === String(reviewerId).trim().toLowerCase()) throw domainError('VALIDATION_ERROR', 'Người thực hiện và người duyệt phải khác nhau.');
   taskIds.forEach((taskId) => {
     const task = findTask(state, taskId);
     if (['DONE', 'CANCELLED'].includes(task.status)) throw domainError('INVALID_TRANSITION', `Không thể phân công ${task.id} ở trạng thái hiện tại.`);
@@ -1026,7 +1042,7 @@ function assignTasks(state, payload, context) {
     task.assignee = assigneeName;
     task.assigneeId = assigneeId;
     task.reviewer = reviewerName;
-    task.reviewerId = payload.reviewerId || reviewerName;
+    task.reviewerId = reviewerId;
     if (task.assignmentStatus) task.status = task.resumeStatus || 'WAITING_INPUT';
     task.assignmentStatus = null;
     task.assignmentReason = null;
@@ -1058,7 +1074,7 @@ function assignTasks(state, payload, context) {
     taskIds,
     assigneeId: payload.assigneeId || assigneeName,
     assigneeName,
-    reviewerId: payload.reviewerId || reviewerName,
+      reviewerId,
     reviewerName,
     activeRole: context.role,
     assignedAt: timestamp,
@@ -1248,16 +1264,20 @@ function updateTaskProgress(state, payload, context) {
   const task = findTask(state, payload.taskId);
   assertTaskAssignee(task, context);
   if (!['IN_PROGRESS', 'REWORK'].includes(task.status)) throw domainError('INVALID_TRANSITION', 'Công việc chưa ở trạng thái cho phép cập nhật tiến độ.');
+  const nextChecklist = Array.isArray(payload.checklist) ? payload.checklist.map(Boolean) : [...task.checklist];
+  const nextChecklistEvidence = Array.isArray(payload.checklistEvidence)
+    ? payload.checklistEvidence.map((items, index) => cleanEvidenceRecords(items, `Minh chứng tiêu chí ${index + 1}`))
+    : task.checklistItems.map((_, index) => clone(task.checklistEvidence?.[index] || []));
+  if (nextChecklist.length !== task.checklistItems.length) throw domainError('VALIDATION_ERROR', 'Checklist không khớp cấu hình bắt buộc.');
+  if (nextChecklistEvidence.length !== task.checklistItems.length) throw domainError('VALIDATION_ERROR', 'Minh chứng theo checklist không khớp cấu hình.');
+  const missingEvidenceIndex = nextChecklist.findIndex((checked, index) => checked && !nextChecklistEvidence[index]?.length);
+  if (missingEvidenceIndex >= 0) throw domainError('VALIDATION_ERROR', `Cần minh chứng cho tiêu chí ${missingEvidenceIndex + 1} trước khi đánh dấu hoàn thành.`);
   if (Array.isArray(payload.checklist)) {
-    if (payload.checklist.length !== task.checklistItems.length) throw domainError('VALIDATION_ERROR', 'Checklist không khớp cấu hình bắt buộc.');
-    task.checklist = payload.checklist.map(Boolean);
+    task.checklist = nextChecklist;
     task.checklistLog.push({ checklist: [...task.checklist], actor: actorFrom(context), happenedAt: nowIso(context) });
   }
   if (Array.isArray(payload.checklistEvidence)) {
-    if (payload.checklistEvidence.length !== task.checklistItems.length) throw domainError('VALIDATION_ERROR', 'Minh chứng theo checklist không khớp cấu hình.');
-    task.checklistEvidence = payload.checklistEvidence.map((items) => Array.isArray(items)
-      ? items.filter((item) => item && (item.url || item.fileUrl || item.path || item.id))
-      : []);
+    task.checklistEvidence = nextChecklistEvidence;
   }
   if (payload.blocker !== undefined) task.blocker = String(payload.blocker || '').trim();
   task.progress = Math.round(task.checklist.filter(Boolean).length / Math.max(task.checklist.length, 1) * 100);
@@ -1270,7 +1290,7 @@ function submitOutput(state, payload, context) {
   assertTaskAssignee(task, context);
   if (!['IN_PROGRESS', 'REWORK'].includes(task.status)) throw domainError('INVALID_TRANSITION', 'Công việc chưa ở trạng thái cho phép nộp kết quả.');
   const actualOutput = requiredText(payload.actualOutput, 'Kết quả thực tế');
-  const evidence = Array.isArray(payload.evidence) ? payload.evidence.filter((item) => item && (item.url || item.fileUrl || item.path || item.id)) : [];
+  const evidence = cleanEvidenceRecords(payload.evidence, 'Minh chứng kết quả');
   if (!evidence.length) throw domainError('VALIDATION_ERROR', 'Cần ít nhất một minh chứng có thể truy cập.');
   const version = (task.outputs.at(-1)?.version || 0) + 1;
   task.outputs.push({ id: `${task.id}:OUT:v${version}`, version, actualOutput, metrics: payload.metrics || {}, evidence, submittedBy: actorFrom(context), submittedAt: nowIso(context) });
@@ -1284,7 +1304,14 @@ function submitReview(state, payload, context) {
   assertTaskAssignee(task, context);
   if (!['IN_PROGRESS', 'REWORK'].includes(task.status)) throw domainError('INVALID_TRANSITION', 'Công việc chưa thể gửi duyệt.');
   if (Array.isArray(payload.checklist) || Array.isArray(payload.checklistEvidence) || payload.blocker !== undefined) updateTaskProgress(state, payload, context);
-  const hasOutput = String(payload.actualOutput || '').trim() || (Array.isArray(payload.evidence) && payload.evidence.some((item) => item && (item.url || item.fileUrl || item.path || item.id)));
+  const incompleteIndex = task.checklist.findIndex((checked) => !checked);
+  if (incompleteIndex >= 0) throw domainError('SUBMISSION_NOT_READY', `Cần hoàn thành tiêu chí ${incompleteIndex + 1} trước khi gửi duyệt.`);
+  const invalidEvidenceIndex = task.checklist.findIndex((checked, index) => {
+    if (!checked) return false;
+    try { return cleanEvidenceRecords(task.checklistEvidence?.[index], `Minh chứng tiêu chí ${index + 1}`).length === 0; } catch { return true; }
+  });
+  if (invalidEvidenceIndex >= 0) throw domainError('SUBMISSION_NOT_READY', `Tiêu chí ${invalidEvidenceIndex + 1} chưa có minh chứng hợp lệ.`);
+  const hasOutput = String(payload.actualOutput || '').trim() || (Array.isArray(payload.evidence) && payload.evidence.length > 0);
   if (hasOutput) submitOutput(state, payload, context);
   const output = task.outputs.at(-1) || null;
   if (!task.reviewerId && !task.reviewer) throw domainError('SUBMISSION_NOT_READY', 'Chưa có người duyệt còn hiệu lực.');
@@ -1307,6 +1334,17 @@ function reviewTask(state, payload, context) {
   if (result === 'REWORK' && !comment) throw domainError('VALIDATION_ERROR', 'Comment là bắt buộc khi trả lại.');
   const submission = [...task.submissions].reverse().find((item) => item.status === 'IN_REVIEW');
   if (!submission) throw domainError('NOT_FOUND', 'Không tìm thấy phiếu đang chờ duyệt.');
+  if (result === 'PASS') {
+    const snapshot = submission.taskSnapshot || {};
+    const checklist = Array.isArray(snapshot.checklist) ? snapshot.checklist : [];
+    const evidence = Array.isArray(snapshot.checklistEvidence) ? snapshot.checklistEvidence : [];
+    if (!checklist.length || checklist.some((checked) => !checked)) throw domainError('SUBMISSION_NOT_READY', 'Chưa thể duyệt đạt khi checklist bắt buộc chưa hoàn thành.');
+    const invalidEvidenceIndex = checklist.findIndex((checked, index) => {
+      if (!checked) return false;
+      try { return cleanEvidenceRecords(evidence[index], `Minh chứng tiêu chí ${index + 1}`).length === 0; } catch { return true; }
+    });
+    if (invalidEvidenceIndex >= 0) throw domainError('SUBMISSION_NOT_READY', `Chưa thể duyệt đạt: tiêu chí ${invalidEvidenceIndex + 1} thiếu minh chứng hợp lệ.`);
+  }
   const timestamp = nowIso(context);
   submission.status = result;
   submission.reviewedAt = timestamp;
@@ -1455,6 +1493,34 @@ function approveScopeChange(state, payload, context) {
   appendAudit(state, auditEvent('SCOPE_CHANGE_APPROVED', `Duyệt ${request.id}; tạo Scope v${nextScope.version} và giữ nguyên lịch sử task.`, context, 'change_request', request.id, { scopeVersion: nextScope.version }));
 }
 
+function ensureTaskDetailedInputs(state, tasks, context, draftForTask = () => null) {
+  for (const task of tasks) {
+    if (!task.defaultDetailInputKey || task.archivedAt || task.status === 'CANCELLED' || task.inputBindings?.length) continue;
+    const existing = (state.detailedInputs || []).find((input) => input.activityId === task.id && input.key === task.defaultDetailInputKey);
+    if (existing) {
+      task.inputBindings = [{ inputId: existing.id, version: existing.latestVersion || 0 }];
+      continue;
+    }
+    const supplied = draftForTask(task) || {};
+    const actorId = context.actor?.id || context.actor?.email || 'system';
+    const ownerId = supplied.ownerId || task.managerId || task.assigneeId || actorId;
+    const reviewerId = supplied.reviewerId || task.reviewerId || task.managerId || actorId;
+    const dueAt = supplied.dueAt || task.plannedDeadline || task.startDate || String(context.now || new Date().toISOString()).slice(0, 10);
+    applyDetailCommand(state, 'CREATE_DETAIL_INPUT', {
+      ...supplied,
+      id: `${task.id.replace(/[^a-zA-Z0-9-]/g, '-')}-initial`,
+      taskId: task.id,
+      key: task.defaultDetailInputKey,
+      title: supplied.title || task.title,
+      ownerId,
+    reviewerId,
+      collaboratorIds: supplied.collaboratorIds || [],
+      dueAt,
+      data: { ...defaultDetailDataForTask(state, task), ...(supplied.data || {}) },
+    }, { ...context, systemProvision: true });
+  }
+}
+
 export function applyTrainingOperationsCommand(currentState, command, context = {}) {
   if (!currentState || typeof currentState !== 'object' || Array.isArray(currentState)) throw domainError('INVALID_STATE', 'Training Operations state không hợp lệ.');
   const type = requiredText(command?.type, 'Loại lệnh').toUpperCase();
@@ -1499,15 +1565,17 @@ export function applyTrainingOperationsCommand(currentState, command, context = 
     case 'APPROVE_SCOPE_CHANGE': approveScopeChange(state, payload, { ...context, role }); break;
     default: throw domainError('UNKNOWN_COMMAND', `Lệnh ${type} chưa được hỗ trợ.`);
   }
-  if (['CREATE_PROJECT', 'CREATE_PROJECT_BUNDLE', 'CREATE_COURSE', 'CREATE_CLASS_TASK'].includes(type)) {
+  if (['CREATE_PROJECT', 'CREATE_PROJECT_BUNDLE', 'CREATE_COURSE', 'CREATE_CLASS_TASK', 'SYNC_CLASS_DEFAULT_TASKS'].includes(type)) {
     const bundles = [payload, ...(payload.additionalCourses || [])];
-    for (const task of state.tasks.filter(task => !previousTaskIds.has(task.id))) {
+    const candidates = type === 'SYNC_CLASS_DEFAULT_TASKS'
+      ? state.tasks.filter(task => [task.classId, task.classCode].includes(payload.classId || payload.classCode))
+      : state.tasks.filter(task => !previousTaskIds.has(task.id));
+    ensureTaskDetailedInputs(state, candidates, { ...context, role }, (task) => {
       const bundle = type === 'CREATE_CLASS_TASK' ? payload : bundles.find(b => (b.course?.id || b.course?.code) === task.courseId);
-      const draft = type === 'CREATE_CLASS_TASK' ? payload.detailedInput : bundle?.detailTemplates?.[task.templateId];
-      if (draft) applyDetailCommand(state, 'CREATE_DETAIL_INPUT', { ...draft, id: task.id.replace(/[^a-zA-Z0-9-]/g, '-') + '-initial', taskId: task.id }, { ...context, role });
-    }
+      return type === 'CREATE_CLASS_TASK' ? payload.detailedInput : bundle?.detailTemplates?.[task.templateId];
+    });
   }
-  if (['CREATE_PROJECT', 'CREATE_PROJECT_BUNDLE', 'CREATE_COURSE', 'CREATE_CLASS_TASK'].includes(type)) state.projects.forEach(project => refreshTaskReadiness(state, project.id, nowIso(context)));
+  if (['CREATE_PROJECT', 'CREATE_PROJECT_BUNDLE', 'CREATE_COURSE', 'CREATE_CLASS_TASK', 'SYNC_CLASS_DEFAULT_TASKS'].includes(type)) state.projects.forEach(project => refreshTaskReadiness(state, project.id, nowIso(context)));
   state.schemaVersion = 3;
   return state;
 }

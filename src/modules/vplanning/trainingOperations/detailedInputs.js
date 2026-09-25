@@ -25,7 +25,7 @@ export const DETAIL_SCHEMAS = Object.freeze({
   email: { label: 'Input gửi mail lịch học', code: 'EMAIL', fields: [field('classTime', 'Thời gian triển khai lớp học'), field('courseName', 'Tên khóa học'), field('className', 'Tên lớp học'), field('recipients', 'Email học viên / tham chiếu danh sách', 'textarea'), field('venue', 'Địa điểm đào tạo'), field('access', 'Hướng dẫn truy cập ELN (học trực tuyến)', 'textarea', false), field('preparation', 'Tài liệu, chia nhóm, dụng cụ (học trực tiếp)', 'textarea', false)] },
 });
 export const DETAIL_COMMANDS = ['CREATE_DETAIL_INPUT', 'SAVE_DETAIL_INPUT', 'SUBMIT_DETAIL_INPUT', 'RETURN_DETAIL_INPUT', 'APPROVE_DETAIL_INPUT', 'ASSIGN_DETAIL_INPUT', 'LINK_DETAIL_INPUT', 'APPLY_DETAIL_INPUT', 'REQUEST_DETAIL_INPUT', 'UPDATE_INPUT_CONTEXT'];
-export const DETAIL_STATUS = { DRAFT: 'Bản nháp', REVIEW: 'Chờ kiểm tra', RETURNED: 'Yêu cầu bổ sung', READY: 'Sẵn sàng' };
+export const DETAIL_STATUS = { DRAFT: 'Bản nháp', REVIEW: 'Chờ kiểm tra', RETURNED: 'Yêu cầu bổ sung', READY: 'Đã duyệt' };
 const token = value => String(value || '').trim().toLowerCase();
 export function detailIdentity(context, ...ids) {
   const tokens = [context?.actor?.id, context?.actor?.email].map(token).filter(Boolean);
@@ -185,8 +185,9 @@ export function applyDetailCommand(state, type, payload, context) {
   }
   if (type === 'CREATE_DETAIL_INPUT') {
     const task = taskById(state, payload.taskId);
-    requireAccess(detailCourseManager(state, task.courseId, context));
-    if (['DONE', 'IN_REVIEW'].includes(task.status)) fail('Không thêm input bắt buộc khi công việc đã hoàn thành hoặc chờ nghiệm thu.');
+    requireAccess(context.systemProvision === true || detailCourseManager(state, task.courseId, context));
+    if (task.status === 'IN_REVIEW') fail('Không thêm input khi công việc đang chờ nghiệm thu.');
+    const backfillReason = task.status === 'DONE' ? text(payload.backfillReason, 'Lý do bổ sung hồ sơ sau hoàn thành') : '';
     if (!DETAIL_SCHEMAS[payload.key]) fail('Loại input không hợp lệ.');
     if (task.defaultDetailInputKey && payload.key !== task.defaultDetailInputKey) fail('Công việc này phải dùng đúng form input đã cấu hình.');
     const id = 'DIN-' + text(payload.id, 'ID input', true, 80);
@@ -198,7 +199,7 @@ export function applyDetailCommand(state, type, payload, context) {
       createdAt: context.now || new Date().toISOString() };
     state.detailedInputs.push(input);
     task.inputBindings = [...(task.inputBindings || []), { inputId: id, version: 0 }];
-    event(state, input, type, context, { taskId: task.id });
+    event(state, input, type, context, { taskId: task.id, ...(backfillReason ? { backfillReason } : {}) });
     notify(state, input, type, context);
     return;
   }

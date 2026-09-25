@@ -41,8 +41,8 @@ export default function TaskDetailLayer({ title, onClose, children }: { title: s
       if (previous?.isConnected) previous.focus({ preventScroll: true });
     };
   }, []);
-  return createPortal(<div className="vwork-training-operations training-overlay-portal detail-layer-backdrop">
-    <section className="detail-layer" ref={ref} role="dialog" aria-modal="true" aria-label={'Chi tiết công việc ' + title}>
+  return createPortal(<div className="vwork-training-operations training-overlay-portal detail-layer-backdrop" onMouseDown={requestClose}>
+    <section className="detail-layer" ref={ref} role="dialog" aria-modal="true" aria-label={'Chi tiết công việc ' + title} onMouseDown={(event) => event.stopPropagation()}>
       <header className="detail-layer-toolbar"><button type="button" className="detail-layer-back" onClick={requestClose}><ArrowLeft size={18}/>Quay lại danh sách</button><span>Chi tiết công việc</span></header>
       <div className="detail-layer-scroll" inert={confirmClose}>{children}</div>
       {confirmClose && <div className="detail-close-confirm" role="alertdialog" aria-modal="true" aria-label="Input chưa lưu"><h3>Input chưa lưu</h3><p>Đóng sẽ bỏ phần đang sửa. Bạn có thể tiếp tục và lưu nháp trước.</p><button type="button" autoFocus onClick={() => setConfirmClose(false)}>Tiếp tục nhập</button><button type="button" onClick={() => { ref.current?.querySelectorAll('[data-detail-dirty]').forEach(node => node.removeAttribute('data-detail-dirty')); closeRef.current(); }}>Bỏ phần chưa lưu và đóng</button></div>}

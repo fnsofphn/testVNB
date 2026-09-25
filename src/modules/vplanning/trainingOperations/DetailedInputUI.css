@@ -10,7 +10,7 @@
 .detail-layer [hidden]{display:none!important}
 .detail-tabs{position:sticky;top:0;z-index:2;display:flex;gap:8px;background:white;padding:12px 0;border-bottom:1px solid #e4e8ef}
 .detail-tabs button{flex:1;min-height:44px}
-.detail-tabs button[aria-pressed="true"]{background:#fff0f3;border-color:#d20a38;color:#bd0932}
+.detail-tabs button[aria-selected="true"]{background:#fff0f3;border-color:#d20a38;color:#bd0932}
 .detail-input-card{margin:16px 0;padding:18px;border:1px solid #dfe5ee;border-radius:12px;background:#fff}
 .detail-input-card header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .detail-input-card h3{margin:4px 0 12px;font-size:17px}

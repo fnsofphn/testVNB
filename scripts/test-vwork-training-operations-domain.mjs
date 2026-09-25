@@ -29,6 +29,10 @@ const legacyLectureTask = structuredClone(state);
 const lecture = legacyLectureTask.tasks.find((item) => item.templateId === 'T-108');
 delete lecture.defaultDetailInputKey;
 assert.equal(normalizeTrainingOperationsState(legacyLectureTask).tasks.find((item) => item.id === lecture.id).defaultDetailInputKey, 'vlearningLesson', 'Existing generated tasks must expose the input template without rewriting stored work.');
+const legacyClassInfoState = structuredClone(state);
+const legacyClassInfoTask = { ...structuredClone(legacyClassInfoState.tasks[0]), id: 'LEGACY-T-101', templateId: 'T-101', title: 'Chuẩn bị thông tin lớp', defaultDetailInputKey: null };
+legacyClassInfoState.tasks.push(legacyClassInfoTask);
+assert.equal(normalizeTrainingOperationsState(legacyClassInfoState).tasks.find((item) => item.id === legacyClassInfoTask.id).defaultDetailInputKey, 'vtrainingClass', 'Legacy class-information work must recover its corresponding input form.');
 assert.equal(selectTrainingTaskTemplates(['VLEARNING']).length, 8);
 assert.ok(selectTrainingTaskTemplates(['VTRAINING', 'VLEARNING']).some((item) => item.code === 'T-105'));
 assert.equal(new Set(selectTrainingTaskTemplates(['VTRAINING', 'VLEARNING']).filter((item) => item.system).map((item) => item.detailInputKey)).size, 13, 'Each of the 13 source tasks must own a distinct detailed-input form.');
@@ -68,6 +72,8 @@ const onlyLearning = command(createEmptyTrainingOperationsState(), 'CREATE_PROJE
 assert.ok(onlyLearning.tasks.some((item) => item.templateId === 'T-114'));
 assert.ok(!onlyLearning.tasks.some((item) => item.templateId === 'T-102' || item.templateId === 'T-105'), 'A VLearning-only course must not get VTraining tasks.');
 assert.equal(onlyLearning.inputs.find((item) => item.courseId === 'ELN-COURSE' && item.dataCode === 'D08').required, true);
+assert.ok(onlyLearning.tasks.filter((item) => item.defaultDetailInputKey).every((item) => item.inputBindings?.length === 1), 'Each generated task form must be provisioned automatically.');
+assert.equal(onlyLearning.detailedInputs.length, onlyLearning.tasks.filter((item) => item.defaultDetailInputKey).length);
 let existingPpoClass = command(createEmptyTrainingOperationsState(), 'CREATE_PROJECT', {
   project: { id: 'PPO_TEST', name: 'Đào tạo Test', customerId: 'PPO', startDate: '2026-10-01', deadline: '2026-10-31', classCount: 1 },
   course: { id: 'PPO_TEST', name: 'Đào tạo Test', systems: ['VTraining', 'VLearning'] },
@@ -149,6 +155,7 @@ assert.ok(assignedLivePublish.blockingTaskIds.length > 0);
 // UC09 + UC10 — generated task dependencies and assignment.
 const discussionTaskId = 'ALPHA-CX-ALPHA01-T-104';
 assert.deepEqual(state.tasks.find((item) => item.id === discussionTaskId).requiredInputCodes, ['D03', 'D06']);
+assert.throws(() => command(state, 'ASSIGN_TASKS', { taskIds: [discussionTaskId], assigneeId: 'same-01', assigneeName: 'Cùng người', reviewerId: 'same-01', reviewerName: 'Cùng người', requireSeparation: false }, 'manager', 'Ngọc Trần'), /phải khác nhau/);
 // The course and class setup precede discussion in the source workflow.
 state.tasks.find((item) => item.id === 'ALPHA-CX-ALPHA01-T-116').status = 'DONE';
 state.tasks.find((item) => item.id === 'ALPHA-CX-ALPHA01-T-102').status = 'DONE';
@@ -165,6 +172,7 @@ assert.throws(() => command(state, 'ASSIGN_TASKS', { taskIds: [discussionTaskId]
 assert.throws(() => commandAs(state, 'START_TASK', { taskId: discussionTaskId }, 'member', 'member-02', 'Thành viên khác'), /không phải người được giao/);
 state = command(state, 'START_TASK', { taskId: discussionTaskId }, 'member', 'Nam Nguyễn');
 const checklistLength = state.tasks.find((item) => item.id === discussionTaskId).checklist.length;
+assert.throws(() => command(state, 'UPDATE_TASK_PROGRESS', { taskId: discussionTaskId, checklist: Array(checklistLength).fill(true), checklistEvidence: Array.from({ length: checklistLength }, () => []), blocker: '' }, 'member', 'Nam Nguyễn'), /Cần minh chứng cho tiêu chí 1/);
 state = command(state, 'UPDATE_TASK_PROGRESS', { taskId: discussionTaskId, checklist: Array(checklistLength).fill(true), checklistEvidence: Array.from({ length: checklistLength }, (_, index) => [{ id: `CE-${index + 1}`, url: `https://evidence.example/check-${index + 1}` }]), blocker: '' }, 'member', 'Nam Nguyễn');
 assert.equal(state.tasks.find((item) => item.id === discussionTaskId).progress, 100);
 
@@ -184,17 +192,26 @@ state = command(state, 'SUBMIT_REVIEW', { taskId: discussionTaskId, checklist: A
 state = command(state, 'REVIEW_TASK', { taskId: discussionTaskId, result: 'PASS', comment: 'Đạt.' }, 'manager', 'Ngọc Trần');
 assert.equal(state.tasks.find((item) => item.id === discussionTaskId).status, 'DONE');
 assert.equal(state.tasks.find((item) => item.id === discussionTaskId).progress, 100);
+assert.throws(() => command(state, 'UPDATE_TASK_CONFIG', { taskId: discussionTaskId, title: 'Không được sửa sau hoàn thành' }, 'operations', 'Quản lý vận hành'), /đã kết thúc/);
+assert.throws(() => command(state, 'ASSIGN_TASKS', { taskIds: [discussionTaskId], assigneeId: 'member-02', assigneeName: 'Người mới', reviewerId: 'manager-01', reviewerName: 'Ngọc Trần' }, 'manager', 'Ngọc Trần'), /trạng thái hiện tại/);
 
-// FB-02/FB-07/FB-08 — 0% and no evidence may be reviewed; rework comment survives; PASS completes at 100%.
+// FB-02/FB-07/FB-08 — incomplete work cannot be reviewed; rework comment survives; PASS completes at 100%.
 const zeroProgressTaskId = 'ALPHA-CX-ALPHA01-T-105';
 state = command(state, 'ASSIGN_TASKS', { taskIds: [zeroProgressTaskId], assigneeId: 'member-01', assigneeName: 'Nam Nguyễn', reviewerId: 'manager-01', reviewerName: 'Ngọc Trần', priority: 'Normal', requireSeparation: true }, 'manager', 'Ngọc Trần');
 state = command(state, 'START_TASK', { taskId: zeroProgressTaskId }, 'member', 'Nam Nguyễn');
 assert.equal(state.tasks.find((item) => item.id === zeroProgressTaskId).progress, 0);
-state = command(state, 'SUBMIT_REVIEW', { taskId: zeroProgressTaskId, checklist: Array(state.tasks.find((item) => item.id === zeroProgressTaskId).checklist.length).fill(false), checklistEvidence: Array.from({ length: state.tasks.find((item) => item.id === zeroProgressTaskId).checklist.length }, () => []), blocker: '' }, 'member', 'Nam Nguyễn');
+const zeroChecklistLength = state.tasks.find((item) => item.id === zeroProgressTaskId).checklist.length;
+assert.throws(() => command(state, 'SUBMIT_REVIEW', { taskId: zeroProgressTaskId, checklist: Array(zeroChecklistLength).fill(false), checklistEvidence: Array.from({ length: zeroChecklistLength }, () => []), blocker: '' }, 'member', 'Nam Nguyễn'), /hoàn thành tiêu chí 1/);
+state.tasks.find((item) => item.id === zeroProgressTaskId).checklist = Array(zeroChecklistLength).fill(true);
+state.tasks.find((item) => item.id === zeroProgressTaskId).checklistEvidence = [];
+assert.throws(() => command(state, 'SUBMIT_REVIEW', { taskId: zeroProgressTaskId }, 'member', 'Nam Nguyễn'), /chưa có minh chứng hợp lệ/);
+state.tasks.find((item) => item.id === zeroProgressTaskId).checklist = Array(zeroChecklistLength).fill(false);
+assert.throws(() => command(state, 'UPDATE_TASK_PROGRESS', { taskId: zeroProgressTaskId, checklist: Array(zeroChecklistLength).fill(true), checklistEvidence: Array.from({ length: zeroChecklistLength }, (_, index) => [{ id: `INVALID-${index + 1}`, url: 'khong-phai-url' }]), blocker: '' }, 'member', 'Nam Nguyễn'), /http\/https/);
+state = command(state, 'SUBMIT_REVIEW', { taskId: zeroProgressTaskId, checklist: Array(zeroChecklistLength).fill(true), checklistEvidence: Array.from({ length: zeroChecklistLength }, (_, index) => [{ id: `ZERO-${index + 1}`, url: `https://minhchung.example/zero-${index + 1}` }]), blocker: '' }, 'member', 'Nam Nguyễn');
 assert.equal(state.tasks.find((item) => item.id === zeroProgressTaskId).status, 'IN_REVIEW');
 assert.equal(state.tasks.find((item) => item.id === zeroProgressTaskId).submissions.at(-1).taskSnapshot.output, null);
 state = command(state, 'REVIEW_TASK', { taskId: zeroProgressTaskId, result: 'REWORK', comment: 'Bổ sung cấu hình thời gian làm bài.' }, 'manager', 'Ngọc Trần');
-assert.equal(state.tasks.find((item) => item.id === zeroProgressTaskId).progress, 0);
+assert.equal(state.tasks.find((item) => item.id === zeroProgressTaskId).progress, 100);
 assert.equal(state.tasks.find((item) => item.id === zeroProgressTaskId).reviews.at(-1).comment, 'Bổ sung cấu hình thời gian làm bài.');
 state = command(state, 'SUBMIT_REVIEW', { taskId: zeroProgressTaskId }, 'member', 'Nam Nguyễn');
 state = command(state, 'REVIEW_TASK', { taskId: zeroProgressTaskId, result: 'PASS', comment: 'Đạt.' }, 'manager', 'Ngọc Trần');
