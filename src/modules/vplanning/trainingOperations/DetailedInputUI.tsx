@@ -14,11 +14,6 @@ export function DetailFields({ inputKey, data = {}, onChange, disabled = false }
       : <input id={prefix + field.key} disabled={disabled} type={field.type} min={field.type === 'number' ? 1 : undefined} step={field.type === 'number' ? 1 : undefined} value={data[field.key] || ''} onChange={e => onChange({ ...data, [field.key]: e.target.value })}/>}
   </label>)}</div>;
 }
-function InputRequirements({ inputKey }) {
-  const schema = DETAIL_SCHEMAS[inputKey];
-  if (!schema) return null;
-  return <section className="detail-requirements" aria-label={`Các trường input ${schema.label}`}><div><small>THEO FILE INPUT VLEARNING, VTRAINING</small><h4>Input cần có · {schema.label}</h4></div><ul>{schema.fields.map(item => <li key={item.key}><span>{item.label}</span><em>{item.required ? 'Bắt buộc' : 'Nếu có'}</em></li>)}</ul></section>;
-}
 function PeopleFields({ value, onChange, directory }) {
   const choices = directory.filter(p => p.assignable !== false && p.active !== false);
   const known = new Set(choices.map(p => p.id));
@@ -28,9 +23,9 @@ function PeopleFields({ value, onChange, directory }) {
     <p className="field-hint">Có thể kiêm người nhập và người chốt. Phân công input độc lập với người thực hiện công việc.</p></>;
 }
 export function InputDraftFields({ inputKey = 'roster', value, onChange, directory, defaultOwner = '', defaultDue = '', title = '', lockInputKey = false }) {
-  return <section className="detail-draft-creation"><h4>Nhập đầy đủ input theo file nguồn</h4>
-    <label className="detail-enable"><input type="checkbox" checked={Boolean(value)} onChange={e => onChange(e.target.checked ? { key: DETAIL_SCHEMAS[inputKey] ? inputKey : 'roster', title: title || DETAIL_SCHEMAS[inputKey]?.label, ownerId: defaultOwner, reviewerId: defaultOwner, collaboratorIds: [], dueAt: defaultDue, data: {} } : null)}/>Khởi tạo bộ input riêng cùng công việc</label>
-    {value && <><label>Tên bộ input<input value={value.title || ''} onChange={e => onChange({ ...value, title: e.target.value })}/></label>{lockInputKey ? <div className="detail-locked-type"><small>Form áp dụng cho đầu việc</small><b>{DETAIL_SCHEMAS[inputKey]?.label}</b></div> : <label>Loại input<select value={value.key} onChange={e => onChange({ ...value, key: e.target.value, data: {} })}>{Object.entries(DETAIL_SCHEMAS).map(([key, schema]) => <option key={key} value={key}>{schema.label}</option>)}</select></label>}
+  return <section className="detail-draft-creation"><h4>Thông tin cần cung cấp</h4>
+    <label className="detail-enable"><input type="checkbox" checked={Boolean(value)} onChange={e => onChange(e.target.checked ? { key: DETAIL_SCHEMAS[inputKey] ? inputKey : 'roster', title: title || DETAIL_SCHEMAS[inputKey]?.label, ownerId: defaultOwner, reviewerId: defaultOwner, collaboratorIds: [], dueAt: defaultDue, data: {} } : null)}/>Bổ sung thông tin cho công việc</label>
+    {value && <><label>Tên nội dung<input value={value.title || ''} onChange={e => onChange({ ...value, title: e.target.value })}/></label>{lockInputKey ? <div className="detail-locked-type"><small>Loại thông tin</small><b>{DETAIL_SCHEMAS[inputKey]?.label}</b></div> : <label>Loại thông tin<select value={value.key} onChange={e => onChange({ ...value, key: e.target.value, data: {} })}>{Object.entries(DETAIL_SCHEMAS).map(([key, schema]) => <option key={key} value={key}>{schema.label}</option>)}</select></label>}
       <PeopleFields value={value} onChange={onChange} directory={directory || []}/>
       <DetailFields inputKey={value.key} data={value.data} onChange={data => onChange({ ...value, data })}/>
       <p className="field-hint">Lưu thành bản nháp. Có thể đính kèm file và gửi kiểm tra sau khi công việc được tạo.</p></>}
@@ -134,7 +129,6 @@ export function TaskDetailedInputs({ task }) {
   const { state, actor, role, directory, command } = api;
   const managing = detailCourseManager(state, task.courseId, { actor, role });
   const schemaKey = task.defaultDetailInputKey || task.input || 'roster';
-  const assignedManager = (state.teamAssignments || []).find(item => item.courseId === task.courseId && item.role === 'manager' && item.status !== 'ARCHIVED');
   const bindings = task.inputBindings || [];
   const all = state.detailedInputs || [];
   const available = all.filter(i => i.courseId === task.courseId && i.classId === task.classId && (!task.defaultDetailInputKey || i.key === task.defaultDetailInputKey) && !bindings.some(b => b.inputId === i.id));
@@ -142,15 +136,13 @@ export function TaskDetailedInputs({ task }) {
     setBusy(true); setError('');
     try { const result = await command('CREATE_DETAIL_INPUT', { ...draft, taskId: task.id, id: crypto.randomUUID() }, 'Đã tạo bộ input chi tiết.'); if (result) { setDraft(null); setDraftTouched(false); } else setError('Chưa tạo được bộ input. Kiểm tra người phụ trách, người chốt và hạn cung cấp.'); } finally { setBusy(false); }
   }
-  return <section className="task-detailed-inputs"><h3>Đầu vào chi tiết của công việc</h3><ContextSummary value={detailContext(state, task)} title="Thông tin hiện tại từ dự án / khóa / lớp"/>
-    <InputRequirements inputKey={schemaKey}/>
-    {!bindings.length && <p>{task.defaultDetailInputKey ? `Mẫu ${DETAIL_SCHEMAS[task.defaultDetailInputKey]?.label || 'input'} đã được chuẩn bị cho công việc. Chọn người phụ trách và người chốt để tạo bộ input.` : 'Chưa có bộ input riêng. Dữ liệu nguồn hiện có được giữ ở phần bên dưới; không tự chuyển hoặc chốt thay.'}</p>}
+  return <section className="task-detailed-inputs"><h3>Đầu vào công việc</h3>
     {bindings.map(binding => { const input = all.find(i => i.id === binding.inputId); return input ? <InputCard key={input.id} input={input} task={task} binding={binding}/> : <p key={binding.inputId}>Bộ input chưa tải được hoặc ngoài quyền xem. Vui lòng tải lại dữ liệu.</p>; })}
-    {!managing && !bindings.length && <div className="detail-permission-note" role="note"><b>Ai tạo input?</b><p><strong>Quản lý vận hành</strong>, hoặc <strong>Quản lý ekip được gán cho khóa</strong>{assignedManager?.accountName ? ` (${assignedManager.accountName})` : ''}. Với tài khoản Coach Admin, chọn vai trò “Quản lý vận hành” ở góc trên rồi mở lại: Công việc → chọn đầu việc → Đầu vào.</p><p>Sau khi tạo, người phụ trách nhập dữ liệu và người chốt duyệt input.</p></div>}
-    {managing && !['DONE', 'IN_REVIEW'].includes(task.status) && <fieldset className="detail-create-input" disabled={busy} data-detail-dirty={draftTouched ? 'true' : undefined}><legend>Tạo input tùy chỉnh cho công việc</legend><p className="field-hint">Đường dẫn: Công việc → chọn đầu việc → Đầu vào. Chọn người phụ trách, người chốt và nhập các trường theo file nguồn bên dưới.</p><InputDraftFields inputKey={schemaKey} lockInputKey={Boolean(task.defaultDetailInputKey)} value={draft} onChange={(value) => { setDraft(value); setDraftTouched(true); }} directory={directory} defaultOwner={actor?.email} defaultDue={task.plannedDeadline || task.startDate} title={task.title}/>
+    {!managing && !bindings.length && <div className="detail-permission-note" role="note"><b>Chưa có thông tin</b><p>Quản lý vận hành hoặc Quản lý ekip của khóa học sẽ phân công người phụ trách.</p></div>}
+    {managing && !['DONE', 'IN_REVIEW'].includes(task.status) && <fieldset className="detail-create-input" disabled={busy} data-detail-dirty={draftTouched ? 'true' : undefined}><legend>Bổ sung thông tin</legend><InputDraftFields inputKey={schemaKey} lockInputKey={Boolean(task.defaultDetailInputKey)} value={draft} onChange={(value) => { setDraft(value); setDraftTouched(true); }} directory={directory} defaultOwner={actor?.email} defaultDue={task.plannedDeadline || task.startDate} title={task.title}/>
       {draft && <button type="button" className="primary" disabled={!draft.ownerId || !draft.reviewerId || !draft.dueAt} onClick={create}>Tạo input</button>}
       {available.length > 0 && <><label>Dùng chung bộ input đã có trong lớp<select value={linkId} onChange={e => setLinkId(e.target.value)}><option value="">Chọn bộ input</option>{available.map(i => <option key={i.id} value={i.id}>{i.title} · {DETAIL_SCHEMAS[i.key]?.label}</option>)}</select></label><button type="button" disabled={!linkId} onClick={async () => { const input = available.find(i => i.id === linkId); setBusy(true); try { await command('LINK_DETAIL_INPUT', { inputId: input.id, taskId: task.id, expectedRevision: input.revision }, 'Đã gắn cùng nguồn input.'); setLinkId(''); } finally { setBusy(false); } }}>Gắn vào công việc</button></>}
-    </fieldset>}{error && <p role="alert" className="detail-error">{error}</p>}<p className="field-hint">Mỗi bài giảng, game, chủ đề hoặc bài kiểm tra có thể thêm một bộ input riêng. Input gửi mail chỉ cung cấp thông tin, không tự gửi email.</p></section>;
+    </fieldset>}{error && <p role="alert" className="detail-error">{error}</p>}</section>;
 }
 export function ContextFields({ level, value, onChange }) {
   const fields = level === 'project' ? [['program', 'Chương trình'], ['audience', 'Đối tượng đào tạo']] : level === 'course' ? [['program', 'Chương trình (để trống để kế thừa)'], ['audience', 'Đối tượng (để trống để kế thừa)'], ['deliveryMode', 'Hình thức đào tạo'], ['venue', 'Địa điểm đào tạo'], ['thumbnail', 'URL ảnh đại diện VLearning']] : [['instructor', 'Giảng viên'], ['deliveryMode', 'Hình thức (để trống để kế thừa)'], ['venue', 'Địa điểm (để trống để kế thừa)']];

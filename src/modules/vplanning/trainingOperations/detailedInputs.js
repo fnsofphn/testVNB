@@ -106,6 +106,12 @@ export function defaultDetailDataForTask(state, task) {
     startDate: context.startDate, endDate: context.endDate,
   };
   if (['email', 'vlearningEmail'].includes(key)) return {
+    ...(() => {
+      const rosterInput = (state.detailedInputs || []).find(item => item.courseId === task.courseId && item.classId === task.classId && item.key === 'vlearningRoster');
+      const rosterVersion = rosterInput?.versions?.find(item => item.version === rosterInput.latestVersion);
+      const rosterData = rosterVersion?.data || rosterInput?.draft?.data || {};
+      return { recipients: rosterData.roster || '', preparation: rosterData.groups || '' };
+    })(),
     classTime: [context.startDate, context.endDate].filter(Boolean).join(' — '),
     courseName: context.courseName, className: context.className, venue: context.venue,
   };
