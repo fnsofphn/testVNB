@@ -167,6 +167,10 @@ assert.equal(state.tasks.find((item) => item.id === discussionTaskId).deadlineSt
 assert.equal(state.tasks.find((item) => item.id === discussionTaskId).assignmentHistory.length, 1);
 assert.ok(state.teamAssignments.some((item) => item.courseId === 'ALPHA-CX' && item.role === 'member' && item.accountId === 'member-01' && item.status === 'ACTIVE'));
 assert.throws(() => command(state, 'ASSIGN_TASKS', { taskIds: [discussionTaskId], assigneeId: 'member-01', assigneeName: 'Nam Nguyễn', reviewerId: 'manager-01', reviewerName: 'Ngọc Trần', deadline: '2026-10-11' }, 'manager', 'Ngọc Trần'), /lý do ngoại lệ/);
+const originalDiscussionChecklist = [...state.tasks.find((item) => item.id === discussionTaskId).checklistItems];
+state = command(state, 'UPDATE_TASK_CONFIG', { taskId: discussionTaskId, checklistItems: [...originalDiscussionChecklist, 'Tiêu chí quản lý thêm'], checklist: [...originalDiscussionChecklist.map(() => false), false], checklistEvidence: [...originalDiscussionChecklist.map(() => []), []] }, 'operations', 'Quản lý vận hành');
+assert.equal(state.tasks.find((item) => item.id === discussionTaskId).checklistItems.at(-1), 'Tiêu chí quản lý thêm');
+state = command(state, 'UPDATE_TASK_CONFIG', { taskId: discussionTaskId, checklistItems: originalDiscussionChecklist, checklist: originalDiscussionChecklist.map(() => false), checklistEvidence: originalDiscussionChecklist.map(() => []) }, 'operations', 'Quản lý vận hành');
 
 // UC11 — start and checklist/progress update.
 assert.throws(() => commandAs(state, 'START_TASK', { taskId: discussionTaskId }, 'member', 'member-02', 'Thành viên khác'), /không phải người được giao/);

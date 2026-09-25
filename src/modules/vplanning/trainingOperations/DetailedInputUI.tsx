@@ -14,19 +14,11 @@ export function DetailFields({ inputKey, data = {}, onChange, disabled = false }
       : <input id={prefix + field.key} disabled={disabled} required={field.required} aria-required={field.required} type={field.type} min={field.type === 'number' ? 1 : undefined} step={field.type === 'number' ? 1 : undefined} value={data[field.key] || ''} onChange={e => onChange({ ...data, [field.key]: e.target.value })}/>}
   </label>)}</div>;
 }
-function PeopleFields({ value, onChange, directory }) {
-  const choices = directory.filter(p => p.assignable !== false && p.active !== false);
-  const known = new Set(choices.map(p => p.id));
-  const options = [...choices, ...[...new Set([value.ownerId, value.reviewerId, ...(value.collaboratorIds || [])])].filter(id => id && !known.has(id)).map(id => ({ id, name: id }))];
-  return <><div className="form-grid">{[['ownerId', 'Người phụ trách chính'], ['reviewerId', 'Người chốt']].map(([key, label]) => <label key={key}>{label}<select value={value[key] || ''} onChange={e => onChange({ ...value, [key]: e.target.value })}><option value="">Chọn tài khoản</option>{options.map(p => <option key={p.id} value={p.id}>{p.name} · {p.email || p.id}</option>)}</select></label>)}<label>Hạn cung cấp<input type="date" value={value.dueAt || ''} onChange={e => onChange({ ...value, dueAt: e.target.value })}/></label></div>
-    <fieldset className="detail-collaborators"><legend>Người cùng nhập</legend>{choices.filter(p => p.id !== value.ownerId).map(p => <label key={p.id}><input type="checkbox" checked={(value.collaboratorIds || []).includes(p.id)} onChange={e => onChange({ ...value, collaboratorIds: e.target.checked ? [...(value.collaboratorIds || []), p.id] : value.collaboratorIds.filter(id => id !== p.id) })}/>{p.name}</label>)}</fieldset>
-    <p className="field-hint">Có thể kiêm người nhập và người chốt. Phân công input độc lập với người thực hiện công việc.</p></>;
-}
 export function InputDraftFields({ inputKey = 'roster', value, onChange, directory, defaultOwner = '', defaultDue = '', title = '', lockInputKey = false }) {
   return <section className="detail-draft-creation"><h4>Thông tin cần cung cấp</h4>
     <label className="detail-enable"><input type="checkbox" checked={Boolean(value)} onChange={e => onChange(e.target.checked ? { key: DETAIL_SCHEMAS[inputKey] ? inputKey : 'roster', title: title || DETAIL_SCHEMAS[inputKey]?.label, ownerId: defaultOwner, reviewerId: defaultOwner, collaboratorIds: [], dueAt: defaultDue, data: {} } : null)}/>Bổ sung thông tin cho công việc</label>
     {value && <><label>Tên nội dung<input value={value.title || ''} onChange={e => onChange({ ...value, title: e.target.value })}/></label>{lockInputKey ? <div className="detail-locked-type"><small>Loại thông tin</small><b>{DETAIL_SCHEMAS[inputKey]?.label}</b></div> : <label>Loại thông tin<select value={value.key} onChange={e => onChange({ ...value, key: e.target.value, data: {} })}>{Object.entries(DETAIL_SCHEMAS).map(([key, schema]) => <option key={key} value={key}>{schema.label}</option>)}</select></label>}
-      <PeopleFields value={value} onChange={onChange} directory={directory || []}/>
+      <label>Hạn cung cấp<input type="date" value={value.dueAt || ''} onChange={e => onChange({ ...value, dueAt: e.target.value })}/></label>
       <DetailFields inputKey={value.key} data={value.data} onChange={data => onChange({ ...value, data })}/>
       <p className="field-hint">Lưu thành bản nháp. Có thể đính kèm file và gửi kiểm tra sau khi công việc được tạo.</p></>}
   </section>;
@@ -46,23 +38,22 @@ function InputCard({ input, task, binding }) {
   const api = useDetailedInputs();
   const { actor, role, directory, state, command } = api;
   const context = { actor, role };
-  const [editing, setEditing] = useState(false), [assigning, setAssigning] = useState(false), [busy, setBusy] = useState(false);
+  const [editing, setEditing] = useState(false), [busy, setBusy] = useState(false);
   const [data, setData] = useState({}), [files, setFiles] = useState([]), [reason, setReason] = useState('');
-  const [people, setPeople] = useState(input), [baseRevision, setBaseRevision] = useState(input.revision);
+  const [baseRevision, setBaseRevision] = useState(input.revision);
   const [decision, setDecision] = useState('KEEP'), [comparing, setComparing] = useState(false), [error, setError] = useState('');
-  const editAllowed = canEditDetail(input, context), reviewAllowed = canReviewDetail(input, context);
   const managing = detailCourseManager(state, input.courseId, context);
+  const editAllowed = managing || canEditDetail(input, context), reviewAllowed = canReviewDetail(input, context);
   const pinned = input.versions.find(v => v.version === binding?.version);
   const latest = input.versions.find(v => v.version === input.latestVersion);
   const shown = binding ? pinned : latest;
-  const personName = id => directory.find(p => p.id === id)?.name || id || 'Chưa phân công';
   async function run(type, patch = {}, revision = input.revision) {
     if (busy) return false;
     setBusy(true); setError('');
     try {
       const response = await command(type, { inputId: input.id, expectedRevision: revision, ...patch }, 'Đã lưu thay đổi input.');
       if (!response) { setError('Chưa lưu được. Kiểm tra thông báo hệ thống; nếu dữ liệu đã đổi, đóng form và mở lại bản mới. Nội dung đang nhập vẫn được giữ.'); return false; }
-      setEditing(false); setAssigning(false); setReason(''); setComparing(false);
+      setEditing(false); setReason(''); setComparing(false);
       return true;
     } catch (e) { setError(e.message); return false; } finally { setBusy(false); }
   }
@@ -88,10 +79,10 @@ function InputCard({ input, task, binding }) {
       if (popup) popup.location.replace(url); else setError('Trình duyệt chặn cửa sổ tải file. Cho phép mở cửa sổ rồi thử lại.');
     } catch (e) { popup?.close(); setError(e.message); }
   }
-  const dirty = editing || assigning || Boolean(reason.trim());
+  const dirty = editing || Boolean(reason.trim());
   return <article className="detail-input-card" data-detail-dirty={dirty ? 'true' : undefined}>
     <header><div><small>{DETAIL_SCHEMAS[input.key]?.label}</small><h3>{input.title}</h3></div><span className={'detail-status ' + input.status}>{DETAIL_STATUS[input.status]}</span></header>
-    <div className="detail-people"><span>Phụ trách: <b>{personName(input.ownerId)}</b></span><span>Người chốt: <b>{personName(input.reviewerId)}</b></span><span>Hạn: <b>{input.dueAt}</b></span><span>Cùng nhập: {(input.collaboratorIds || []).map(personName).join(', ') || 'Không có'}</span></div>
+    <div className="detail-people"><span>Hạn cung cấp: <b>{input.dueAt}</b></span></div>
     <p className="detail-version">{binding?.version ? 'Công việc dùng v' + binding.version + ' đã chốt' : binding ? 'Chưa có bản chốt áp dụng cho công việc' : input.latestVersion ? 'Nguồn mới nhất: v' + input.latestVersion : 'Chưa có bản chốt'}{binding?.version && input.latestVersion !== binding.version ? ' · Nguồn mới nhất v' + input.latestVersion : ''}</p>
     {input.feedback && <p className="detail-feedback">{input.feedback}</p>}
     {binding?.pendingVersion > 0 && <div className="detail-version-new"><b>Có phiên bản mới v{binding.pendingVersion}</b><p>{latest?.reason}</p><button type="button" onClick={() => setComparing(!comparing)}>So sánh phiên bản</button></div>}
@@ -106,9 +97,8 @@ function InputCard({ input, task, binding }) {
     </fieldset> : <><dl className="detail-values">{DETAIL_SCHEMAS[input.key]?.fields.map(f => <div key={f.key}><dt>{f.label}</dt><dd><DetailValue value={(shown?.data || input.draft?.data || {})[f.key]}/></dd></div>)}</dl>
       <div className="detail-files">{(shown?.files || []).map(file => <button type="button" key={file.path} onClick={() => openFile(file)}>Mở tệp · {file.name}</button>)}</div>
       {input.draft && <details className="detail-review-draft" open={input.status === 'REVIEW'}><summary>Bản nháp {input.status === 'REVIEW' ? 'đang chờ kiểm tra' : 'đã lưu'}</summary><dl className="detail-values">{DETAIL_SCHEMAS[input.key]?.fields.map(f => <div key={f.key}><dt>{f.label}</dt><dd><DetailValue value={input.draft.data[f.key]}/></dd></div>)}</dl><p>Lý do: {input.draft.reason || 'Nộp lần đầu'}</p>{input.draft.files.map(file => <button type="button" key={file.path} onClick={() => openFile(file)}>Mở tệp nháp · {file.name}</button>)}</details>}
-      <div className="detail-actions">{editAllowed && input.status !== 'REVIEW' && <button type="button" onClick={beginEdit}>Bổ sung input</button>}{reviewAllowed && input.status === 'REVIEW' && <button type="button" className="primary" disabled={busy} onClick={() => run('APPROVE_DETAIL_INPUT')}>Duyệt input</button>}{managing && <button type="button" onClick={() => { setPeople(input); setBaseRevision(input.revision); setAssigning(!assigning); }}>Phân công nhập input</button>}</div>
+      <div className="detail-actions">{editAllowed && input.status !== 'REVIEW' && <button type="button" onClick={beginEdit}>Bổ sung input</button>}{reviewAllowed && input.status === 'REVIEW' && <button type="button" className="primary" disabled={busy} onClick={() => run('APPROVE_DETAIL_INPUT')}>Duyệt input</button>}</div>
       <label>Nội dung cần bổ sung<textarea value={reason} onChange={e => setReason(e.target.value)}/></label><button type="button" disabled={busy || !reason.trim()} onClick={() => run(reviewAllowed && input.status === 'REVIEW' ? 'RETURN_DETAIL_INPUT' : 'REQUEST_DETAIL_INPUT', { reason })}>{reviewAllowed && input.status === 'REVIEW' ? 'Trả lại để bổ sung' : 'Yêu cầu bổ sung'}</button></>}
-    {assigning && <fieldset disabled={busy}><legend>Phân công cung cấp input</legend><PeopleFields value={people} onChange={setPeople} directory={directory}/><button type="button" onClick={() => run('ASSIGN_DETAIL_INPUT', { ownerId: people.ownerId, reviewerId: people.reviewerId, collaboratorIds: people.collaboratorIds, dueAt: people.dueAt }, baseRevision)}>Lưu phân công input</button><button type="button" onClick={() => setAssigning(false)}>Hủy phân công</button></fieldset>}
     {error && <p className="detail-error" role="alert">{error}</p>}
     <details><summary>Lịch sử input · {input.history?.length || 0} hoạt động</summary>{[...(input.history || [])].reverse().map(item => <p key={item.id}><b>{item.actor.name || item.actor.email}</b> · {item.happenedAt} · {item.type}{item.details?.reason ? ' · ' + item.details.reason : ''}</p>)}</details>
   </article>;

@@ -911,7 +911,7 @@ function syncClassDefaultTasks(state, payload, context) {
 function updateTaskConfig(state, payload, context) {
   const task = findTask(state, payload.taskId);
   assertTaskConfigurationAccess(state, task.courseId, context);
-  if (['DONE', 'CANCELLED'].includes(task.status)) throw domainError('INVALID_TRANSITION', 'Công việc đã kết thúc; hãy mở lại công việc trước khi sửa cấu hình.');
+  if (['DONE', 'CANCELLED', 'IN_REVIEW'].includes(task.status)) throw domainError('INVALID_TRANSITION', 'Công việc đang chờ duyệt hoặc đã kết thúc nên không thể sửa cấu hình.');
   const allowedGroups = new Set(TRAINING_TASK_TEMPLATES.map((item) => item.group));
   if (payload.enabled !== undefined) task.status = payload.enabled ? 'WAITING_INPUT' : 'CANCELLED';
   if (payload.dueOffset !== undefined) task.dueOffset = Math.max(0, Number(payload.dueOffset) || 0);
@@ -925,9 +925,20 @@ function updateTaskConfig(state, payload, context) {
   if (Array.isArray(payload.checklistItems)) {
     const items = payload.checklistItems.map((item) => String(item).trim()).filter(Boolean);
     if (!items.length) throw domainError('VALIDATION_ERROR', 'Checklist phải có ít nhất một tiêu chí.');
+    const previousItems = [...task.checklistItems];
     task.checklistItems = items;
-    task.checklist = items.map((_, index) => Boolean(task.checklist[index]));
-    task.checklistEvidence = items.map((_, index) => clone(task.checklistEvidence?.[index] || []));
+    task.checklist = Array.isArray(payload.checklist) && payload.checklist.length === items.length
+      ? payload.checklist.map(Boolean)
+      : items.map((item, index) => {
+        const previousIndex = previousItems.indexOf(item);
+        return Boolean(task.checklist[previousIndex >= 0 ? previousIndex : index]);
+      });
+    task.checklistEvidence = Array.isArray(payload.checklistEvidence) && payload.checklistEvidence.length === items.length
+      ? payload.checklistEvidence.map((records, index) => cleanEvidenceRecords(records, `Minh chứng tiêu chí ${index + 1}`))
+      : items.map((item, index) => {
+        const previousIndex = previousItems.indexOf(item);
+        return clone(task.checklistEvidence?.[previousIndex >= 0 ? previousIndex : index] || []);
+      });
   }
   task.updatedAt = nowIso(context);
   refreshTaskReadiness(state, task.projectId, task.updatedAt);

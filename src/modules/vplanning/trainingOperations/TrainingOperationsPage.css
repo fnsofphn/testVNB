@@ -530,6 +530,7 @@
 .vwork-training-operations .check-evidence-row .check-row input{width:16px;height:16px;margin:1px 0 0;accent-color:var(--green)}
 .vwork-training-operations .check-evidence-row .check-row span{display:grid;gap:3px;min-width:0;line-height:1.4}
 .vwork-training-operations .check-evidence-row .check-row b{color:var(--muted);font-size:8px;letter-spacing:.06em;text-transform:uppercase}
+.vwork-training-operations .checklist-config-inline{display:grid;gap:7px;margin-top:12px;padding:11px;border:1px solid var(--border);border-radius:9px;background:#f8fafc}.vwork-training-operations .checklist-config-head,.vwork-training-operations .checklist-config-row{display:flex;align-items:center;gap:7px}.vwork-training-operations .checklist-config-head{justify-content:space-between}.vwork-training-operations .checklist-config-row{padding-top:7px;border-top:1px solid #e5eaf1}.vwork-training-operations .checklist-config-row span{flex:1;min-width:0}.vwork-training-operations .checklist-config-row input{flex:1;min-width:0}.vwork-training-operations .checklist-config-inline .icon-button{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0}
 .vwork-training-operations .criterion-evidence{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px;padding-top:8px;border-top:1px solid #edf0f4}
 .vwork-training-operations .criterion-evidence>span{grid-column:1/-1;color:var(--muted);font-size:8px;font-weight:800}
 .vwork-training-operations .criterion-evidence>input{min-width:0;width:100%;padding:7px 8px;font-size:9px}

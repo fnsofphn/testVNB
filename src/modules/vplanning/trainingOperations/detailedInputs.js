@@ -133,8 +133,8 @@ function assignment(payload) {
   const ownerId = text(payload.ownerId, 'Người phụ trách chính', true, 200);
   const reviewerId = text(payload.reviewerId, 'Người chốt', true, 200);
   if (!Array.isArray(payload.collaboratorIds || [])) fail('Danh sách người cùng nhập không hợp lệ.');
-  const collaboratorIds = [...new Set((payload.collaboratorIds || []).map(v => text(v, 'Người cùng nhập', true, 200)))].filter(v => v !== ownerId);
-  if (collaboratorIds.length > 30) fail('Tối đa 30 người cùng nhập.');
+  const collaboratorIds = [...new Set((payload.collaboratorIds || []).map(v => text(v, 'Tài khoản phối hợp', true, 200)))].filter(v => v !== ownerId);
+  if (collaboratorIds.length > 30) fail('Tối đa 30 tài khoản phối hợp.');
   const dueAt = text(payload.dueAt, 'Hạn cung cấp');
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dueAt) || !Number.isFinite(Date.parse(dueAt)) || new Date(dueAt).toISOString().slice(0, 10) !== dueAt) fail('Hạn cung cấp không hợp lệ.');
   return { ownerId, reviewerId, collaboratorIds, dueAt };
@@ -216,7 +216,7 @@ export function applyDetailCommand(state, type, payload, context) {
     Object.assign(input, assignment(payload));
     details = { diff: detailDiff(before, assignment(payload)) };
   } else if (type === 'SAVE_DETAIL_INPUT' || type === 'SUBMIT_DETAIL_INPUT') {
-    requireAccess(canEditDetail(input, context));
+    requireAccess(canEditDetail(input, context) || detailCourseManager(state, input.courseId, context));
     if (input.status === 'REVIEW') fail('Bản đang kiểm tra bị khóa. Người chốt cần yêu cầu bổ sung trước khi sửa.');
     const submitting = type === 'SUBMIT_DETAIL_INPUT';
     input.draft = { data: cleanDetailData(input.key, payload.data, submitting), files: cleanFiles(payload.files || [], input.id),

@@ -5,7 +5,7 @@ import { stateForRole } from '../api/vwork-training-operations.js';
 import { assertDetailedDocumentAccess } from '../api/vwork-training-operations-file.js';
 
 const ctx = (email, role = 'member') => ({ role, actor: { id: email, email, name: email }, now: '2026-09-17T10:00:00.000Z' });
-const ops = ctx('ops@test.local', 'operations'), owner = ctx('owner@test.local'), collaborator = ctx('collab@test.local'), reviewer = ctx('review@test.local'), worker = ctx('worker@test.local'), outsider = ctx('other@test.local');
+const ops = ctx('ops@test.local', 'operations'), manager = ctx('manager@test.local', 'manager'), owner = ctx('owner@test.local'), collaborator = ctx('collab@test.local'), reviewer = ctx('review@test.local'), worker = ctx('worker@test.local'), outsider = ctx('other@test.local');
 let state = createEmptyTrainingOperationsState();
 assert.equal(state.tasks.length, 0);
 state.projects.push({ id: 'P', name: 'Project', customerName: 'Customer', program: 'Program' });
@@ -31,6 +31,8 @@ assert.ok(completedWithInput.tasks.find(item => item.id === 'MAIL').inputBinding
 const create = { id: 'one', taskId: 'T', key: 'game', title: 'Game one', ownerId: owner.actor.id, reviewerId: reviewer.actor.id, collaboratorIds: [collaborator.actor.id], dueAt: '2026-09-20', data: {} };
 assert.throws(() => send('CREATE_DETAIL_INPUT', create, worker), e => e.status === 403);
 send('CREATE_DETAIL_INPUT', create);
+state.teamAssignments.push({ id: 'manager-C', projectId: 'P', courseId: 'C', role: 'manager', status: 'ACTIVE', accountId: manager.actor.id, accountEmail: manager.actor.email });
+edit('SAVE_DETAIL_INPUT', { data: game }, manager);
 assert.equal(state.tasks[0].status, 'WAITING_INPUT');
 assert.deepEqual(detailedReadiness(state, state.tasks[0]).blockingIds, ['DIN-one']);
 assert.throws(() => edit('SAVE_DETAIL_INPUT', { data: game }, outsider), e => e.status === 403);
